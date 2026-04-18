@@ -146,6 +146,109 @@
   @apply absolute right-3 top-3 h-8 w-8 rounded-full bg-light text-center leading-8 text-text-dark dark:bg-darkmode-light dark:text-darkmode-text-dark;
 }
 
+/* homepage hero */
+.hero-badge {
+  @apply rounded-full border border-border bg-light px-4 py-2 text-xs font-semibold uppercase tracking-wide text-text-dark dark:border-darkmode-border dark:bg-darkmode-light dark:text-darkmode-text-dark;
+}
+
+.hero-visual {
+  @apply relative mx-auto min-h-[420px] max-w-[560px] overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-[#eef5ff] via-white to-[#f3f7ff] p-6 shadow-[0_30px_70px_rgba(18,18,18,0.14)] dark:border-darkmode-border dark:from-[#1d2a40] dark:via-darkmode-body dark:to-[#182232];
+}
+
+.hero-glow {
+  @apply absolute rounded-full blur-2xl;
+}
+
+.hero-glow-a {
+  @apply right-[-40px] top-[-20px] h-40 w-40 bg-[#7ea9ff]/40 dark:bg-[#7ea9ff]/20;
+}
+
+.hero-glow-b {
+  @apply bottom-[-30px] left-[-40px] h-44 w-44 bg-[#5be1b9]/35 dark:bg-[#5be1b9]/20;
+}
+
+.hero-device-card {
+  @apply absolute rounded-2xl border border-white/70 bg-white/95 p-5 shadow-[0_20px_40px_rgba(18,18,18,0.12)] backdrop-blur dark:border-darkmode-border dark:bg-darkmode-light/90;
+}
+
+.hero-device-main {
+  @apply left-4 right-4 top-8 z-[3] md:left-8 md:right-24;
+}
+
+.hero-device-top {
+  @apply right-2 top-44 z-[4] w-[68%] rotate-[2deg] md:right-6 md:w-[52%];
+}
+
+.hero-device-bottom {
+  @apply bottom-6 left-6 z-[2] w-[58%] -rotate-[1.5deg] md:left-12 md:w-[44%];
+}
+
+.hero-dot {
+  @apply inline-block h-3 w-3 rounded-full bg-green-500 shadow-[0_0_0_6px_rgba(34,197,94,0.2)];
+}
+
+.hero-bars {
+  @apply flex items-end gap-2;
+}
+
+.hero-bars span {
+  @apply inline-block w-6 rounded-t-md bg-primary/80 dark:bg-darkmode-primary/80;
+}
+
+.hero-bars span:nth-child(1) {
+  @apply h-7;
+}
+
+.hero-bars span:nth-child(2) {
+  @apply h-12;
+}
+
+.hero-bars span:nth-child(3) {
+  @apply h-9;
+}
+
+.hero-bars span:nth-child(4) {
+  @apply h-14;
+}
+
+.hero-stat {
+  @apply flex flex-col rounded-lg border border-border bg-light p-3 text-center dark:border-darkmode-border dark:bg-darkmode-body;
+}
+
+.hero-stat strong {
+  @apply text-lg text-text-dark dark:text-darkmode-text-dark;
+}
+
+.hero-stat span {
+  @apply text-xs;
+}
+
+.hero-device-image-wrap {
+  @apply rounded-xl border border-border bg-light p-2 dark:border-darkmode-border dark:bg-darkmode-body;
+}
+
+.hero-mini-card {
+  @apply overflow-hidden rounded-xl border border-border bg-light p-2 dark:border-darkmode-border dark:bg-darkmode-body;
+}
+
+.hero-device-image {
+  @apply h-auto w-full rounded-lg;
+}
+
+@media (max-width: 767px) {
+  .hero-visual {
+    @apply min-h-[460px] max-w-[430px];
+  }
+
+  .hero-device-top {
+    @apply top-52 w-[70%];
+  }
+
+  .hero-device-bottom {
+    @apply bottom-4 left-4 w-[62%];
+  }
+}
+
 /* content style */
 .content {
   @apply [&>*:first-child]:mt-0 [&>*:first-child]:pt-0;
