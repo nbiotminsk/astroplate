@@ -7,7 +7,8 @@ img: /images/banner.png
 brand: Teleofis24
 availability: true
 short_description: Универсальный GSM модуль для телеметрии и уведомлений.
-description: Решение для объектов, где доступна только GSM-сеть. Передает показания и аварийные события в диспетчерскую систему.
+description: Решение для объектов, где доступна только GSM-сеть. Передает
+  показания и аварийные события в диспетчерскую систему.
 features:
   - Поддержка 2G/GPRS
   - SIM-слот стандартного размера
@@ -17,3 +18,4 @@ mpn: CG-G100
 condition: https://schema.org/NewCondition
 draft: false
 ---
+тест контента в каталоге 111
