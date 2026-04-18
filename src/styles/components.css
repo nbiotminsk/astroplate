@@ -316,6 +316,26 @@
   @apply rounded-3xl border border-border bg-gradient-to-br from-light to-white p-8 dark:border-darkmode-border dark:from-darkmode-light dark:to-darkmode-body md:p-12;
 }
 
+.faq-list {
+  @apply space-y-3;
+}
+
+.faq-item {
+  @apply rounded-2xl border border-border bg-body px-5 py-4 dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.faq-question {
+  @apply text-text-dark dark:text-darkmode-text-dark cursor-pointer list-none pr-6 text-lg font-semibold;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-answer {
+  @apply mt-3 text-sm leading-relaxed;
+}
+
 @media (max-width: 767px) {
   .hero-visual {
     @apply min-h-[460px] max-w-[430px];

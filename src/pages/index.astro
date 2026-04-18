@@ -1,5 +1,6 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
+import siteContent from "@/config/siteContent.json";
 import Base from "@/layouts/Base.astro";
 import {
   FaBroadcastTower,
@@ -21,152 +22,25 @@ import {
   FaWater,
 } from "react-icons/fa";
 
-const popularProducts = [
-  {
-    title: "Teleofis RTU-101",
-    specs: "GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485",
-    price: "от 590 BYN",
-    image: "/images/service-1.png",
-    buyLink: "/catalog",
-    detailsLink: "/catalog",
-  },
-  {
-    title: "VEGA Smart Flow",
-    specs: "Дистанционный учёт воды, импульсные входы",
-    price: "от 740 BYN",
-    image: "/images/service-2.png",
-    buyLink: "/catalog",
-    detailsLink: "/catalog",
-  },
-  {
-    title: "ТАХАТ Control Box",
-    specs: "Контроль температуры и аварий, DIN-монтаж",
-    price: "от 680 BYN",
-    image: "/images/service-3.png",
-    buyLink: "/catalog",
-    detailsLink: "/catalog",
-  },
-  {
-    title: "Router Gateway Pro",
-    specs: "Промышленный роутер, VPN, удалённый доступ",
-    price: "от 960 BYN",
-    image: "/images/banner.png",
-    buyLink: "/catalog",
-    detailsLink: "/catalog",
-  },
-];
+const { homepage } = siteContent;
 
-const solutions = [
-  {
-    title: "Удалённый учёт воды",
-    text: "Сбор показаний, архив, аварийные уведомления.",
-    icon: FaWater,
-  },
-  {
-    title: "Дистанционный учет тепла",
-    text: "Контроль теплопотребления с онлайн-дашбордом.",
-    icon: FaFire,
-  },
-  {
-    title: "GSM или NBIoT модули",
-    text: "Подбор канала связи под объект и бюджет.",
-    icon: FaBroadcastTower,
-  },
-  {
-    title: "Контроль температуры",
-    text: "Мониторинг и пороговые уведомления 24/7.",
-    icon: FaThermometerHalf,
-  },
-  {
-    title: "Автоматизация насосной станции",
-    text: "Сценарии работы насосов и защита от аварий.",
-    icon: FaCogs,
-  },
-  {
-    title: "Телеметрия колодцев",
-    text: "Уровень, протечки, доступ к данным онлайн.",
-    icon: FaTint,
-  },
-];
-
-const trustCards = [
-  { title: "Оригинальное оборудование", icon: FaCertificate },
-  { title: "Быстрая поставка", icon: FaTruck },
-  { title: "Настройка под ключ", icon: FaTools },
-  { title: "Техподдержка", icon: FaHeadset },
-  { title: "Работа с юрлицами", icon: FaBuilding },
-  { title: "Лицензионное программное обеспечение", icon: FaCheck },
-];
-
-const buySteps = [
-  {
-    title: "Выберите оборудование",
-    description:
-      "Поможем подобрать модуль, датчики и комплект под ваш объект и бюджет.",
-  },
-  {
-    title: "Оплатите E-POS или запросите счёт по безналу",
-    description:
-      "Для физлиц доступна быстрая онлайн-оплата, для организаций подготовим документы.",
-  },
-  {
-    title: "Получите доставку / монтаж",
-    description:
-      "Организуем доставку по Беларуси и при необходимости выполним монтаж и запуск.",
-  },
-  {
-    title: "Поддержка после покупки",
-    description:
-      "Сопровождаем после внедрения: консультации, настройка и техническая поддержка.",
-  },
-];
-
-const buyHighlights = [
-  "Подбор совместимого оборудования под ваш счётчик и объект",
-  "Коммерческое предложение в день обращения",
-  "Удалённая помощь с первичным запуском",
-];
-
-const integrationCards = [
-  {
-    title: "Работаем с A1 и МТС",
-    text: "Подбираем оптимальный канал передачи данных под объект и покрытие.",
-    icon: FaMobileAlt,
-  },
-  {
-    title: "Драйверы под любой протокол",
-    text: "Разрабатываем драйверы и интеграции под нужный протокол обмена.",
-    icon: FaPlug,
-  },
-  {
-    title: 'Платформа EST.by \"Мой Клиент: Ресурсы\"',
-    text: "Интеграция данных приборов учёта и телеметрии в едином интерфейсе.",
-    icon: FaLayerGroup,
-  },
-  {
-    title: "Платформа A1 от Nekta",
-    text: "Подключаем и настраиваем решения для диспетчеризации и мониторинга.",
-    icon: FaCogs,
-  },
-];
-
-const cases = [
-  {
-    object: "Подвал",
-    problem: "Протечки и отсутствие удалённого контроля.",
-    result: "Автоматические уведомления и онлайн-мониторинг 24/7.",
-  },
-  {
-    object: "Магазин",
-    problem: "Риски порчи товара из-за температуры.",
-    result: "Стабильный температурный контроль и снижение потерь.",
-  },
-  {
-    object: "Квартира",
-    problem: "Нет прозрачного учёта воды и тепла.",
-    result: "Дистанционные показания и точная аналитика расходов.",
-  },
-];
+const iconMap = {
+  FaWater,
+  FaFire,
+  FaBroadcastTower,
+  FaThermometerHalf,
+  FaCogs,
+  FaTint,
+  FaCertificate,
+  FaTruck,
+  FaTools,
+  FaHeadset,
+  FaBuilding,
+  FaCheck,
+  FaMobileAlt,
+  FaPlug,
+  FaLayerGroup,
+} as const;
 ---
 
 <Base>
@@ -175,39 +49,26 @@ const cases = [
     <div class="container">
       <div class="row items-center gap-y-10">
         <div class="md:col-6">
-          <span class="hero-badge mb-5 inline-flex">
-            Официальные решения УП "Минскводоканала"
-          </span>
-          <h1 class="mb-5 text-h2 leading-tight md:text-h1">
-            Оборудование Teleofis, Тахат, Вега и телеметрия в Беларуси
-          </h1>
-          <p class="mb-8 text-lg">
-            Продажа оборудования, монтаж, удалённый мониторинг, обслуживание
-            модулей и оплата онлайн через E-POS.
-          </p>
+          <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
+          <h1 class="mb-5 text-h2 leading-tight md:text-h1">{homepage.hero.title}</h1>
+          <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
           <div class="mb-8 flex flex-wrap gap-3">
-            <a class="btn btn-primary" href="/catalog">Перейти в каталог</a>
-            <a class="btn btn-outline-primary" href="/contact">
-              Получить счёт для организации
+            <a class="btn btn-primary" href={homepage.hero.primaryCta.link}>
+              {homepage.hero.primaryCta.label}
+            </a>
+            <a class="btn btn-outline-primary" href={homepage.hero.secondaryCta.link}>
+              {homepage.hero.secondaryCta.label}
             </a>
           </div>
           <ul class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2">
-            <li class="flex items-center gap-2">
-              <FaCheck className="text-primary" />
-              <span>Работаем по Беларуси</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <FaCheck className="text-primary" />
-              <span>Гарантия</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <FaCheck className="text-primary" />
-              <span>Оплата ЕРИП</span>
-            </li>
-            <li class="flex items-center gap-2">
-              <FaCheck className="text-primary" />
-              <span>Безналичный расчёт</span>
-            </li>
+            {
+              homepage.hero.trustItems.map((item) => (
+                <li class="flex items-center gap-2">
+                  <FaCheck className="text-primary" />
+                  <span>{item}</span>
+                </li>
+              ))
+            }
           </ul>
         </div>
         <div class="md:col-6">
@@ -277,11 +138,11 @@ const cases = [
   <section class="section-sm pt-0">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Популярные товары
+        {homepage.popularProducts.title}
       </h2>
       <div class="row gap-y-6">
         {
-          popularProducts.map((product) => (
+          homepage.popularProducts.items.map((product) => (
             <div class="sm:col-6 lg:col-3">
               <article class="catalog-card h-full">
                 <ImageMod
@@ -300,9 +161,9 @@ const cases = [
                   {product.price}
                 </p>
                 <div class="mt-4 flex gap-2">
-                  <a class="btn btn-primary btn-sm" href={product.buyLink}>Купить</a>
-                  <a class="btn btn-outline-primary btn-sm" href={product.detailsLink}>
-                    Подробнее
+                  <a class="btn btn-primary btn-sm" href={product.buy.link}>{product.buy.label}</a>
+                  <a class="btn btn-outline-primary btn-sm" href={product.details.link}>
+                    {product.details.label}
                   </a>
                 </div>
               </article>
@@ -311,7 +172,9 @@ const cases = [
         }
       </div>
       <div class="mt-8 text-center">
-        <a class="btn btn-outline-primary" href="/catalog">View all products</a>
+        <a class="btn btn-outline-primary" href={homepage.popularProducts.viewAll.link}>
+          {homepage.popularProducts.viewAll.label}
+        </a>
       </div>
     </div>
   </section>
@@ -320,24 +183,30 @@ const cases = [
   <section class="section-sm bg-gradient">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Готовые решения под задачи
+        {homepage.solutions.title}
       </h2>
       <div class="row gap-y-6">
         {
-          solutions.map((item) => (
-            <div class="sm:col-6 lg:col-4">
-              <article class="info-card h-full">
-                <item.icon className="info-card-icon" />
-                <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
-                </h3>
-                <p class="mt-2">{item.text}</p>
-                <a class="mt-4 inline-block font-semibold hover:underline" href="/solutions">
-                  Подробнее
-                </a>
-              </article>
-            </div>
-          ))
+          homepage.solutions.items.map((item) => {
+            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
+            return (
+              <div class="sm:col-6 lg:col-4">
+                <article class="info-card h-full">
+                  <Icon className="info-card-icon" />
+                  <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
+                    {item.title}
+                  </h3>
+                  <p class="mt-2">{item.text}</p>
+                  <a
+                    class="mt-4 inline-block font-semibold hover:underline"
+                    href={homepage.solutions.moreLink}
+                  >
+                    {homepage.solutions.moreLabel}
+                  </a>
+                </article>
+              </div>
+            );
+          })
         }
       </div>
     </div>
@@ -347,20 +216,23 @@ const cases = [
   <section class="section-sm">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Почему выбирают teleofis24.by
+        {homepage.whyUs.title}
       </h2>
       <div class="row gap-y-6">
         {
-          trustCards.map((item) => (
-            <div class="sm:col-6 lg:col-4">
-              <article class="trust-card h-full">
-                <item.icon className="trust-card-icon" />
-                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
-                </h3>
-              </article>
-            </div>
-          ))
+          homepage.whyUs.items.map((item) => {
+            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCheck;
+            return (
+              <div class="sm:col-6 lg:col-4">
+                <article class="trust-card h-full">
+                  <Icon className="trust-card-icon" />
+                  <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                    {item.title}
+                  </h3>
+                </article>
+              </div>
+            );
+          })
         }
       </div>
     </div>
@@ -370,24 +242,24 @@ const cases = [
   <section class="section-sm bg-gradient">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Как купить
+        {homepage.howToBuy.title}
       </h2>
       <div class="row gap-y-6 items-stretch">
         <div class="lg:col-7">
           <div class="buy-timeline-panel h-full">
-          <ol class="buy-timeline">
-            {
-              buySteps.map((step, idx) => (
-                <li class="buy-timeline-item">
-                  <span class="buy-step-index">{idx + 1}</span>
-                  <div>
-                    <p class="buy-step-text">{step.title}</p>
-                    <p class="buy-step-description">{step.description}</p>
-                  </div>
-                </li>
-              ))
-            }
-          </ol>
+            <ol class="buy-timeline">
+              {
+                homepage.howToBuy.steps.map((step, idx) => (
+                  <li class="buy-timeline-item">
+                    <span class="buy-step-index">{idx + 1}</span>
+                    <div>
+                      <p class="buy-step-text">{step.title}</p>
+                      <p class="buy-step-description">{step.description}</p>
+                    </div>
+                  </li>
+                ))
+              }
+            </ol>
           </div>
         </div>
         <div class="lg:col-5">
@@ -395,24 +267,21 @@ const cases = [
             <div class="flex items-center gap-2">
               <FaCamera className="buy-help-icon" />
               <h3 class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                Скиньте фото счётчика
+                {homepage.howToBuy.helpCard.title}
               </h3>
             </div>
-            <p class="mt-3 text-sm">
-              Отправьте фото вашего счётчика или узла учёта в Telegram и мы
-              подготовим точное предложение под ваш объект.
-            </p>
+            <p class="mt-3 text-sm">{homepage.howToBuy.helpCard.text}</p>
             <a
               class="btn btn-primary mt-4 w-full text-center"
-              href="https://t.me/teleofis24"
+              href={homepage.howToBuy.helpCard.button.link}
               target="_blank"
               rel="noopener"
             >
-              Отправить фото в Telegram
+              {homepage.howToBuy.helpCard.button.label}
             </a>
             <ul class="mt-4 space-y-2 text-sm">
               {
-                buyHighlights.map((item) => (
+                homepage.howToBuy.helpCard.highlights.map((item) => (
                   <li class="flex items-start gap-2">
                     <FaCheck className="mt-1 text-primary" />
                     <span>{item}</span>
@@ -430,21 +299,24 @@ const cases = [
   <section class="section-sm pt-0">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Интеграции и протоколы
+        {homepage.integrations.title}
       </h2>
       <div class="row gap-y-6">
         {
-          integrationCards.map((item) => (
-            <div class="sm:col-6 lg:col-3">
-              <article class="integration-card h-full">
-                <item.icon className="integration-card-icon" />
-                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
-                </h3>
-                <p class="mt-2 text-sm">{item.text}</p>
-              </article>
-            </div>
-          ))
+          homepage.integrations.items.map((item) => {
+            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
+            return (
+              <div class="sm:col-6 lg:col-3">
+                <article class="integration-card h-full">
+                  <Icon className="integration-card-icon" />
+                  <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                    {item.title}
+                  </h3>
+                  <p class="mt-2 text-sm">{item.text}</p>
+                </article>
+              </div>
+            );
+          })
         }
       </div>
     </div>
@@ -454,15 +326,17 @@ const cases = [
   <section class="section-sm">
     <div class="container">
       <div class="business-block">
-        <h2 class="text-h3 text-white">Работаем с организациями</h2>
-        <p class="mt-4 max-w-3xl text-white/90">
-          Счета, договоры, безналичный расчёт, поставки, сервисное обслуживание,
-          индивидуальные решения.
-        </p>
+        <h2 class="text-h3 text-white">{homepage.business.title}</h2>
+        <p class="mt-4 max-w-3xl text-white/90">{homepage.business.text}</p>
         <div class="mt-6 flex flex-wrap gap-3">
-          <a class="btn btn-primary" href="/contact">Получить счёт</a>
-          <a class="btn border-white text-white hover:bg-white hover:text-dark" href="/contact">
-            Связаться с менеджером
+          <a class="btn btn-primary" href={homepage.business.primaryCta.link}>
+            {homepage.business.primaryCta.label}
+          </a>
+          <a
+            class="btn border-white text-white hover:bg-white hover:text-dark"
+            href={homepage.business.secondaryCta.link}
+          >
+            {homepage.business.secondaryCta.label}
           </a>
         </div>
       </div>
@@ -473,11 +347,11 @@ const cases = [
   <section class="section-sm pt-0">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        Кейсы / отзывы
+        {homepage.cases.title}
       </h2>
       <div class="row gap-y-6">
         {
-          cases.map((item) => (
+          homepage.cases.items.map((item) => (
             <div class="md:col-4">
               <article class="case-card h-full">
                 <h3 class="text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
@@ -498,15 +372,36 @@ const cases = [
     <div class="container">
       <div class="final-cta-block text-center">
         <h2 class="text-h3 text-text-dark dark:text-darkmode-text-dark">
-          Не знаете что выбрать?
+          {homepage.finalCta.title}
         </h2>
-        <p class="mt-3 text-lg">Подберём решение под ваш объект за 15 минут.</p>
+        <p class="mt-3 text-lg">{homepage.finalCta.text}</p>
         <div class="mt-6 flex flex-wrap justify-center gap-3">
-          <a class="btn btn-primary" href="/contact">Консультация</a>
-          <a class="btn btn-outline-primary" href="tel:+375293652910">
-            <FaPhoneAlt className="mr-2 inline" /> Позвонить
+          <a class="btn btn-primary" href={homepage.finalCta.primary.link}>
+            {homepage.finalCta.primary.label}
+          </a>
+          <a class="btn btn-outline-primary" href={homepage.finalCta.secondary.link}>
+            <FaPhoneAlt className="mr-2 inline" /> {homepage.finalCta.secondary.label}
           </a>
         </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FAQ -->
+  <section class="section-sm pt-0">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.faq.title}
+      </h2>
+      <div class="faq-list">
+        {
+          homepage.faq.items.map((item, idx) => (
+            <details class="faq-item" open={idx === 0}>
+              <summary class="faq-question">{item.question}</summary>
+              <p class="faq-answer">{item.answer}</p>
+            </details>
+          ))
+        }
       </div>
     </div>
   </section>

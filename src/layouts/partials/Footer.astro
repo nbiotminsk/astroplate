@@ -1,61 +1,60 @@
 ---
+import siteContent from "@/config/siteContent.json";
+
+const { footer } = siteContent;
 ---
 
 <footer class="bg-light dark:bg-darkmode-light border-t border-border dark:border-darkmode-border">
   <div class="container py-12">
     <div class="row gap-y-8">
-      <div class="sm:col-6 lg:col-3">
-        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-          Каталог
-        </h3>
-        <ul class="space-y-2">
-          <li><a href="/catalog" class="hover:underline">Контроллеры</a></li>
-          <li><a href="/catalog" class="hover:underline">Модули связи</a></li>
-          <li><a href="/catalog" class="hover:underline">Датчики</a></li>
-          <li><a href="/catalog" class="hover:underline">Промышленные роутеры</a></li>
-        </ul>
-      </div>
+      {
+        footer.columns.map((column) => (
+          <div class="sm:col-6 lg:col-3">
+            <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+              {column.title}
+            </h3>
+            <ul class="space-y-2">
+              {
+                column.links.map((link) => (
+                  <li><a href={link.href} class="hover:underline">{link.label}</a></li>
+                ))
+              }
+            </ul>
+          </div>
+        ))
+      }
 
       <div class="sm:col-6 lg:col-3">
         <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-          Услуги
+          {footer.contacts.title}
         </h3>
         <ul class="space-y-2">
-          <li><a href="/services" class="hover:underline">Монтаж</a></li>
-          <li><a href="/services" class="hover:underline">Пусконаладка</a></li>
-          <li><a href="/services" class="hover:underline">Удалённый мониторинг</a></li>
-          <li><a href="/services" class="hover:underline">Сервисное обслуживание</a></li>
-        </ul>
-      </div>
-
-      <div class="sm:col-6 lg:col-3">
-        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-          Информация
-        </h3>
-        <ul class="space-y-2">
-          <li><a href="/delivery-payment" class="hover:underline">Доставка и оплата</a></li>
-          <li><a href="/business" class="hover:underline">Для бизнеса</a></li>
-          <li><a href="/solutions" class="hover:underline">Готовые решения</a></li>
-          <li><a href="/contact" class="hover:underline">Контакты</a></li>
-        </ul>
-      </div>
-
-      <div class="sm:col-6 lg:col-3">
-        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-          Контакты
-        </h3>
-        <ul class="space-y-2">
-          <li><a href="tel:+375293652910" class="hover:underline">+375 29 365 29 10</a></li>
-          <li><a href="mailto:info@teleofis24.by" class="hover:underline">info@teleofis24.by</a></li>
-          <li>г. Минск, Беларусь</li>
-          <li><a href="https://t.me/teleofis24" target="_blank" rel="noopener" class="hover:underline">Telegram</a></li>
-          <li>c 10.00 до 17.00</li>
+          {
+            footer.contacts.items.map((item) => (
+              <li>
+                {
+                  item.href ? (
+                    <a
+                      href={item.href}
+                      target={item.external ? "_blank" : undefined}
+                      rel={item.external ? "noopener" : undefined}
+                      class="hover:underline"
+                    >
+                      {item.label}
+                    </a>
+                  ) : (
+                    item.label
+                  )
+                }
+              </li>
+            ))
+          }
         </ul>
       </div>
     </div>
   </div>
 
   <div class="border-t border-border py-6 text-center text-sm dark:border-darkmode-border">
-    © teleofis24.by
+    {footer.copyright}
   </div>
 </footer>
