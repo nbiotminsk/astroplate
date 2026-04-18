@@ -1,0 +1,36 @@
+---
+import BlogCard from "@/components/BlogCard.astro";
+import Base from "@/layouts/Base.astro";
+import { getSinglePage } from "@/lib/contentParser.astro";
+import { sortByDate } from "@/lib/utils/sortFunctions";
+import PageHeader from "@/partials/PageHeader.astro";
+
+const posts = await getSinglePage("blog");
+const sortedPosts = sortByDate(posts);
+---
+
+<Base
+  title="Решения"
+  meta_title="Решения"
+  description="Решения и статьи из блога"
+>
+  <PageHeader title="Решения" />
+
+  <section class="section">
+    <div class="container">
+      {
+        sortedPosts.length ? (
+          <div class="row">
+            {sortedPosts.map((post) => (
+              <div class="mb-14 md:col-6 xl:col-4">
+                <BlogCard data={post} />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>Статей пока нет.</p>
+        )
+      }
+    </div>
+  </section>
+</Base>
