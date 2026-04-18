@@ -7,7 +7,7 @@ const tags = ["Все", ...productCategories];
 ---
 
 <Base title="Каталог" description="Каталог товаров с ценами и фильтрами по категориям">
-  <section class="section pb-8">
+  <section class="section pb-6 pt-10">
     <div class="container text-center">
       <h1 class="mb-4">Каталог</h1>
       <p class="mx-auto max-w-2xl">
@@ -16,7 +16,7 @@ const tags = ["Все", ...productCategories];
     </div>
   </section>
 
-  <section class="section pt-0">
+  <section class="section pb-6 pt-2">
     <div class="container">
       <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
         <div class="flex flex-wrap gap-3" id="catalog-tags">
@@ -55,7 +55,7 @@ const tags = ["Все", ...productCategories];
         {
           products.map((product) => (
             <article
-              class="mb-8 md:col-6 xl:col-4"
+              class="mb-8 md:col-6 xl:col-3"
               data-category={product.category}
               data-price={product.price}
               data-title={product.title}
@@ -76,13 +76,26 @@ const tags = ["Все", ...productCategories];
                 <p class="mb-4">{product.shortDescription}</p>
                 <p class="mb-5 text-2xl font-bold text-primary">{product.price} BYN</p>
 
+                <div class="mb-3 flex items-center gap-2">
+                  <label for={`qty-${product.id}`} class="text-sm">Кол-во:</label>
+                  <input
+                    id={`qty-${product.id}`}
+                    type="number"
+                    min="1"
+                    value="1"
+                    class="w-20 rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
+                    data-qty-input={product.id}
+                  />
+                </div>
+
                 <div class="flex gap-3">
                   <button
                     type="button"
-                    class="btn btn-primary btn-sm"
+                    class="btn btn-buy btn-sm"
                     data-add-to-cart={product.id}
                     data-price={product.price}
                     data-title={product.title}
+                    data-qty-source={product.id}
                   >
                     Купить
                   </button>
@@ -101,7 +114,7 @@ const tags = ["Все", ...productCategories];
     </div>
   </section>
 
-  <section class="section pt-0" id="cart">
+  <section class="section pt-2" id="cart">
     <div class="container">
       <div class="rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
         <div class="mb-4 flex items-center justify-between gap-3">
@@ -173,17 +186,31 @@ const tags = ["Все", ...productCategories];
               <p class="mb-1 font-semibold">${item.title}</p>
               <p class="mb-0 text-sm">${item.quantity} x ${formatPrice(item.price)}</p>
             </div>
-            <button
-              type="button"
-              class="btn btn-outline-primary btn-sm"
-              data-remove-item="${item.id}"
-            >
-              Удалить
-            </button>
+            <div class="flex items-center gap-2">
+              <button type="button" class="btn btn-outline-primary btn-sm" data-dec-item="${item.id}">-</button>
+              <input
+                type="number"
+                min="1"
+                value="${item.quantity}"
+                class="w-16 rounded border border-border bg-body px-2 py-1 text-center text-sm dark:border-darkmode-border dark:bg-darkmode-body"
+                data-item-qty="${item.id}"
+              />
+              <button type="button" class="btn btn-outline-primary btn-sm" data-inc-item="${item.id}">+</button>
+              <button type="button" class="btn btn-outline-primary btn-sm" data-remove-item="${item.id}">Удалить</button>
+            </div>
           </div>
         `,
       )
       .join("");
+
+    const updateItemQuantity = (id, nextQty) => {
+      const cart = getCart();
+      const item = cart.find((entry) => entry.id === id);
+      if (!item) return;
+      item.quantity = Math.max(1, Number(nextQty) || 1);
+      saveCart(cart);
+      renderCart();
+    };
 
     cartItemsWrap.querySelectorAll("[data-remove-item]").forEach((button) => {
       button.addEventListener("click", () => {
@@ -191,6 +218,36 @@ const tags = ["Все", ...productCategories];
         const nextCart = getCart().filter((item) => item.id !== id);
         saveCart(nextCart);
         renderCart();
+      });
+    });
+
+    cartItemsWrap.querySelectorAll("[data-inc-item]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.incItem;
+        const cart = getCart();
+        const item = cart.find((entry) => entry.id === id);
+        if (!item) return;
+        item.quantity += 1;
+        saveCart(cart);
+        renderCart();
+      });
+    });
+
+    cartItemsWrap.querySelectorAll("[data-dec-item]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const id = button.dataset.decItem;
+        const cart = getCart();
+        const item = cart.find((entry) => entry.id === id);
+        if (!item) return;
+        item.quantity = Math.max(1, item.quantity - 1);
+        saveCart(cart);
+        renderCart();
+      });
+    });
+
+    cartItemsWrap.querySelectorAll("[data-item-qty]").forEach((input) => {
+      input.addEventListener("change", () => {
+        updateItemQuantity(input.dataset.itemQty, input.value);
       });
     });
   };
@@ -245,13 +302,17 @@ const tags = ["Все", ...productCategories];
       const id = button.dataset.addToCart;
       const title = button.dataset.title || "";
       const price = Number(button.dataset.price || 0);
+      const qtyInput = document.querySelector(
+        `[data-qty-input="${button.dataset.qtySource}"]`,
+      );
+      const selectedQuantity = Math.max(1, Number(qtyInput?.value || 1));
       const cart = getCart();
       const existing = cart.find((item) => item.id === id);
 
       if (existing) {
-        existing.quantity += 1;
+        existing.quantity += selectedQuantity;
       } else {
-        cart.push({ id, title, price, quantity: 1 });
+        cart.push({ id, title, price, quantity: selectedQuantity });
       }
 
       saveCart(cart);

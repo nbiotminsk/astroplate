@@ -55,9 +55,20 @@ if (!product) {
             }
           </ul>
 
+          <div class="mb-4 flex items-center gap-2">
+            <label for="detail-qty" class="text-sm">Кол-во:</label>
+            <input
+              id="detail-qty"
+              type="number"
+              min="1"
+              value="1"
+              class="w-24 rounded border border-border bg-body px-3 py-2 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
+            />
+          </div>
+
           <button
             type="button"
-            class="btn btn-primary"
+            class="btn btn-buy"
             id="add-to-cart"
             data-id={product.id}
             data-title={product.title}
@@ -74,6 +85,7 @@ if (!product) {
 <script>
   const cartKey = "catalog-cart-v1";
   const addToCartButton = document.querySelector("#add-to-cart");
+  const qtyInput = document.querySelector("#detail-qty");
 
   const getCart = () => {
     try {
@@ -91,13 +103,14 @@ if (!product) {
     const id = addToCartButton.dataset.id;
     const title = addToCartButton.dataset.title || "";
     const price = Number(addToCartButton.dataset.price || 0);
+    const quantity = Math.max(1, Number(qtyInput?.value || 1));
     const cart = getCart();
     const existing = cart.find((item) => item.id === id);
 
     if (existing) {
-      existing.quantity += 1;
+      existing.quantity += quantity;
     } else {
-      cart.push({ id, title, price, quantity: 1 });
+      cart.push({ id, title, price, quantity });
     }
 
     saveCart(cart);
