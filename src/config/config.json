@@ -1,6 +1,6 @@
 {
   "site": {
-    "title": "Astroplate",
+    "title": "Teleofis24.by",
     "base_url": "https://teleofis24.by",
     "base_path": "/",
     "trailing_slash": false,
@@ -47,5 +47,6 @@
     "meta_author": "zeon.studio",
     "meta_image": "/images/og-image.png",
     "meta_description": "astro and tailwind boilerplate"
-  }
+  },
+  "draft": false
 }
