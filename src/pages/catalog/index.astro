@@ -62,14 +62,16 @@ const tags = ["Все", ...productCategories];
               data-title={product.title}
             >
               <div class="flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
-                <ImageMod
-                  class="mb-4 h-48 w-full rounded object-cover"
-                  src={product.image}
-                  alt={product.title}
-                  width={380}
-                  height={220}
-                  format="webp"
-                />
+                <a href={`/catalog/${product.id}`} aria-label={`Открыть ${product.title}`}>
+                  <ImageMod
+                    class="mb-4 h-48 w-full rounded object-cover"
+                    src={product.image}
+                    alt={product.title}
+                    width={380}
+                    height={220}
+                    format="webp"
+                  />
+                </a>
                 <p class="mb-2 inline-block rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
                   {product.category}
                 </p>

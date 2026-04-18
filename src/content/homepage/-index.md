@@ -43,7 +43,7 @@ hero:
 popularProducts:
   title: "Популярные товары"
   viewAll:
-    label: "View all products"
+    label: "Перейти в магазин"
     link: "/catalog"
   items:
     - title: "Teleofis RTU-101"
