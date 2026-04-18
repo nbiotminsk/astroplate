@@ -1,9 +1,9 @@
 ---
 img: ""
 title: Schetchik
-price: 0
-brand: ""
+price: "65"
+brand: "Декаст"
 price_currency: 0
-availability: false
+availability: true
 ---
 
