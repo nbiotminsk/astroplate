@@ -1,9 +1,27 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
-import { productCategories, products } from "@/data/products";
+import { getCollection } from "astro:content";
 
-const tags = ["Все", ...productCategories];
+const catalogEntries = await getCollection(
+  "catalog",
+  ({ data }) => !data.draft,
+);
+
+const products = catalogEntries.map((entry) => {
+  const priceNumber = Number(entry.data.price ?? 0);
+  return {
+    id: entry.id,
+    title: entry.data.title,
+    category: entry.data.category ?? "others",
+    price: Number.isNaN(priceNumber) ? 0 : priceNumber,
+    image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+    availability: entry.data.availability !== false,
+  };
+});
+
+const categorySet = new Set(products.map((product) => product.category));
+const tags = ["Все", ...Array.from(categorySet)];
 ---
 
 <Base title="Каталог" description="Каталог товаров с ценами и фильтрами по категориям">
@@ -77,15 +95,25 @@ const tags = ["Все", ...productCategories];
                 </p>
                 <h4 class="mb-4 text-2xl leading-tight">{product.title}</h4>
                 <p class="mb-4 text-2xl font-bold text-primary">{product.price} BYN</p>
+                <p
+                  class={`mb-4 text-sm ${
+                    product.availability ? "text-green-700" : "text-red-700"
+                  }`}
+                >
+                  {product.availability ? "В наличии" : "Нет в наличии"}
+                </p>
 
                 <div class="mt-auto grid grid-cols-[1fr_64px_1fr] items-center gap-2">
                   <button
                     type="button"
-                    class="btn btn-buy btn-sm min-w-0 px-2 text-center"
+                    class={`btn btn-buy btn-sm min-w-0 px-2 text-center ${
+                      !product.availability ? "cursor-not-allowed opacity-50" : ""
+                    }`}
                     data-add-to-cart={product.id}
                     data-price={product.price}
                     data-title={product.title}
                     data-qty-source={product.id}
+                    disabled={!product.availability}
                   >
                     Купить
                   </button>

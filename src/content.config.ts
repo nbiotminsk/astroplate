@@ -143,6 +143,26 @@ const testimonialSectionCollection = defineCollection({
   }),
 });
 
+// Catalog collection schema (Sitepins-friendly fields)
+const catalogCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/catalog" }),
+  schema: z.looseObject({
+    title: z.string(),
+    category: z.string().default("others"),
+    price: z.union([z.string(), z.number()]).default("0"),
+    price_currency: z.union([z.string(), z.number()]).default("BYN"),
+    img: z.string().optional(),
+    image: z.string().optional(),
+    brand: z.string().optional(),
+    availability: z.boolean().default(true),
+    short_description: z.string().optional(),
+    description: z.string().optional(),
+    features: z.array(z.string()).optional(),
+    draft: z.boolean().optional(),
+    date: z.coerce.date().optional(),
+  }),
+});
+
 // Export collections
 export const collections = {
   // Pages
@@ -152,6 +172,7 @@ export const collections = {
   pages: pagesCollection,
   about: aboutCollection,
   contact: contactCollection,
+  catalog: catalogCollection,
 
   // sections
   ctaSection: ctaSectionCollection,

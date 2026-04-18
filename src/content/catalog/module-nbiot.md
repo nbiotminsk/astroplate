@@ -1,5 +1,9 @@
 ---
 title: Модули NbIoT
-date: 2026-04-18
+category: модули Nbiot
+price: "0"
+price_currency: BYN
+img: /images/image-placeholder.png
+availability: false
+draft: true
 ---
-

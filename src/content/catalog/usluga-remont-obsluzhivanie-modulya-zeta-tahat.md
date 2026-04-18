@@ -1,0 +1,19 @@
+---
+title: Ремонт и обслуживание модуля Zeta Тахат
+category: услуги
+price: "120"
+price_currency: BYN
+img: /images/service-1.png
+brand: Teleofis24
+availability: true
+short_description: Диагностика, ремонт и регламентное обслуживание модулей Zeta Тахат.
+description: Выполняем восстановление работоспособности модуля Zeta Тахат, профилактику и обновление базовых параметров для стабильной связи.
+features:
+  - Полная диагностика модуля
+  - Замена неисправных элементов
+  - Тестирование после обслуживания
+sku: SERVICE-ZETA-REPAIR
+mpn: SERVICE-ZETA-REPAIR
+condition: https://schema.org/NewCondition
+draft: false
+---

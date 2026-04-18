@@ -2,55 +2,69 @@
 import ImageMod from "@/components/ImageMod.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
-import { getProductById, products } from "@/data/products";
+import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
-  return products.map((product) => ({
-    params: { slug: product.id },
+  const catalogEntries = await getCollection("catalog", ({ data }) => !data.draft);
+
+  return catalogEntries.map((entry) => ({
+    params: { slug: entry.id },
+    props: { product: entry },
   }));
 }
 
-const { slug } = Astro.params;
-const product = getProductById(slug || "");
+const { product } = Astro.props;
+const { Content } = await render(product);
 
-if (!product) {
-  return Astro.redirect("/404");
-}
+const title = product.data.title;
+const category = product.data.category || "others";
+const image = product.data.img || product.data.image || "/images/image-placeholder.png";
+const description = product.data.description || product.data.short_description || "";
+const features = product.data.features || [];
+const brand = product.data.brand || "Teleofis24";
+const priceNumber = Number(product.data.price ?? 0);
+const price = Number.isNaN(priceNumber) ? 0 : priceNumber;
+const isInStock = product.data.availability !== false;
+const availabilitySchema = isInStock
+  ? "https://schema.org/InStock"
+  : "https://schema.org/OutOfStock";
+const gtin = product.data.gtin || product.data.gtin13 || product.data.gtin14;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const productUrl = `${siteUrl}/catalog/${product.id}`;
-const imageUrl = `${siteUrl}${product.image}`;
+const imageUrl = `${siteUrl}${image}`;
 const productSchema = {
   "@context": "https://schema.org",
   "@type": "Product",
   "@id": `${productUrl}#product`,
-  name: product.title,
-  description: product.description,
+  name: title,
+  description,
   image: [imageUrl],
-  sku: product.sku,
-  mpn: product.mpn,
-  category: product.category,
+  sku: product.data.sku || product.id,
+  mpn: product.data.mpn || product.id,
+  category,
   brand: {
     "@type": "Brand",
-    name: product.brand,
+    name: brand,
   },
-  itemCondition: product.condition,
-  additionalProperty: product.features.map((feature, index) => ({
+  itemCondition: product.data.condition || "https://schema.org/NewCondition",
+  additionalProperty: features.map((feature, index) => ({
     "@type": "PropertyValue",
     name: `Характеристика ${index + 1}`,
     value: feature,
   })),
+  ...(gtin ? { gtin } : {}),
   offers: {
     "@type": "Offer",
     url: productUrl,
-    price: product.price.toFixed(2),
+    price: price.toFixed(2),
     priceCurrency: "BYN",
-    availability: product.availability,
-    itemCondition: product.condition,
+    availability: availabilitySchema,
+    itemCondition: product.data.condition || "https://schema.org/NewCondition",
     priceValidUntil: "2027-12-31",
     seller: {
       "@type": "Organization",
-      name: product.brand,
+      name: brand,
       url: siteUrl,
     },
   },
@@ -58,16 +72,16 @@ const productSchema = {
 ---
 
 <Base
-  title={product.title}
-  description={product.shortDescription}
-  image={product.image}
+  title={title}
+  description={description}
+  image={image}
   canonical={productUrl}
 >
   <Fragment slot="head">
     <meta property="og:type" content="product" />
-    <meta property="product:price:amount" content={product.price.toFixed(2)} />
+    <meta property="product:price:amount" content={price.toFixed(2)} />
     <meta property="product:price:currency" content="BYN" />
-    <meta property="product:availability" content="in stock" />
+    <meta property="product:availability" content={isInStock ? "in stock" : "out of stock"} />
     <script type="application/ld+json" set:html={JSON.stringify(productSchema)} />
   </Fragment>
   <section class="section pb-8">
@@ -79,8 +93,8 @@ const productSchema = {
         <div class="lg:col-6">
           <ImageMod
             class="w-full rounded border border-border dark:border-darkmode-border"
-            src={product.image}
-            alt={product.title}
+            src={image}
+            alt={title}
             width={620}
             height={420}
             format="webp"
@@ -88,20 +102,29 @@ const productSchema = {
         </div>
         <div class="lg:col-6">
           <p class="mb-3 inline-block rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light">
-            {product.category}
+            {category}
           </p>
-          <h1 class="mb-3">{product.title}</h1>
-          <p class="mb-4 text-3xl font-bold text-primary">{product.price} BYN</p>
-          <p class="mb-6">{product.description}</p>
+          <h1 class="mb-3">{title}</h1>
+          <p class="mb-4 text-3xl font-bold text-primary">{price} BYN</p>
+          <p class={`mb-4 text-sm ${isInStock ? "text-green-700" : "text-red-700"}`}>
+            {isInStock ? "В наличии" : "Нет в наличии"}
+          </p>
+          {description && <p class="mb-6">{description}</p>}
 
-          <h4 class="mb-3">Характеристики</h4>
-          <ul class="mb-8 list-disc pl-5">
-            {
-              product.features.map((feature) => (
-                <li class="mb-2">{feature}</li>
-              ))
-            }
-          </ul>
+          <div class="content mb-6">
+            <Content />
+          </div>
+
+          {
+            features.length > 0 && (
+              <>
+                <h4 class="mb-3">Характеристики</h4>
+                <ul class="mb-8 list-disc pl-5">
+                  {features.map((feature) => <li class="mb-2">{feature}</li>)}
+                </ul>
+              </>
+            )
+          }
 
           <div class="mb-4 flex items-center gap-2">
             <label for="detail-qty" class="text-sm">Кол-во:</label>
@@ -116,11 +139,12 @@ const productSchema = {
 
           <button
             type="button"
-            class="btn btn-buy"
+            class={`btn btn-buy ${!isInStock ? "cursor-not-allowed opacity-50" : ""}`}
             id="add-to-cart"
             data-id={product.id}
-            data-title={product.title}
-            data-price={product.price}
+            data-title={title}
+            data-price={price}
+            disabled={!isInStock}
           >
             Купить
           </button>
