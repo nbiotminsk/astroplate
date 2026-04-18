@@ -1,53 +1,215 @@
 ---
-# Banner
+# Banner (legacy block for Sitepins)
 banner:
-  title: "The Ultimate Starter Template You Need To Start Your Astro Project"
-  content: "Astroplate is a free starter template built with Astro and TailwindCSS, providing everything you need to jumpstart your Astro project and save valuable time."
+  title: "Оборудование Teleofis, Тахат, Вега и телеметрия в Беларуси"
+  content: "Продажа оборудования, монтаж, удалённый мониторинг, обслуживание модулей и оплата онлайн через E-POS."
   image: "/images/banner.png"
   button:
     enable: true
-    label: "Fork Deploy and Edit Online 🚀"
-    link: "https://app.sitepins.com/new/clone?name=Astroplate&repository=https://github.com/zeon-studio/astroplate?aff=astroplate"
+    label: "Перейти в каталог"
+    link: "/catalog"
 
-# Features
+# Features (legacy block for Sitepins)
 features:
-  - title: "What's Included in Astroplate"
+  - title: "Популярные товары"
     image: "/images/service-1.png"
-    content: "Astroplate is a comprehensive starter template that includes everything you need to get started with your Astro project. What's Included in Astroplate"
+    content: "Подбор и поставка оборудования под ваш объект."
     bulletpoints:
-      - "10+ Pre-build pages"
-      - "95+ Google Pagespeed Score"
-      - "Build with Astro and TailwindCSS for easy and customizable styling"
-      - "Fully responsive on all devices"
-      - "SEO-optimized for better search engine rankings"
-      - "**Open-source and free** for personal and commercial use"
-    button:
-      enable: false
-      label: "Get Started Now"
-      link: "#"
-
-  - title: "Discover the Key Features Of Astro"
-    image: "/images/service-2.png"
-    content: "Astro is an all-in-one web framework for building fast, content-focused websites. It offers a range of exciting features for developers and website creators. Some of the key features are:"
-    bulletpoints:
-      - "Zero JS, by default: No JavaScript runtime overhead to slow you down."
-      - "Customizable: Tailwind, MDX, and 100+ other integrations to choose from."
-      - "UI-agnostic: Supports React, Preact, Svelte, Vue, Solid, Lit and more."
+      - "Работаем по Беларуси"
+      - "Гарантия"
+      - "Оплата ЕРИП"
+      - "Безналичный расчёт"
     button:
       enable: true
-      label: "Get Started Now"
-      link: "https://github.com/zeon-studio/astroplate"
+      label: "Подробнее"
+      link: "/catalog"
 
-  - title: "The Top Reasons to Choose Astro for Your Next Project"
-    image: "/images/service-3.png"
-    content: "With Astro, you can build modern and content-focused websites without sacrificing performance or ease of use."
-    bulletpoints:
-      - "Instantly load static sites for better user experience and SEO."
-      - "Intuitive syntax and support for popular frameworks make learning and using Astro a breeze."
-      - "Use any front-end library or framework, or build custom components, for any project size."
-      - "Built on cutting-edge technology to keep your projects up-to-date with the latest web standards."
+hero:
+  badge: "Официальные решения УП \"Минскводоканала\""
+  title: "Оборудование Teleofis, Тахат, Вега и телеметрия в Беларуси"
+  subtitle: "Продажа оборудования, монтаж, удалённый мониторинг, обслуживание модулей и оплата онлайн через E-POS."
+  primaryCta:
+    label: "Перейти в каталог"
+    link: "/catalog"
+  secondaryCta:
+    label: "Получить счёт для организации"
+    link: "/contact"
+  trustItems:
+    - "Работаем по Беларуси"
+    - "Гарантия"
+    - "Оплата ЕРИП"
+    - "Безналичный расчёт"
+
+popularProducts:
+  title: "Популярные товары"
+  viewAll:
+    label: "View all products"
+    link: "/catalog"
+  items:
+    - title: "Teleofis RTU-101"
+      specs: "GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485"
+      price: "от 590 BYN"
+      image: "/images/service-1.png"
+      buy:
+        label: "Купить"
+        link: "/catalog"
+      details:
+        label: "Подробнее"
+        link: "/catalog"
+
+    - title: "VEGA Smart Flow"
+      specs: "Дистанционный учёт воды, импульсные входы"
+      price: "от 740 BYN"
+      image: "/images/service-2.png"
+      buy:
+        label: "Купить"
+        link: "/catalog"
+      details:
+        label: "Подробнее"
+        link: "/catalog"
+
+    - title: "ТАХАТ Control Box"
+      specs: "Контроль температуры и аварий, DIN-монтаж"
+      price: "от 680 BYN"
+      image: "/images/service-3.png"
+      buy:
+        label: "Купить"
+        link: "/catalog"
+      details:
+        label: "Подробнее"
+        link: "/catalog"
+
+    - title: "Router Gateway Pro"
+      specs: "Промышленный роутер, VPN, удалённый доступ"
+      price: "от 960 BYN"
+      image: "/images/banner.png"
+      buy:
+        label: "Купить"
+        link: "/catalog"
+      details:
+        label: "Подробнее"
+        link: "/catalog"
+
+solutions:
+  title: "Готовые решения под задачи"
+  moreLabel: "Подробнее"
+  moreLink: "/solutions"
+  items:
+    - title: "Удалённый учёт воды"
+      text: "Сбор показаний, архив, аварийные уведомления."
+      icon: "FaWater"
+    - title: "Дистанционный учет тепла"
+      text: "Контроль теплопотребления с онлайн-дашбордом."
+      icon: "FaFire"
+    - title: "GSM или NBIoT модули"
+      text: "Подбор канала связи под объект и бюджет."
+      icon: "FaBroadcastTower"
+    - title: "Контроль температуры"
+      text: "Мониторинг и пороговые уведомления 24/7."
+      icon: "FaThermometerHalf"
+    - title: "Автоматизация насосной станции"
+      text: "Сценарии работы насосов и защита от аварий."
+      icon: "FaCogs"
+    - title: "Телеметрия колодцев"
+      text: "Уровень, протечки, доступ к данным онлайн."
+      icon: "FaTint"
+
+whyUs:
+  title: "Почему выбирают teleofis24.by"
+  items:
+    - title: "Оригинальное оборудование"
+      icon: "FaCertificate"
+    - title: "Быстрая поставка"
+      icon: "FaTruck"
+    - title: "Настройка под ключ"
+      icon: "FaTools"
+    - title: "Техподдержка"
+      icon: "FaHeadset"
+    - title: "Работа с юрлицами"
+      icon: "FaBuilding"
+    - title: "Лицензионное программное обеспечение"
+      icon: "FaCheck"
+
+howToBuy:
+  title: "Как купить"
+  steps:
+    - title: "Выберите оборудование"
+      description: "Поможем подобрать модуль, датчики и комплект под ваш объект и бюджет."
+    - title: "Оплатите E-POS или запросите счёт по безналу"
+      description: "Для физлиц доступна быстрая онлайн-оплата, для организаций подготовим документы."
+    - title: "Получите доставку / монтаж"
+      description: "Организуем доставку по Беларуси и при необходимости выполним монтаж и запуск."
+    - title: "Поддержка после покупки"
+      description: "Сопровождаем после внедрения: консультации, настройка и техническая поддержка."
+  helpCard:
+    title: "Скиньте фото счётчика"
+    text: "Отправьте фото вашего счётчика или узла учёта в Telegram и мы подготовим точное предложение под ваш объект."
     button:
-      enable: false
-      label: ""
-      link: ""
+      label: "Отправить фото в Telegram"
+      link: "https://t.me/teleofis24"
+    highlights:
+      - "Подбор совместимого оборудования под ваш счётчик и объект"
+      - "Коммерческое предложение в день обращения"
+      - "Удалённая помощь с первичным запуском"
+
+integrations:
+  title: "Интеграции и протоколы"
+  items:
+    - title: "Работаем с A1 и МТС"
+      text: "Подбираем оптимальный канал передачи данных под объект и покрытие."
+      icon: "FaMobileAlt"
+    - title: "Драйверы под любой протокол"
+      text: "Разрабатываем драйверы и интеграции под нужный протокол обмена."
+      icon: "FaPlug"
+    - title: "Платформа EST.by \"Мой Клиент: Ресурсы\""
+      text: "Интеграция данных приборов учёта и телеметрии в едином интерфейсе."
+      icon: "FaLayerGroup"
+    - title: "Платформа A1 от Nekta"
+      text: "Подключаем и настраиваем решения для диспетчеризации и мониторинга."
+      icon: "FaCogs"
+
+business:
+  title: "Работаем с организациями"
+  text: "Счета, договоры, безналичный расчёт, поставки, сервисное обслуживание, индивидуальные решения."
+  primaryCta:
+    label: "Получить счёт"
+    link: "/contact"
+  secondaryCta:
+    label: "Связаться с менеджером"
+    link: "/contact"
+
+cases:
+  title: "Кейсы / отзывы"
+  items:
+    - object: "Подвал"
+      problem: "Протечки и отсутствие удалённого контроля."
+      result: "Автоматические уведомления и онлайн-мониторинг 24/7."
+    - object: "Магазин"
+      problem: "Риски порчи товара из-за температуры."
+      result: "Стабильный температурный контроль и снижение потерь."
+    - object: "Квартира"
+      problem: "Нет прозрачного учёта воды и тепла."
+      result: "Дистанционные показания и точная аналитика расходов."
+
+finalCta:
+  title: "Не знаете что выбрать?"
+  text: "Подберём решение под ваш объект за 15 минут."
+  primary:
+    label: "Консультация"
+    link: "/contact"
+  secondary:
+    label: "Позвонить"
+    link: "tel:+375293652910"
+
+faq:
+  title: "FAQ"
+  items:
+    - question: "Какие счётчики и датчики вы поддерживаете?"
+      answer: "Поддерживаем популярные модели водо- и теплосчётчиков, а также промышленные датчики. Подберём совместимое решение под ваш объект."
+    - question: "Можно ли оплатить как юрлицо по безналу?"
+      answer: "Да. Работаем с организациями: выставляем счёт, готовим договор и закрывающие документы."
+    - question: "Вы выполняете монтаж и настройку?"
+      answer: "Да, выполняем монтаж, пусконаладку и удалённую настройку с последующей технической поддержкой."
+    - question: "Сколько занимает подбор решения?"
+      answer: "Обычно предварительный подбор занимает до 15 минут. Для точного КП можно отправить фото счётчика или узла учёта."
 ---

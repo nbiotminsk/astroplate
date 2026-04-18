@@ -76,7 +76,7 @@ const contactCollection = defineCollection({
 // Homepage collection schema
 const homepageCollection = defineCollection({
   loader: glob({ pattern: "**/-*.{md,mdx}", base: "src/content/homepage" }),
-  schema: z.object({
+  schema: z.looseObject({
     banner: z.object({
       title: z.string(),
       content: z.string(),

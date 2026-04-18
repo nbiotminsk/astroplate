@@ -136,38 +136,54 @@ const tags = ["Все", ...productCategories];
 
 <script>
   const cartKey = "catalog-cart-v1";
+  interface CartItem {
+    id: string;
+    title: string;
+    price: number;
+    quantity: number;
+  }
 
   const initCatalogPage = () => {
-    const page = document.querySelector("#catalog-grid");
+    const page = document.querySelector("#catalog-grid") as HTMLElement | null;
     if (!page || page.dataset.initialized === "true") return;
     page.dataset.initialized = "true";
 
-    const tags = document.querySelectorAll("#catalog-tags [data-tag]");
-    const grid = document.querySelector("#catalog-grid");
-    const sortSelect = document.querySelector("#catalog-sort");
-    const cards = Array.from(document.querySelectorAll("#catalog-grid [data-category]"));
-    const addToCartButtons = document.querySelectorAll("[data-add-to-cart]");
-    const cartItemsWrap = document.querySelector("#cart-items");
-    const cartCount = document.querySelector("#cart-count");
-    const cartTotal = document.querySelector("#cart-total");
-    const clearCartButton = document.querySelector("#clear-cart");
+    const tags = document.querySelectorAll(
+      "#catalog-tags [data-tag]",
+    ) as NodeListOf<HTMLButtonElement>;
+    const grid = document.querySelector("#catalog-grid") as HTMLElement | null;
+    const sortSelect = document.querySelector(
+      "#catalog-sort",
+    ) as HTMLSelectElement | null;
+    const cards = Array.from(
+      document.querySelectorAll("#catalog-grid [data-category]"),
+    ) as HTMLElement[];
+    const addToCartButtons = document.querySelectorAll(
+      "[data-add-to-cart]",
+    ) as NodeListOf<HTMLButtonElement>;
+    const cartItemsWrap = document.querySelector("#cart-items") as HTMLElement | null;
+    const cartCount = document.querySelector("#cart-count") as HTMLElement | null;
+    const cartTotal = document.querySelector("#cart-total") as HTMLElement | null;
+    const clearCartButton = document.querySelector(
+      "#clear-cart",
+    ) as HTMLButtonElement | null;
     let activeTag = "Все";
 
     if (!grid || !sortSelect || !cartItemsWrap || !cartCount || !cartTotal || !clearCartButton) {
       return;
     }
 
-    const formatPrice = (price) => `${price} BYN`;
+    const formatPrice = (price: number) => `${price} BYN`;
 
-    const getCart = () => {
+    const getCart = (): CartItem[] => {
       try {
-        return JSON.parse(localStorage.getItem(cartKey) || "[]");
+        return JSON.parse(localStorage.getItem(cartKey) || "[]") as CartItem[];
       } catch {
         return [];
       }
     };
 
-    const saveCart = (cart) => {
+    const saveCart = (cart: CartItem[]) => {
       localStorage.setItem(cartKey, JSON.stringify(cart));
     };
 
@@ -185,7 +201,7 @@ const tags = ["Все", ...productCategories];
 
       cartItemsWrap.innerHTML = cart
         .map(
-          (item) => `
+          (item: CartItem) => `
             <div class="mb-3 flex items-center justify-between gap-3 border-b border-border pb-3 dark:border-darkmode-border">
               <div>
                 <p class="mb-1 font-semibold">${item.title}</p>
@@ -208,29 +224,33 @@ const tags = ["Все", ...productCategories];
         )
         .join("");
 
-      const updateItemQuantity = (id, nextQty) => {
+      const updateItemQuantity = (id: string, nextQty: number | string) => {
         const nextCart = getCart();
-        const item = nextCart.find((entry) => entry.id === id);
+        const item = nextCart.find((entry: CartItem) => entry.id === id);
         if (!item) return;
         item.quantity = Math.max(1, Number(nextQty) || 1);
         saveCart(nextCart);
         renderCart();
       };
 
-      cartItemsWrap.querySelectorAll("[data-remove-item]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const id = button.dataset.removeItem;
-          const nextCart = getCart().filter((item) => item.id !== id);
-          saveCart(nextCart);
-          renderCart();
+      cartItemsWrap
+        .querySelectorAll("[data-remove-item]")
+        .forEach((button: Element) => {
+          const btn = button as HTMLButtonElement;
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.removeItem;
+            const nextCart = getCart().filter((item: CartItem) => item.id !== id);
+            saveCart(nextCart);
+            renderCart();
+          });
         });
-      });
 
-      cartItemsWrap.querySelectorAll("[data-inc-item]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const id = button.dataset.incItem;
+      cartItemsWrap.querySelectorAll("[data-inc-item]").forEach((button: Element) => {
+        const btn = button as HTMLButtonElement;
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.incItem;
           const nextCart = getCart();
-          const item = nextCart.find((entry) => entry.id === id);
+          const item = nextCart.find((entry: CartItem) => entry.id === id);
           if (!item) return;
           item.quantity += 1;
           saveCart(nextCart);
@@ -238,11 +258,12 @@ const tags = ["Все", ...productCategories];
         });
       });
 
-      cartItemsWrap.querySelectorAll("[data-dec-item]").forEach((button) => {
-        button.addEventListener("click", () => {
-          const id = button.dataset.decItem;
+      cartItemsWrap.querySelectorAll("[data-dec-item]").forEach((button: Element) => {
+        const btn = button as HTMLButtonElement;
+        btn.addEventListener("click", () => {
+          const id = btn.dataset.decItem;
           const nextCart = getCart();
-          const item = nextCart.find((entry) => entry.id === id);
+          const item = nextCart.find((entry: CartItem) => entry.id === id);
           if (!item) return;
           item.quantity = Math.max(1, item.quantity - 1);
           saveCart(nextCart);
@@ -250,14 +271,15 @@ const tags = ["Все", ...productCategories];
         });
       });
 
-      cartItemsWrap.querySelectorAll("[data-item-qty]").forEach((input) => {
-        input.addEventListener("change", () => {
-          updateItemQuantity(input.dataset.itemQty, input.value);
+      cartItemsWrap.querySelectorAll("[data-item-qty]").forEach((input: Element) => {
+        const qtyInput = input as HTMLInputElement;
+        qtyInput.addEventListener("change", () => {
+          updateItemQuantity(qtyInput.dataset.itemQty || "", qtyInput.value);
         });
       });
     };
 
-    const activateTag = (tagName) => {
+    const activateTag = (tagName: string) => {
       tags.forEach((tagButton) => {
         const isActive = tagButton.dataset.tag === tagName;
         tagButton.classList.toggle("border-primary", isActive);
@@ -271,7 +293,7 @@ const tags = ["Все", ...productCategories];
         tagButton.classList.toggle("hover:border-primary", !isActive);
       });
 
-      cards.forEach((card) => {
+      cards.forEach((card: HTMLElement) => {
         const shouldShow = tagName === "Все" || card.dataset.category === tagName;
         card.style.display = shouldShow ? "" : "none";
       });
@@ -292,7 +314,7 @@ const tags = ["Все", ...productCategories];
         return 0;
       });
 
-      sorted.forEach((card) => grid.appendChild(card));
+      sorted.forEach((card: HTMLElement) => grid.appendChild(card));
       activateTag(activeTag);
     };
 
@@ -308,14 +330,15 @@ const tags = ["Все", ...productCategories];
     addToCartButtons.forEach((button) => {
       button.addEventListener("click", () => {
         const id = button.dataset.addToCart;
+        if (!id) return;
         const title = button.dataset.title || "";
         const price = Number(button.dataset.price || 0);
         const qtyInput = document.querySelector(
           `[data-qty-input="${button.dataset.qtySource}"]`,
-        );
+        ) as HTMLInputElement | null;
         const selectedQuantity = Math.max(1, Number(qtyInput?.value || 1));
         const nextCart = getCart();
-        const existing = nextCart.find((item) => item.id === id);
+        const existing = nextCart.find((item: CartItem) => item.id === id);
 
         if (existing) {
           existing.quantity += selectedQuantity;

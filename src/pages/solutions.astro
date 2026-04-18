@@ -75,9 +75,15 @@ const allTags = Array.from(
 </Base>
 
 <script>
-  const categoryFilter = document.querySelector("#solutions-category-filter");
-  const tagFilter = document.querySelector("#solutions-tag-filter");
-  const cards = Array.from(document.querySelectorAll("#solutions-grid > [data-categories]"));
+  const categoryFilter = document.querySelector(
+    "#solutions-category-filter",
+  ) as HTMLSelectElement | null;
+  const tagFilter = document.querySelector(
+    "#solutions-tag-filter",
+  ) as HTMLSelectElement | null;
+  const cards = Array.from(
+    document.querySelectorAll("#solutions-grid > [data-categories]"),
+  ) as HTMLElement[];
 
   const applyFilters = () => {
     const selectedCategory = categoryFilter?.value || "";

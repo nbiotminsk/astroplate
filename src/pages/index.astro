@@ -1,7 +1,7 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
-import siteContent from "@/config/siteContent.json";
 import Base from "@/layouts/Base.astro";
+import { getListPage } from "@/lib/contentParser.astro";
 import {
   FaBroadcastTower,
   FaBuilding,
@@ -22,7 +22,8 @@ import {
   FaWater,
 } from "react-icons/fa";
 
-const { homepage } = siteContent;
+const homepageEntry = await getListPage("homepage", "-index");
+const homepage = homepageEntry.data as any;
 
 const iconMap = {
   FaWater,
@@ -62,7 +63,7 @@ const iconMap = {
           </div>
           <ul class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2">
             {
-              homepage.hero.trustItems.map((item) => (
+              homepage.hero.trustItems.map((item: string) => (
                 <li class="flex items-center gap-2">
                   <FaCheck className="text-primary" />
                   <span>{item}</span>
@@ -142,7 +143,7 @@ const iconMap = {
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.popularProducts.items.map((product) => (
+          homepage.popularProducts.items.map((product: any) => (
             <div class="sm:col-6 lg:col-3">
               <article class="catalog-card h-full">
                 <ImageMod
@@ -187,7 +188,7 @@ const iconMap = {
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.solutions.items.map((item) => {
+          homepage.solutions.items.map((item: any) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
             return (
               <div class="sm:col-6 lg:col-4">
@@ -220,7 +221,7 @@ const iconMap = {
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.whyUs.items.map((item) => {
+          homepage.whyUs.items.map((item: any) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCheck;
             return (
               <div class="sm:col-6 lg:col-4">
@@ -249,7 +250,7 @@ const iconMap = {
           <div class="buy-timeline-panel h-full">
             <ol class="buy-timeline">
               {
-                homepage.howToBuy.steps.map((step, idx) => (
+                homepage.howToBuy.steps.map((step: any, idx: number) => (
                   <li class="buy-timeline-item">
                     <span class="buy-step-index">{idx + 1}</span>
                     <div>
@@ -281,7 +282,7 @@ const iconMap = {
             </a>
             <ul class="mt-4 space-y-2 text-sm">
               {
-                homepage.howToBuy.helpCard.highlights.map((item) => (
+                homepage.howToBuy.helpCard.highlights.map((item: string) => (
                   <li class="flex items-start gap-2">
                     <FaCheck className="mt-1 text-primary" />
                     <span>{item}</span>
@@ -303,7 +304,7 @@ const iconMap = {
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.integrations.items.map((item) => {
+          homepage.integrations.items.map((item: any) => {
             const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
             return (
               <div class="sm:col-6 lg:col-3">
@@ -351,7 +352,7 @@ const iconMap = {
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.cases.items.map((item) => (
+          homepage.cases.items.map((item: any) => (
             <div class="md:col-4">
               <article class="case-card h-full">
                 <h3 class="text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
@@ -395,7 +396,7 @@ const iconMap = {
       </h2>
       <div class="faq-list">
         {
-          homepage.faq.items.map((item, idx) => (
+          homepage.faq.items.map((item: any, idx: number) => (
             <details class="faq-item" open={idx === 0}>
               <summary class="faq-question">{item.question}</summary>
               <p class="faq-answer">{item.answer}</p>
