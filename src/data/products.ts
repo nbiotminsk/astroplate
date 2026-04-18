@@ -19,6 +19,15 @@ export type Product = {
   shortDescription: string;
   description: string;
   features: string[];
+  sku: string;
+  mpn: string;
+  brand: string;
+  availability: "https://schema.org/InStock" | "https://schema.org/OutOfStock";
+  condition:
+    | "https://schema.org/NewCondition"
+    | "https://schema.org/UsedCondition"
+    | "https://schema.org/DamagedCondition"
+    | "https://schema.org/RefurbishedCondition";
 };
 
 const rawProducts: Omit<Product, "id">[] = [
@@ -35,6 +44,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Класс точности B",
       "Ресурс работы до 12 лет",
     ],
+    sku: "SF-W15",
+    mpn: "SF-W15",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Водомер AquaMeter Pro 20",
@@ -49,6 +63,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Устойчивость к гидроударам",
       "Увеличенный межповерочный интервал",
     ],
+    sku: "AMP-20",
+    mpn: "AMP-20",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "NB-IoT модуль LinkNode N1",
@@ -63,6 +82,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Низкое энергопотребление",
       "Интерфейсы UART и GPIO",
     ],
+    sku: "LN-N1",
+    mpn: "LN-N1",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "NB-IoT модуль LinkNode N2",
@@ -77,6 +101,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Поддержка eDRX и PSM",
       "Монтаж на DIN-рейку через адаптер",
     ],
+    sku: "LN-N2",
+    mpn: "LN-N2",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "GSM модуль Connect G100",
@@ -91,6 +120,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "SIM-слот стандартного размера",
       "Антенна в комплекте",
     ],
+    sku: "CG-G100",
+    mpn: "CG-G100",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "GSM модуль Connect G200",
@@ -105,6 +139,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Сторожевой таймер",
       "Широкий диапазон рабочих температур",
     ],
+    sku: "CG-G200",
+    mpn: "CG-G200",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Модуль NBIOT + 2 счетчика воды 15 мм",
@@ -120,6 +159,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "1 модуль связи NBIOT",
       "Готов к монтажу и подключению",
     ],
+    sku: "KIT-NBIOT-2W15",
+    mpn: "KIT-NBIOT-2W15",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Модуль NBIoT + счетчик воды Ду 20 мм",
@@ -134,6 +178,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Модуль NBIoT",
       "Удобная интеграция в систему диспетчеризации",
     ],
+    sku: "KIT-NBIOT-W20",
+    mpn: "KIT-NBIOT-W20",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Замена счетчика воды Ду 15-25 мм",
@@ -148,6 +197,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Снятие старого прибора учета",
       "Монтаж и базовая проверка работы",
     ],
+    sku: "SERVICE-REPLACE-15-25",
+    mpn: "SERVICE-REPLACE-15-25",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Поверка счетчика воды Ду 15-25 мм",
@@ -162,6 +216,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Оформление документов по поверке",
       "Консультация по срокам следующей поверки",
     ],
+    sku: "SERVICE-CALIBRATION-15-25",
+    mpn: "SERVICE-CALIBRATION-15-25",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
   {
     title: "Ремонт и обслуживание модуля Zeta Тахат",
@@ -177,6 +236,11 @@ const rawProducts: Omit<Product, "id">[] = [
       "Замена неисправных элементов",
       "Тестирование после обслуживания",
     ],
+    sku: "SERVICE-ZETA-REPAIR",
+    mpn: "SERVICE-ZETA-REPAIR",
+    brand: "Teleofis24",
+    availability: "https://schema.org/InStock",
+    condition: "https://schema.org/NewCondition",
   },
 ];
 

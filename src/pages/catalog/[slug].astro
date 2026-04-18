@@ -1,5 +1,6 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
+import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
 import { getProductById, products } from "@/data/products";
 
@@ -15,13 +16,60 @@ const product = getProductById(slug || "");
 if (!product) {
   return Astro.redirect("/404");
 }
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const productUrl = `${siteUrl}/catalog/${product.id}`;
+const imageUrl = `${siteUrl}${product.image}`;
+const productSchema = {
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "@id": `${productUrl}#product`,
+  name: product.title,
+  description: product.description,
+  image: [imageUrl],
+  sku: product.sku,
+  mpn: product.mpn,
+  category: product.category,
+  brand: {
+    "@type": "Brand",
+    name: product.brand,
+  },
+  itemCondition: product.condition,
+  additionalProperty: product.features.map((feature, index) => ({
+    "@type": "PropertyValue",
+    name: `Характеристика ${index + 1}`,
+    value: feature,
+  })),
+  offers: {
+    "@type": "Offer",
+    url: productUrl,
+    price: product.price.toFixed(2),
+    priceCurrency: "BYN",
+    availability: product.availability,
+    itemCondition: product.condition,
+    priceValidUntil: "2027-12-31",
+    seller: {
+      "@type": "Organization",
+      name: product.brand,
+      url: siteUrl,
+    },
+  },
+};
 ---
 
 <Base
   title={product.title}
   description={product.shortDescription}
   image={product.image}
+  canonical={productUrl}
 >
+  <Fragment slot="head">
+    <meta property="og:type" content="product" />
+    <meta property="product:price:amount" content={product.price.toFixed(2)} />
+    <meta property="product:price:currency" content="BYN" />
+    <meta property="product:availability" content="in stock" />
+    <script type="application/ld+json" set:html={JSON.stringify(productSchema)} />
+  </Fragment>
   <section class="section pb-8">
     <div class="container">
       <a href="/catalog" class="mb-6 inline-block text-primary underline">
