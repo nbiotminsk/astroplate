@@ -13,17 +13,6 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
-    },
-    {
-      "name": "date",
-      "label": "date",
-      "type": "Date",
-      "value": "2026-04-18",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": "2026-04-18",
-      "alwaysUseCurrentDate": false
     }
   ]
 }
