@@ -53,6 +53,16 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
+    },
+    {
+      "name": "availability",
+      "label": "availability",
+      "type": "boolean",
+      "value": false,
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": "false"
     }
   ]
 }
