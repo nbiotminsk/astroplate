@@ -94,7 +94,7 @@ const tags = ["Все", ...Array.from(categorySet)];
                   {product.category}
                 </p>
                 <h4 class="mb-4 text-2xl leading-tight">{product.title}</h4>
-                <p class="mb-4 text-2xl font-bold text-primary">{product.price} BYN</p>
+                <p class="mb-4 text-2xl font-bold text-emerald-600">{product.price} BYN</p>
                 <p
                   class={`mb-4 text-sm ${
                     product.availability ? "text-green-700" : "text-red-700"
@@ -103,10 +103,10 @@ const tags = ["Все", ...Array.from(categorySet)];
                   {product.availability ? "В наличии" : "Нет в наличии"}
                 </p>
 
-                <div class="mt-auto grid grid-cols-[1fr_64px_1fr] items-center gap-2">
+                <div class="mt-auto grid grid-cols-1 gap-2 sm:grid-cols-[1fr_64px_1fr] sm:items-center">
                   <button
                     type="button"
-                    class={`btn btn-buy btn-sm min-w-0 px-2 text-center ${
+                    class={`btn btn-buy btn-sm w-full min-w-0 px-2 text-center ${
                       !product.availability ? "cursor-not-allowed opacity-50" : ""
                     }`}
                     data-add-to-cart={product.id}
@@ -122,11 +122,11 @@ const tags = ["Все", ...Array.from(categorySet)];
                     type="number"
                     min="1"
                     value="1"
-                    class="w-16 rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
+                    class="w-full rounded border border-border bg-body px-2 py-1 text-sm sm:w-16 dark:border-darkmode-border dark:bg-darkmode-body"
                     data-qty-input={product.id}
                   />
                   <a
-                    class="btn btn-sm min-w-0 border-transparent bg-transparent px-2 text-center text-primary hover:underline"
+                    class="btn btn-sm w-full min-w-0 border-transparent bg-transparent px-2 text-center text-primary hover:underline"
                     href={`/catalog/${product.id}`}
                   >
                     Подробнее
