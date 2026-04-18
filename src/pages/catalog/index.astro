@@ -79,10 +79,10 @@ const tags = ["Все", ...Array.from(categorySet)];
               data-price={product.price}
               data-title={product.title}
             >
-              <div class="flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
+              <div class="catalog-card group flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
                 <a href={`/catalog/${product.id}`} aria-label={`Открыть ${product.title}`}>
                   <ImageMod
-                    class="mb-4 h-48 w-full rounded object-cover"
+                    class="catalog-card__image mb-4 h-48 w-full rounded object-cover"
                     src={product.image}
                     alt={product.title}
                     width={380}
@@ -166,12 +166,54 @@ const tags = ["Все", ...Array.from(categorySet)];
 </Base>
 
 <style>
+  .catalog-card {
+    transform: translateY(0);
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    transition:
+      transform 0.24s ease,
+      box-shadow 0.24s ease,
+      border-color 0.24s ease;
+  }
+
+  .catalog-card:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 20px 38px rgba(15, 23, 42, 0.12);
+    border-color: rgba(5, 150, 105, 0.35);
+  }
+
+  .catalog-card__image {
+    transition:
+      transform 0.3s ease,
+      filter 0.3s ease;
+  }
+
+  .catalog-card:hover .catalog-card__image {
+    transform: scale(1.02);
+    filter: saturate(1.05);
+  }
+
   #catalog-tags [data-active="true"] {
     color: #fff !important;
   }
 
   #catalog-tags [data-active="true"]:hover {
     color: #fff !important;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .catalog-card,
+    .catalog-card__image {
+      transition: none;
+    }
+
+    .catalog-card:hover {
+      transform: none;
+    }
+
+    .catalog-card:hover .catalog-card__image {
+      transform: none;
+      filter: none;
+    }
   }
 </style>
 
