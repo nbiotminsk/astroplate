@@ -30,6 +30,7 @@ const tags = ["Все", ...productCategories];
                     : "border-border bg-light hover:border-primary hover:text-primary dark:bg-darkmode-light"
                 }`}
                 data-tag={tag}
+                data-active={index === 0 ? "true" : "false"}
               >
                 {tag}
               </button>
@@ -133,6 +134,16 @@ const tags = ["Все", ...productCategories];
     </div>
   </section>
 </Base>
+
+<style>
+  #catalog-tags [data-active="true"] {
+    color: #fff !important;
+  }
+
+  #catalog-tags [data-active="true"]:hover {
+    color: #fff !important;
+  }
+</style>
 
 <script>
   const cartKey = "catalog-cart-v1";
@@ -282,6 +293,7 @@ const tags = ["Все", ...productCategories];
     const activateTag = (tagName: string) => {
       tags.forEach((tagButton) => {
         const isActive = tagButton.dataset.tag === tagName;
+        tagButton.dataset.active = isActive ? "true" : "false";
         tagButton.classList.toggle("border-primary", isActive);
         tagButton.classList.toggle("bg-primary", isActive);
         tagButton.classList.toggle("text-white", isActive);
