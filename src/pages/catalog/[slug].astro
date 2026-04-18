@@ -84,36 +84,45 @@ if (!product) {
 
 <script>
   const cartKey = "catalog-cart-v1";
-  const addToCartButton = document.querySelector("#add-to-cart");
-  const qtyInput = document.querySelector("#detail-qty");
 
-  const getCart = () => {
-    try {
-      return JSON.parse(localStorage.getItem(cartKey) || "[]");
-    } catch {
-      return [];
-    }
+  const initProductPage = () => {
+    const addToCartButton = document.querySelector("#add-to-cart");
+    const qtyInput = document.querySelector("#detail-qty");
+
+    if (!addToCartButton || addToCartButton.dataset.initialized === "true") return;
+    addToCartButton.dataset.initialized = "true";
+
+    const getCart = () => {
+      try {
+        return JSON.parse(localStorage.getItem(cartKey) || "[]");
+      } catch {
+        return [];
+      }
+    };
+
+    const saveCart = (cart) => {
+      localStorage.setItem(cartKey, JSON.stringify(cart));
+    };
+
+    addToCartButton.addEventListener("click", () => {
+      const id = addToCartButton.dataset.id;
+      const title = addToCartButton.dataset.title || "";
+      const price = Number(addToCartButton.dataset.price || 0);
+      const quantity = Math.max(1, Number(qtyInput?.value || 1));
+      const cart = getCart();
+      const existing = cart.find((item) => item.id === id);
+
+      if (existing) {
+        existing.quantity += quantity;
+      } else {
+        cart.push({ id, title, price, quantity });
+      }
+
+      saveCart(cart);
+      window.location.href = "/catalog#cart";
+    });
   };
 
-  const saveCart = (cart) => {
-    localStorage.setItem(cartKey, JSON.stringify(cart));
-  };
-
-  addToCartButton?.addEventListener("click", () => {
-    const id = addToCartButton.dataset.id;
-    const title = addToCartButton.dataset.title || "";
-    const price = Number(addToCartButton.dataset.price || 0);
-    const quantity = Math.max(1, Number(qtyInput?.value || 1));
-    const cart = getCart();
-    const existing = cart.find((item) => item.id === id);
-
-    if (existing) {
-      existing.quantity += quantity;
-    } else {
-      cart.push({ id, title, price, quantity });
-    }
-
-    saveCart(cart);
-    window.location.href = "/catalog#cart";
-  });
+  initProductPage();
+  document.addEventListener("astro:page-load", initProductPage);
 </script>
