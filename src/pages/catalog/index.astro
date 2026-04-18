@@ -72,26 +72,22 @@ const tags = ["Все", ...productCategories];
                 <p class="mb-2 inline-block rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
                   {product.category}
                 </p>
-                <h4 class="mb-2">{product.title}</h4>
-                <p class="mb-4">{product.shortDescription}</p>
-                <p class="mb-5 text-2xl font-bold text-primary">{product.price} BYN</p>
+                <h4 class="mb-4">{product.title}</h4>
+                <p class="mb-4 text-2xl font-bold text-primary">{product.price} BYN</p>
 
-                <div class="mb-3 flex items-center gap-2">
-                  <label for={`qty-${product.id}`} class="text-sm">Кол-во:</label>
+                <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
+                  <label for={`qty-${product.id}`} class="text-sm whitespace-nowrap">Кол-во:</label>
                   <input
                     id={`qty-${product.id}`}
                     type="number"
                     min="1"
                     value="1"
-                    class="w-20 rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
+                    class="w-16 rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
                     data-qty-input={product.id}
                   />
-                </div>
-
-                <div class="flex gap-3">
                   <button
                     type="button"
-                    class="btn btn-buy btn-sm"
+                    class="btn btn-buy btn-sm flex-1 sm:flex-none"
                     data-add-to-cart={product.id}
                     data-price={product.price}
                     data-title={product.title}
@@ -100,7 +96,7 @@ const tags = ["Все", ...productCategories];
                     Купить
                   </button>
                   <a
-                    class="btn btn-outline-primary btn-sm"
+                    class="btn btn-outline-primary btn-sm flex-1 text-center sm:flex-none"
                     href={`/catalog/${product.id}`}
                   >
                     Подробнее
