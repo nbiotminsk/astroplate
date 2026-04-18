@@ -1,9 +1,8 @@
 ---
 import Logo from "@/components/Logo.astro";
-import ThemeSwitcher from "@/components/ThemeSwitcher.astro";
 import config from "@/config/config.json";
 import menu from "@/config/menu.json";
-import { IoSearch } from "react-icons/io5";
+import { IoCartOutline, IoSearch } from "react-icons/io5";
 
 export interface ChildNavigationLink {
   name: string;
@@ -48,7 +47,7 @@ const { pathname } = Astro.url;
     <!-- /navbar toggler -->
     <ul
       id="nav-menu"
-      class="navbar-nav order-3 hidden w-full pb-6 lg:order-1 lg:flex lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8"
+      class="navbar-nav order-3 hidden w-full pb-6 lg:order-1 lg:mx-auto lg:flex lg:w-auto lg:space-x-2 lg:pb-0 xl:space-x-8"
     >
       {
         main.map((menu) => (
@@ -127,11 +126,11 @@ const { pathname } = Astro.url;
         )
       }
     </ul>
-    <div class="order-1 ml-auto flex items-center md:order-2 lg:ml-0">
+    <div class="order-1 ml-auto flex items-center gap-5 md:order-2 lg:ml-0">
       {
         settings.search && (
           <button
-            class="border-border text-text-dark hover:text-primary dark:border-darkmode-border mr-5 inline-block border-r pr-5 text-xl dark:text-white dark:hover:text-darkmode-primary"
+            class="text-text-dark hover:text-primary inline-block text-xl dark:text-white dark:hover:text-darkmode-primary"
             aria-label="search"
             data-search-trigger
           >
@@ -139,11 +138,17 @@ const { pathname } = Astro.url;
           </button>
         )
       }
-      <ThemeSwitcher className="mr-5" />
+      <a
+        href="/cart"
+        aria-label="cart"
+        class="text-text-dark hover:text-primary inline-block text-xl dark:text-white dark:hover:text-darkmode-primary"
+      >
+        <IoCartOutline />
+      </a>
       {
         navigation_button.enable && (
           <a
-            class="btn btn-outline-primary btn-sm hidden lg:inline-block"
+            class="btn btn-primary btn-sm hidden lg:inline-block"
             href={navigation_button.link}
             target={
               navigation_button.link.startsWith("http") ? "_blank" : "_self"

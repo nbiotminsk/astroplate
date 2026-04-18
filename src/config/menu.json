@@ -1,47 +1,28 @@
 {
   "main": [
     {
-      "name": "Home",
-      "url": "/"
+      "name": "Каталог",
+      "url": "/catalog"
     },
     {
-      "name": "About",
-      "url": "/about"
+      "name": "Решения",
+      "url": "/solutions"
     },
     {
-      "name": "Elements",
-      "url": "/elements"
+      "name": "Услуги",
+      "url": "/services"
     },
     {
-      "name": "Contact",
+      "name": "Для бизнеса",
+      "url": "/business"
+    },
+    {
+      "name": "Доставка и оплата",
+      "url": "/delivery-payment"
+    },
+    {
+      "name": "Контакты",
       "url": "/contact"
-    },
-    {
-      "name": "Pages",
-      "url": "",
-      "hasChildren": true,
-      "children": [
-        {
-          "name": "Blog",
-          "url": "/blog"
-        },
-        {
-          "name": "Authors",
-          "url": "/authors"
-        },
-        {
-          "name": "Categories",
-          "url": "/categories"
-        },
-        {
-          "name": "Tags",
-          "url": "/tags"
-        },
-        {
-          "name": "404 Page",
-          "url": "/404"
-        }
-      ]
     }
   ],
   "footer": [

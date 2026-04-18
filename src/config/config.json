@@ -5,18 +5,18 @@
     "base_path": "/",
     "trailing_slash": false,
     "favicon": "/images/favicon.png",
-    "logo": "/images/logo.png",
-    "logo_darkmode": "/images/logo-darkmode.png",
+    "logo": "",
+    "logo_darkmode": "",
     "logo_width": "150",
     "logo_height": "30",
-    "logo_text": "Astroplate"
+    "logo_text": "teleofis24.by"
   },
 
   "settings": {
     "search": true,
     "sticky_header": true,
     "theme_switcher": true,
-    "default_theme": "system",
+    "default_theme": "light",
     "pagination": 2,
     "summary_length": 200,
     "blog_folder": "blog"
@@ -35,8 +35,8 @@
 
   "navigation_button": {
     "enable": true,
-    "label": "Github",
-    "link": "https://github.com/zeon-studio/astroplate"
+    "label": "Получить консультацию",
+    "link": "/contact"
   },
 
   "google_tag_manager": {
