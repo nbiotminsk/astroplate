@@ -99,10 +99,26 @@ const trustCards = [
 ];
 
 const buySteps = [
-  "Выберите оборудование",
-  "Оплатите E-POS или запросите счёт по безналу",
-  "Получите доставку / монтаж",
-  "Поддержка после покупки",
+  {
+    title: "Выберите оборудование",
+    description:
+      "Поможем подобрать модуль, датчики и комплект под ваш объект и бюджет.",
+  },
+  {
+    title: "Оплатите E-POS или запросите счёт по безналу",
+    description:
+      "Для физлиц доступна быстрая онлайн-оплата, для организаций подготовим документы.",
+  },
+  {
+    title: "Получите доставку / монтаж",
+    description:
+      "Организуем доставку по Беларуси и при необходимости выполним монтаж и запуск.",
+  },
+  {
+    title: "Поддержка после покупки",
+    description:
+      "Сопровождаем после внедрения: консультации, настройка и техническая поддержка.",
+  },
 ];
 
 const buyHighlights = [
@@ -356,20 +372,25 @@ const cases = [
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
         Как купить
       </h2>
-      <div class="row gap-y-6">
-        <div class="lg:col-8">
+      <div class="row gap-y-6 items-stretch">
+        <div class="lg:col-7">
+          <div class="buy-timeline-panel h-full">
           <ol class="buy-timeline">
             {
               buySteps.map((step, idx) => (
                 <li class="buy-timeline-item">
                   <span class="buy-step-index">{idx + 1}</span>
-                  <p class="buy-step-text">{step}</p>
+                  <div>
+                    <p class="buy-step-text">{step.title}</p>
+                    <p class="buy-step-description">{step.description}</p>
+                  </div>
                 </li>
               ))
             }
           </ol>
+          </div>
         </div>
-        <div class="lg:col-4">
+        <div class="lg:col-5">
           <aside class="buy-help-card">
             <div class="flex items-center gap-2">
               <FaCamera className="buy-help-icon" />

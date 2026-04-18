@@ -259,25 +259,33 @@
   @apply text-primary dark:text-darkmode-primary mx-auto text-3xl;
 }
 
+.buy-timeline-panel {
+  @apply rounded-2xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
 .buy-timeline {
-  @apply relative space-y-5;
+  @apply relative space-y-3;
 }
 
 .buy-timeline::before {
   content: "";
-  @apply border-border dark:border-darkmode-border absolute left-5 top-2 h-[calc(100%-1rem)] border-l-2;
+  @apply border-border dark:border-darkmode-border absolute left-4 top-3 h-[calc(100%-1.5rem)] border-l-2;
 }
 
 .buy-timeline-item {
-  @apply relative flex items-start gap-4 pl-2;
+  @apply relative flex items-start gap-4 rounded-xl border border-border bg-light px-3 py-3 dark:border-darkmode-border dark:bg-darkmode-body;
 }
 
 .buy-step-index {
-  @apply border-primary bg-primary dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark z-[1] inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold text-white;
+  @apply border-primary bg-primary dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark z-[1] inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold text-white shadow-sm;
 }
 
 .buy-step-text {
-  @apply mt-1 text-base font-semibold;
+  @apply mt-1 text-base font-semibold leading-snug;
+}
+
+.buy-step-description {
+  @apply mt-1 text-sm leading-relaxed;
 }
 
 .buy-help-card {
@@ -319,6 +327,10 @@
 
   .hero-device-bottom {
     @apply bottom-4 left-4 w-[62%];
+  }
+
+  .buy-timeline::before {
+    @apply left-4;
   }
 }
 
