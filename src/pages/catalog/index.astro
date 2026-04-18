@@ -75,8 +75,17 @@ const tags = ["Все", ...productCategories];
                 <h4 class="mb-4">{product.title}</h4>
                 <p class="mb-4 text-2xl font-bold text-primary">{product.price} BYN</p>
 
-                <div class="flex flex-wrap items-center gap-2 sm:flex-nowrap">
-                  <label for={`qty-${product.id}`} class="text-sm whitespace-nowrap">Кол-во:</label>
+                <div class="grid grid-cols-[1fr_64px_1fr] items-center gap-2">
+                  <button
+                    type="button"
+                    class="btn btn-buy btn-sm min-w-0 px-2 text-center"
+                    data-add-to-cart={product.id}
+                    data-price={product.price}
+                    data-title={product.title}
+                    data-qty-source={product.id}
+                  >
+                    Купить
+                  </button>
                   <input
                     id={`qty-${product.id}`}
                     type="number"
@@ -85,18 +94,8 @@ const tags = ["Все", ...productCategories];
                     class="w-16 rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body"
                     data-qty-input={product.id}
                   />
-                  <button
-                    type="button"
-                    class="btn btn-buy btn-sm flex-1 sm:flex-none"
-                    data-add-to-cart={product.id}
-                    data-price={product.price}
-                    data-title={product.title}
-                    data-qty-source={product.id}
-                  >
-                    Купить
-                  </button>
                   <a
-                    class="btn btn-outline-primary btn-sm flex-1 text-center sm:flex-none"
+                    class="btn btn-outline-primary btn-sm min-w-0 px-2 text-center"
                     href={`/catalog/${product.id}`}
                   >
                     Подробнее
