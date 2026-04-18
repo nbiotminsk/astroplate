@@ -1,0 +1,106 @@
+---
+import ImageMod from "@/components/ImageMod.astro";
+import Base from "@/layouts/Base.astro";
+import { getProductById, products } from "@/data/products";
+
+export async function getStaticPaths() {
+  return products.map((product) => ({
+    params: { slug: product.id },
+  }));
+}
+
+const { slug } = Astro.params;
+const product = getProductById(slug || "");
+
+if (!product) {
+  return Astro.redirect("/404");
+}
+---
+
+<Base
+  title={product.title}
+  description={product.shortDescription}
+  image={product.image}
+>
+  <section class="section pb-8">
+    <div class="container">
+      <a href="/catalog" class="mb-6 inline-block text-primary underline">
+        ← Назад в каталог
+      </a>
+      <div class="row items-start gap-y-8">
+        <div class="lg:col-6">
+          <ImageMod
+            class="w-full rounded border border-border dark:border-darkmode-border"
+            src={product.image}
+            alt={product.title}
+            width={620}
+            height={420}
+            format="webp"
+          />
+        </div>
+        <div class="lg:col-6">
+          <p class="mb-3 inline-block rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light">
+            {product.category}
+          </p>
+          <h1 class="mb-3">{product.title}</h1>
+          <p class="mb-4 text-3xl font-bold text-primary">{product.price} BYN</p>
+          <p class="mb-6">{product.description}</p>
+
+          <h4 class="mb-3">Характеристики</h4>
+          <ul class="mb-8 list-disc pl-5">
+            {
+              product.features.map((feature) => (
+                <li class="mb-2">{feature}</li>
+              ))
+            }
+          </ul>
+
+          <button
+            type="button"
+            class="btn btn-primary"
+            id="add-to-cart"
+            data-id={product.id}
+            data-title={product.title}
+            data-price={product.price}
+          >
+            Купить
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const cartKey = "catalog-cart-v1";
+  const addToCartButton = document.querySelector("#add-to-cart");
+
+  const getCart = () => {
+    try {
+      return JSON.parse(localStorage.getItem(cartKey) || "[]");
+    } catch {
+      return [];
+    }
+  };
+
+  const saveCart = (cart) => {
+    localStorage.setItem(cartKey, JSON.stringify(cart));
+  };
+
+  addToCartButton?.addEventListener("click", () => {
+    const id = addToCartButton.dataset.id;
+    const title = addToCartButton.dataset.title || "";
+    const price = Number(addToCartButton.dataset.price || 0);
+    const cart = getCart();
+    const existing = cart.find((item) => item.id === id);
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+      cart.push({ id, title, price, quantity: 1 });
+    }
+
+    saveCart(cart);
+    window.location.href = "/catalog#cart";
+  });
+</script>
