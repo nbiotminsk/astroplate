@@ -22,6 +22,10 @@
   @apply text-text-dark hover:text-primary dark:text-darkmode-text-dark dark:hover:text-darkmode-primary block p-3 cursor-pointer font-semibold transition lg:px-2 lg:py-3;
 }
 
+.nav-link.active {
+  @apply font-bold border-primary dark:border-darkmode-primary border-b-2;
+}
+
 .nav-dropdown {
   @apply mr-0;
 }

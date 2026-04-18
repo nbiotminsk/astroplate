@@ -32,8 +32,11 @@ const serviceArticles = pages.sort((a, b) =>
                         </a>
                       </h3>
                       {article.data.description && (
-                        <p class="mb-0 text-text-dark">{article.data.description}</p>
+                        <p class="mb-5 text-text-dark">{article.data.description}</p>
                       )}
+                      <a class="btn btn-sm btn-primary" href={`/${article.id}`}>
+                        Подробнее
+                      </a>
                     </article>
                   </div>
                 ))}

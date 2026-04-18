@@ -263,8 +263,12 @@ const tags = ["Все", ...productCategories];
         tagButton.classList.toggle("border-primary", isActive);
         tagButton.classList.toggle("bg-primary", isActive);
         tagButton.classList.toggle("text-white", isActive);
+        tagButton.classList.toggle("hover:text-white", isActive);
+        tagButton.classList.toggle("hover:border-primary", isActive);
         tagButton.classList.toggle("border-border", !isActive);
         tagButton.classList.toggle("bg-light", !isActive);
+        tagButton.classList.toggle("hover:text-primary", !isActive);
+        tagButton.classList.toggle("hover:border-primary", !isActive);
       });
 
       cards.forEach((card) => {
