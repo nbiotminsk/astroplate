@@ -280,6 +280,22 @@
   @apply mt-1 text-base font-semibold;
 }
 
+.buy-help-card {
+  @apply rounded-2xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.buy-help-icon {
+  @apply text-primary dark:text-darkmode-primary text-2xl;
+}
+
+.integration-card {
+  @apply rounded-2xl border border-border bg-body p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.integration-card-icon {
+  @apply text-primary dark:text-darkmode-primary text-3xl;
+}
+
 .business-block {
   @apply rounded-3xl bg-gradient-to-br from-[#0f1b2f] via-[#111f36] to-[#1d2f4e] p-8 shadow-[0_24px_54px_rgba(10,20,38,0.45)] md:p-12;
 }

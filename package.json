@@ -60,6 +60,9 @@
   },
   "overrides": {
     "typescript": "$typescript",
-    "astro": "$astro"
+    "astro": "$astro",
+    "yaml-language-server": {
+      "yaml": "2.8.3"
+    }
   }
 }

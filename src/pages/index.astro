@@ -4,12 +4,16 @@ import Base from "@/layouts/Base.astro";
 import {
   FaBroadcastTower,
   FaBuilding,
+  FaCamera,
   FaCertificate,
   FaCheck,
   FaCogs,
   FaFire,
   FaHeadset,
+  FaLayerGroup,
+  FaMobileAlt,
   FaPhoneAlt,
+  FaPlug,
   FaThermometerHalf,
   FaTint,
   FaTools,
@@ -99,6 +103,35 @@ const buySteps = [
   "Оплатите E-POS или запросите счёт по безналу",
   "Получите доставку / монтаж",
   "Поддержка после покупки",
+];
+
+const buyHighlights = [
+  "Подбор совместимого оборудования под ваш счётчик и объект",
+  "Коммерческое предложение в день обращения",
+  "Удалённая помощь с первичным запуском",
+];
+
+const integrationCards = [
+  {
+    title: "Работаем с A1 и МТС",
+    text: "Подбираем оптимальный канал передачи данных под объект и покрытие.",
+    icon: FaMobileAlt,
+  },
+  {
+    title: "Драйверы под любой протокол",
+    text: "Разрабатываем драйверы и интеграции под нужный протокол обмена.",
+    icon: FaPlug,
+  },
+  {
+    title: 'Платформа EST.by \"Мой Клиент: Ресурсы\"',
+    text: "Интеграция данных приборов учёта и телеметрии в едином интерфейсе.",
+    icon: FaLayerGroup,
+  },
+  {
+    title: "Платформа A1 от Nekta",
+    text: "Подключаем и настраиваем решения для диспетчеризации и мониторинга.",
+    icon: FaCogs,
+  },
 ];
 
 const cases = [
@@ -323,16 +356,76 @@ const cases = [
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
         Как купить
       </h2>
-      <ol class="buy-timeline">
+      <div class="row gap-y-6">
+        <div class="lg:col-8">
+          <ol class="buy-timeline">
+            {
+              buySteps.map((step, idx) => (
+                <li class="buy-timeline-item">
+                  <span class="buy-step-index">{idx + 1}</span>
+                  <p class="buy-step-text">{step}</p>
+                </li>
+              ))
+            }
+          </ol>
+        </div>
+        <div class="lg:col-4">
+          <aside class="buy-help-card">
+            <div class="flex items-center gap-2">
+              <FaCamera className="buy-help-icon" />
+              <h3 class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                Скиньте фото счётчика
+              </h3>
+            </div>
+            <p class="mt-3 text-sm">
+              Отправьте фото вашего счётчика или узла учёта в Telegram и мы
+              подготовим точное предложение под ваш объект.
+            </p>
+            <a
+              class="btn btn-primary mt-4 w-full text-center"
+              href="https://t.me/teleofis24"
+              target="_blank"
+              rel="noopener"
+            >
+              Отправить фото в Telegram
+            </a>
+            <ul class="mt-4 space-y-2 text-sm">
+              {
+                buyHighlights.map((item) => (
+                  <li class="flex items-start gap-2">
+                    <FaCheck className="mt-1 text-primary" />
+                    <span>{item}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Integrations -->
+  <section class="section-sm pt-0">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Интеграции и протоколы
+      </h2>
+      <div class="row gap-y-6">
         {
-          buySteps.map((step, idx) => (
-            <li class="buy-timeline-item">
-              <span class="buy-step-index">{idx + 1}</span>
-              <p class="buy-step-text">{step}</p>
-            </li>
+          integrationCards.map((item) => (
+            <div class="sm:col-6 lg:col-3">
+              <article class="integration-card h-full">
+                <item.icon className="integration-card-icon" />
+                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+                <p class="mt-2 text-sm">{item.text}</p>
+              </article>
+            </div>
           ))
         }
-      </ol>
+      </div>
     </div>
   </section>
 
