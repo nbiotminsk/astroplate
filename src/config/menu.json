@@ -13,16 +13,12 @@
       "url": "/elements"
     },
     {
-      "name": "Contact",
-      "url": "/contact"
-    },
-    {
       "name": "Pages",
       "url": "",
       "hasChildren": true,
       "children": [
         {
-          "name": "Blog",
+          "name": "Новости",
           "url": "/blog"
         },
         {
@@ -42,6 +38,10 @@
           "url": "/404"
         }
       ]
+    },
+    {
+      "name": "Contact",
+      "url": "/contact"
     }
   ],
   "footer": [
