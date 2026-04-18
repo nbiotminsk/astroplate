@@ -334,6 +334,13 @@ const tags = ["Все", ...productCategories];
     activateTag(activeTag);
   };
 
-  initCatalogPage();
-  document.addEventListener("astro:page-load", initCatalogPage);
+  const scheduleCatalogInit = () => {
+    requestAnimationFrame(() => initCatalogPage());
+  };
+
+  scheduleCatalogInit();
+  document.addEventListener("DOMContentLoaded", scheduleCatalogInit);
+  document.addEventListener("astro:after-swap", scheduleCatalogInit);
+  document.addEventListener("astro:page-load", scheduleCatalogInit);
+  window.addEventListener("pageshow", scheduleCatalogInit);
 </script>

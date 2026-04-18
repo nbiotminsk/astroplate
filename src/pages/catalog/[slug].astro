@@ -123,6 +123,13 @@ if (!product) {
     });
   };
 
-  initProductPage();
-  document.addEventListener("astro:page-load", initProductPage);
+  const scheduleProductInit = () => {
+    requestAnimationFrame(() => initProductPage());
+  };
+
+  scheduleProductInit();
+  document.addEventListener("DOMContentLoaded", scheduleProductInit);
+  document.addEventListener("astro:after-swap", scheduleProductInit);
+  document.addEventListener("astro:page-load", scheduleProductInit);
+  window.addEventListener("pageshow", scheduleProductInit);
 </script>
