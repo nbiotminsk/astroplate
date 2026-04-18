@@ -33,6 +33,26 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
+    },
+    {
+      "name": "brand",
+      "label": "brand",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "price_currency",
+      "label": "priceCurrency",
+      "type": "number",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
     }
   ]
 }
