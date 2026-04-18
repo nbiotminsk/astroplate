@@ -60,7 +60,7 @@ const tags = ["Все", ...productCategories];
               data-price={product.price}
               data-title={product.title}
             >
-              <div class="h-full rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
+              <div class="flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
                 <ImageMod
                   class="mb-4 h-48 w-full rounded object-cover"
                   src={product.image}
@@ -72,10 +72,10 @@ const tags = ["Все", ...productCategories];
                 <p class="mb-2 inline-block rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
                   {product.category}
                 </p>
-                <h4 class="mb-4">{product.title}</h4>
+                <h4 class="mb-4 text-2xl leading-tight">{product.title}</h4>
                 <p class="mb-4 text-2xl font-bold text-primary">{product.price} BYN</p>
 
-                <div class="grid grid-cols-[1fr_64px_1fr] items-center gap-2">
+                <div class="mt-auto grid grid-cols-[1fr_64px_1fr] items-center gap-2">
                   <button
                     type="button"
                     class="btn btn-buy btn-sm min-w-0 px-2 text-center"

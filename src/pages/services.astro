@@ -1,0 +1,49 @@
+---
+import Base from "@/layouts/Base.astro";
+import { getSinglePage } from "@/lib/contentParser.astro";
+import PageHeader from "@/partials/PageHeader.astro";
+
+const pages = await getSinglePage("pages");
+const serviceArticles = pages.sort((a, b) =>
+  a.data.title.localeCompare(b.data.title)
+);
+---
+
+<Base
+  title="Услуги"
+  meta_title="Услуги"
+  description="Страницы с информацией об услугах и политике конфиденциальности"
+>
+  <PageHeader title="Услуги" />
+
+  <section class="section-sm">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          {
+            serviceArticles.length ? (
+              <div class="row">
+                {serviceArticles.map((article) => (
+                  <div class="mb-6 md:col-6">
+                    <article class="h-full rounded border border-border bg-light p-6 dark:bg-darkmode-light">
+                      <h3 class="h5 mb-3">
+                        <a href={`/${article.id}`} class="hover:text-primary">
+                          {article.data.title}
+                        </a>
+                      </h3>
+                      {article.data.description && (
+                        <p class="mb-0 text-text-dark">{article.data.description}</p>
+                      )}
+                    </article>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p>Материалы пока не добавлены.</p>
+            )
+          }
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
