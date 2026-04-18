@@ -1,17 +1,123 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
-import { getListPage } from "@/lib/contentParser.astro";
-import { markdownify } from "@/lib/utils/textConverter";
-import CallToAction from "@/partials/CallToAction.astro";
-import Testimonial from "@/partials/Testimonial.astro";
-import { FaCheck } from "react-icons/fa";
+import {
+  FaBroadcastTower,
+  FaBuilding,
+  FaCertificate,
+  FaCheck,
+  FaCogs,
+  FaFire,
+  FaHeadset,
+  FaPhoneAlt,
+  FaThermometerHalf,
+  FaTint,
+  FaTools,
+  FaTruck,
+  FaWater,
+} from "react-icons/fa";
 
-const homepage = await getListPage("homepage", "-index");
-const call_to_action = await getListPage("ctaSection", "call-to-action");
-const testimonial = await getListPage("testimonialSection", "testimonial");
+const popularProducts = [
+  {
+    title: "Teleofis RTU-101",
+    specs: "GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485",
+    price: "от 590 BYN",
+    image: "/images/service-1.png",
+    buyLink: "/catalog",
+    detailsLink: "/catalog",
+  },
+  {
+    title: "VEGA Smart Flow",
+    specs: "Дистанционный учёт воды, импульсные входы",
+    price: "от 740 BYN",
+    image: "/images/service-2.png",
+    buyLink: "/catalog",
+    detailsLink: "/catalog",
+  },
+  {
+    title: "ТАХАТ Control Box",
+    specs: "Контроль температуры и аварий, DIN-монтаж",
+    price: "от 680 BYN",
+    image: "/images/service-3.png",
+    buyLink: "/catalog",
+    detailsLink: "/catalog",
+  },
+  {
+    title: "Router Gateway Pro",
+    specs: "Промышленный роутер, VPN, удалённый доступ",
+    price: "от 960 BYN",
+    image: "/images/banner.png",
+    buyLink: "/catalog",
+    detailsLink: "/catalog",
+  },
+];
 
-const { features } = homepage.data;
+const solutions = [
+  {
+    title: "Удалённый учёт воды",
+    text: "Сбор показаний, архив, аварийные уведомления.",
+    icon: FaWater,
+  },
+  {
+    title: "Дистанционный учет тепла",
+    text: "Контроль теплопотребления с онлайн-дашбордом.",
+    icon: FaFire,
+  },
+  {
+    title: "GSM или NBIoT модули",
+    text: "Подбор канала связи под объект и бюджет.",
+    icon: FaBroadcastTower,
+  },
+  {
+    title: "Контроль температуры",
+    text: "Мониторинг и пороговые уведомления 24/7.",
+    icon: FaThermometerHalf,
+  },
+  {
+    title: "Автоматизация насосной станции",
+    text: "Сценарии работы насосов и защита от аварий.",
+    icon: FaCogs,
+  },
+  {
+    title: "Телеметрия колодцев",
+    text: "Уровень, протечки, доступ к данным онлайн.",
+    icon: FaTint,
+  },
+];
+
+const trustCards = [
+  { title: "Оригинальное оборудование", icon: FaCertificate },
+  { title: "Быстрая поставка", icon: FaTruck },
+  { title: "Настройка под ключ", icon: FaTools },
+  { title: "Техподдержка", icon: FaHeadset },
+  { title: "Работа с юрлицами", icon: FaBuilding },
+  { title: "Лицензионное программное обеспечение", icon: FaCheck },
+];
+
+const buySteps = [
+  "Выберите оборудование",
+  "Оплатите E-POS или запросите счёт по безналу",
+  "Получите доставку / монтаж",
+  "Поддержка после покупки",
+];
+
+const cases = [
+  {
+    object: "Подвал",
+    problem: "Протечки и отсутствие удалённого контроля.",
+    result: "Автоматические уведомления и онлайн-мониторинг 24/7.",
+  },
+  {
+    object: "Магазин",
+    problem: "Риски порчи товара из-за температуры.",
+    result: "Стабильный температурный контроль и снижение потерь.",
+  },
+  {
+    object: "Квартира",
+    problem: "Нет прозрачного учёта воды и тепла.",
+    result: "Дистанционные показания и точная аналитика расходов.",
+  },
+];
 ---
 
 <Base>
@@ -118,47 +224,176 @@ const { features } = homepage.data;
   </section>
   <!-- /Hero -->
 
-  <!-- Features -->
-  {
-    features.map((feature, index: number) => (
-      <section class={`section-sm ${index % 2 === 0 && "bg-gradient"}`}>
-        <div class="container">
-          <div class="row items-center justify-between">
-            <div
-              class={`mb:md-0 mb-6 md:col-5 ${index % 2 !== 0 && "md:order-2"}`}
-            >
-              <ImageMod
-                src={feature.image}
-                height={480}
-                width={520}
-                alt={feature.title}
-                format="webp"
-              />
+  <!-- Popular Products -->
+  <section class="section-sm pt-0">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Популярные товары
+      </h2>
+      <div class="row gap-y-6">
+        {
+          popularProducts.map((product) => (
+            <div class="sm:col-6 lg:col-3">
+              <article class="catalog-card h-full">
+                <ImageMod
+                  src={product.image}
+                  width={420}
+                  height={240}
+                  alt={product.title}
+                  class="catalog-card-image"
+                  format="webp"
+                />
+                <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {product.title}
+                </h3>
+                <p class="mt-2 text-sm">{product.specs}</p>
+                <p class="mt-3 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {product.price}
+                </p>
+                <div class="mt-4 flex gap-2">
+                  <a class="btn btn-primary btn-sm" href={product.buyLink}>Купить</a>
+                  <a class="btn btn-outline-primary btn-sm" href={product.detailsLink}>
+                    Подробнее
+                  </a>
+                </div>
+              </article>
             </div>
-            <div class={`md:col-7 lg:col-6 ${index % 2 !== 0 && "md:order-1"}`}>
-              <h2 set:html={markdownify(feature.title)} class="mb-4" />
-              <p set:html={markdownify(feature.content)} class="mb-8 text-lg" />
-              <ul>
-                {feature.bulletpoints.map((bullet: string) => (
-                  <li class="relative mb-4 pl-6">
-                    <FaCheck className={"absolute left-0 top-1.5"} />
-                    <span set:html={markdownify(bullet)} />
-                  </li>
-                ))}
-              </ul>
-              {feature.button.enable && (
-                <a class="btn btn-primary mt-5" href={feature.button.link}>
-                  {feature.button.label}
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </section>
-    ))
-  }
-  <!-- /Features -->
+          ))
+        }
+      </div>
+      <div class="mt-8 text-center">
+        <a class="btn btn-outline-primary" href="/catalog">View all products</a>
+      </div>
+    </div>
+  </section>
 
-  <Testimonial testimonial={testimonial} />
-  <CallToAction call_to_action={call_to_action} />
+  <!-- Solutions -->
+  <section class="section-sm bg-gradient">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Готовые решения под задачи
+      </h2>
+      <div class="row gap-y-6">
+        {
+          solutions.map((item) => (
+            <div class="sm:col-6 lg:col-4">
+              <article class="info-card h-full">
+                <item.icon className="info-card-icon" />
+                <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+                <p class="mt-2">{item.text}</p>
+                <a class="mt-4 inline-block font-semibold hover:underline" href="/solutions">
+                  Подробнее
+                </a>
+              </article>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Us -->
+  <section class="section-sm">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Почему выбирают teleofis24.by
+      </h2>
+      <div class="row gap-y-6">
+        {
+          trustCards.map((item) => (
+            <div class="sm:col-6 lg:col-4">
+              <article class="trust-card h-full">
+                <item.icon className="trust-card-icon" />
+                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+              </article>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- How To Buy -->
+  <section class="section-sm bg-gradient">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Как купить
+      </h2>
+      <ol class="buy-timeline">
+        {
+          buySteps.map((step, idx) => (
+            <li class="buy-timeline-item">
+              <span class="buy-step-index">{idx + 1}</span>
+              <p class="buy-step-text">{step}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <!-- For Business -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="business-block">
+        <h2 class="text-h3 text-white">Работаем с организациями</h2>
+        <p class="mt-4 max-w-3xl text-white/90">
+          Счета, договоры, безналичный расчёт, поставки, сервисное обслуживание,
+          индивидуальные решения.
+        </p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a class="btn btn-primary" href="/contact">Получить счёт</a>
+          <a class="btn border-white text-white hover:bg-white hover:text-dark" href="/contact">
+            Связаться с менеджером
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cases -->
+  <section class="section-sm pt-0">
+    <div class="container">
+      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Кейсы / отзывы
+      </h2>
+      <div class="row gap-y-6">
+        {
+          cases.map((item) => (
+            <div class="md:col-4">
+              <article class="case-card h-full">
+                <h3 class="text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {item.object}
+                </h3>
+                <p class="mt-3 text-sm"><strong>Проблема:</strong> {item.problem}</p>
+                <p class="mt-3 text-sm"><strong>Результат:</strong> {item.result}</p>
+              </article>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- Final CTA -->
+  <section class="section-sm">
+    <div class="container">
+      <div class="final-cta-block text-center">
+        <h2 class="text-h3 text-text-dark dark:text-darkmode-text-dark">
+          Не знаете что выбрать?
+        </h2>
+        <p class="mt-3 text-lg">Подберём решение под ваш объект за 15 минут.</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-3">
+          <a class="btn btn-primary" href="/contact">Консультация</a>
+          <a class="btn btn-outline-primary" href="tel:+375293652910">
+            <FaPhoneAlt className="mr-2 inline" /> Позвонить
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
 </Base>

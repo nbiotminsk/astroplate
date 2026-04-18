@@ -1,41 +1,61 @@
 ---
-import Logo from "@/components/Logo.astro";
-import Social from "@/components/Social.astro";
-import config from "@/config/config.json";
-import menu from "@/config/menu.json";
-import social from "@/config/social.json";
-import { markdownify } from "@/lib/utils/textConverter";
-
-const { footer }: { footer: { name: string; url: string }[] } = menu;
 ---
 
-<footer class="bg-light dark:bg-darkmode-light">
-  <div class="container">
-    <div class="row items-center py-10">
-      <div class="mb-8 text-center lg:col-3 lg:mb-0 lg:text-left">
-        <Logo />
-      </div>
-      <div class="mb-8 text-center lg:col-6 lg:mb-0">
-        <ul>
-          {
-            footer.map((menu) => (
-              <li class="m-3 inline-block">
-                <a href={menu.url}>{menu.name}</a>
-              </li>
-            ))
-          }
+<footer class="bg-light dark:bg-darkmode-light border-t border-border dark:border-darkmode-border">
+  <div class="container py-12">
+    <div class="row gap-y-8">
+      <div class="sm:col-6 lg:col-3">
+        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+          Каталог
+        </h3>
+        <ul class="space-y-2">
+          <li><a href="/catalog" class="hover:underline">Контроллеры</a></li>
+          <li><a href="/catalog" class="hover:underline">Модули связи</a></li>
+          <li><a href="/catalog" class="hover:underline">Датчики</a></li>
+          <li><a href="/catalog" class="hover:underline">Промышленные роутеры</a></li>
         </ul>
       </div>
-      <div class="mb-8 text-center lg:col-3 lg:mb-0 lg:mt-0 lg:text-right">
-        <Social source={social.main} className="social-icons" />
+
+      <div class="sm:col-6 lg:col-3">
+        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+          Услуги
+        </h3>
+        <ul class="space-y-2">
+          <li><a href="/services" class="hover:underline">Монтаж</a></li>
+          <li><a href="/services" class="hover:underline">Пусконаладка</a></li>
+          <li><a href="/services" class="hover:underline">Удалённый мониторинг</a></li>
+          <li><a href="/services" class="hover:underline">Сервисное обслуживание</a></li>
+        </ul>
+      </div>
+
+      <div class="sm:col-6 lg:col-3">
+        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+          Информация
+        </h3>
+        <ul class="space-y-2">
+          <li><a href="/delivery-payment" class="hover:underline">Доставка и оплата</a></li>
+          <li><a href="/business" class="hover:underline">Для бизнеса</a></li>
+          <li><a href="/solutions" class="hover:underline">Готовые решения</a></li>
+          <li><a href="/contact" class="hover:underline">Контакты</a></li>
+        </ul>
+      </div>
+
+      <div class="sm:col-6 lg:col-3">
+        <h3 class="mb-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+          Контакты
+        </h3>
+        <ul class="space-y-2">
+          <li><a href="tel:+375293652910" class="hover:underline">+375 29 365 29 10</a></li>
+          <li><a href="mailto:info@teleofis24.by" class="hover:underline">info@teleofis24.by</a></li>
+          <li>г. Минск, Беларусь</li>
+          <li><a href="https://t.me/teleofis24" target="_blank" rel="noopener" class="hover:underline">Telegram</a></li>
+          <li>c 10.00 до 17.00</li>
+        </ul>
       </div>
     </div>
   </div>
-  <div class="border-t border-border py-7 dark:border-darkmode-border">
-    <div
-      class="container text-center text-text-light dark:text-darkmode-text-light"
-    >
-      <p set:html={markdownify(config.params.copyright)} />
-    </div>
+
+  <div class="border-t border-border py-6 text-center text-sm dark:border-darkmode-border">
+    © teleofis24.by
   </div>
 </footer>

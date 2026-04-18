@@ -235,6 +235,63 @@
   @apply h-auto w-full rounded-lg;
 }
 
+.catalog-card {
+  @apply rounded-2xl border border-border bg-body p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.catalog-card-image {
+  @apply w-full rounded-xl border border-border bg-light p-2 dark:border-darkmode-border dark:bg-darkmode-body;
+}
+
+.info-card {
+  @apply rounded-2xl border border-border bg-body p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.info-card-icon {
+  @apply text-primary dark:text-darkmode-primary text-3xl;
+}
+
+.trust-card {
+  @apply rounded-2xl border border-border bg-body p-6 text-center shadow-sm dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.trust-card-icon {
+  @apply text-primary dark:text-darkmode-primary mx-auto text-3xl;
+}
+
+.buy-timeline {
+  @apply relative space-y-5;
+}
+
+.buy-timeline::before {
+  content: "";
+  @apply border-border dark:border-darkmode-border absolute left-5 top-2 h-[calc(100%-1rem)] border-l-2;
+}
+
+.buy-timeline-item {
+  @apply relative flex items-start gap-4 pl-2;
+}
+
+.buy-step-index {
+  @apply border-primary bg-primary dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark z-[1] inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold text-white;
+}
+
+.buy-step-text {
+  @apply mt-1 text-base font-semibold;
+}
+
+.business-block {
+  @apply rounded-3xl bg-gradient-to-br from-[#0f1b2f] via-[#111f36] to-[#1d2f4e] p-8 shadow-[0_24px_54px_rgba(10,20,38,0.45)] md:p-12;
+}
+
+.case-card {
+  @apply rounded-2xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.final-cta-block {
+  @apply rounded-3xl border border-border bg-gradient-to-br from-light to-white p-8 dark:border-darkmode-border dark:from-darkmode-light dark:to-darkmode-body md:p-12;
+}
+
 @media (max-width: 767px) {
   .hero-visual {
     @apply min-h-[460px] max-w-[430px];
