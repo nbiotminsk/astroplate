@@ -157,13 +157,7 @@ const productSchema = {
 </Base>
 
 <script>
-  const cartKey = "catalog-cart-v1";
-  interface CartItem {
-    id: string;
-    title: string;
-    price: number;
-    quantity: number;
-  }
+  import { addToCart } from "@/lib/cart";
 
   const initProductPage = () => {
     const addToCartButton = document.querySelector(
@@ -174,35 +168,15 @@ const productSchema = {
     if (!addToCartButton || addToCartButton.dataset.initialized === "true") return;
     addToCartButton.dataset.initialized = "true";
 
-    const getCart = (): CartItem[] => {
-      try {
-        return JSON.parse(localStorage.getItem(cartKey) || "[]") as CartItem[];
-      } catch {
-        return [];
-      }
-    };
-
-    const saveCart = (cart: CartItem[]) => {
-      localStorage.setItem(cartKey, JSON.stringify(cart));
-    };
-
     addToCartButton.addEventListener("click", () => {
       const id = addToCartButton.dataset.id;
       if (!id) return;
       const title = addToCartButton.dataset.title || "";
       const price = Number(addToCartButton.dataset.price || 0);
       const quantity = Math.max(1, Number(qtyInput?.value || 1));
-      const cart = getCart();
-      const existing = cart.find((item: CartItem) => item.id === id);
 
-      if (existing) {
-        existing.quantity += quantity;
-      } else {
-        cart.push({ id, title, price, quantity });
-      }
-
-      saveCart(cart);
-      window.location.href = "/catalog#cart";
+      addToCart({ id, title, price, quantity });
+      window.location.href = "/cart";
     });
   };
 
@@ -211,8 +185,5 @@ const productSchema = {
   };
 
   scheduleProductInit();
-  document.addEventListener("DOMContentLoaded", scheduleProductInit);
-  document.addEventListener("astro:after-swap", scheduleProductInit);
   document.addEventListener("astro:page-load", scheduleProductInit);
-  window.addEventListener("pageshow", scheduleProductInit);
 </script>

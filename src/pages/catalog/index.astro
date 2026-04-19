@@ -41,8 +41,8 @@ const tagIcons: Record<string, string> = {
 <Base title="Каталог" description="Каталог товаров с ценами и фильтрами по категориям">
   <section class="section pb-4 pt-4">
     <div class="container text-center">
+      <h1 class="mb-2">Каталог</h1>
       <Breadcrumbs className="mb-4" />
-      <h1 class="mb-4">Каталог</h1>
       <p class="mx-auto max-w-2xl">
         Выберите категорию вверху, чтобы быстро отфильтровать товары.
       </p>
@@ -182,7 +182,7 @@ const tagIcons: Record<string, string> = {
           <strong id="cart-total">0 BYN</strong>
         </div>
         <div class="flex flex-wrap gap-3">
-          <a class="btn btn-primary" href="/contact">Оформить заказ</a>
+          <a class="btn btn-primary" href="/cart">Оформить заказ</a>
           <button id="clear-cart" type="button" class="btn btn-outline-primary">
             Очистить корзину
           </button>
@@ -244,13 +244,16 @@ const tagIcons: Record<string, string> = {
 </style>
 
 <script>
-  const cartKey = "catalog-cart-v1";
-  interface CartItem {
-    id: string;
-    title: string;
-    price: number;
-    quantity: number;
-  }
+  import {
+    getCart,
+    getCartTotal,
+    getCartCount,
+    addToCart,
+    clearCart,
+    removeFromCart,
+    updateQuantity,
+    type CartItem,
+  } from "@/lib/cart";
 
   const initCatalogPage = () => {
     const page = document.querySelector("#catalog-grid") as HTMLElement | null;
@@ -284,22 +287,10 @@ const tagIcons: Record<string, string> = {
 
     const formatPrice = (price: number) => `${price} BYN`;
 
-    const getCart = (): CartItem[] => {
-      try {
-        return JSON.parse(localStorage.getItem(cartKey) || "[]") as CartItem[];
-      } catch {
-        return [];
-      }
-    };
-
-    const saveCart = (cart: CartItem[]) => {
-      localStorage.setItem(cartKey, JSON.stringify(cart));
-    };
-
     const renderCart = () => {
       const cart = getCart();
-      const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-      const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+      const total = getCartTotal();
+      const count = getCartCount();
       cartCount.textContent = `${count} товаров`;
       cartTotal.textContent = formatPrice(total);
 
@@ -333,23 +324,12 @@ const tagIcons: Record<string, string> = {
         )
         .join("");
 
-      const updateItemQuantity = (id: string, nextQty: number | string) => {
-        const nextCart = getCart();
-        const item = nextCart.find((entry: CartItem) => entry.id === id);
-        if (!item) return;
-        item.quantity = Math.max(1, Number(nextQty) || 1);
-        saveCart(nextCart);
-        renderCart();
-      };
-
       cartItemsWrap
         .querySelectorAll("[data-remove-item]")
         .forEach((button: Element) => {
           const btn = button as HTMLButtonElement;
           btn.addEventListener("click", () => {
-            const id = btn.dataset.removeItem;
-            const nextCart = getCart().filter((item: CartItem) => item.id !== id);
-            saveCart(nextCart);
+            removeFromCart(btn.dataset.removeItem || "");
             renderCart();
           });
         });
@@ -357,12 +337,9 @@ const tagIcons: Record<string, string> = {
       cartItemsWrap.querySelectorAll("[data-inc-item]").forEach((button: Element) => {
         const btn = button as HTMLButtonElement;
         btn.addEventListener("click", () => {
-          const id = btn.dataset.incItem;
-          const nextCart = getCart();
-          const item = nextCart.find((entry: CartItem) => entry.id === id);
-          if (!item) return;
-          item.quantity += 1;
-          saveCart(nextCart);
+          const id = btn.dataset.incItem || "";
+          const item = getCart().find((i) => i.id === id);
+          if (item) updateQuantity(id, item.quantity + 1);
           renderCart();
         });
       });
@@ -370,12 +347,9 @@ const tagIcons: Record<string, string> = {
       cartItemsWrap.querySelectorAll("[data-dec-item]").forEach((button: Element) => {
         const btn = button as HTMLButtonElement;
         btn.addEventListener("click", () => {
-          const id = btn.dataset.decItem;
-          const nextCart = getCart();
-          const item = nextCart.find((entry: CartItem) => entry.id === id);
-          if (!item) return;
-          item.quantity = Math.max(1, item.quantity - 1);
-          saveCart(nextCart);
+          const id = btn.dataset.decItem || "";
+          const item = getCart().find((i) => i.id === id);
+          if (item) updateQuantity(id, item.quantity - 1);
           renderCart();
         });
       });
@@ -383,7 +357,8 @@ const tagIcons: Record<string, string> = {
       cartItemsWrap.querySelectorAll("[data-item-qty]").forEach((input: Element) => {
         const qtyInput = input as HTMLInputElement;
         qtyInput.addEventListener("change", () => {
-          updateItemQuantity(qtyInput.dataset.itemQty || "", qtyInput.value);
+          updateQuantity(qtyInput.dataset.itemQty || "", Number(qtyInput.value));
+          renderCart();
         });
       });
     };
@@ -446,24 +421,16 @@ const tagIcons: Record<string, string> = {
         const qtyInput = document.querySelector(
           `[data-qty-input="${button.dataset.qtySource}"]`,
         ) as HTMLInputElement | null;
-        const selectedQuantity = Math.max(1, Number(qtyInput?.value || 1));
-        const nextCart = getCart();
-        const existing = nextCart.find((item: CartItem) => item.id === id);
+        const quantity = Math.max(1, Number(qtyInput?.value || 1));
 
-        if (existing) {
-          existing.quantity += selectedQuantity;
-        } else {
-          nextCart.push({ id, title, price, quantity: selectedQuantity });
-        }
-
-        saveCart(nextCart);
+        addToCart({ id, title, price, quantity });
         renderCart();
-        location.hash = "cart";
+        // location.hash = "cart"; // User might still want to see the local cart update
       });
     });
 
     clearCartButton.addEventListener("click", () => {
-      saveCart([]);
+      clearCart();
       renderCart();
     });
 

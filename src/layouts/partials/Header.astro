@@ -141,10 +141,34 @@ const { pathname } = Astro.url;
       <a
         href="/cart"
         aria-label="cart"
-        class="text-text-dark hover:text-primary inline-block text-xl dark:text-white dark:hover:text-darkmode-primary"
+        class="text-text-dark hover:text-primary relative inline-block text-xl dark:text-white dark:hover:text-darkmode-primary"
       >
         <IoCartOutline />
+        <span
+          id="cart-count-badge"
+          class="hidden absolute -right-2 -top-2 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-white"
+        >
+          0
+        </span>
       </a>
+
+      <script>
+        import { getCartCount, CART_UPDATE_EVENT } from "@/lib/cart";
+
+        const updateBadge = () => {
+          const badge = document.getElementById("cart-count-badge");
+          if (badge) {
+            const count = getCartCount();
+            badge.textContent = count.toString();
+            badge.classList.toggle("hidden", count === 0);
+          }
+        };
+
+        // Update on load
+        document.addEventListener("astro:page-load", updateBadge);
+        // Listen for updates from other components
+        window.addEventListener(CART_UPDATE_EVENT, updateBadge);
+      </script>
       {
         navigation_button.enable && (
           <a

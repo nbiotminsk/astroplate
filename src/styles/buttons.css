@@ -15,11 +15,5 @@
 }
 
 .btn-buy {
-  background-image: linear-gradient(135deg, #16a34a 0%, #22c55e 55%, #86efac 100%);
-  @apply border-emerald-600 text-white shadow-sm;
-}
-
-.btn-buy:hover {
-  background-image: linear-gradient(135deg, #15803d 0%, #16a34a 55%, #4ade80 100%);
-  @apply border-emerald-700 text-white;
+  @apply bg-emerald-600 border-emerald-600 text-white shadow-sm hover:bg-emerald-700 hover:border-emerald-700;
 }
