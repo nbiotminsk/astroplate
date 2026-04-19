@@ -20,11 +20,11 @@
       ]
     },
     "popularProducts": {
-    "title": "Популярные товары",
-    "viewAll": {
-      "label": "Перейти в магазин",
-      "link": "/store"
-    },
+      "title": "Популярные товары",
+      "viewAll": {
+        "label": "Перейти в магазин",
+        "link": "/store"
+      },
       "items": [
         {
           "title": "Teleofis RTU-101",
@@ -280,39 +280,89 @@
       {
         "title": "Магазин",
         "links": [
-          { "label": "Контроллеры", "href": "/store" },
-          { "label": "Модули связи", "href": "/store" },
-          { "label": "Датчики", "href": "/store" },
-          { "label": "Промышленные роутеры", "href": "/store" }
+          {
+            "label": "Контроллеры",
+            "href": "/store"
+          },
+          {
+            "label": "Модули связи",
+            "href": "/store"
+          },
+          {
+            "label": "Датчики",
+            "href": "/store"
+          },
+          {
+            "label": "Промышленные роутеры",
+            "href": "/store"
+          }
         ]
       },
       {
         "title": "Услуги",
         "links": [
-          { "label": "Монтаж", "href": "/services" },
-          { "label": "Пусконаладка", "href": "/services" },
-          { "label": "Удалённый мониторинг", "href": "/services" },
-          { "label": "Сервисное обслуживание", "href": "/services" }
+          {
+            "label": "Монтаж",
+            "href": "/services"
+          },
+          {
+            "label": "Пусконаладка",
+            "href": "/services"
+          },
+          {
+            "label": "Удалённый мониторинг",
+            "href": "/services"
+          },
+          {
+            "label": "Сервисное обслуживание",
+            "href": "/services"
+          }
         ]
       },
       {
         "title": "Информация",
         "links": [
-          { "label": "Доставка и оплата", "href": "/delivery-payment" },
-          { "label": "Для бизнеса", "href": "/business" },
-          { "label": "Готовые решения", "href": "/solutions" },
-          { "label": "Контакты", "href": "/contact" }
+          {
+            "label": "Доставка и оплата",
+            "href": "/delivery-payment"
+          },
+          {
+            "label": "Для бизнеса",
+            "href": "/business"
+          },
+          {
+            "label": "Готовые решения",
+            "href": "/solutions"
+          },
+          {
+            "label": "Контакты",
+            "href": "/contact"
+          }
         ]
       }
     ],
     "contacts": {
       "title": "Контакты",
       "items": [
-        { "label": "+375 29 365 29 10", "href": "tel:+375293652910" },
-        { "label": "info@teleofis24.by", "href": "mailto:info@teleofis24.by" },
-        { "label": "г. Минск, Беларусь" },
-        { "label": "Telegram", "href": "https://t.me/teleofis24", "external": true },
-        { "label": "c 10.00 до 17.00" }
+        {
+          "label": "+375 29 365 29 10",
+          "href": "tel:+375293652910"
+        },
+        {
+          "label": "info@teleofis24.by",
+          "href": "mailto:info@teleofis24.by"
+        },
+        {
+          "label": "г. Минск, Макаёнка, 12г, 257"
+        },
+        {
+          "label": "Telegram",
+          "href": "https://t.me/teleofis24",
+          "external": true
+        },
+        {
+          "label": "c 10.00 до 17.00"
+        }
       ]
     },
     "copyright": "© teleofis24.by"
