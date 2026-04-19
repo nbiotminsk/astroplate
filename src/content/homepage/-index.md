@@ -16,9 +16,9 @@ features:
     image: /images/service-1.png
     content: Подбор и поставка оборудования под ваш объект.
     bulletpoints:
-      - Работаем по Беларуси
-      - Гарантия
-      - Оплата ЕРИП
+      - Работаем по Минску и Минскому району
+      - Гарантия 24 месяца
+      - Оплата E-POS (ЕРИП)
       - Безналичный расчёт
     button:
       enable: true
@@ -45,8 +45,8 @@ hero:
 popularProducts:
   title: Популярные товары
   viewAll:
-    label: "Перейти в магазин"
-    link: "/store"
+    label: Перейти в магазин
+    link: /store
   items:
     - title: GSM модуль Connect G100
       specs: GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485
@@ -223,3 +223,4 @@ faq:
     - question: "122222"
       answer: "3333"
 ---
+​
