@@ -1,10 +1,10 @@
 ---
-title: GSM модуль Connect G100
+title: Модуль+Сим+По
 category: модули gsm
-price: "79"
+price: "658"
 price_currency: BYN
-img: /images/banner.png
-brand: Teleofis24
+img: /images/module_nbiot.png
+brand: Teleofis
 availability: true
 short_description: Универсальный GSM модуль для телеметрии и уведомлений.
 description: Решение для объектов, где доступна только GSM-сеть. Передает
@@ -13,6 +13,7 @@ features:
   - Поддержка 2G/GPRS
   - SIM-слот стандартного размера
   - Антенна в комплекте
+  - ""
 sku: CG-G100
 mpn: CG-G100
 condition: https://schema.org/NewCondition
