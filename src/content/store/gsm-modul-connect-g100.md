@@ -1,5 +1,5 @@
 ---
-title: Модуль+Сим+По
+title: Модуль + Сим-карта
 category: модули gsm
 price: "658"
 price_currency: BYN
