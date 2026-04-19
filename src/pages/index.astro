@@ -57,7 +57,7 @@ const iconMap = {
             <a class="btn btn-primary w-full sm:w-auto text-center bg-gradient-to-r from-primary to-blue-500 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95" href={homepage.hero.primaryCta.link}>
               {homepage.hero.primaryCta.label}
             </a>
-            <a class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:shadow-lg active:scale-95" href={homepage.hero.secondaryCta.link}>
+            <a class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:text-black dark:hover:text-black hover:shadow-lg active:scale-95" href={homepage.hero.secondaryCta.link}>
               {homepage.hero.secondaryCta.label}
             </a>
           </div>
@@ -92,14 +92,13 @@ const iconMap = {
                 </div>
               </div>
               
-              <div class="relative my-2 flex flex-1 items-center justify-center overflow-hidden rounded-xl bg-light/40 border border-border/40 p-4 dark:border-darkmode-border/40 dark:bg-darkmode-body/40">
-                <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:16px_16px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px))]"></div>
+              <div class="relative mt-2 flex flex-1 overflow-hidden rounded-xl bg-white border border-border/40 dark:border-darkmode-border/40 dark:bg-darkmode-body">
                 <ImageMod
                   src="/images/water_meter_blueprint.png"
-                  width={340}
-                  height={340}
+                  width={400}
+                  height={400}
                   alt="Чертеж телеметрического счетчика воды"
-                  class="relative z-10 w-full max-w-[220px] md:max-w-[280px] mix-blend-multiply dark:mix-blend-screen opacity-90"
+                  class="w-full h-full object-cover mix-blend-multiply dark:mix-blend-screen"
                   format="webp"
                 />
               </div>
