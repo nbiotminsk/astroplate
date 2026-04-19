@@ -1,0 +1,54 @@
+---
+import ImageMod from "@/components/ImageMod.astro";
+import Base from "@/layouts/Base.astro";
+import PageHeader from "@/partials/PageHeader.astro";
+import { getCollection, render } from "astro:content";
+
+export async function getStaticPaths() {
+  const entries = await getCollection("info", ({ data }) => !data.draft);
+
+  return entries.map((entry) => ({
+    params: {
+      single: entry.id,
+    },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const { title, description, img } = entry.data;
+const { Content } = await render(entry);
+---
+
+<Base title={title} meta_title={title} description={description} image={img}>
+  <PageHeader title={title} compact={true} />
+
+  <section class="py-8 xl:py-10">
+    <div class="container">
+      <div class="row justify-center">
+        <div class="lg:col-10">
+          <article class="rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light">
+            {
+              img && (
+                <ImageMod
+                  class="mb-4 w-full rounded md:float-left md:mr-6 md:max-w-md"
+                  src={img}
+                  width={960}
+                  height={480}
+                  alt={title}
+                  format="webp"
+                />
+              )
+            }
+            <h1 class="h2 mb-3">{title}</h1>
+            {description && <p class="mb-6 text-text-dark">{description}</p>}
+            <div class="content">
+              <Content />
+            </div>
+            <div class="clear-both"></div>
+          </article>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
