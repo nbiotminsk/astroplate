@@ -1,5 +1,6 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import { markdownify } from "@/lib/utils/textConverter";
@@ -22,6 +23,7 @@ if (aboutIndex.data.draft) {
 >
   <section class="section-sm">
     <div class="container">
+      <Breadcrumbs className="mb-6 text-center" />
       <div class="row justify-center">
         <div class="md:col-10 lg:col-8">
           {

@@ -1,5 +1,6 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import Base from "@/layouts/Base.astro";
 import { getCollection } from "astro:content";
 
@@ -40,6 +41,7 @@ const tagIcons: Record<string, string> = {
 <Base title="Каталог" description="Каталог товаров с ценами и фильтрами по категориям">
   <section class="section pb-4 pt-4">
     <div class="container text-center">
+      <Breadcrumbs className="mb-4" />
       <h1 class="mb-4">Каталог</h1>
       <p class="mx-auto max-w-2xl">
         Выберите категорию вверху, чтобы быстро отфильтровать товары.

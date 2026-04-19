@@ -1,5 +1,6 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
 import { getCollection, render } from "astro:content";
@@ -86,6 +87,7 @@ const productSchema = {
   </Fragment>
   <section class="section pb-8 pt-6">
     <div class="container">
+      <Breadcrumbs className="mb-4" />
       <a href="/catalog" class="mb-6 inline-block text-primary underline">
         ← Назад в каталог
       </a>

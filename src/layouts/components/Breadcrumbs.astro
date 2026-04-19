@@ -3,10 +3,24 @@ import { humanize } from "@/lib/utils/textConverter";
 
 const { className }: { className?: string } = Astro.props;
 
+const labelMap: Record<string, string> = {
+  blog: "Блог",
+  tags: "Теги",
+  categories: "Категории",
+  authors: "Авторы",
+  solutions: "Решения",
+  services: "Услуги",
+  contact: "Контакты",
+  about: "О компании",
+  catalog: "Каталог",
+  info: "Информация",
+  "delivery-payment": "Доставка и оплата",
+};
+
 const paths = Astro.url.pathname.split("/").filter((x) => x);
 let parts = [
   {
-    label: "Home",
+    label: "Главная",
     href: "/",
     "aria-label": Astro.url.pathname === "/" ? "page" : undefined,
   },
@@ -14,9 +28,11 @@ let parts = [
 
 paths.forEach((label: string, i: number) => {
   const href = `/${paths.slice(0, i + 1).join("/")}`;
+  const normalizedLabel = label.replace(".html", "").replace(/[-_]/g, " ");
+  const translatedLabel = labelMap[label] || humanize(normalizedLabel) || "";
   label !== "page" &&
     parts.push({
-      label: humanize(label.replace(".html", "").replace(/[-_]/g, " ")) || "",
+      label: translatedLabel,
       href,
       "aria-label": Astro.url.pathname === href ? "page" : undefined,
     });
