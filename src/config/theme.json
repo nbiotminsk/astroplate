@@ -33,7 +33,7 @@
     "font_family": {
       "primary": "Golos+Text:wght@400;500;600;700",
       "primary_type": "sans-serif",
-      "secondary": "Manrope:wght@600;700;800",
+      "secondary": "Golos+Text:wght@400;500;600;700;800",
       "secondary_type": "sans-serif"
     },
     "font_size": {
