@@ -7,8 +7,8 @@ banner:
   image: /images/banner.png
   button:
     enable: true
-    label: Перейти в каталог
-    link: /catalog
+    label: Перейти в магазин
+    link: /store
 
 # Features (legacy block for Sitepins)
 features:
@@ -23,7 +23,7 @@ features:
     button:
       enable: true
       label: Подробнее
-      link: /catalog
+      link: /store
 
 hero:
   badge: Официальные решения УП "Минскводоканала"
@@ -31,8 +31,8 @@ hero:
   subtitle: Продажа оборудования, монтаж, удалённый мониторинг, обслуживание
     модулей и оплата онлайн через E-POS.
   primaryCta:
-    label: Перейти в каталог
-    link: /catalog
+    label: Перейти в магазин
+    link: /store
   secondaryCta:
     label: Получить счёт для организации
     link: /contact
@@ -46,7 +46,7 @@ popularProducts:
   title: Популярные товары
   viewAll:
     label: "Перейти в магазин"
-    link: "/catalog"
+    link: "/store"
   items:
     - title: GSM модуль Connect G100
       specs: GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485
@@ -54,40 +54,40 @@ popularProducts:
       image: /images/service-1.png
       buy:
         label: Купить
-        link: /catalog/gsm-modul-connect-g100
+        link: /store/gsm-modul-connect-g100
       details:
         label: Подробнее
-        link: /catalog/gsm-modul-connect-g100
+        link: /store/gsm-modul-connect-g100
     - title: Водомер SmartFlow W-15
       specs: Дистанционный учёт воды, импульсные входы
       price: 149 BYN
       image: /images/service-2.png
       buy:
         label: Купить
-        link: /catalog/vodomer-smartflow-w-15
+        link: /store/vodomer-smartflow-w-15
       details:
         label: Подробнее
-        link: /catalog/vodomer-smartflow-w-15
+        link: /store/vodomer-smartflow-w-15
     - title: Ремонт модуля Zeta Тахат
       specs: Контроль температуры и аварий, обслуживание модемов
       price: 120 BYN
       image: /images/service-3.png
       buy:
         label: Заказать
-        link: /catalog/usluga-remont-obsluzhivanie-modulya-zeta-tahat
+        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat
       details:
         label: Подробнее
-        link: /catalog/usluga-remont-obsluzhivanie-modulya-zeta-tahat
+        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat
     - title: Модуль NBIOT + 2 счетчика
       specs: Готовый комплект для учета воды
       price: 329 BYN
       image: /images/banner.png
       buy:
         label: Купить
-        link: /catalog/komplekt-nbiot-2-schetchika-vody-15-mm
+        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm
       details:
         label: Подробнее
-        link: /catalog/komplekt-nbiot-2-schetchika-vody-15-mm
+        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm
 
 solutions:
   title: Готовые решения под задачи

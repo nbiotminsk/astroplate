@@ -5,8 +5,8 @@
       "title": "Оборудование Teleofis, Тахат, Вега и телеметрия в Беларуси",
       "subtitle": "Продажа оборудования, монтаж, удалённый мониторинг, обслуживание модулей и оплата онлайн через E-POS.",
       "primaryCta": {
-        "label": "Перейти в каталог",
-        "link": "/catalog"
+        "label": "Перейти в магазин",
+        "link": "/store"
       },
       "secondaryCta": {
         "label": "Получить счёт для организации",
@@ -23,7 +23,7 @@
     "title": "Популярные товары",
     "viewAll": {
       "label": "Перейти в магазин",
-      "link": "/catalog"
+      "link": "/store"
     },
       "items": [
         {
@@ -33,11 +33,11 @@
           "image": "/images/service-1.png",
           "buy": {
             "label": "Купить",
-            "link": "/catalog"
+            "link": "/store"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/catalog"
+            "link": "/store"
           }
         },
         {
@@ -47,11 +47,11 @@
           "image": "/images/service-2.png",
           "buy": {
             "label": "Купить",
-            "link": "/catalog"
+            "link": "/store"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/catalog"
+            "link": "/store"
           }
         },
         {
@@ -61,11 +61,11 @@
           "image": "/images/service-3.png",
           "buy": {
             "label": "Купить",
-            "link": "/catalog"
+            "link": "/store"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/catalog"
+            "link": "/store"
           }
         },
         {
@@ -75,11 +75,11 @@
           "image": "/images/banner.png",
           "buy": {
             "label": "Купить",
-            "link": "/catalog"
+            "link": "/store"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/catalog"
+            "link": "/store"
           }
         }
       ]
@@ -278,12 +278,12 @@
   "footer": {
     "columns": [
       {
-        "title": "Каталог",
+        "title": "Магазин",
         "links": [
-          { "label": "Контроллеры", "href": "/catalog" },
-          { "label": "Модули связи", "href": "/catalog" },
-          { "label": "Датчики", "href": "/catalog" },
-          { "label": "Промышленные роутеры", "href": "/catalog" }
+          { "label": "Контроллеры", "href": "/store" },
+          { "label": "Модули связи", "href": "/store" },
+          { "label": "Датчики", "href": "/store" },
+          { "label": "Промышленные роутеры", "href": "/store" }
         ]
       },
       {

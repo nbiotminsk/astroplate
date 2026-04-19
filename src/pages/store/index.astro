@@ -38,10 +38,10 @@ const tagIcons: Record<string, string> = {
 };
 ---
 
-<Base title="Каталог" description="Каталог товаров с ценами и фильтрами по категориям">
+<Base title="Магазин" description="Магазин товаров с ценами и фильтрами по категориям">
   <section class="section pb-4 pt-4">
     <div class="container text-center">
-      <h1 class="mb-2">Каталог</h1>
+      <h1 class="mb-2">Магазин</h1>
       <Breadcrumbs className="mb-4" />
       <p class="mx-auto max-w-2xl">
         Выберите категорию вверху, чтобы быстро отфильтровать товары.
@@ -107,7 +107,7 @@ const tagIcons: Record<string, string> = {
               data-title={product.title}
             >
               <div class="catalog-card group flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
-                <a href={`/catalog/${product.id}`} aria-label={`Открыть ${product.title}`}>
+                <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
                   <ImageMod
                     class="catalog-card__image mb-4 h-48 w-full rounded object-cover"
                     src={product.image}
@@ -154,7 +154,7 @@ const tagIcons: Record<string, string> = {
                   />
                   <a
                     class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:text-primary sm:hover:underline"
-                    href={`/catalog/${product.id}`}
+                    href={`/store/${product.id}`}
                   >
                     Подробнее
                   </a>

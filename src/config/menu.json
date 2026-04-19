@@ -1,8 +1,8 @@
 {
   "main": [
     {
-      "name": "Каталог",
-      "url": "/catalog"
+      "name": "Магазин",
+      "url": "/store"
     },
     {
       "name": "Решения",

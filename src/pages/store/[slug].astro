@@ -32,7 +32,7 @@ const availabilitySchema = isInStock
 const gtin = product.data.gtin || product.data.gtin13 || product.data.gtin14;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
-const productUrl = `${siteUrl}/catalog/${product.id}`;
+const productUrl = `${siteUrl}/store/${product.id}`;
 const imageUrl = `${siteUrl}${image}`;
 const productSchema = {
   "@context": "https://schema.org",
@@ -88,8 +88,8 @@ const productSchema = {
   <section class="section pb-8 pt-6">
     <div class="container">
       <Breadcrumbs className="mb-4" />
-      <a href="/catalog" class="mb-6 inline-block text-primary underline">
-        ← Назад в каталог
+      <a href="/store" class="mb-6 inline-block text-primary underline">
+        ← Назад в магазин
       </a>
       <div class="row items-start gap-y-8">
         <div class="lg:col-6">
