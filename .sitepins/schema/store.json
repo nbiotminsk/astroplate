@@ -1,0 +1,119 @@
+{
+  "file": "",
+  "name": "store",
+  "fileType": "md",
+  "fmType": "yaml",
+  "template": [
+    {
+      "name": "title",
+      "label": "Title",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "category",
+      "label": "Category",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "price",
+      "label": "Price",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "price_currency",
+      "label": "PriceCurrency",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "img",
+      "label": "Img",
+      "type": "media",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "brand",
+      "label": "Brand",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "availability",
+      "label": "Availability",
+      "type": "boolean",
+      "value": false,
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": "false"
+    },
+    {
+      "name": "short_description",
+      "label": "ShortDescription",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "description",
+      "label": "Description",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "features",
+      "label": "Features",
+      "type": "Array",
+      "value": [],
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": "",
+      "subType": "string"
+    },
+    {
+      "name": "condition",
+      "label": "Condition",
+      "type": "string",
+      "value": "https://schema.org/NewCondition",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": "https://schema.org/NewCondition"
+    }
+  ]
+}
