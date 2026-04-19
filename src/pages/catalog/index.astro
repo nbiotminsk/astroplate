@@ -51,13 +51,13 @@ const tagIcons: Record<string, string> = {
 
   <section class="section pb-6 pt-0">
     <div class="container">
-      <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div class="flex flex-wrap gap-3" id="catalog-tags">
+      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+        <div class="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:flex-wrap" id="catalog-tags">
           {
             tags.map((tag, index) => (
               <button
                 type="button"
-                class={`inline-flex items-center gap-2 rounded border px-4 py-2 text-sm transition ${
+                class={`inline-flex w-full justify-center sm:w-auto sm:justify-start items-center gap-2 rounded border px-2 py-2.5 text-sm sm:text-sm text-center min-h-[44px] transition ${
                   index === 0
                     ? "border-primary bg-primary text-white"
                     : "border-border bg-light hover:border-primary hover:text-primary dark:bg-darkmode-light"
@@ -130,10 +130,10 @@ const tagIcons: Record<string, string> = {
                   {product.availability ? "В наличии" : "Нет в наличии"}
                 </p>
 
-                <div class="mt-auto grid grid-cols-1 gap-2 sm:grid-cols-[1fr_64px_1fr] sm:items-center">
+                <div class="mt-auto flex flex-col gap-2 pt-4 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
                   <button
                     type="button"
-                    class={`btn btn-buy btn-sm w-full min-w-0 px-2 text-center ${
+                    class={`btn btn-buy w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
                       !product.availability ? "cursor-not-allowed opacity-50" : ""
                     }`}
                     data-add-to-cart={product.id}
@@ -149,11 +149,11 @@ const tagIcons: Record<string, string> = {
                     type="number"
                     min="1"
                     value="1"
-                    class="w-full rounded border border-border bg-body px-2 py-1 text-sm sm:w-16 dark:border-darkmode-border dark:bg-darkmode-body"
+                    class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
                     data-qty-input={product.id}
                   />
                   <a
-                    class="btn btn-sm w-full min-w-0 border-transparent bg-transparent px-2 text-center text-primary hover:underline"
+                    class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:text-primary sm:hover:underline"
                     href={`/catalog/${product.id}`}
                   >
                     Подробнее

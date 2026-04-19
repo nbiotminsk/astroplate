@@ -53,11 +53,11 @@ const iconMap = {
           <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
           <h1 class="mb-5 text-h2 leading-tight md:text-h1">{homepage.hero.title}</h1>
           <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
-          <div class="mb-8 flex flex-wrap gap-3">
-            <a class="btn btn-primary" href={homepage.hero.primaryCta.link}>
+          <div class="mb-8 flex flex-col sm:flex-row flex-wrap gap-3">
+            <a class="btn btn-primary w-full sm:w-auto text-center" href={homepage.hero.primaryCta.link}>
               {homepage.hero.primaryCta.label}
             </a>
-            <a class="btn btn-outline-primary" href={homepage.hero.secondaryCta.link}>
+            <a class="btn btn-outline-primary w-full sm:w-auto text-center" href={homepage.hero.secondaryCta.link}>
               {homepage.hero.secondaryCta.label}
             </a>
           </div>
@@ -161,9 +161,11 @@ const iconMap = {
                 <p class="mt-3 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
                   {product.price}
                 </p>
-                <div class="mt-auto pt-4 flex gap-2">
-                  <a class="btn btn-primary btn-sm" href={product.buy.link}>{product.buy.label}</a>
-                  <a class="btn btn-outline-primary btn-sm" href={product.details.link}>
+                <div class="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
+                  <a class="btn btn-primary w-full sm:w-auto text-center py-2.5 text-base sm:py-1.5 sm:text-sm" href={product.buy.link}>
+                    {product.buy.label}
+                  </a>
+                  <a class="btn btn-outline-primary w-full sm:w-auto text-center py-2.5 text-base sm:py-1.5 sm:text-sm" href={product.details.link}>
                     {product.details.label}
                   </a>
                 </div>

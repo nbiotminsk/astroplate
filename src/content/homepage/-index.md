@@ -48,46 +48,46 @@ popularProducts:
     label: "Перейти в магазин"
     link: "/catalog"
   items:
-    - title: Teleofis RTU-101
+    - title: GSM модуль Connect G100
       specs: GSM/NB-IoT модуль, 2 DI, 2 DO, RS-485
-      price: от 590 BYN
+      price: 79 BYN
       image: /images/service-1.png
       buy:
         label: Купить
-        link: /catalog
+        link: /catalog/gsm-modul-connect-g100
       details:
         label: Подробнее
-        link: /catalog
-    - title: VEGA Smart Flow
+        link: /catalog/gsm-modul-connect-g100
+    - title: Водомер SmartFlow W-15
       specs: Дистанционный учёт воды, импульсные входы
-      price: от 740 BYN
+      price: 149 BYN
       image: /images/service-2.png
       buy:
         label: Купить
-        link: /catalog
+        link: /catalog/vodomer-smartflow-w-15
       details:
         label: Подробнее
-        link: /catalog
-    - title: ТАХАТ Control Box
-      specs: Контроль температуры и аварий, DIN-монтаж
-      price: от 680 BYN
+        link: /catalog/vodomer-smartflow-w-15
+    - title: Ремонт модуля Zeta Тахат
+      specs: Контроль температуры и аварий, обслуживание модемов
+      price: 120 BYN
       image: /images/service-3.png
       buy:
-        label: Купить
-        link: /catalog
+        label: Заказать
+        link: /catalog/usluga-remont-obsluzhivanie-modulya-zeta-tahat
       details:
         label: Подробнее
-        link: /catalog
-    - title: Router Gateway Pro
-      specs: Промышленный роутер, VPN, удалённый доступ
-      price: от 960 BYN
+        link: /catalog/usluga-remont-obsluzhivanie-modulya-zeta-tahat
+    - title: Модуль NBIOT + 2 счетчика
+      specs: Готовый комплект для учета воды
+      price: 329 BYN
       image: /images/banner.png
       buy:
         label: Купить
-        link: /catalog
+        link: /catalog/komplekt-nbiot-2-schetchika-vody-15-mm
       details:
         label: Подробнее
-        link: /catalog
+        link: /catalog/komplekt-nbiot-2-schetchika-vody-15-mm
 
 solutions:
   title: Готовые решения под задачи

@@ -83,7 +83,7 @@ const productSchema = {
     <meta property="product:price:amount" content={price.toFixed(2)} />
     <meta property="product:price:currency" content="BYN" />
     <meta property="product:availability" content={isInStock ? "in stock" : "out of stock"} />
-    <script type="application/ld+json" set:html={JSON.stringify(productSchema)} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(productSchema)} />
   </Fragment>
   <section class="section pb-8 pt-6">
     <div class="container">

@@ -2,5 +2,6 @@
   "files.associations": {
     "*.mdx": "markdown"
   },
-  "tailwindCSS.experimental.configFile": "src/styles/main.css"
+  "tailwindCSS.experimental.configFile": "src/styles/main.css",
+  "css.lint.unknownAtRules": "ignore"
 }
