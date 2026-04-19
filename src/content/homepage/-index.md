@@ -123,7 +123,7 @@ whyUs:
       icon: FaTruck
     - title: Настройка под ключ
       icon: FaTools
-    - title: Техподдержка
+    - title: Техподдержка 24/7
       icon: FaHeadset
     - title: Работа с юрлицами
       icon: FaBuilding
