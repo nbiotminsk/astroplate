@@ -75,34 +75,43 @@ const allTags = Array.from(
 </Base>
 
 <script>
-  const categoryFilter = document.querySelector(
-    "#solutions-category-filter",
-  ) as HTMLSelectElement | null;
-  const tagFilter = document.querySelector(
-    "#solutions-tag-filter",
-  ) as HTMLSelectElement | null;
-  const cards = Array.from(
-    document.querySelectorAll("#solutions-grid > [data-categories]"),
-  ) as HTMLElement[];
+  const initSolutionsFilters = () => {
+    const categoryFilter = document.querySelector(
+      "#solutions-category-filter",
+    ) as HTMLSelectElement | null;
+    const tagFilter = document.querySelector(
+      "#solutions-tag-filter",
+    ) as HTMLSelectElement | null;
+    const cards = Array.from(
+      document.querySelectorAll("#solutions-grid > [data-categories]"),
+    ) as HTMLElement[];
 
-  const applyFilters = () => {
-    const selectedCategory = categoryFilter?.value || "";
-    const selectedTag = tagFilter?.value || "";
+    if (!categoryFilter && !tagFilter) return;
 
-    cards.forEach((card) => {
-      const categories = String(card.dataset.categories || "")
-        .split("|")
-        .filter(Boolean);
-      const tags = String(card.dataset.tags || "")
-        .split("|")
-        .filter(Boolean);
+    const applyFilters = () => {
+      const selectedCategory = categoryFilter?.value || "";
+      const selectedTag = tagFilter?.value || "";
 
-      const categoryMatch = !selectedCategory || categories.includes(selectedCategory);
-      const tagMatch = !selectedTag || tags.includes(selectedTag);
-      card.style.display = categoryMatch && tagMatch ? "" : "none";
-    });
+      cards.forEach((card) => {
+        const categories = String(card.dataset.categories || "")
+          .split("|")
+          .filter(Boolean);
+        const tags = String(card.dataset.tags || "")
+          .split("|")
+          .filter(Boolean);
+
+        const categoryMatch =
+          !selectedCategory || categories.includes(selectedCategory);
+        const tagMatch = !selectedTag || tags.includes(selectedTag);
+        card.style.display = categoryMatch && tagMatch ? "" : "none";
+      });
+    };
+
+    categoryFilter?.addEventListener("change", applyFilters);
+    tagFilter?.addEventListener("change", applyFilters);
+    applyFilters();
   };
 
-  categoryFilter?.addEventListener("change", applyFilters);
-  tagFilter?.addEventListener("change", applyFilters);
+  document.addEventListener("astro:page-load", initSolutionsFilters);
+  initSolutionsFilters();
 </script>
