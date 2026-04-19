@@ -24,11 +24,11 @@ const items = await Promise.all(
     <div class="container">
       {
         items.length ? (
-          <div class="row justify-center">
-            <div class="lg:col-10">
-              <div class="space-y-12">
-                {items.map(({ entry, Content }) => (
-                  <article class="rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light">
+          <div class="row" id="delivery-payment-grid">
+            {items.map(({ entry, Content }, index) => (
+              <div class="mb-8 md:col-6 xl:col-4">
+                <article class="flex h-full flex-col rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light">
+                  <div class="flex-1">
                     {
                       entry.data.img && (
                         <ImageMod
@@ -44,18 +44,31 @@ const items = await Promise.all(
                     <h2 class="h3 mb-3">{entry.data.title}</h2>
                     {
                       entry.data.description && (
-                        <p class="mb-4 text-text-dark dark:text-darkmode-text">
+                        <p class="mb-5 text-text-dark dark:text-darkmode-text">
                           {entry.data.description}
                         </p>
                       )
                     }
-                    <div class="content">
-                      <Content />
-                    </div>
-                  </article>
-                ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    class="btn btn-outline-primary btn-sm self-start"
+                    data-details-toggle={`delivery-payment-content-${index}`}
+                    aria-expanded="false"
+                  >
+                    Подробнее
+                  </button>
+
+                  <div
+                    id={`delivery-payment-content-${index}`}
+                    class="content mt-5 hidden"
+                  >
+                    <Content />
+                  </div>
+                </article>
               </div>
-            </div>
+            ))}
           </div>
         ) : (
           <p>Информация пока не добавлена.</p>
@@ -64,3 +77,32 @@ const items = await Promise.all(
     </div>
   </section>
 </Base>
+
+<script>
+  const initDeliveryPaymentCards = () => {
+    const buttons = document.querySelectorAll(
+      "#delivery-payment-grid [data-details-toggle]",
+    ) as NodeListOf<HTMLButtonElement>;
+
+    buttons.forEach((button) => {
+      if (button.dataset.bound === "true") return;
+
+      button.dataset.bound = "true";
+      button.addEventListener("click", () => {
+        const targetId = button.dataset.detailsToggle;
+        if (!targetId) return;
+
+        const content = document.getElementById(targetId);
+        if (!content) return;
+
+        const isHidden = content.classList.contains("hidden");
+        content.classList.toggle("hidden", !isHidden);
+        button.setAttribute("aria-expanded", String(isHidden));
+        button.textContent = isHidden ? "Скрыть" : "Подробнее";
+      });
+    });
+  };
+
+  document.addEventListener("astro:page-load", initDeliveryPaymentCards);
+  initDeliveryPaymentCards();
+</script>
