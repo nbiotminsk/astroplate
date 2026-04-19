@@ -1,4 +1,5 @@
 User-agent: *
 Allow: /
-
 Disallow: /api/*
+
+Sitemap: https://teleofis24.by/sitemap-index.xml

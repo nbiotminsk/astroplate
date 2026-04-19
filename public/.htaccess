@@ -1,3 +1,11 @@
+##### HTTP to HTTPS 301 Redirect - BEGIN
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteCond %{HTTPS} off
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+##### HTTP to HTTPS 301 Redirect - END
+
 ##### Optimize default expiration time - BEGIN
 <IfModule mod_expires.c>
   
