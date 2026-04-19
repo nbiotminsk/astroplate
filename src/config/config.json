@@ -12,7 +12,7 @@
     "logo_text": "teleofis24.by"
   },
   "settings": {
-    "search": true,
+    "search": false,
     "sticky_header": true,
     "theme_switcher": true,
     "default_theme": "light",

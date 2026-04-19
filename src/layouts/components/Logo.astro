@@ -57,15 +57,21 @@ const { theme_switcher }: { theme_switcher: boolean } = config.settings;
     ) : logo_text ? (
       <span class="flex items-center gap-3">
         <ImageMod src="/images/favicon.png" alt="Icon" width={128} height={128} class="h-12 w-12 object-contain" format="webp" />
-        <span class="font-bold text-2xl">
+        <span class="font-bold text-2xl hidden md:block">
           {logo_text.replace(/\.by$/i, "")}{/\.by$/i.test(logo_text) && <span class="text-primary">.by</span>}
+        </span>
+        <span class="font-bold text-lg sm:text-xl block md:hidden">
+          info@teleofis24<span class="text-primary">.by</span>
         </span>
       </span>
     ) : (
       <span class="flex items-center gap-3">
         <ImageMod src="/images/favicon.png" alt="Icon" width={128} height={128} class="h-12 w-12 object-contain" format="webp" />
-        <span class="font-bold text-2xl">
+        <span class="font-bold text-2xl hidden md:block">
           {title.replace(/\.by$/i, "")}{/\.by$/i.test(title) && <span class="text-primary">.by</span>}
+        </span>
+        <span class="font-bold text-lg sm:text-xl block md:hidden">
+          info@teleofis24<span class="text-primary">.by</span>
         </span>
       </span>
     )
