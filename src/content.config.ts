@@ -154,9 +154,9 @@ const testimonialSectionCollection = defineCollection({
   }),
 });
 
-// Catalog collection schema (Sitepins-friendly fields)
-const catalogCollection = defineCollection({
-  loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/catalog" }),
+// Store collection schema (Sitepins-friendly fields)
+const storeCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/store" }),
   schema: z.looseObject({
     title: z.string(),
     category: z.string().default("others"),
@@ -184,7 +184,7 @@ export const collections = {
   about: aboutCollection,
   contact: contactCollection,
   info: infoCollection,
-  catalog: catalogCollection,
+  store: storeCollection,
 
   // sections
   ctaSection: ctaSectionCollection,

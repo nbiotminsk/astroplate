@@ -6,7 +6,7 @@ import Base from "@/layouts/Base.astro";
 import { getCollection, render } from "astro:content";
 
 export async function getStaticPaths() {
-  const catalogEntries = await getCollection("catalog", ({ data }) => !data.draft);
+  const catalogEntries = await getCollection("store", ({ data }) => !data.draft);
 
   return catalogEntries.map((entry) => ({
     params: { slug: entry.id },
