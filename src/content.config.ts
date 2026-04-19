@@ -73,6 +73,17 @@ const contactCollection = defineCollection({
   }),
 });
 
+// info collection schema
+const infoCollection = defineCollection({
+  loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/info" }),
+  schema: z.object({
+    img: z.string().optional(),
+    title: z.string(),
+    description: z.string().optional(),
+    draft: z.boolean().optional(),
+  }),
+});
+
 // Homepage collection schema
 const homepageCollection = defineCollection({
   loader: glob({ pattern: "**/-*.{md,mdx}", base: "src/content/homepage" }),
@@ -172,6 +183,7 @@ export const collections = {
   pages: pagesCollection,
   about: aboutCollection,
   contact: contactCollection,
+  info: infoCollection,
   catalog: catalogCollection,
 
   // sections
