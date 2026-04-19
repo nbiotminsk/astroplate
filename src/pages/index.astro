@@ -53,11 +53,11 @@ const iconMap = {
           <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
           <h1 class="mb-5 text-h4 leading-tight md:text-h3">{homepage.hero.title}</h1>
           <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
-          <div class="mb-8 flex flex-col sm:flex-row flex-wrap gap-3">
-            <a class="btn btn-primary w-full sm:w-auto text-center" href={homepage.hero.primaryCta.link}>
+          <div class="mb-8 flex flex-col sm:flex-row flex-wrap gap-4">
+            <a class="btn btn-primary w-full sm:w-auto text-center bg-gradient-to-r from-primary to-blue-500 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95" href={homepage.hero.primaryCta.link}>
               {homepage.hero.primaryCta.label}
             </a>
-            <a class="btn btn-outline-primary w-full sm:w-auto text-center" href={homepage.hero.secondaryCta.link}>
+            <a class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:shadow-lg active:scale-95" href={homepage.hero.secondaryCta.link}>
               {homepage.hero.secondaryCta.label}
             </a>
           </div>
@@ -93,13 +93,13 @@ const iconMap = {
               </div>
               
               <div class="relative my-2 flex flex-1 items-center justify-center overflow-hidden rounded-xl bg-light/40 border border-border/40 p-4 dark:border-darkmode-border/40 dark:bg-darkmode-body/40">
-                <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:24px_24px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px))]"></div>
+                <div class="absolute inset-0 bg-[linear-gradient(rgba(0,0,0,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(0,0,0,0.04)_1px,transparent_1px)] bg-[size:16px_16px] dark:bg-[linear-gradient(rgba(255,255,255,0.03)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.03)_1px,transparent_1px))]"></div>
                 <ImageMod
                   src="/images/water_meter_blueprint.png"
                   width={340}
                   height={340}
                   alt="Чертеж телеметрического счетчика воды"
-                  class="relative z-10 w-full max-w-[220px] md:max-w-[260px] drop-shadow-xl"
+                  class="relative z-10 w-full max-w-[220px] md:max-w-[280px] mix-blend-multiply dark:mix-blend-screen opacity-90"
                   format="webp"
                 />
               </div>
