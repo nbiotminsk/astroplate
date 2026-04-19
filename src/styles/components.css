@@ -152,7 +152,7 @@
 }
 
 .hero-visual {
-  @apply relative mx-auto min-h-[420px] max-w-[560px] overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-[#eef5ff] via-white to-[#f3f7ff] p-6 shadow-[0_30px_70px_rgba(18,18,18,0.14)] dark:border-darkmode-border dark:from-[#1d2a40] dark:via-darkmode-body dark:to-[#182232];
+  @apply relative mx-auto flex items-center justify-center;
 }
 
 .hero-glow {
