@@ -1,5 +1,5 @@
 ---
-title: modul-sim-programm
+title: Модуль с сим-картой и подключением
 category: "модуль NBIoT"
 price: "658"
 price_currency: "BYN"
