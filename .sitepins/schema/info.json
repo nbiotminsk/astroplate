@@ -1,0 +1,38 @@
+{
+  "file": "",
+  "name": "content",
+  "fileType": "md",
+  "fmType": "yaml",
+  "template": [
+    {
+      "name": "img",
+      "label": "img",
+      "type": "media",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "title",
+      "label": "title",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "description",
+      "label": "description",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    }
+  ]
+}
