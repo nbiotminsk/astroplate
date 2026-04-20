@@ -2,7 +2,7 @@
 import config from "@/config/config.json";
 import dateFormat from "@/lib/utils/dateFormat";
 import { humanize, plainify, slugify } from "@/lib/utils/textConverter";
-import { FaRegFolder, FaRegUserCircle } from "react-icons/fa";
+import { FaRegFolder } from "react-icons/fa";
 import ImageMod from "./ImageMod.astro";
 
 const {
@@ -10,7 +10,7 @@ const {
   blog_folder,
 }: { summary_length: number; blog_folder: string } = config.settings;
 const { data } = Astro.props;
-const { title, image, date, author, categories } = data.data;
+const { title, image, date, categories } = data.data;
 ---
 
 <div class="bg-body dark:bg-darkmode-body rounded-xl border border-border/50 dark:border-darkmode-border/50 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
