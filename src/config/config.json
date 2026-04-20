@@ -9,7 +9,7 @@
     "logo_darkmode": "",
     "logo_width": "150",
     "logo_height": "30",
-    "logo_text": "teleofis24.by"
+    "logo_text": "Teleofis24.by"
   },
   "settings": {
     "search": false,
@@ -22,12 +22,12 @@
   },
   "announcement": {
     "enable": false,
-    "content": "<span class='text-center block'>♥️ Loving Astroplate? <a class='underline' href='https://github.com/zeon-studio/astroplate' target='_blank' rel='noopener'>Please ⭐️ on Github</a></span>",
+    "content": "<span class='text-center block'>Скидки ⭐️ постоянным клиентам</a></span>",
     "expire_days": 7
   },
   "params": {
     "contact_form_action": "#",
-    "copyright": "Designed And Developed by [Zeon Studio](https://zeon.studio)"
+    "copyright": "Designed and Developed teleofis24.by"
   },
   "navigation_button": {
     "enable": true,
@@ -44,9 +44,9 @@
     "settings": {}
   },
   "metadata": {
-    "meta_author": "zeon.studio",
-    "meta_image": "/images/og-image.png",
-    "meta_description": "astro and tailwind boilerplate"
+    "meta_author": "teleofi24.by",
+    "meta_image": "/images/favicon-512x512.png",
+    "meta_description": "счетчики воды с дистанционным съемом показаний воды для УП Минскводоканал"
   },
   "draft": false
 }
