@@ -17,11 +17,11 @@ const { title, image, date, author, categories } = data.data;
   {
     image && (
       <ImageMod
-        class="mb-6 mx-auto block rounded object-contain"
+        class="mb-6 mx-auto block rounded object-contain max-w-[250px] w-full"
         src={image}
         alt={title}
-        width={445}
-        height={173}
+        width={700}
+        height={270}
         format="webp"
       />
     )
