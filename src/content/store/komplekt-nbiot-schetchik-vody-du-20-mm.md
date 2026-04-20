@@ -17,5 +17,6 @@ sku: KIT-NBIOT-W20
 mpn: KIT-NBIOT-W20
 condition: https://schema.org/NewCondition
 draft: false
+custom_label_0: standart
 ---
 ​
