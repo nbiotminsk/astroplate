@@ -3,7 +3,7 @@ title: Замена счетчика воды Ду 15-25 мм
 category: услуги
 price: "85"
 price_currency: BYN
-img: /images/call-to-action.png
+img: /images/Image_15mm.png
 brand: Teleofis
 availability: true
 short_description: Демонтаж старого и монтаж нового счетчика воды.
@@ -19,4 +19,4 @@ condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
 ---
-​
+Также продаем новые счетчики воды с импульсным выходом
