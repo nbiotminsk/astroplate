@@ -17,5 +17,6 @@ sku: SERVICE-REPLACE-15-25
 mpn: SERVICE-REPLACE-15-25
 condition: https://schema.org/NewCondition
 draft: false
+custom_label_0: standart
 ---
 ​
