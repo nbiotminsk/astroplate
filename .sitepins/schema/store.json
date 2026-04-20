@@ -124,6 +124,38 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
+    },
+    {
+      "name": "sku",
+      "label": "sku",
+      "type": "object",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": "",
+      "fields": [
+        {
+          "name": "value",
+          "label": "value",
+          "type": "string",
+          "value": "",
+          "description": "",
+          "isIgnored": false,
+          "isRequired": false,
+          "defaultValue": ""
+        },
+        {
+          "name": "id",
+          "label": "id",
+          "type": "string",
+          "value": "",
+          "description": "",
+          "isIgnored": false,
+          "isRequired": false,
+          "defaultValue": ""
+        }
+      ]
     }
   ]
 }
