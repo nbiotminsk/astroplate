@@ -16,5 +16,6 @@ features:
   - 2 слота под сим-карты
   - Внешняя антенна
 condition: https://schema.org/NewCondition
+custom_label_0: premium
 ---
-
+​
