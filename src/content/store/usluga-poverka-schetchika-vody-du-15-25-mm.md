@@ -17,5 +17,6 @@ sku: SERVICE-CALIBRATION-15-20
 mpn: SERVICE-CALIBRATION-15-20
 condition: https://schema.org/NewCondition
 draft: false
+custom_label_0: discount
 ---
 ​
