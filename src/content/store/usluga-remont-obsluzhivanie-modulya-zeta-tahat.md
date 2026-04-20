@@ -3,7 +3,7 @@ title: Ремонт и обслуживание модуля Zeta Тахат
 category: услуги
 price: "280"
 price_currency: BYN
-img: /images/service-1.png
+img: /images/Image_tehobsluzhivanie.png
 brand: Teleofis
 availability: true
 short_description: Диагностика, ремонт и регламентное обслуживание модулей Zeta Тахат.
