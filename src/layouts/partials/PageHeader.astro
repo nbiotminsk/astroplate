@@ -15,7 +15,7 @@ const { title = "", compact = false }: { title?: string; compact?: boolean } =
       ]}
     >
       <h1 set:text={humanize(title)} />
-      <Breadcrumbs className={compact ? "mt-3" : "mt-6"} />
+      <Breadcrumbs className={compact ? "mt-3" : "mt-6"} title={title} />
     </div>
   </div>
 </section>

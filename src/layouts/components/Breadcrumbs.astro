@@ -1,7 +1,7 @@
 ---
 import { humanize } from "@/lib/utils/textConverter";
 
-const { className }: { className?: string } = Astro.props;
+const { className, title }: { className?: string; title?: string } = Astro.props;
 
 const labelMap: Record<string, string> = {
   blog: "Блог",
@@ -27,7 +27,10 @@ let parts = [
 paths.forEach((label: string, i: number) => {
   const href = `/${paths.slice(0, i + 1).join("/")}`;
   const normalizedLabel = label.replace(".html", "").replace(/[-_]/g, " ");
-  const translatedLabel = labelMap[label] || humanize(normalizedLabel) || "";
+  const translatedLabel =
+    i === paths.length - 1 && title
+      ? title
+      : labelMap[label] || humanize(normalizedLabel) || "";
   label !== "page" &&
     parts.push({
       label: translatedLabel,

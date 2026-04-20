@@ -24,13 +24,14 @@ const { title, description, author, categories, image, date, tags } = post.data;
   <div class="container">
     <div class="row justify-center">
       <article class="lg:col-10">
-        <Breadcrumbs className="mb-6" />
+        <Breadcrumbs className="mb-6" title={title} />
+        <h1 set:html={markdownify(title)} class="h2 mb-4" />
         {
           image && (
             <div class="mb-10 flex justify-center">
               <ImageMod
                 src={image}
-                height={167}
+                height={125}
                 width={400}
                 alt={title}
                 class="rounded object-contain"
@@ -39,7 +40,6 @@ const { title, description, author, categories, image, date, tags } = post.data;
             </div>
           )
         }
-        <h1 set:html={markdownify(title)} class="h2 mb-4" />
         <ul class="mb-4">
           <li class="mr-4 inline-block">
             <FaRegUserCircle className={"mr-2 -mt-1 inline-block"} />
