@@ -230,6 +230,9 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     }
 
     renderCartPage();
+
+    // Listen for cart updates from other components
+    document.addEventListener("cart:update", renderCartPage);
   };
 
   // Run on page load

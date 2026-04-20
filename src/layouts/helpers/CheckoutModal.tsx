@@ -43,7 +43,7 @@ const CheckoutModal = () => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setError(null);
@@ -101,7 +101,7 @@ const CheckoutModal = () => {
         onClick={closeModal}
       />
       <div className={`modal ${isOpen ? "show" : ""}`}>
-        <div className="modal-content !w-[500px]">
+        <div className="modal-content w-[500px]!">
           <button 
             className="modal-close" 
             onClick={closeModal}

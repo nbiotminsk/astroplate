@@ -19,11 +19,10 @@ if (!$input) {
     exit();
 }
 
+$requestType = $input['requestType'] ?? '';
 $name = $input['name'] ?? '';
 $phone = $input['phone'] ?? '';
-$quantity = $input['quantity'] ?? null;
-$serviceTitle = $input['serviceTitle'] ?? '';
-$requestType = $input['requestType'] ?? '';
+$email = $input['email'] ?? '';
 $message = $input['message'] ?? '';
 
 // Checkout specific fields
@@ -34,10 +33,18 @@ $cartItems = $input['cartItems'] ?? [];
 $total = $input['total'] ?? 0;
 
 // Валидация
-if (empty($name) || empty($phone)) {
-    echo json_encode(['error' => 'Missing required fields']);
-    http_response_code(400);
-    exit();
+if ($requestType === 'contact') {
+    if (empty($name) || empty($email)) {
+        echo json_encode(['error' => 'Missing required fields (name, email)']);
+        http_response_code(400);
+        exit();
+    }
+} else {
+    if (empty($name) || empty($phone)) {
+        echo json_encode(['error' => 'Missing required fields (name, phone)']);
+        http_response_code(400);
+        exit();
+    }
 }
 
 // Получаем переменные окружения (через getenv или конфигурационный файл)
@@ -82,15 +89,16 @@ if ($requestType === 'checkout') {
     }
     
     $messageText .= "\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
-} elseif ($requestType === 'consultation') {
-    $messageText = "💼 Запрос на консультацию\n\n👤 Имя/Организация: {$name}\n📞 Телефон: {$phone}\n\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
-} elseif ($requestType === 'order') {
-    $qty = (!is_null($quantity) && is_numeric($quantity) && $quantity > 0) ? $quantity : 1;
-    $messageText = "🛒 Заказ товара\n\n👤 Имя/Организация: {$name}\n📞 Телефон: {$phone}\n📦 Товар: " . ($serviceTitle ?: 'Не указан') . "\n📊 Количество: {$qty} шт.\n\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
 } elseif ($requestType === 'contact') {
-    $messageText = "📬 Новая заявка с сайта Meter.by\n\n👤 Имя: {$name}\n📞 Телефон: {$phone}\n💬 Сообщение:\n" . ($message ?: 'Нет сообщения') . "\n\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
+    $messageText = "📬 <b>Новая заявка с сайта Teleofis24.by</b>\n\n";
+    $messageText .= "👤 <b>Имя:</b> {$name}\n";
+    $messageText .= "📧 <b>Email:</b> {$email}\n";
+    $messageText .= "💬 <b>Сообщение:</b>\n" . ($message ?: 'Нет сообщения') . "\n";
+    $messageText .= "\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
 } else {
-    $messageText = "📞 Заявка на обратный звонок\n\n👤 Имя/Организация: {$name}\n📞 Телефон: {$phone}\n🔧 Услуга: " . ($serviceTitle ?: 'Не указана') . "\n\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
+    echo json_encode(['error' => 'Unknown request type']);
+    http_response_code(400);
+    exit();
 }
 
 // Отправка в Telegram
@@ -110,7 +118,6 @@ curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
 $telegramResponse = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-curl_close($ch);
 
 $responseData = json_decode($telegramResponse, true);
 

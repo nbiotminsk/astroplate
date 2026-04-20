@@ -1,12 +1,10 @@
 ---
-import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
 import { render } from "astro:content";
 
 const contactIndex = await getListPage("contact", "-index");
-const { contact_form_action }: { contact_form_action: string } = config.params;
 const { title, description, meta_title, image } = contactIndex.data;
 const { Content } = await render(contactIndex);
 
@@ -26,7 +24,7 @@ if (contactIndex.data.draft) {
     <div class="container">
       <div class="row items-start gap-y-8">
         <div class="md:col-6">
-          <form action={contact_form_action} method="POST">
+          <form id="contact-form">
             <div class="mb-6">
               <label for="name" class="form-label">
                 Ваше имя <span class="text-red-500">*</span>
@@ -65,7 +63,8 @@ if (contactIndex.data.draft) {
                 required
                 rows="8"></textarea>
             </div>
-            <button type="submit" class="btn btn-primary">Отправить</button>
+            <div id="contact-status" class="mb-4 hidden rounded-lg p-3 text-sm"></div>
+            <button type="submit" id="contact-submit" class="btn btn-primary">Отправить</button>
           </form>
         </div>
         <div class="md:col-6">
@@ -77,3 +76,53 @@ if (contactIndex.data.draft) {
     </div>
   </section>
 </Base>
+
+<script>
+  const form = document.getElementById("contact-form") as HTMLFormElement;
+  const statusEl = document.getElementById("contact-status") as HTMLDivElement;
+  const submitBtn = document.getElementById("contact-submit") as HTMLButtonElement;
+
+  form?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const name = (form.querySelector("#name") as HTMLInputElement).value.trim();
+    const email = (form.querySelector("#email") as HTMLInputElement).value.trim();
+    const message = (form.querySelector("#message") as HTMLTextAreaElement).value.trim();
+
+    if (!name || !email || !message) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Отправка...";
+    statusEl.classList.add("hidden");
+
+    try {
+      const response = await fetch("/api/send-callback.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          requestType: "contact",
+          name,
+          email,
+          message,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        statusEl.textContent = "✅ Сообщение успешно отправлено! Мы свяжемся с вами в ближайшее время.";
+        statusEl.className = "mb-4 rounded-lg p-3 text-sm bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400";
+        form.reset();
+      } else {
+        statusEl.textContent = "❌ Ошибка при отправке. Попробуйте позже.";
+        statusEl.className = "mb-4 rounded-lg p-3 text-sm bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+      }
+    } catch {
+      statusEl.textContent = "❌ Не удалось связаться с сервером. Проверьте подключение.";
+      statusEl.className = "mb-4 rounded-lg p-3 text-sm bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400";
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Отправить";
+    }
+  });
+</script>
