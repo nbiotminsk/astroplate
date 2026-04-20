@@ -44,7 +44,7 @@ paths.forEach((label: string, i: number) => {
   <ol class="inline-flex flex-wrap items-center text-sm md:text-base" role="list">
     {
       parts.map(({ label, ...attrs }, index) => (
-        <li class="mx-1 flex items-center capitalize" role="listitem">
+        <li class="mx-1 flex items-center" role="listitem">
           {index > 0 && <span class="inline-block mr-1">/</span>}
           {index !== parts.length - 1 ? (
             <a class="inline-flex items-center px-1 min-h-[44px] text-primary dark:text-darkmode-primary" {...attrs}>
