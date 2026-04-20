@@ -18,5 +18,6 @@ sku: KIT-NBIOT-2W15
 mpn: KIT-NBIOT-2W15
 condition: https://schema.org/NewCondition
 draft: false
+custom_label_0: standart
 ---
 ​
