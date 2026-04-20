@@ -17,5 +17,6 @@ sku: SERVICE-ZETA-REPAIR
 mpn: SERVICE-ZETA-REPAIR
 condition: https://schema.org/NewCondition
 draft: false
+custom_label_0: standart
 ---
 ​
