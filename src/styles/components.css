@@ -283,9 +283,6 @@
 }
 
 @media (max-width: 767px) {
-  .hero-visual {
-    @apply min-h-[420px] max-w-[430px];
-  }
 
   .buy-timeline::before {
     @apply left-4;
