@@ -27,13 +27,13 @@ const { title, description, author, categories, image, date, tags } = post.data;
         <Breadcrumbs className="mb-6" />
         {
           image && (
-            <div class="mb-10">
+            <div class="mb-10 flex justify-center">
               <ImageMod
                 src={image}
-                height={500}
-                width={1200}
+                height={167}
+                width={400}
                 alt={title}
-                class="w-full rounded"
+                class="rounded object-contain"
                 format="webp"
               />
             </div>
