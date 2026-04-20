@@ -3,7 +3,7 @@ title: Модуль NBIOT + 2 счетчика воды 15 мм
 category: комплекты
 price: "788"
 price_currency: BYN
-img: /images/service-2.png
+img: /images/Gemini_Generated_Image_69qciz69qciz69qc.png
 brand: Teleofis
 availability: true
 short_description: Готовый комплект для установки в квартире или небольшом офисе.
