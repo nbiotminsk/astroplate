@@ -6,10 +6,10 @@ image: ""
 draft: false
 ---
 <div class="not-prose">
-<div class="mb-10 p-6 sm:p-8 rounded-2xl bg-gradient-to-br from-white to-theme-light dark:from-darkmode-theme-light dark:to-darkmode-body border border-border dark:border-darkmode-border shadow-lg relative overflow-hidden group">
+<div class="mb-10 p-6 sm:p-8 rounded-2xl bg-linear-to-br from-white to-theme-light dark:from-darkmode-theme-light dark:to-darkmode-body border border-border dark:border-darkmode-border shadow-lg relative overflow-hidden group">
 <!-- Decorative accent -->
-<div class="absolute top-0 right-0 w-48 h-48 bg-primary/5 dark:bg-darkmode-primary/10 rounded-bl-full -z-0 transition-transform duration-700 group-hover:scale-110"></div>
-<div class="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 dark:bg-darkmode-primary/5 rounded-tr-full -z-0 transition-transform duration-700 group-hover:scale-110"></div>
+<div class="absolute top-0 right-0 w-48 h-48 bg-primary/5 dark:bg-darkmode-primary/10 rounded-bl-full z-0 transition-transform duration-700 group-hover:scale-110"></div>
+<div class="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 dark:bg-darkmode-primary/5 rounded-tr-full z-0 transition-transform duration-700 group-hover:scale-110"></div>
 <div class="relative z-10">
 <h3 class="text-2xl font-bold mb-6 text-text-dark dark:text-darkmode-text-dark flex items-center gap-3">
 <div class="p-2 bg-primary/10 dark:bg-darkmode-primary/20 rounded-lg text-primary dark:text-darkmode-primary">
@@ -42,7 +42,7 @@ draft: false
 </div>
 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
 <a href="tel:+375293652910" class="group flex flex-col items-center justify-center p-8 bg-white dark:bg-darkmode-theme-light border border-border dark:border-darkmode-border rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
-<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 <div class="relative z-10 flex flex-col items-center">
 <div class="w-16 h-16 bg-primary/10 dark:bg-darkmode-primary/20 group-hover:bg-primary group-hover:text-white dark:group-hover:bg-darkmode-primary rounded-2xl flex items-center justify-center mb-5 text-primary dark:text-darkmode-primary transition-all duration-500 group-hover:scale-110 shadow-sm">
 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
@@ -52,7 +52,7 @@ draft: false
 </div>
 </a>
 <a href="mailto:info@teleofis24.by" class="group flex flex-col items-center justify-center p-8 bg-white dark:bg-darkmode-theme-light border border-border dark:border-darkmode-border rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 relative overflow-hidden">
-<div class="absolute inset-0 bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+<div class="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
 <div class="relative z-10 flex flex-col items-center">
 <div class="w-16 h-16 bg-primary/10 dark:bg-darkmode-primary/20 group-hover:bg-primary group-hover:text-white dark:group-hover:bg-darkmode-primary rounded-2xl flex items-center justify-center mb-5 text-primary dark:text-darkmode-primary transition-all duration-500 group-hover:scale-110 shadow-sm">
 <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"></rect><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"></path></svg>
