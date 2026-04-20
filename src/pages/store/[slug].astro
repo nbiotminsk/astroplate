@@ -176,7 +176,7 @@ const productSchema = {
       const quantity = Math.max(1, Number(qtyInput?.value || 1));
 
       addToCart({ id, title, price, quantity });
-      window.location.href = "/cart";
+      document.dispatchEvent(new CustomEvent("cart:item-added"));
     });
   };
 

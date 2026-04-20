@@ -13,6 +13,7 @@ import {
 import { Font } from "astro:assets";
 import { ClientRouter } from "astro:transitions";
 import Announcement from "./helpers/Announcement";
+import CartModal from "./helpers/CartModal";
 import SearchModal from "./helpers/SearchModal";
 
 // font families - extract font names for Font component (filter out type keys)
@@ -172,6 +173,7 @@ const { title, meta_title, description, image, noindex, canonical } =
     <Announcement client:only="react" />
     <Header />
     <SearchModal client:only="react" />
+    <CartModal client:only="react" />
     <main class="grow" id="main-content">
       <slot />
     </main>

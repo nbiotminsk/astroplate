@@ -425,6 +425,7 @@ const tagIcons: Record<string, string> = {
 
         addToCart({ id, title, price, quantity });
         renderCart();
+        document.dispatchEvent(new CustomEvent("cart:item-added"));
         // location.hash = "cart"; // User might still want to see the local cart update
       });
     });

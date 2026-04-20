@@ -7,6 +7,9 @@ import { defineConfig, fontProviders } from "astro/config";
 import remarkCollapse from "remark-collapse";
 import remarkToc from "remark-toc";
 import sharp from "sharp";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import config from "./src/config/config.json";
 import theme from "./src/config/theme.json";
 
@@ -56,7 +59,36 @@ export default defineConfig({
   fonts: fontsConfig,
   integrations: [
     react(),
-    sitemap(),
+    sitemap({
+      serialize(item) {
+        if (/%[0-9A-F]{2}/i.test(item.url)) {
+          item.url = decodeURIComponent(item.url);
+        }
+        return item;
+      },
+    }),
+    {
+      name: "decode-sitemap",
+      hooks: {
+        "astro:build:done": async ({ dir }) => {
+          const distDir = fileURLToPath(dir);
+          const files = fs.readdirSync(distDir);
+          for (const file of files) {
+            if (file.startsWith("sitemap") && file.endsWith(".xml")) {
+              const filePath = path.join(distDir, file);
+              let content = fs.readFileSync(filePath, "utf-8");
+              if (/%D[01]%[0-9A-F]{2}/i.test(content)) {
+                content = content.replace(
+                  /(%D0%[0-9A-F]{2}|%D1%[0-9A-F]{2})/gi,
+                  (match) => decodeURIComponent(match),
+                );
+                fs.writeFileSync(filePath, content);
+              }
+            }
+          }
+        },
+      },
+    },
     AutoImport({
       imports: [
         "@/shortcodes/Button",

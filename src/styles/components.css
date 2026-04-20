@@ -131,19 +131,27 @@
 
 /* modal */
 .modal {
-  @apply fixed inset-0 z-40 hidden h-full w-full overflow-auto;
+  @apply fixed inset-0 z-40 hidden h-full w-full overflow-auto items-center justify-center;
+}
+
+.modal.show {
+  @apply flex;
 }
 
 .modal-overlay {
-  @apply fixed inset-0 z-40 hidden h-full w-full bg-black/40;
+  @apply fixed inset-0 z-30 hidden h-full w-full bg-black/40;
+}
+
+.modal-overlay.show {
+  @apply block;
 }
 
 .modal-content {
-  @apply relative top-1/2 z-50 mx-auto max-w-[90%] -translate-y-1/2 rounded-lg bg-body p-8 dark:bg-darkmode-body;
+  @apply relative z-50 mx-auto max-w-[90%] w-[450px] rounded-2xl bg-body p-8 shadow-2xl dark:bg-darkmode-body border border-border dark:border-darkmode-border;
 }
 
 .modal-close {
-  @apply absolute right-3 top-3 h-8 w-8 rounded-full bg-light text-center leading-8 text-text-dark dark:bg-darkmode-light dark:text-darkmode-text-dark;
+  @apply absolute right-4 top-4 h-9 w-9 rounded-full bg-light text-center leading-9 text-text-dark transition hover:bg-primary hover:text-white dark:bg-darkmode-light dark:text-darkmode-text-dark dark:hover:bg-darkmode-primary;
 }
 
 /* homepage hero */

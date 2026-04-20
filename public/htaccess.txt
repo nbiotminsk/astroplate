@@ -11,7 +11,6 @@ AddDefaultCharset UTF-8
     RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
     # 2. Перенаправление с WWW на без-WWW (SEO: избавляемся от дублей контента)
-    # Например: www.meter.by -> meter.by
     RewriteCond %{HTTP_HOST} ^www\.(.*)$ [NC]
     RewriteRule ^(.*)$ https://%1/$1 [R=301,L]
 
