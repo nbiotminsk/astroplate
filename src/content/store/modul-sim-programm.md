@@ -17,5 +17,8 @@ features:
   - Внешняя антенна
 condition: https://schema.org/NewCondition
 custom_label_0: premium
+sku:
+  id: "01"
+  value: module-nbiot
 ---
 ​
