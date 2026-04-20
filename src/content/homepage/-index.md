@@ -1,10 +1,11 @@
 ---
 # Banner (legacy block for Sitepins)
 banner:
-  title: Оборудование Teleofis, Тахат, Вега и телеметрия в Беларуси
+  title: Дистанционный съем показаний счетчиков воды в Минске под ключ и
+    телеметрия в Беларуси | teleofis24.by
   content: Продажа оборудования, монтаж, удалённый мониторинг, обслуживание
-    модулей и оплата онлайн через E-POS.
-  image: /images/banner.png
+    модулей и оплата онлайн через E-POS | teleofis24.by
+  image: ""
   button:
     enable: true
     label: Перейти в магазин
