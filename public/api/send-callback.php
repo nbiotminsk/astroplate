@@ -26,6 +26,13 @@ $serviceTitle = $input['serviceTitle'] ?? '';
 $requestType = $input['requestType'] ?? '';
 $message = $input['message'] ?? '';
 
+// Checkout specific fields
+$address = $input['address'] ?? '';
+$unp = $input['unp'] ?? '';
+$checkoutType = $input['checkoutType'] ?? '';
+$cartItems = $input['cartItems'] ?? [];
+$total = $input['total'] ?? 0;
+
 // Валидация
 if (empty($name) || empty($phone)) {
     echo json_encode(['error' => 'Missing required fields']);
@@ -48,7 +55,34 @@ if (empty($telegramBotToken) || empty($telegramChatId)) {
 $messageText = '';
 $currentTime = new DateTime('now', new DateTimeZone('Europe/Minsk'));
 
-if ($requestType === 'consultation') {
+if ($requestType === 'checkout') {
+    $typeLabel = ($checkoutType === 'yur') ? "🏢 Юрлицо" : "👤 Физлицо";
+    $messageText = "🔥 <b>Новый заказ с сайта</b>\n\n";
+    $messageText .= "<b>Тип:</b> {$typeLabel}\n";
+    if ($checkoutType === 'yur' && !empty($unp)) {
+        $messageText .= "<b>УНП:</b> {$unp}\n";
+        $messageText .= "<b>Организация:</b> {$name}\n";
+    } else {
+        $messageText .= "<b>ФИО:</b> {$name}\n";
+    }
+    $messageText .= "<b>Телефон:</b> {$phone}\n";
+    $messageText .= "<b>Адрес:</b> {$address}\n\n";
+    
+    if (!empty($cartItems)) {
+        $messageText .= "<b>🛒 Состав заказа:</b>\n";
+        foreach ($cartItems as $index => $item) {
+            $idx = $index + 1;
+            $itemTitle = $item['title'] ?? 'Товар';
+            $itemQty = $item['quantity'] ?? 1;
+            $itemPrice = $item['price'] ?? 0;
+            $itemSum = $itemQty * $itemPrice;
+            $messageText .= "{$idx}. {$itemTitle} — {$itemQty} шт. x {$itemPrice} BYN = <b>{$itemSum} BYN</b>\n";
+        }
+        $messageText .= "\n💰 <b>Итого: {$total} BYN</b>\n";
+    }
+    
+    $messageText .= "\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
+} elseif ($requestType === 'consultation') {
     $messageText = "💼 Запрос на консультацию\n\n👤 Имя/Организация: {$name}\n📞 Телефон: {$phone}\n\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
 } elseif ($requestType === 'order') {
     $qty = (!is_null($quantity) && is_numeric($quantity) && $quantity > 0) ? $quantity : 1;
