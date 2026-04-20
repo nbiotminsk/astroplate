@@ -350,7 +350,8 @@
         },
         {
           "label": "info@teleofis24.by",
-          "href": "mailto:info@teleofis24.by"
+          "href": "mailto:info@teleofis24.by",
+          "external": true
         },
         {
           "label": "г. Минск, Макаёнка, 12г, 257"
@@ -365,6 +366,6 @@
         }
       ]
     },
-    "copyright": "© teleofis24.by"
+    "copyright": "Все права принадлежат © teleofis24.by"
   }
 }
