@@ -114,6 +114,16 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": "https://schema.org/NewCondition"
+    },
+    {
+      "name": "custom_label_0",
+      "label": "custom_label_0",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
     }
   ]
 }
