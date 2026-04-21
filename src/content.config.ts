@@ -9,7 +9,7 @@ const commonFields = {
   // z.coerce.date() handles both Date objects and ISO string dates from frontmatter (Zod 4)
   date: z.coerce.date().optional(),
   image: z.string().optional(),
-  draft: z.boolean(),
+  draft: z.boolean().default(false),
 };
 
 // Post collection schema
@@ -25,7 +25,7 @@ const blogCollection = defineCollection({
     // Use factory functions for mutable array defaults (Zod 4 best practice)
     categories: z.array(z.string()).default(() => ["others"]),
     tags: z.array(z.string()).default(() => ["others"]),
-    draft: z.boolean().optional(),
+    draft: z.boolean().default(false),
   }),
 });
 
@@ -101,7 +101,7 @@ const storeCollection = defineCollection({
     short_description: z.string().optional(),
     description: z.string().optional(),
     features: z.array(z.string()).optional(),
-    draft: z.boolean().optional(),
+    draft: z.boolean().default(false),
     date: z.coerce.date().optional(),
   }),
 });
