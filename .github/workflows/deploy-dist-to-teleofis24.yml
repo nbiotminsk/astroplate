@@ -12,6 +12,8 @@ permissions:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
 
     steps:
       - name: Checkout source repository
@@ -56,5 +58,3 @@ jobs:
           git commit -m "Deploy dist from main"
           git push --force origin "$TARGET_BRANCH"
         shell: bash
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
