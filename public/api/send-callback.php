@@ -77,8 +77,8 @@ if (!empty($phone) && !preg_match($phonePattern, $phone)) {
 }
 
 // Получаем переменные окружения (через getenv или конфигурационный файл)
-$telegramBotToken = getenv('PUBLIC_TELEGRAM_BOT_TOKEN') ?: $_ENV['PUBLIC_TELEGRAM_BOT_TOKEN'] ?: '8243078295:AAGgXFk6LsCW9yYw9-Lh0EHRwH0rj4C8wLA';
-$telegramChatId = getenv('PUBLIC_TELEGRAM_CHAT_ID') ?: $_ENV['PUBLIC_TELEGRAM_CHAT_ID'] ?: '358128306';
+$telegramBotToken = getenv('PUBLIC_TELEGRAM_BOT_TOKEN') ?: ($_ENV['PUBLIC_TELEGRAM_BOT_TOKEN'] ?? '8243078295:AAGgXFk6LsCW9yYw9-Lh0EHRwH0rj4C8wLA');
+$telegramChatId = getenv('PUBLIC_TELEGRAM_CHAT_ID') ?: ($_ENV['PUBLIC_TELEGRAM_CHAT_ID'] ?? '358128306');
 
 if (empty($telegramBotToken) || empty($telegramChatId)) {
     error_log('Missing Telegram configuration');
