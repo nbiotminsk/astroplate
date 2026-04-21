@@ -8,6 +8,7 @@ import {
   getStoreLabelPriority,
   normalizeStoreLabel,
 } from "@/lib/utils/storeLabels";
+import { FaCrown, FaShoppingBasket } from "react-icons/fa";
 
 const catalogEntries = await getNormalizedCollection(
   "store",
@@ -120,17 +121,28 @@ const tagIcons: Record<string, string> = {
               data-custom-label={product.customLabel}
             >
               <div
-                class={`catalog-card group flex h-full flex-col rounded border bg-light p-5 dark:bg-darkmode-light ${
+                class={`catalog-card group relative flex h-full flex-col rounded-2xl border bg-body p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-darkmode-light ${
                   product.customLabel === "premium"
-                    ? "border-amber-300 shadow-[0_14px_28px_rgba(217,119,6,0.12)] dark:border-amber-500/50"
+                    ? "border-amber-300 dark:border-amber-500/50"
                     : product.customLabel === "discount"
-                      ? "border-rose-300 shadow-[0_14px_28px_rgba(225,29,72,0.08)] dark:border-rose-500/50"
+                      ? "border-emerald-300 dark:border-emerald-500/50"
                       : "border-border dark:border-darkmode-border"
                 }`}
               >
+                {product.customLabel === "premium" ? (
+                  <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
+                    <FaCrown className="text-amber-500 dark:text-amber-300" />
+                    <span>TOP</span>
+                  </div>
+                ) : product.customLabel === "discount" ? (
+                  <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
+                    <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
+                    <span>SALE</span>
+                  </div>
+                ) : null}
                 <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
                   <ImageMod
-                    class="catalog-card__image mb-4 h-48 w-full rounded object-contain"
+                    class="catalog-card__image mb-4 h-48 w-full rounded-xl border border-border bg-light object-contain p-2 dark:border-darkmode-border dark:bg-darkmode-body"
                     src={product.image}
                     alt={product.title}
                     width={760}
@@ -138,34 +150,19 @@ const tagIcons: Record<string, string> = {
                     format="webp"
                   />
                 </a>
-                <div class="mb-2 flex flex-wrap gap-2">
-                  <p class="inline-flex rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
-                    {product.category}
-                  </p>
-                  {(() => {
-                    const labelMeta = getStoreLabelMeta(product.customLabel);
-                    return labelMeta ? (
-                      <span
-                        class={`inline-flex rounded border px-3 py-1 text-xs font-semibold ${labelMeta.className}`}
-                      >
-                        {labelMeta.badge}
-                      </span>
-                    ) : null;
-                  })()}
-                </div>
-                <h4 class="mb-4 min-h-[3rem] text-xl leading-tight">
+                <h4 class="mb-4 min-h-[2.5rem] text-lg leading-tight">
                   {product.title}
                 </h4>
                 <div class="mt-auto flex flex-col gap-2 pt-4">
-                  <div class="flex items-end justify-between gap-3">
+                  <div class="flex flex-col gap-1">
                     <p
                       class={`min-h-[2rem] text-2xl font-bold leading-none ${
-                        product.customLabel === "premium"
-                          ? "text-amber-700 dark:text-amber-300"
-                          : product.customLabel === "discount"
-                            ? "text-rose-600 dark:text-rose-300"
-                            : "text-emerald-600"
-                      }`}
+                      product.customLabel === "premium"
+                        ? "text-amber-700 dark:text-amber-300"
+                        : product.customLabel === "discount"
+                          ? "text-emerald-600 dark:text-emerald-300"
+                          : "text-emerald-600"
+                    }`}
                     >
                       {product.price} BYN
                     </p>
@@ -179,34 +176,34 @@ const tagIcons: Record<string, string> = {
                   </div>
 
                   <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
-                  <button
-                    type="button"
-                    class={`btn btn-buy w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
-                      !product.availability ? "cursor-not-allowed opacity-50" : ""
-                    }`}
-                    data-add-to-cart={product.id}
-                    data-price={product.price}
-                    data-title={product.title}
-                    data-qty-source={product.id}
-                    disabled={!product.availability}
-                  >
-                    Купить
-                  </button>
-                  <input
-                    id={`qty-${product.id}`}
-                    type="number"
-                    min="1"
-                    value="1"
-                    class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
-                    data-qty-input={product.id}
-                  />
-                  <a
-                    class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:text-primary sm:hover:underline"
-                    href={`/store/${product.id}`}
-                  >
-                    Подробнее
-                  </a>
-                </div>
+                    <button
+                      type="button"
+                      class={`btn btn-buy w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
+                        !product.availability ? "cursor-not-allowed opacity-50" : ""
+                      }`}
+                      data-add-to-cart={product.id}
+                      data-price={product.price}
+                      data-title={product.title}
+                      data-qty-source={product.id}
+                      disabled={!product.availability}
+                    >
+                      Купить
+                    </button>
+                    <input
+                      id={`qty-${product.id}`}
+                      type="number"
+                      min="1"
+                      value="1"
+                      class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
+                      data-qty-input={product.id}
+                    />
+                    <a
+                      class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:text-primary sm:hover:underline"
+                      href={`/store/${product.id}`}
+                    >
+                      Подробнее
+                    </a>
+                  </div>
                 </div>
               </div>
             </article>
