@@ -60,7 +60,7 @@ const breadcrumbSchema = {
       "@type": "ListItem",
       "position": index + 1,
       "name": part.label,
-      ...(part.href && !isLast ? { "item": `${baseUrl}${part.href}` } : {})
+      ...(part.href && !isLast ? { "url": `${baseUrl}${part.href}` } : {})
     };
   })
 };
