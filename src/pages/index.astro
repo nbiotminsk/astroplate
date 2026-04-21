@@ -144,13 +144,13 @@ const iconMap = {
                 <div
                   class={`relative flex h-full flex-col ${
                     product.customLabel === "premium"
-                      ? "rounded-[calc(1rem-1px)] bg-linear-to-b from-amber-50 via-body to-body dark:from-amber-500/10 dark:via-darkmode-light dark:to-darkmode-light"
+                      ? "rounded-[calc(1rem-1px)] bg-linear-to-b from-amber-50 via-body to-body p-5 dark:from-amber-500/10 dark:via-darkmode-light dark:to-darkmode-light"
                       : ""
                   }`}
                 >
                   {product.customLabel === "premium" ? (
                     <div class="absolute right-4 top-4 z-10 inline-flex items-center rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-                      Top pick
+                      TOP
                     </div>
                   ) : null}
                   <ImageMod
