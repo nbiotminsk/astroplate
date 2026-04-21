@@ -1,4 +1,4 @@
-import { resolveDate } from "@/lib/utils/dateFormat";
+import { resolveDate } from "@/lib/utils/contentNormalizer";
 
 // sort by date
 export const sortByDate = (array: any[]) => {

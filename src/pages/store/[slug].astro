@@ -3,10 +3,11 @@ import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
-import { getCollection, render } from "astro:content";
+import { getNormalizedCollection } from "@/lib/contentCollections";
+import { render } from "astro:content";
 
 export async function getStaticPaths() {
-  const catalogEntries = await getCollection("store", ({ data }) => !data.draft);
+  const catalogEntries = await getNormalizedCollection("store", ({ data }) => !data.draft);
 
   return catalogEntries.map((entry) => ({
     params: { slug: entry.id },

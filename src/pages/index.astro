@@ -2,7 +2,7 @@
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
-import { getCollection } from "astro:content";
+import { getNormalizedCollection } from "@/lib/contentCollections";
 import {
   FaBroadcastTower,
   FaBuilding,
@@ -26,7 +26,7 @@ import {
 const homepageEntry = await getListPage("homepage", "-index");
 const homepage = homepageEntry.data as any;
 
-const catalogEntries = await getCollection(
+const catalogEntries = await getNormalizedCollection(
   "store",
   ({ data }) => !data.draft,
 );
@@ -64,7 +64,11 @@ const iconMap = {
 } as const;
 ---
 
-<Base>
+<Base
+  title={homepage.title}
+  meta_title={homepage.meta_title}
+  description={homepage.description}
+>
   <!-- Hero -->
   <section class="section pb-16 pt-12">
     <div class="container">

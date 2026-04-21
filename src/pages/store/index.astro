@@ -2,9 +2,9 @@
 import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import Base from "@/layouts/Base.astro";
-import { getCollection } from "astro:content";
+import { getNormalizedCollection } from "@/lib/contentCollections";
 
-const catalogEntries = await getCollection(
+const catalogEntries = await getNormalizedCollection(
   "store",
   ({ data }) => !data.draft,
 );

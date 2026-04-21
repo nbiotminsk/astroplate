@@ -1,10 +1,10 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
+import { getNormalizedCollection } from "@/lib/contentCollections";
 import PageHeader from "@/partials/PageHeader.astro";
-import { getCollection } from "astro:content";
 
-const infoEntries = await getCollection("info", ({ data }) => !data.draft);
+const infoEntries = await getNormalizedCollection("info", ({ data }) => !data.draft);
 ---
 
 <Base

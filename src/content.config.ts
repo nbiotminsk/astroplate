@@ -1,13 +1,19 @@
 import { glob } from "astro/loaders";
 import { defineCollection } from "astro:content";
 import { z } from "astro/zod";
+import { getBuildDate } from "@/lib/utils/buildTimestamp";
+
+const safeDate = z.preprocess(
+  (value) => (value === "" || value == null ? undefined : value),
+  z.coerce.date().default(() => getBuildDate()),
+);
 
 const commonFields = {
   title: z.string(),
-  description: z.string(),
+  description: z.string().default(""),
   meta_title: z.string().optional(),
-  // z.coerce.date() handles both Date objects and ISO string dates from frontmatter (Zod 4)
-  date: z.coerce.date().optional(),
+  // Empty or missing dates fall back to the build timestamp.
+  date: safeDate,
   image: z.string().optional(),
   draft: z.boolean().default(false),
 };
@@ -19,7 +25,7 @@ const blogCollection = defineCollection({
     title: z.string(),
     meta_title: z.string().optional(),
     description: z.string().optional(),
-    date: z.coerce.date().optional(),
+    date: safeDate,
     image: z.string().optional(),
     author: z.string().default("Admin"),
     // Use factory functions for mutable array defaults (Zod 4 best practice)
@@ -102,7 +108,7 @@ const storeCollection = defineCollection({
     description: z.string().optional(),
     features: z.array(z.string()).optional(),
     draft: z.boolean().default(false),
-    date: z.coerce.date().optional(),
+    date: safeDate,
   }),
 });
 

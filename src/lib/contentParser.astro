@@ -1,10 +1,12 @@
 ---
 import {
-  getCollection,
-  getEntry,
   type CollectionEntry,
   type CollectionKey,
 } from "astro:content";
+import {
+  getNormalizedCollection,
+  getNormalizedEntry,
+} from "@/lib/contentCollections";
 
 type PageData = {
   title: string;
@@ -17,7 +19,7 @@ type PageData = {
 export const getSinglePage = async <C extends CollectionKey>(
   collectionName: C
 ): Promise<CollectionEntry<C>[]> => {
-  const allPages = await getCollection(
+  const allPages = await getNormalizedCollection(
     collectionName,
     ({ data, id }) => !(data as PageData)?.draft && !id.startsWith("-")
   );
@@ -28,10 +30,7 @@ export const getListPage = async <C extends CollectionKey>(
   collectionName: C,
   documentId: "-index" | string
 ): Promise<CollectionEntry<C>> => {
-  const data = (await getEntry(
-    collectionName,
-    documentId
-  )) as CollectionEntry<C> | null;
+  const data = (await getNormalizedEntry(collectionName, documentId)) as CollectionEntry<C> | null;
 
   if (!data) {
     throw new Error(

@@ -13,6 +13,26 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
+    },
+    {
+      "name": "meta_title",
+      "label": "meta_title",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
+    },
+    {
+      "name": "description",
+      "label": "description",
+      "type": "string",
+      "value": "",
+      "description": "",
+      "isIgnored": false,
+      "isRequired": false,
+      "defaultValue": ""
     }
   ]
 }
