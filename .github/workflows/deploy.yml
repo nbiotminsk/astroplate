@@ -20,13 +20,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 'lts/*'
-          cache: 'yarn'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
 
       - name: Build project
-        run: yarn build
+        run: npm run build
 
       - name: Deploy to build branch
         uses: peaceiris/actions-gh-pages@v4
