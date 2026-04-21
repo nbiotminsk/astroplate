@@ -1,0 +1,60 @@
+name: Build and Deploy Dist
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build project
+        run: yarn build
+
+      - name: Publish dist to target repository
+        env:
+          TARGET_REPO_TOKEN: ${{ secrets.TELEOFIS24_DEPLOY_TOKEN }}
+          TARGET_REPO: nbiotminsk/teleofis24
+          TARGET_BRANCH: deploy
+        run: |
+          set -euo pipefail
+
+          if [ -z "${TARGET_REPO_TOKEN:-}" ]; then
+            echo "Missing secret TELEOFIS24_DEPLOY_TOKEN"
+            exit 1
+          fi
+
+          workdir="$(mktemp -d)"
+          git clone "https://x-access-token:${TARGET_REPO_TOKEN}@github.com/${TARGET_REPO}.git" "$workdir"
+
+          cd "$workdir"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout --orphan "$TARGET_BRANCH"
+          git rm -rf . >/dev/null 2>&1 || true
+          rsync -a --delete --exclude='.git' "$GITHUB_WORKSPACE"/dist/ ./
+
+          if git status --porcelain | grep -q .; then
+            git add -A
+            git commit -m "Deploy dist from astroplate"
+            git push origin "$TARGET_BRANCH"
+          else
+            echo "No dist changes to publish"
+          fi
