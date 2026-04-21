@@ -141,14 +141,16 @@ const tagIcons: Record<string, string> = {
                   </div>
                 ) : null}
                 <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
-                  <ImageMod
-                    class="catalog-card__image mb-4 h-48 w-full rounded-xl border border-border bg-light object-contain p-2 dark:border-darkmode-border dark:bg-darkmode-body"
-                    src={product.image}
-                    alt={product.title}
-                    width={760}
-                    height={440}
-                    format="webp"
-                  />
+                  <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body">
+                    <ImageMod
+                      class="h-full w-full object-contain"
+                      src={product.image}
+                      alt={product.title}
+                      width={760}
+                      height={440}
+                      format="webp"
+                    />
+                  </div>
                 </a>
                 <h4 class="mb-4 min-h-[2.5rem] text-lg leading-tight">
                   {product.title}
@@ -198,7 +200,7 @@ const tagIcons: Record<string, string> = {
                       data-qty-input={product.id}
                     />
                     <a
-                      class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:text-primary sm:hover:underline"
+                      class="btn btn-outline-primary w-full text-center py-2.5 text-base text-emerald-600/70 sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:hover:text-emerald-600 sm:hover:underline"
                       href={`/store/${product.id}`}
                     >
                       Подробнее
