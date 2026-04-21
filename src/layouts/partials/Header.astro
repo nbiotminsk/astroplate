@@ -2,6 +2,7 @@
 import Logo from "@/components/Logo.astro";
 import config from "@/config/config.json";
 import menu from "@/config/menu.json";
+import { FaHouse } from "react-icons/fa6";
 import { IoCartOutline, IoSearch } from "react-icons/io5";
 import { FaPhoneAlt } from "react-icons/fa";
 
@@ -13,6 +14,7 @@ export interface ChildNavigationLink {
 export interface NavigationLink {
   name: string;
   url: string;
+  icon?: string;
   hasChildren?: boolean;
   children?: ChildNavigationLink[];
 }
@@ -98,12 +100,14 @@ const { pathname } = Astro.url;
               <li class="nav-item">
                 <a
                   href={menu.url}
-                  class={`nav-link ${
+                  aria-label={menu.name}
+                  class={`nav-link inline-flex items-center gap-2 leading-none ${
                     (pathname === `${menu.url}/` || pathname === menu.url) &&
                     "active"
                   }`}
                 >
-                  {menu.name}
+                  {menu.icon === "FaHouse" && <FaHouse className="text-sm align-middle" />}
+                  {menu.icon !== "FaHouse" && menu.name}
                 </a>
               </li>
             )}

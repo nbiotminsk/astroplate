@@ -28,7 +28,7 @@ const { title, image, date, categories } = data.data;
       </a>
     )
   }
-  <h4 class="mb-3">
+  <h4 class="card-title mb-3 text-text-dark dark:text-darkmode-text-dark">
     <a href={`/${blog_folder}/${data.id}`}>
       {title}
     </a>
@@ -47,7 +47,9 @@ const { title, image, date, categories } = data.data;
     </li>
     <li class="inline-block">{dateFormat(date)}</li>
   </ul>
-  <p class="mb-6">{plainify(data.body?.slice(0, Number(summary_length)))}</p>
+  <p class="mb-6 text-sm leading-relaxed text-justify">
+    {plainify(data.body?.slice(0, Number(summary_length)))}
+  </p>
   <a class="btn btn-outline-primary btn-sm" href={`/${blog_folder}/${data.id}`}>
     Подробнее
   </a>

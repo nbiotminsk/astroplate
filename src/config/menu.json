@@ -1,6 +1,11 @@
 {
   "main": [
     {
+      "name": "Главная",
+      "url": "/",
+      "icon": "FaHouse"
+    },
+    {
       "name": "Магазин",
       "url": "/store"
     },

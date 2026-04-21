@@ -152,13 +152,13 @@ const tagIcons: Record<string, string> = {
                     />
                   </div>
                 </a>
-                <h4 class="mb-4 min-h-[2.5rem] text-lg leading-tight">
+                <h4 class="card-title mb-4 min-h-[2.5rem] text-text-dark dark:text-darkmode-text-dark">
                   {product.title}
                 </h4>
                 <div class="mt-auto flex flex-col gap-2 pt-4">
                   <div class="flex flex-col gap-1">
                     <p
-                      class={`min-h-[2rem] text-2xl font-bold leading-none ${
+                      class={`min-h-[2rem] text-lg font-semibold leading-none ${
                       product.customLabel === "premium"
                         ? "text-amber-700 dark:text-amber-300"
                         : product.customLabel === "discount"
@@ -180,7 +180,7 @@ const tagIcons: Record<string, string> = {
                   <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
                     <button
                       type="button"
-                      class={`btn btn-buy w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
+                      class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
                         !product.availability ? "cursor-not-allowed opacity-50" : ""
                       }`}
                       data-add-to-cart={product.id}
