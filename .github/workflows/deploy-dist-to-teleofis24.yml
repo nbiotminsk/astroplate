@@ -36,6 +36,12 @@ jobs:
       - name: Build project
         run: yarn build
 
+      - name: Ensure publish-only files exist
+        run: |
+          touch dist/.nojekyll
+          cp dist/htaccess.txt dist/.htaccess
+          chmod 644 dist/.htaccess
+
       - name: Publish dist to target repository
         env:
           TARGET_BRANCH: deploy
