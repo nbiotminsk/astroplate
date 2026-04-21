@@ -43,14 +43,26 @@ paths.forEach((label: string, i: number) => {
     });
   }
 
-  label !== "page" &&
     parts.push({
       label: translatedLabel,
       href,
       "aria-label": Astro.url.pathname === href ? "page" : undefined,
     });
 });
+
+const breadcrumbSchema = {
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": parts.map((part, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "name": part.label,
+    "item": part.href ? `${Astro.site?.origin || "https://teleofis24.by"}${part.href}` : undefined
+  }))
+};
 ---
+
+<script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
 
 <nav aria-label="Breadcrumb" class={className}>
   <ol class="inline-flex flex-wrap items-center text-sm md:text-base" role="list">

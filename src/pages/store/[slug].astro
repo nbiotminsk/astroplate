@@ -44,7 +44,12 @@ const productSchema = {
   "@id": `${productUrl}#product`,
   name: title,
   description,
-  image: [imageUrl],
+  image: [{
+    "@type": "ImageObject",
+    "url": imageUrl,
+    "caption": title,
+    "description": title
+  }],
   sku: product.data.sku || product.id,
   mpn: product.data.mpn || product.id,
   category,

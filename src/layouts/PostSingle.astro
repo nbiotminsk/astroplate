@@ -13,14 +13,47 @@ import ImageMod from "./components/ImageMod.astro";
 import ProductCard from "./components/ProductCard.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { normalizeStoreLabel } from "@/lib/utils/storeLabels";
+import config from "@/config/config.json";
 
 const COLLECTION_FOLDER = "blog";
 const { post } = Astro.props;
 
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const postUrl = `${siteUrl}/${post.id}`;
+const articleSchema = {
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": post.data.title,
+  "description": post.data.description,
+  "image": post.data.image ? [{
+    "@type": "ImageObject",
+    "url": `${siteUrl}${post.data.image}`,
+    "caption": post.data.alt_img || post.data.title,
+    "description": post.data.alt_img || post.data.title
+  }] : [],
+  "datePublished": post.data.date,
+  "author": {
+    "@type": "Person",
+    "name": post.data.author
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": config.site.title,
+    "logo": {
+      "@type": "ImageObject",
+      "url": `${siteUrl}${config.site.logo || "/images/favicon.png"}`
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": postUrl
+  }
+};
+
 const posts = await getSinglePage(COLLECTION_FOLDER);
 const similarPosts = similarItems(post, posts);
 const { Content } = await render(post);
-const { title, description, author, categories, image, date, tags } = post.data;
+const { title, description, author, categories, image, date, tags, alt_img } = post.data;
 
 const catalogEntries = await getNormalizedCollection(
   "store",
@@ -46,6 +79,8 @@ const recommendedProducts = catalogEntries
   .slice(0, 3);
 ---
 
+<script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+
 <section class="section pt-7">
   <div class="container">
     <div class="row justify-center">
@@ -59,7 +94,7 @@ const recommendedProducts = catalogEntries
                 src={image}
                 height={500}
                 width={1600}
-                alt={title}
+                alt={alt_img || title}
                 class="rounded object-contain max-w-[400px] w-full"
                 format="webp"
               />
