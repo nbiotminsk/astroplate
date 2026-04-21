@@ -3,7 +3,11 @@ import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
-import { getStoreLabelPriority, normalizeStoreLabel } from "@/lib/utils/storeLabels";
+import {
+  getStoreLabelMeta,
+  getStoreLabelPriority,
+  normalizeStoreLabel,
+} from "@/lib/utils/storeLabels";
 import {
   FaBroadcastTower,
   FaBuilding,
@@ -11,6 +15,7 @@ import {
   FaCertificate,
   FaCheck,
   FaCogs,
+  FaCrown,
   FaFire,
   FaHeadset,
   FaLayerGroup,
@@ -42,6 +47,7 @@ const topProducts = catalogEntries
       category: entry.data.category ?? "Без категории",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
       image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      customLabel: label,
       labelPriority: getStoreLabelPriority(label),
     };
   })
@@ -126,29 +132,75 @@ const iconMap = {
         {
           topProducts.map((product) => (
             <div class="sm:col-6 lg:col-3">
-              <article class="catalog-card flex h-full flex-col">
-                <ImageMod
-                  src={product.image}
-                  width={420}
-                  height={240}
-                  alt={product.title}
-                  class="catalog-card-image"
-                  format="webp"
-                />
-                <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {product.title}
-                </h3>
-                <p class="mt-2 text-sm">{product.category}</p>
-                <p class="mt-3 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {product.price} BYN
-                </p>
-                <div class="mt-auto pt-4 flex flex-col sm:flex-row gap-2">
-                  <a class="btn btn-primary w-full sm:w-auto text-center py-2.5 text-base sm:py-1.5 sm:text-sm" href={`/store/${product.id}`}>
-                    Купить
-                  </a>
-                  <a class="btn btn-outline-primary w-full sm:w-auto text-center py-2.5 text-base sm:py-1.5 sm:text-sm" href={`/store/${product.id}`}>
-                    Подробнее
-                  </a>
+              <article
+                class={`catalog-card relative flex h-full flex-col ${
+                  product.customLabel === "premium"
+                    ? "border-transparent bg-linear-to-br from-amber-200 via-amber-100 to-amber-300 p-[1px] shadow-[0_18px_36px_rgba(217,119,6,0.16)] dark:from-amber-500/40 dark:via-amber-400/20 dark:to-amber-600/40"
+                    : product.customLabel === "discount"
+                      ? "border-rose-300 shadow-[0_14px_28px_rgba(225,29,72,0.08)] dark:border-rose-500/50"
+                      : ""
+                }`}
+              >
+                <div
+                  class={`relative flex h-full flex-col ${
+                    product.customLabel === "premium"
+                      ? "rounded-[calc(1rem-1px)] bg-linear-to-b from-amber-50 via-body to-body dark:from-amber-500/10 dark:via-darkmode-light dark:to-darkmode-light"
+                      : ""
+                  }`}
+                >
+                  {product.customLabel === "premium" ? (
+                    <div class="absolute right-4 top-4 z-10 inline-flex items-center rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
+                      Top pick
+                    </div>
+                  ) : null}
+                  <ImageMod
+                    src={product.image}
+                    width={420}
+                    height={240}
+                    alt={product.title}
+                    class="catalog-card-image"
+                    format="webp"
+                  />
+                  <h3 class="mt-4 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark">
+                    {product.title}
+                  </h3>
+                  <div class="mt-2 flex flex-wrap gap-2">
+                    <p class="inline-flex rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
+                      {product.category}
+                    </p>
+                    {(() => {
+                      const labelMeta = getStoreLabelMeta(product.customLabel);
+                      return labelMeta ? (
+                        <span
+                          class={`inline-flex rounded border px-3 py-1 text-xs font-semibold ${labelMeta.className}`}
+                        >
+                          {labelMeta.badge}
+                        </span>
+                      ) : null;
+                    })()}
+                  </div>
+                  <p
+                    class={`mt-3 flex items-center gap-2 text-lg font-semibold ${
+                      product.customLabel === "premium"
+                        ? "text-amber-700 dark:text-amber-300"
+                        : product.customLabel === "discount"
+                          ? "text-rose-600 dark:text-rose-300"
+                          : "text-text-dark dark:text-darkmode-text-dark"
+                    }`}
+                  >
+                    {product.customLabel === "premium" ? (
+                      <FaCrown className="text-amber-500 dark:text-amber-300" />
+                    ) : null}
+                    <span>{product.price} BYN</span>
+                  </p>
+                  <div class="mt-auto flex flex-col gap-2 pt-4 sm:flex-row">
+                    <a class="btn btn-primary w-full text-center py-2.5 text-base sm:w-auto sm:py-1.5 sm:text-sm" href={`/store/${product.id}`}>
+                      Купить
+                    </a>
+                    <a class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:w-auto sm:py-1.5 sm:text-sm" href={`/store/${product.id}`}>
+                      Подробнее
+                    </a>
+                  </div>
                 </div>
               </article>
             </div>

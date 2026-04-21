@@ -153,9 +153,11 @@ const tagIcons: Record<string, string> = {
                     ) : null;
                   })()}
                 </div>
-                <h4 class="mb-4 text-2xl leading-tight">{product.title}</h4>
+                <h4 class="mb-4 min-h-[3.5rem] text-2xl leading-tight">
+                  {product.title}
+                </h4>
                 <p
-                  class={`mb-4 text-2xl font-bold ${
+                  class={`mb-4 min-h-[2rem] text-2xl font-bold ${
                     product.customLabel === "premium"
                       ? "text-amber-700 dark:text-amber-300"
                       : product.customLabel === "discount"
@@ -166,7 +168,7 @@ const tagIcons: Record<string, string> = {
                   {product.price} BYN
                 </p>
                 <p
-                  class={`mb-4 text-sm ${
+                  class={`mb-4 min-h-[1.5rem] text-sm ${
                     product.availability ? "text-green-700" : "text-red-700"
                   }`}
                 >
