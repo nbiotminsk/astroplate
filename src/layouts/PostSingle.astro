@@ -10,6 +10,9 @@ import { humanize, markdownify, slugify } from "@/lib/utils/textConverter";
 import { render } from "astro:content";
 import { FaRegClock, FaRegFolder, FaRegUserCircle } from "react-icons/fa";
 import ImageMod from "./components/ImageMod.astro";
+import ProductCard from "./components/ProductCard.astro";
+import { getNormalizedCollection } from "@/lib/contentCollections";
+import { normalizeStoreLabel } from "@/lib/utils/storeLabels";
 
 const COLLECTION_FOLDER = "blog";
 const { post } = Astro.props;
@@ -18,6 +21,29 @@ const posts = await getSinglePage(COLLECTION_FOLDER);
 const similarPosts = similarItems(post, posts);
 const { Content } = await render(post);
 const { title, description, author, categories, image, date, tags } = post.data;
+
+const catalogEntries = await getNormalizedCollection(
+  "store",
+  ({ data }) => !data.draft && data.category !== "услуги",
+);
+
+const recommendedProducts = catalogEntries
+  .map((entry) => {
+    const priceNumber = Number(entry.data.price ?? 0);
+    const label = normalizeStoreLabel(entry.data.custom_label_0);
+
+    return {
+      id: entry.id,
+      title: entry.data.title,
+      category: entry.data.category ?? "others",
+      price: Number.isNaN(priceNumber) ? 0 : priceNumber,
+      image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      availability: entry.data.availability !== false,
+      customLabel: label,
+    };
+  })
+  .sort(() => Math.random() - 0.5)
+  .slice(0, 4);
 ---
 
 <section class="section pt-7">
@@ -93,6 +119,19 @@ const { title, description, author, categories, image, date, tags } = post.data;
           </div>
         </div>
         <Disqus className="mt-20" client:only="react" />
+
+        {recommendedProducts.length > 0 && (
+          <div class="mt-20 border-t border-border pt-10">
+            <h2 class="h3 mb-8 text-center">Рекомендуемые товары</h2>
+            <div class="row">
+              {recommendedProducts.map((product) => (
+                <div class="mb-8 md:col-6 lg:col-6 xl:col-3">
+                  <ProductCard product={product} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
     </div>
 
@@ -111,3 +150,33 @@ const { title, description, author, categories, image, date, tags } = post.data;
     </div>
   </div>
 </section>
+
+<script>
+  import { addToCart } from "@/lib/cart";
+
+  const initAddToCart = () => {
+    const buttons = document.querySelectorAll("[data-add-to-cart]");
+    buttons.forEach((button) => {
+      if ((button as any)._cartInit) return;
+      (button as any)._cartInit = true;
+
+      button.addEventListener("click", () => {
+        const id = (button as HTMLElement).dataset.addToCart;
+        if (!id) return;
+        const title = (button as HTMLElement).dataset.title || "";
+        const price = Number((button as HTMLElement).dataset.price || 0);
+        const qtyInput = document.querySelector(
+          `[data-qty-input="${(button as HTMLElement).dataset.qtySource}"]`,
+        ) as HTMLInputElement | null;
+        const quantity = Math.max(1, Number(qtyInput?.value || 1));
+
+        addToCart({ id, title, price, quantity });
+        document.dispatchEvent(new CustomEvent("cart:item-added"));
+      });
+    });
+  };
+
+  initAddToCart();
+  document.addEventListener("astro:after-swap", initAddToCart);
+  document.addEventListener("astro:page-load", initAddToCart);
+</script>

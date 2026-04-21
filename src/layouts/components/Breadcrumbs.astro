@@ -14,6 +14,7 @@ const labelMap: Record<string, string> = {
   cart: "Корзина",
   info: "Информация",
   "delivery-payment": "Доставка и оплата",
+  "404": "404",
 };
 
 const paths = Astro.url.pathname.split("/").filter((x) => x);
@@ -32,6 +33,16 @@ paths.forEach((label: string, i: number) => {
     i === paths.length - 1 && title
       ? title
       : labelMap[label] || humanize(normalizedLabel) || "";
+
+  // if path is root and not in labelMap, it's likely a service page, so add "Services" before it
+  if (paths.length === 1 && !labelMap[label]) {
+    parts.push({
+      label: labelMap["services"],
+      href: "/services",
+      "aria-label": undefined,
+    });
+  }
+
   label !== "page" &&
     parts.push({
       label: translatedLabel,

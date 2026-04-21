@@ -3,6 +3,7 @@ import Base from "@/layouts/Base.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
 import { render } from "astro:content";
+import ImageMod from "@/components/ImageMod.astro";
 
 // get static paths for all pages
 export async function getStaticPaths() {
@@ -35,6 +36,20 @@ const { Content } = await render(page);
     <div class="container">
       <div class="row justify-center">
         <div class="lg:col-10">
+          {
+            image && (
+              <div class="mb-10 flex justify-center">
+                <ImageMod
+                  src={image}
+                  height={500}
+                  width={1200}
+                  alt={title}
+                  class="rounded object-contain max-h-[500px] w-full"
+                  format="webp"
+                />
+              </div>
+            )
+          }
           <div class="content">
             <Content />
           </div>
