@@ -299,14 +299,73 @@ const iconMap = {
               </h3>
             </div>
             <p class="mt-3 text-sm">{homepage.howToBuy.helpCard.text}</p>
-            <a
-              class="btn btn-primary mt-4 w-full text-center"
-              href={homepage.howToBuy.helpCard.button.link}
-              target="_blank"
-              rel="noopener"
-            >
-              {homepage.howToBuy.helpCard.button.label}
-            </a>
+            <form id="meter-photo-form" class="mt-4 space-y-3" enctype="multipart/form-data">
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  Ваше имя
+                </span>
+                <input
+                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
+                  id="meter-name"
+                  name="name"
+                  type="text"
+                  placeholder="Иван"
+                  required
+                />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  Телефон
+                </span>
+                <input
+                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
+                  id="meter-phone"
+                  name="phone"
+                  type="tel"
+                  placeholder="+375XXXXXXXXX"
+                  inputmode="tel"
+                  autocomplete="tel"
+                  required
+                />
+                <span class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light">
+                  Формат: +375XXXXXXXXX
+                </span>
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  Адрес установки
+                </span>
+                <input
+                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
+                  id="meter-address"
+                  name="address"
+                  type="text"
+                  placeholder="Минск, ул. ..."
+                  required
+                />
+              </label>
+              <label class="block">
+                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  Прикрепите фото
+                </span>
+                <input
+                  class="block w-full cursor-pointer rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-primary/90 dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
+                  id="meter-photo"
+                  name="photo"
+                  type="file"
+                  accept="image/*"
+                  data-max-size="5242880"
+                  required
+                />
+                <span class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light">
+                  До 5 МБ
+                </span>
+              </label>
+              <button class="btn btn-primary w-full text-center" type="submit">
+                {homepage.howToBuy.helpCard.button.label}
+              </button>
+              <p id="meter-photo-status" class="text-sm text-text-light dark:text-darkmode-text-light"></p>
+            </form>
             <ul class="mt-4 space-y-2 text-sm">
               {
                 homepage.howToBuy.helpCard.highlights.map((item: string) => (
@@ -322,6 +381,103 @@ const iconMap = {
       </div>
     </div>
   </section>
+
+  <script is:inline>
+    (() => {
+      const form = document.getElementById("meter-photo-form");
+      const status = document.getElementById("meter-photo-status");
+      const photoInput = document.getElementById("meter-photo");
+      const nameInput = document.getElementById("meter-name");
+      const phoneInput = document.getElementById("meter-phone");
+      const addressInput = document.getElementById("meter-address");
+      const phoneError = document.createElement("p");
+
+      if (!form || !status || !photoInput || !nameInput || !phoneInput || !addressInput) return;
+      phoneError.className = "mt-1 text-xs text-red-500";
+      phoneError.setAttribute("aria-live", "polite");
+      phoneInput.insertAdjacentElement("afterend", phoneError);
+
+      const formatPhone = (value) => {
+        const digits = value.replace(/\D/g, "");
+        const normalized = digits.startsWith("375")
+          ? digits.slice(3)
+          : digits.startsWith("80")
+            ? digits.slice(1)
+            : digits;
+        const phoneDigits = normalized.slice(0, 9);
+        return phoneDigits ? `+375${phoneDigits}` : "+375";
+      };
+
+      phoneInput.addEventListener("input", () => {
+        phoneInput.value = formatPhone(phoneInput.value);
+        phoneError.textContent = "";
+      });
+
+      phoneInput.addEventListener("focus", () => {
+        if (!phoneInput.value.trim()) {
+          phoneInput.value = "+375";
+        }
+      });
+
+      phoneInput.addEventListener("paste", () => {
+        window.setTimeout(() => {
+          phoneInput.value = formatPhone(phoneInput.value);
+        }, 0);
+      });
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const file = photoInput.files && photoInput.files[0];
+
+        if (!file) {
+          status.textContent = "Выберите фото счётчика перед отправкой.";
+          return;
+        }
+
+        const maxSize = Number(photoInput.dataset.maxSize || 5242880);
+        if (file.size > maxSize) {
+          status.textContent = "Размер фото не должен превышать 5 МБ.";
+          return;
+        }
+
+        const normalizedPhone = formatPhone(phoneInput.value.trim());
+        if (!/^\+375\d{9}$/.test(normalizedPhone)) {
+          phoneError.textContent = "Введите номер в формате +375XXXXXXXXX";
+          phoneInput.focus();
+          return;
+        }
+        phoneInput.value = normalizedPhone;
+
+        const formData = new FormData();
+        formData.append("requestType", "meter_photo");
+        formData.append("name", nameInput.value.trim());
+        formData.append("phone", normalizedPhone);
+        formData.append("address", addressInput.value.trim());
+        formData.append("photo", file);
+
+        status.textContent = "Отправка...";
+
+        try {
+          const response = await fetch("/api/send-callback.php", {
+            method: "POST",
+            body: formData,
+          });
+
+          const payload = await response.json();
+
+          if (!response.ok || !payload.success) {
+            throw new Error(payload.error || "Не удалось отправить фото");
+          }
+
+          form.reset();
+          phoneError.textContent = "";
+          status.textContent = "Фото отправлено. Мы свяжемся с вами после обработки.";
+        } catch (error) {
+          status.textContent = error instanceof Error ? error.message : "Ошибка отправки фото.";
+        }
+      });
+    })();
+  </script>
 
   <!-- Integrations -->
   <section class="section-sm pt-0">

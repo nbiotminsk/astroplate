@@ -11,10 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 // Получение данных из тела запроса
-$input = json_decode(file_get_contents('php://input'), true);
+$contentType = $_SERVER['CONTENT_TYPE'] ?? $_SERVER['HTTP_CONTENT_TYPE'] ?? '';
+$input = [];
+if (stripos($contentType, 'multipart/form-data') === 0) {
+    $input = $_POST;
+} else {
+    $rawInput = json_decode(file_get_contents('php://input'), true);
+    if (is_array($rawInput)) {
+        $input = $rawInput;
+    }
+}
 
-if (!$input) {
-    echo json_encode(['error' => 'Invalid JSON data']);
+if (!$input && empty($_FILES)) {
+    echo json_encode(['error' => 'Invalid request data']);
     http_response_code(400);
     exit();
 }
@@ -31,9 +40,23 @@ $unp = $input['unp'] ?? '';
 $checkoutType = $input['checkoutType'] ?? '';
 $cartItems = $input['cartItems'] ?? [];
 $total = $input['total'] ?? 0;
+$photoFile = $_FILES['photo'] ?? null;
+$maxPhotoSize = 5 * 1024 * 1024;
+$phonePattern = '/^\+375\d{9}$/';
 
 // Валидация
-if ($requestType === 'contact') {
+if ($requestType === 'meter_photo') {
+    if (empty($photoFile) || ($photoFile['error'] ?? UPLOAD_ERR_NO_FILE) !== UPLOAD_ERR_OK) {
+        echo json_encode(['error' => 'Missing photo file']);
+        http_response_code(400);
+        exit();
+    }
+    if (($photoFile['size'] ?? 0) > $maxPhotoSize) {
+        echo json_encode(['error' => 'Photo exceeds 5 MB limit']);
+        http_response_code(400);
+        exit();
+    }
+} elseif ($requestType === 'contact') {
     if (empty($name) || empty($email)) {
         echo json_encode(['error' => 'Missing required fields (name, email)']);
         http_response_code(400);
@@ -45,6 +68,12 @@ if ($requestType === 'contact') {
         http_response_code(400);
         exit();
     }
+}
+
+if (!empty($phone) && !preg_match($phonePattern, $phone)) {
+    echo json_encode(['error' => 'Invalid phone format']);
+    http_response_code(400);
+    exit();
 }
 
 // Получаем переменные окружения (через getenv или конфигурационный файл)
@@ -95,6 +124,12 @@ if ($requestType === 'checkout') {
     $messageText .= "📧 <b>Email:</b> {$email}\n";
     $messageText .= "💬 <b>Сообщение:</b>\n" . ($message ?: 'Нет сообщения') . "\n";
     $messageText .= "\n📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
+} elseif ($requestType === 'meter_photo') {
+    $messageText = "📷 <b>Фото счётчика с сайта Teleofis24.by</b>\n\n";
+    $messageText .= "<b>Имя:</b> {$name}\n";
+    $messageText .= "<b>Телефон:</b> {$phone}\n";
+    $messageText .= "<b>Адрес установки:</b> {$address}\n";
+    $messageText .= "📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
 } else {
     echo json_encode(['error' => 'Unknown request type']);
     http_response_code(400);
@@ -102,27 +137,39 @@ if ($requestType === 'checkout') {
 }
 
 // Отправка в Telegram
-$telegramUrl = "https://api.telegram.org/bot{$telegramBotToken}/sendMessage";
-$telegramData = [
-    'chat_id' => (string)$telegramChatId,
-    'text' => $messageText,
-    'parse_mode' => 'HTML'
-];
+$telegramMethod = $requestType === 'meter_photo' ? 'sendPhoto' : 'sendMessage';
+$telegramUrl = "https://api.telegram.org/bot{$telegramBotToken}/{$telegramMethod}";
+
+if ($requestType === 'meter_photo') {
+    $telegramData = [
+        'chat_id' => (string)$telegramChatId,
+        'caption' => $messageText,
+        'parse_mode' => 'HTML',
+        'photo' => new CURLFile($photoFile['tmp_name'], $photoFile['type'] ?: 'application/octet-stream', $photoFile['name'] ?? 'photo.jpg'),
+    ];
+} else {
+    $telegramData = [
+        'chat_id' => (string)$telegramChatId,
+        'text' => $messageText,
+        'parse_mode' => 'HTML'
+    ];
+}
 
 $ch = curl_init($telegramUrl);
 curl_setopt($ch, CURLOPT_POST, true);
-curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($telegramData));
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+curl_setopt($ch, CURLOPT_POSTFIELDS, $telegramData);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 
 $telegramResponse = curl_exec($ch);
 $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+$curlError = curl_error($ch);
+curl_close($ch);
 
 $responseData = json_decode($telegramResponse, true);
 
-if ($httpCode !== 200 || !$responseData || !$responseData['ok']) {
-    error_log('Telegram API error: ' . $telegramResponse);
+if ($telegramResponse === false || $httpCode !== 200 || !$responseData || empty($responseData['ok'])) {
+    error_log('Telegram API error: ' . ($curlError ?: $telegramResponse));
     echo json_encode([
         'error' => 'Failed to send message to Telegram',
         'details' => $responseData,

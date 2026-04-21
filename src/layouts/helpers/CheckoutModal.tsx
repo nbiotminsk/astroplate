@@ -7,6 +7,7 @@ const CheckoutModal = () => {
   const [checkoutType, setCheckoutType] = useState<"fiz" | "yur">("fiz");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   // Form states
   const [formData, setFormData] = useState({
@@ -22,6 +23,7 @@ const CheckoutModal = () => {
       setIsOpen(true);
       setStep("type");
       setError(null);
+      setPhoneError(null);
     };
 
     document.addEventListener("checkout:open", handleOpen);
@@ -40,8 +42,41 @@ const CheckoutModal = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
+    if (name === "phone") {
+      const digits = value.replace(/\D/g, "");
+      const normalized = digits.startsWith("375")
+        ? digits.slice(3)
+        : digits.startsWith("80")
+          ? digits.slice(1)
+          : digits;
+      const phoneDigits = normalized.slice(0, 9);
+      const formatted = phoneDigits ? `+375${phoneDigits}` : "+375";
+      setFormData((prev) => ({ ...prev, [name]: formatted }));
+      setPhoneError(null);
+      return;
+    }
+
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  const handlePhonePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text");
+    const digits = pasted.replace(/\D/g, "");
+    const normalized = digits.startsWith("375")
+      ? digits.slice(3)
+      : digits.startsWith("80")
+        ? digits.slice(1)
+        : digits;
+    const phoneDigits = normalized.slice(0, 9);
+    setFormData((prev) => ({
+      ...prev,
+      phone: phoneDigits ? `+375${phoneDigits}` : "+375",
+    }));
+    setPhoneError(null);
+  };
+
+  const isValidPhone = (phone: string) => /^\+375\d{9}$/.test(phone);
 
   const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,6 +88,12 @@ const CheckoutModal = () => {
 
     if (cart.length === 0) {
       setError("Ваша корзина пуста");
+      setIsSubmitting(false);
+      return;
+    }
+
+    if (!isValidPhone(formData.phone.trim())) {
+      setPhoneError("Введите номер в формате +375XXXXXXXXX");
       setIsSubmitting(false);
       return;
     }
@@ -218,9 +259,19 @@ const CheckoutModal = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
+                    onPaste={handlePhonePaste}
+                    inputMode="tel"
+                    autoComplete="tel"
+                    pattern="^\+375\d{9}$"
                     className="w-full rounded-lg border border-border bg-transparent px-4 py-2 focus:border-primary focus:outline-none dark:border-darkmode-border"
-                    placeholder="+375 (__) ___-__-__"
+                    placeholder="+375XXXXXXXXX"
                   />
+                  <p className="mt-1 text-xs text-red-500" aria-live="polite">
+                    {phoneError || " "}
+                  </p>
+                  <p className="mt-1 text-xs text-text-light dark:text-darkmode-text-light">
+                    Формат: +375XXXXXXXXX
+                  </p>
                 </div>
 
                 <div>
