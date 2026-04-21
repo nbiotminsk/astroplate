@@ -86,7 +86,7 @@ const recommendedProducts = catalogEntries
     <div class="row justify-center">
       <article class="lg:col-10">
         <Breadcrumbs className="mb-6" title={title} />
-        <h1 set:html={markdownify(title)} class="mb-4" />
+        <h1 set:html={markdownify(title)} class="text-h3-sm md:text-h3 mb-4" />
         {
           image && (
             <div class="mb-10 flex justify-center">
@@ -186,11 +186,6 @@ const recommendedProducts = catalogEntries
   </div>
 </section>
 
-<style>
-  h1 {
-    @apply text-h3-sm md:text-h3;
-  }
-</style>
 
 <script>
   import { addToCart } from "@/lib/cart";

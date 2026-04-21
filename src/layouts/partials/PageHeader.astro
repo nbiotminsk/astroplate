@@ -14,14 +14,8 @@ const { title = "", compact = false }: { title?: string; compact?: boolean } =
         compact ? "py-5" : "py-14",
       ]}
     >
-      <h1 set:text={humanize(title)} />
+      <h1 class="text-h3-sm md:text-h3" set:text={humanize(title)} />
       <Breadcrumbs className={compact ? "mt-3" : "mt-6"} title={title} />
     </div>
   </div>
 </section>
-
-<style>
-  h1 {
-    @apply text-h3-sm md:text-h3;
-  }
-</style>
