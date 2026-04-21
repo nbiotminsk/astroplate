@@ -152,13 +152,13 @@ const tagIcons: Record<string, string> = {
                     />
                   </div>
                 </a>
-                <h4 class="card-title mb-4 min-h-[2.5rem] text-text-dark dark:text-darkmode-text-dark">
+                <h4 class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark">
                   {product.title}
                 </h4>
                 <div class="mt-auto flex flex-col gap-2 pt-4">
                   <div class="flex flex-col gap-1">
                     <p
-                      class={`min-h-[2rem] text-lg font-semibold leading-none ${
+                      class={`min-h-8 text-lg font-semibold leading-none ${
                       product.customLabel === "premium"
                         ? "text-amber-700 dark:text-amber-300"
                         : product.customLabel === "discount"
@@ -169,7 +169,7 @@ const tagIcons: Record<string, string> = {
                       {product.price} BYN
                     </p>
                     <p
-                      class={`min-h-[1.5rem] text-sm leading-none ${
+                      class={`min-h-6 text-sm leading-none ${
                         product.availability ? "text-green-700" : "text-red-700"
                       }`}
                     >
