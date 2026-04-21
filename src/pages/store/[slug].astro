@@ -4,6 +4,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
+import { getStoreLabelMeta, normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -27,6 +28,8 @@ const brand = product.data.brand || "Teleofis24";
 const priceNumber = Number(product.data.price ?? 0);
 const price = Number.isNaN(priceNumber) ? 0 : priceNumber;
 const isInStock = product.data.availability !== false;
+const customLabel = normalizeStoreLabel(product.data.custom_label_0);
+const labelMeta = getStoreLabelMeta(customLabel);
 const availabilitySchema = isInStock
   ? "https://schema.org/InStock"
   : "https://schema.org/OutOfStock";
@@ -104,11 +107,32 @@ const productSchema = {
           />
         </div>
         <div class="lg:col-6">
-          <p class="mb-3 inline-block rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light">
-            {category}
-          </p>
+          <div class="mb-3 flex flex-wrap gap-2">
+            <p class="inline-flex rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light">
+              {category}
+            </p>
+            {
+              labelMeta ? (
+                <span
+                  class={`inline-flex rounded border px-3 py-1 text-xs font-semibold ${labelMeta.className}`}
+                >
+                  {labelMeta.badge}
+                </span>
+              ) : null
+            }
+          </div>
           <h1 class="mb-3">{title}</h1>
-          <p class="mb-4 text-3xl font-bold text-emerald-600">{price} BYN</p>
+          <p
+            class={`mb-4 text-3xl font-bold ${
+              customLabel === "premium"
+                ? "text-amber-700 dark:text-amber-300"
+                : customLabel === "discount"
+                  ? "text-rose-600 dark:text-rose-300"
+                  : "text-emerald-600"
+            }`}
+          >
+            {price} BYN
+          </p>
           <p class={`mb-4 text-sm ${isInStock ? "text-green-700" : "text-red-700"}`}>
             {isInStock ? "В наличии" : "Нет в наличии"}
           </p>

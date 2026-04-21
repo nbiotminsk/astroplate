@@ -17,6 +17,7 @@ const COLLECTION_DEFAULTS: Partial<Record<CollectionKey, Record<string, unknown>
   store: {
     availability: true,
     category: "others",
+    custom_label_0: "standart",
     price: "0",
     price_currency: "BYN",
   },

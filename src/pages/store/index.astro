@@ -3,23 +3,34 @@ import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import Base from "@/layouts/Base.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
+import {
+  getStoreLabelMeta,
+  getStoreLabelPriority,
+  normalizeStoreLabel,
+} from "@/lib/utils/storeLabels";
 
 const catalogEntries = await getNormalizedCollection(
   "store",
   ({ data }) => !data.draft,
 );
 
-const products = catalogEntries.map((entry) => {
-  const priceNumber = Number(entry.data.price ?? 0);
-  return {
-    id: entry.id,
-    title: entry.data.title,
-    category: entry.data.category ?? "others",
-    price: Number.isNaN(priceNumber) ? 0 : priceNumber,
-    image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
-    availability: entry.data.availability !== false,
-  };
-});
+const products = catalogEntries
+  .map((entry) => {
+    const priceNumber = Number(entry.data.price ?? 0);
+    const label = normalizeStoreLabel(entry.data.custom_label_0);
+
+    return {
+      id: entry.id,
+      title: entry.data.title,
+      category: entry.data.category ?? "others",
+      price: Number.isNaN(priceNumber) ? 0 : priceNumber,
+      image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      availability: entry.data.availability !== false,
+      customLabel: label,
+      labelPriority: getStoreLabelPriority(label),
+    };
+  })
+  .sort((a, b) => a.labelPriority - b.labelPriority || a.title.localeCompare(b.title, "ru"));
 
 const categorySet = new Set(products.map((product) => product.category));
 const tags = ["Все", ...Array.from(categorySet)];
@@ -57,7 +68,7 @@ const tagIcons: Record<string, string> = {
             tags.map((tag, index) => (
               <button
                 type="button"
-                class={`inline-flex w-full justify-center sm:w-auto sm:justify-start items-center gap-2 rounded border px-2 py-2.5 text-sm sm:text-sm text-center min-h-[44px] transition ${
+                class={`inline-flex min-h-[44px] w-full items-center justify-center gap-2 rounded border px-2 py-2.5 text-center text-sm transition sm:w-auto sm:justify-start sm:text-sm ${
                   index === 0
                     ? "border-primary bg-primary text-white"
                     : "border-border bg-light hover:border-primary hover:text-primary dark:bg-darkmode-light"
@@ -105,8 +116,18 @@ const tagIcons: Record<string, string> = {
               data-category={product.category}
               data-price={product.price}
               data-title={product.title}
+              data-label-priority={product.labelPriority}
+              data-custom-label={product.customLabel}
             >
-              <div class="catalog-card group flex h-full flex-col rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
+              <div
+                class={`catalog-card group flex h-full flex-col rounded border bg-light p-5 dark:bg-darkmode-light ${
+                  product.customLabel === "premium"
+                    ? "border-amber-300 shadow-[0_14px_28px_rgba(217,119,6,0.12)] dark:border-amber-500/50"
+                    : product.customLabel === "discount"
+                      ? "border-rose-300 shadow-[0_14px_28px_rgba(225,29,72,0.08)] dark:border-rose-500/50"
+                      : "border-border dark:border-darkmode-border"
+                }`}
+              >
                 <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
                   <ImageMod
                     class="catalog-card__image mb-4 h-48 w-full rounded object-cover"
@@ -117,11 +138,33 @@ const tagIcons: Record<string, string> = {
                     format="webp"
                   />
                 </a>
-                <p class="mb-2 inline-block rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
-                  {product.category}
-                </p>
+                <div class="mb-2 flex flex-wrap gap-2">
+                  <p class="inline-flex rounded bg-body px-3 py-1 text-xs dark:bg-darkmode-body">
+                    {product.category}
+                  </p>
+                  {(() => {
+                    const labelMeta = getStoreLabelMeta(product.customLabel);
+                    return labelMeta ? (
+                      <span
+                        class={`inline-flex rounded border px-3 py-1 text-xs font-semibold ${labelMeta.className}`}
+                      >
+                        {labelMeta.badge}
+                      </span>
+                    ) : null;
+                  })()}
+                </div>
                 <h4 class="mb-4 text-2xl leading-tight">{product.title}</h4>
-                <p class="mb-4 text-2xl font-bold text-emerald-600">{product.price} BYN</p>
+                <p
+                  class={`mb-4 text-2xl font-bold ${
+                    product.customLabel === "premium"
+                      ? "text-amber-700 dark:text-amber-300"
+                      : product.customLabel === "discount"
+                        ? "text-rose-600 dark:text-rose-300"
+                        : "text-emerald-600"
+                  }`}
+                >
+                  {product.price} BYN
+                </p>
                 <p
                   class={`mb-4 text-sm ${
                     product.availability ? "text-green-700" : "text-red-700"
@@ -387,16 +430,19 @@ const tagIcons: Record<string, string> = {
     const sortCards = () => {
       const mode = sortSelect.value;
       const sorted = [...cards].sort((a, b) => {
+        const labelPriorityA = Number(a.dataset.labelPriority || 2);
+        const labelPriorityB = Number(b.dataset.labelPriority || 2);
         const priceA = Number(a.dataset.price || 0);
         const priceB = Number(b.dataset.price || 0);
         const titleA = (a.dataset.title || "").toLowerCase();
         const titleB = (b.dataset.title || "").toLowerCase();
 
+        if (labelPriorityA !== labelPriorityB) return labelPriorityA - labelPriorityB;
         if (mode === "price-asc") return priceA - priceB;
         if (mode === "price-desc") return priceB - priceA;
         if (mode === "title-asc") return titleA.localeCompare(titleB, "ru");
         if (mode === "title-desc") return titleB.localeCompare(titleA, "ru");
-        return 0;
+        return titleA.localeCompare(titleB, "ru");
       });
 
       sorted.forEach((card: HTMLElement) => grid.appendChild(card));

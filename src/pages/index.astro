@@ -3,6 +3,7 @@ import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
+import { getStoreLabelPriority, normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import {
   FaBroadcastTower,
   FaBuilding,
@@ -34,15 +35,17 @@ const catalogEntries = await getNormalizedCollection(
 const topProducts = catalogEntries
   .map((entry) => {
     const priceNumber = Number(entry.data.price ?? 0);
+    const label = normalizeStoreLabel(entry.data.custom_label_0);
     return {
       id: entry.id,
       title: entry.data.title,
       category: entry.data.category ?? "Без категории",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
       image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      labelPriority: getStoreLabelPriority(label),
     };
   })
-  .sort((a, b) => b.price - a.price)
+  .sort((a, b) => a.labelPriority - b.labelPriority || b.price - a.price)
   .slice(0, 4);
 
 const iconMap = {
