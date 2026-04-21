@@ -130,7 +130,7 @@ const tagIcons: Record<string, string> = {
               >
                 <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
                   <ImageMod
-                    class="catalog-card__image mb-4 h-48 w-full rounded object-cover"
+                    class="catalog-card__image mb-4 h-48 w-full rounded object-contain"
                     src={product.image}
                     alt={product.title}
                     width={760}
@@ -153,29 +153,32 @@ const tagIcons: Record<string, string> = {
                     ) : null;
                   })()}
                 </div>
-                <h4 class="mb-4 min-h-[3.5rem] text-2xl leading-tight">
+                <h4 class="mb-4 min-h-[3rem] text-xl leading-tight">
                   {product.title}
                 </h4>
-                <p
-                  class={`mb-4 min-h-[2rem] text-2xl font-bold ${
-                    product.customLabel === "premium"
-                      ? "text-amber-700 dark:text-amber-300"
-                      : product.customLabel === "discount"
-                        ? "text-rose-600 dark:text-rose-300"
-                        : "text-emerald-600"
-                  }`}
-                >
-                  {product.price} BYN
-                </p>
-                <p
-                  class={`mb-4 min-h-[1.5rem] text-sm ${
-                    product.availability ? "text-green-700" : "text-red-700"
-                  }`}
-                >
-                  {product.availability ? "В наличии" : "Нет в наличии"}
-                </p>
+                <div class="mt-auto flex flex-col gap-2 pt-4">
+                  <div class="flex items-end justify-between gap-3">
+                    <p
+                      class={`min-h-[2rem] text-2xl font-bold leading-none ${
+                        product.customLabel === "premium"
+                          ? "text-amber-700 dark:text-amber-300"
+                          : product.customLabel === "discount"
+                            ? "text-rose-600 dark:text-rose-300"
+                            : "text-emerald-600"
+                      }`}
+                    >
+                      {product.price} BYN
+                    </p>
+                    <p
+                      class={`min-h-[1.5rem] text-sm leading-none ${
+                        product.availability ? "text-green-700" : "text-red-700"
+                      }`}
+                    >
+                      {product.availability ? "В наличии" : "Нет в наличии"}
+                    </p>
+                  </div>
 
-                <div class="mt-auto flex flex-col gap-2 pt-4 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
+                  <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
                   <button
                     type="button"
                     class={`btn btn-buy w-full text-center py-2.5 text-base sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
@@ -203,6 +206,7 @@ const tagIcons: Record<string, string> = {
                   >
                     Подробнее
                   </a>
+                </div>
                 </div>
               </div>
             </article>
