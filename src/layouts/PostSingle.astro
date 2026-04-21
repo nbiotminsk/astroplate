@@ -43,7 +43,7 @@ const recommendedProducts = catalogEntries
     };
   })
   .sort(() => Math.random() - 0.5)
-  .slice(0, 4);
+  .slice(0, 3);
 ---
 
 <section class="section pt-7">
@@ -51,7 +51,7 @@ const recommendedProducts = catalogEntries
     <div class="row justify-center">
       <article class="lg:col-10">
         <Breadcrumbs className="mb-6" title={title} />
-        <h1 set:html={markdownify(title)} class="h2 mb-4" />
+        <h1 set:html={markdownify(title)} class="mb-4" />
         {
           image && (
             <div class="mb-10 flex justify-center">
@@ -123,9 +123,9 @@ const recommendedProducts = catalogEntries
         {recommendedProducts.length > 0 && (
           <div class="mt-20 border-t border-border pt-10">
             <h2 class="h3 mb-8 text-center">Рекомендуемые товары</h2>
-            <div class="row">
+            <div class="row justify-center">
               {recommendedProducts.map((product) => (
-                <div class="mb-8 md:col-6 lg:col-6 xl:col-3">
+                <div class="mb-8 md:col-6 lg:col-4">
                   <ProductCard product={product} />
                 </div>
               ))}
@@ -150,6 +150,12 @@ const recommendedProducts = catalogEntries
     </div>
   </div>
 </section>
+
+<style>
+  h1 {
+    @apply text-h3-sm md:text-h3;
+  }
+</style>
 
 <script>
   import { addToCart } from "@/lib/cart";
