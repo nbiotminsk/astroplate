@@ -31,8 +31,8 @@
   },
   "navigation_button": {
     "enable": true,
-    "label": "+375 29 365 29 10",
-    "link": "tel:+375293652910"
+    "label": "+375 29 8-462-462",
+    "link": "tel:+375298462462"
   },
   "google_tag_manager": {
     "enable": false,

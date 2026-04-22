@@ -211,7 +211,7 @@ finalCta:
     link: /contact
   secondary:
     label: Позвонить
-    link: tel:+375293652910
+    link: tel:+375298462462
 
 faq:
   title: FAQ
