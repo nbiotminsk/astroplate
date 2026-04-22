@@ -1,7 +1,7 @@
 ---
 title: Модуль + счетчик Ду 20 мм в колодец
 category: комплекты
-price: "259"
+price: "800"
 price_currency: BYN
 img: /images/Image_module_sim_prog_20mm.png
 brand: Teleofis24
