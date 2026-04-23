@@ -51,7 +51,7 @@ description: "ЧУП \"Телеофис\""
 
 3.3. Размещение текста настоящего Договора в сети Интернет по адресу:
 
-​[https://teleofis24.by/info/dogovor-oferty ](https://teleofis24.by/delivery-payment/dogovor-oferty)является публичной офертой Подрядчика.
+​[https://teleofis24.by/info/dogovor-oferty ](https://teleofis24.by/info/dogovor-oferty)является публичной офертой Подрядчика.
 
 3.4. Для Акцепта Оферты Заказчик направляет Заявку на приобретение Оборудования и/или выполнение Работ.
 
