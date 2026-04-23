@@ -54,15 +54,12 @@ const baseUrl = Astro.site?.origin || "https://teleofis24.by";
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
-  "itemListElement": parts.map((part: any, index: number) => {
-    const isLast = index === parts.length - 1;
-    return {
-      "@type": "ListItem",
-      "position": index + 1,
-      "name": part.label,
-      ...(part.href && !isLast ? { "url": `${baseUrl}${part.href}` } : {})
-    };
-  })
+  "itemListElement": parts.map((part: any, index: number) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "name": part.label,
+    "item": part.href ? `${baseUrl}${part.href}` : undefined
+  }))
 };
 ---
 
