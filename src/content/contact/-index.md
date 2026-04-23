@@ -7,7 +7,6 @@ draft: false
 ---
 <div className="not-prose">
 <div className="mb-10 p-6 sm:p-8 rounded-2xl bg-linear-to-br from-white to-theme-light dark:from-darkmode-theme-light dark:to-darkmode-body border border-border dark:border-darkmode-border shadow-lg relative overflow-hidden group">
-{/* Decorative accent */}
 <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 dark:bg-darkmode-primary/10 rounded-bl-full z-0 transition-transform duration-700 group-hover:scale-110"></div>
 <div className="absolute -bottom-8 -left-8 w-32 h-32 bg-primary/10 dark:bg-darkmode-primary/5 rounded-tr-full z-0 transition-transform duration-700 group-hover:scale-110"></div>
 <div className="relative z-10">
