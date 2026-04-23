@@ -1,6 +1,7 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import {
@@ -122,6 +123,7 @@ const businessSchema = {
     <div class="container">
       <div class="row items-center gap-y-10">
         <div class="md:col-6">
+          <Breadcrumbs className="mb-5" />
           <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
           <h1 class="mb-5 text-h4 leading-tight md:text-h3">{homepage.hero.title}</h1>
           <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
