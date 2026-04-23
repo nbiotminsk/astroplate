@@ -1,5 +1,6 @@
 ---
 import TwSizeIndicator from "@/components/TwSizeIndicator.astro";
+import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import theme from "@/config/theme.json";
 import { plainify } from "@/lib/utils/textConverter";
@@ -30,10 +31,11 @@ export interface Props {
   image?: string;
   noindex?: boolean;
   canonical?: string;
+  hideBreadcrumbs?: boolean;
 }
 
 // destructure frontmatter
-const { title, meta_title, description, image, noindex, canonical } =
+const { title, meta_title, description, image, noindex, canonical, hideBreadcrumbs } =
   Astro.props;
 ---
 
@@ -177,6 +179,7 @@ const { title, meta_title, description, image, noindex, canonical } =
     <CartModal client:only="react" />
     <CheckoutModal client:only="react" />
     <main class="grow" id="main-content">
+      {!hideBreadcrumbs && <Breadcrumbs className="container mt-6 mb-0" />}
       <slot />
     </main>
     <Footer />
