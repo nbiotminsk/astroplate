@@ -19,5 +19,18 @@ mpn: KIT-NBIOT-2W15
 condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
+review:
+  rating: 4.8
+  count: 45
+aggregateRating:
+  ratingValue: 4.8
+  reviewCount: 45
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.4
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 ---
 ​

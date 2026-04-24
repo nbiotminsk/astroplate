@@ -17,6 +17,19 @@ features:
   - Внешняя антенна
 condition: https://schema.org/NewCondition
 custom_label_0: premium
+review:
+  rating: 4.9
+  count: 18
+aggregateRating:
+  ratingValue: 4.9
+  reviewCount: 18
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.3
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 sku:
   id: "01"
   value: module-nbiot

@@ -18,5 +18,18 @@ mpn: SERVICE-ZETA-REPAIR
 condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
+review:
+  rating: 5
+  count: 9
+aggregateRating:
+  ratingValue: 5
+  reviewCount: 9
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.2
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 ---
 ​

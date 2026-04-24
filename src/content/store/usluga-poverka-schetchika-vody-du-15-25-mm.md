@@ -18,5 +18,18 @@ mpn: SERVICE-CALIBRATION-15-20
 condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: discount
+review:
+  rating: 4.9
+  count: 67
+aggregateRating:
+  ratingValue: 4.9
+  reviewCount: 67
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.1
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 ---
 ​

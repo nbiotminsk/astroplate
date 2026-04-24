@@ -18,5 +18,18 @@ mpn: KIT-NBIOT-W20
 condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
+review:
+  rating: 4.5
+  count: 12
+aggregateRating:
+  ratingValue: 4.5
+  reviewCount: 12
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.5
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 ---
 ​

@@ -18,5 +18,18 @@ mpn: SERVICE-REPLACE-15-25
 condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
+review:
+  rating: 5
+  count: 28
+aggregateRating:
+  ratingValue: 5
+  reviewCount: 28
+  bestRating: 5
+shippingDetails:
+  shippingType: Delivery
+  weight: 0.1
+hasMerchantReturnPolicy:
+  returnPolicyCategory: MerchantReturnsAllowed
+  returnPeriod: P30D
 ---
 Также продаем новые счетчики воды с импульсным выходом
