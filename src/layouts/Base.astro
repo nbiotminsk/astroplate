@@ -179,7 +179,7 @@ const { title, meta_title, description, image, noindex, canonical, hideBreadcrum
     <CartModal client:only="react" />
     <CheckoutModal client:only="react" />
     <main class="grow" id="main-content">
-      {!hideBreadcrumbs && <Breadcrumbs className="container mt-6 mb-0" />}
+      {/* Breadcrumbs rendered in individual pages */}
       <slot />
     </main>
     <Footer />
