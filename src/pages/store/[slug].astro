@@ -24,6 +24,14 @@ const title = product.data.title;
 const category = product.data.category || "others";
 const image = product.data.img || product.data.image || "/images/image-placeholder.png";
 const description = (product.data.description || product.data.short_description || "").slice(0, 5000);
+
+// SEO Enhancement
+const metaTitle = product.data.meta_title || `${title} | Купить в Минске`;
+const isNbiot = category.toLowerCase().includes("nbiot") || title.toLowerCase().includes("nbiot");
+const keyPhrase = isNbiot ? "модуль NBIoT для учёта воды" : "";
+const metaDescription = product.data.meta_description || 
+  `${title}${category !== "others" ? ` (${category})` : ""}. ${keyPhrase ? `${keyPhrase}. ` : ""}Доступная цена, доставка по Минску и Беларуси. Заказывайте на teleofis24.by!`;
+
 const features = product.data.features || [];
 const brand = product.data.brand || "Teleofis24";
 const priceNumber = Number(product.data.price ?? 0);
@@ -147,7 +155,8 @@ const productSchema = {
 
 <Base
   title={title}
-  description={description}
+  meta_title={metaTitle}
+  description={metaDescription}
   image={image}
   canonical={productUrl}
 >
