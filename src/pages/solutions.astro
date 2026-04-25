@@ -131,6 +131,6 @@ const allTags = Array.from(
     applyFilters();
   };
 
-  document.addEventListener("astro:page-load", initSolutionsFilters);
+  document.addEventListener("DOMContentLoaded", initSolutionsFilters);
   initSolutionsFilters();
 </script>

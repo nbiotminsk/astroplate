@@ -296,5 +296,5 @@ const productSchema = {
   };
 
   scheduleProductInit();
-  document.addEventListener("astro:page-load", scheduleProductInit);
+  document.addEventListener("DOMContentLoaded", scheduleProductInit);
 </script>

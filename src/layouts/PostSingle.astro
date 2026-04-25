@@ -215,6 +215,5 @@ const recommendedProducts = catalogEntries
   };
 
   initAddToCart();
-  document.addEventListener("astro:after-swap", initAddToCart);
-  document.addEventListener("astro:page-load", initAddToCart);
+  document.addEventListener("DOMContentLoaded", initAddToCart);
 </script>

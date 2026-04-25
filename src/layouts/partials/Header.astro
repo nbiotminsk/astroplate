@@ -171,7 +171,9 @@ const { pathname } = Astro.url;
         };
 
         // Update on load
-        document.addEventListener("astro:page-load", updateBadge);
+        document.addEventListener("DOMContentLoaded", updateBadge);
+        // Also run on script execution to catch initial state
+        updateBadge();
         // Listen for updates from other components
         window.addEventListener(CART_UPDATE_EVENT, updateBadge);
       </script>
