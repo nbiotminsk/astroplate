@@ -198,11 +198,11 @@ const finalDescription = plainify(
         <GoogleTagmanagerNoscript id={config.google_tag_manager.gtm_id} />
       )
     }
-    <Announcement client:only="react" />
+    <Announcement client:load />
     <Header />
-    <SearchModal client:only="react" />
-    <CartModal client:only="react" />
-    <CheckoutModal client:only="react" />
+    <SearchModal client:idle />
+    <CartModal client:idle />
+    <CheckoutModal client:idle />
     <main class="grow" id="main-content">
       {/* Breadcrumbs rendered in individual pages */}
       <slot />

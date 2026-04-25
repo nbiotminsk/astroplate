@@ -27,7 +27,7 @@ const filterByTags = taxonomyFilter(posts, "tags", tag!);
 const sortedPosts = sortByDate(filterByTags);
 ---
 
-<Base title={tag}>
+<Base title={`Тег: ${tag}`} description={`Все статьи, помеченные тегом "${tag}", в нашем блоге.`}>
   <PageHeader title={tag} />
   <div class="section-sm pb-0">
     <div class="container">
