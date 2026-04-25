@@ -6,7 +6,8 @@
 </IfModule>
 ##### HTTP to HTTPS 301 Redirect - END
 
-##### Disable caching for HTML files to ensure fresh content - BEGIN
+##### Disable caching for HTML files and extensionless paths to ensure fresh content - BEGIN
+# For actual .html files
 <FilesMatch "\.(html|htm)$">
   FileETag None
   <ifModule mod_headers.c>
@@ -16,7 +17,15 @@
     Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT"
   </ifModule>
 </FilesMatch>
-##### Disable caching for HTML files to ensure fresh content - END
+
+# For paths without extensions (Astro routes)
+<IfModule mod_headers.c>
+  SetEnvIf Request_URI "(\.[a-zA-Z0-9]+)$" HAS_EXT
+  Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate" env=!HAS_EXT
+  Header set Pragma "no-cache" env=!HAS_EXT
+  Header set Expires "Wed, 11 Jan 1984 05:00:00 GMT" env=!HAS_EXT
+</IfModule>
+##### Disable caching for HTML files and extensionless paths to ensure fresh content - END
 
 ##### Optimize default expiration time - BEGIN
 <IfModule mod_expires.c>
