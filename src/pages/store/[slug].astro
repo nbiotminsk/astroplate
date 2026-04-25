@@ -70,6 +70,17 @@ const productFaqs = [
   }
 ];
 
+// Extract SKU and MPN safely (handle objects from Sitepins)
+const rawSku = product.data.sku;
+const sku = typeof rawSku === "object" && rawSku !== null 
+  ? (rawSku.value || rawSku.id || product.id) 
+  : (rawSku || product.id);
+
+const rawMpn = product.data.mpn;
+const mpn = typeof rawMpn === "object" && rawMpn !== null 
+  ? (rawMpn.value || rawMpn.id || product.id) 
+  : (rawMpn || product.id);
+
 // Google Rich Results - Merchant Center requirements
 const productSchema = {
   "@id": `${productUrl}#product`,
@@ -81,8 +92,8 @@ const productSchema = {
     "caption": title,
     "description": title
   }],
-  sku: String(product.data.sku || product.id).slice(0, 100),
-  mpn: String(product.data.mpn || product.id).slice(0, 100),
+  sku: String(sku).slice(0, 100),
+  mpn: String(mpn).slice(0, 100),
   category,
   brand: {
     "@type": "Brand",
@@ -130,45 +141,41 @@ const productSchema = {
       name: "Teleofis24",
       url: siteUrl,
     },
-    ...(product.data.shippingDetails ? {
-      shippingDetails: {
-        "@type": "OfferShippingDetails",
-        shippingRate: {
-          "@type": "MonetaryAmount",
-          value: "0",
-          currency: "BYN"
+    shippingDetails: {
+      "@type": "OfferShippingDetails",
+      shippingRate: {
+        "@type": "MonetaryAmount",
+        value: "0",
+        currency: "BYN"
+      },
+      shippingDestination: {
+        "@type": "DefinedRegion",
+        addressCountry: "BY"
+      },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        handlingTime: {
+          "@type": "QuantitativeValue",
+          minValue: 0,
+          maxValue: 1,
+          unitCode: "DAY"
         },
-        shippingDestination: {
-          "@type": "DefinedRegion",
-          addressCountry: "BY"
-        },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          handlingTime: {
-            "@type": "QuantitativeValue",
-            minValue: 0,
-            maxValue: 1,
-            unitCode: "DAY"
-          },
-          transitTime: {
-            "@type": "QuantitativeValue",
-            minValue: 1,
-            maxValue: 3,
-            unitCode: "DAY"
-          }
+        transitTime: {
+          "@type": "QuantitativeValue",
+          minValue: 1,
+          maxValue: 3,
+          unitCode: "DAY"
         }
       }
-    } : {}),
-    ...(product.data.hasMerchantReturnPolicy ? {
-      hasMerchantReturnPolicy: {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "BY",
-        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-        merchantReturnDays: 14,
-        returnMethod: "https://schema.org/ReturnByMail",
-        returnFees: "https://schema.org/FreeReturn"
-      }
-    } : {}),
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "BY",
+      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      merchantReturnDays: 14,
+      returnMethod: "https://schema.org/ReturnByMail",
+      returnFees: "https://schema.org/FreeReturn"
+    }
   },
 };
 ---
