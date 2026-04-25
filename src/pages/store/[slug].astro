@@ -3,6 +3,7 @@ import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { getStoreLabelMeta, normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import { render } from "astro:content";
@@ -22,7 +23,7 @@ const { Content } = await render(product);
 const title = product.data.title;
 const category = product.data.category || "others";
 const image = product.data.img || product.data.image || "/images/image-placeholder.png";
-const description = product.data.description || product.data.short_description || "";
+const description = (product.data.description || product.data.short_description || "").slice(0, 5000);
 const features = product.data.features || [];
 const brand = product.data.brand || "Teleofis24";
 const priceNumber = Number(product.data.price ?? 0);
@@ -38,11 +39,13 @@ const gtin = product.data.gtin || product.data.gtin13 || product.data.gtin14;
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const productUrl = `${siteUrl}/store/${product.id}`;
 const imageUrl = `${siteUrl}${image}`;
+
+// Google Rich Results - Merchant Center requirements
 const productSchema = {
   "@context": "https://schema.org",
   "@type": "Product",
   "@id": `${productUrl}#product`,
-  name: title,
+  name: title.slice(0, 150),
   description,
   image: [{
     "@type": "ImageObject",
@@ -50,14 +53,36 @@ const productSchema = {
     "caption": title,
     "description": title
   }],
-  sku: product.data.sku || product.id,
-  mpn: product.data.mpn || product.id,
+  sku: String(product.data.sku || product.id).slice(0, 100),
+  mpn: String(product.data.mpn || product.id).slice(0, 100),
   category,
   brand: {
     "@type": "Brand",
-    name: brand,
+    name: String(brand).slice(0, 70),
   },
   itemCondition: product.data.condition || "https://schema.org/NewCondition",
+  ...(product.data.aggregateRating ? {
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: product.data.aggregateRating.ratingValue,
+      reviewCount: product.data.aggregateRating.reviewCount,
+      bestRating: product.data.aggregateRating.bestRating || 5,
+    }
+  } : {}),
+  ...(product.data.review ? {
+    review: {
+      "@type": "Review",
+      reviewRating: {
+        "@type": "Rating",
+        ratingValue: product.data.review.rating,
+        bestRating: 5,
+      },
+      author: {
+        "@type": "Person",
+        name: "Покупатель"
+      }
+    }
+  } : {}),
   additionalProperty: features.map((feature, index) => ({
     "@type": "PropertyValue",
     name: `Характеристика ${index + 1}`,
@@ -74,9 +99,48 @@ const productSchema = {
     priceValidUntil: "2027-12-31",
     seller: {
       "@type": "Organization",
-      name: brand,
+      name: "Teleofis24",
       url: siteUrl,
     },
+    ...(product.data.shippingDetails ? {
+      shippingDetails: {
+        "@type": "OfferShippingDetails",
+        shippingRate: {
+          "@type": "MonetaryAmount",
+          value: "0",
+          currency: "BYN"
+        },
+        shippingDestination: {
+          "@type": "DefinedRegion",
+          addressCountry: "BY"
+        },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          handlingTime: {
+            "@type": "QuantitativeValue",
+            minValue: 0,
+            maxValue: 1,
+            unitCode: "DAY"
+          },
+          transitTime: {
+            "@type": "QuantitativeValue",
+            minValue: 1,
+            maxValue: 3,
+            unitCode: "DAY"
+          }
+        }
+      }
+    } : {}),
+    ...(product.data.hasMerchantReturnPolicy ? {
+      hasMerchantReturnPolicy: {
+        "@type": "MerchantReturnPolicy",
+        applicableCountry: "BY",
+        returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+        merchantReturnDays: 14,
+        returnMethod: "https://schema.org/ReturnByMail",
+        returnFees: "https://schema.org/FreeReturn"
+      }
+    } : {}),
   },
 };
 ---
@@ -92,7 +156,7 @@ const productSchema = {
     <meta property="product:price:amount" content={price.toFixed(2)} />
     <meta property="product:price:currency" content="BYN" />
     <meta property="product:availability" content={isInStock ? "in stock" : "out of stock"} />
-    <script type="application/ld+json" is:inline set:html={JSON.stringify(productSchema)} />
+    <JsonLd type="Product" data={productSchema} />
   </Fragment>
   <section class="section pb-8 pt-6">
     <div class="container">

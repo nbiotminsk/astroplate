@@ -1,7 +1,9 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
+import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import {
   getStoreLabelPriority,
@@ -34,6 +36,19 @@ const products = catalogEntries
 
 const categorySet = new Set(products.map((product) => product.category));
 const tags = ["Все", ...Array.from(categorySet)];
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const itemListSchema = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "numberOfItems": products.length,
+  "itemListElement": products.map((product, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "url": `${siteUrl}/store/${product.id}`
+  }))
+};
+
 const tagIcons: Record<string, string> = {
   Все: "M3 12h18M12 3v18",
   "Счетчики воды":
@@ -50,6 +65,9 @@ const tagIcons: Record<string, string> = {
 ---
 
 <Base title="Магазин" description="Магазин товаров с ценами и фильтрами по категориям" hideBreadcrumbs={true}>
+  <Fragment slot="head">
+    <JsonLd type="ItemList" data={itemListSchema} />
+  </Fragment>
   <section class="section pb-4 pt-4">
     <div class="container text-center">
       <h1 class="mb-2">Магазин</h1>

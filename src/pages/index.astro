@@ -8,6 +8,7 @@ import {
   getStoreLabelPriority,
   normalizeStoreLabel,
 } from "@/lib/utils/storeLabels";
+import JsonLd from "@/components/JsonLd.astro";
 import {
   FaBroadcastTower,
   FaBuilding,
@@ -74,44 +75,7 @@ const iconMap = {
 } as const;
 
 const siteUrl = "https://teleofis24.by";
-const faqSchema = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  "mainEntity": homepage.faq.items.map((item: any) => ({
-    "@type": "Question",
-    "name": item.question,
-    "acceptedAnswer": {
-      "@type": "Answer",
-      "text": item.answer
-    }
-  }))
-};
-
-const businessSchema = {
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "ЧАСТНОЕ ПРЕДПРИЯТИЕ «ТЕЛЕОФИС»",
-  "image": `${siteUrl}/images/og-image.png`,
-  "@id": `${siteUrl}/#organization`,
-  "url": siteUrl,
-  "telephone": "+375298462462",
-  "address": {
-    "@type": "PostalAddress",
-    "streetAddress": "ул. Макаёнка, 12г, пом. 257",
-    "addressLocality": "Минск",
-    "postalCode": "220114",
-    "addressCountry": "BY"
-  },
-  "geo": {
-    "@type": "GeoCoordinates",
-    "latitude": 53.921, 
-    "longitude": 27.625 
-  }
-};
 ---
-
-<script type="application/ld+json" is:inline set:html={JSON.stringify(faqSchema)} />
-<script type="application/ld+json" is:inline set:html={JSON.stringify(businessSchema)} />
 
 <Base
   title={homepage.title}
@@ -119,6 +83,44 @@ const businessSchema = {
   description={homepage.description}
   hideBreadcrumbs={true}
 >
+  <Fragment slot="head">
+    <JsonLd
+      type="FAQPage"
+      data={{
+        mainEntity: homepage.faq.items.map((item: any) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer,
+          },
+        })),
+      }}
+    />
+
+    <JsonLd
+      type="LocalBusiness"
+      data={{
+        name: "ЧАСТНОЕ ПРЕДПРИЯТИЕ «ТЕЛЕОФИС»",
+        image: `${siteUrl}/images/og-image.png`,
+        "@id": `${siteUrl}/#organization`,
+        url: siteUrl,
+        telephone: "+375298462462",
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "ул. Макаёнка, 12г, пом. 257",
+          addressLocality: "Минск",
+          postalCode: "220114",
+          addressCountry: "BY",
+        },
+        geo: {
+          "@type": "GeoCoordinates",
+          latitude: 53.921,
+          longitude: 27.625,
+        },
+      }}
+    />
+  </Fragment>
   <!-- Hero -->
   <section class="section pb-16 pt-12">
     <div class="container">

@@ -1,6 +1,5 @@
 ---
 import TwSizeIndicator from "@/components/TwSizeIndicator.astro";
-import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import theme from "@/config/theme.json";
 import { plainify } from "@/lib/utils/textConverter";
@@ -17,6 +16,7 @@ import Announcement from "./helpers/Announcement";
 import CartModal from "./helpers/CartModal";
 import CheckoutModal from "./helpers/CheckoutModal";
 import SearchModal from "./helpers/SearchModal";
+import JsonLd from "@/components/JsonLd.astro";
 
 // font families - extract font names for Font component (filter out type keys)
 const fontEntries = Object.entries(theme.fonts.font_family).filter(
@@ -35,8 +35,25 @@ export interface Props {
 }
 
 // destructure frontmatter
-const { title, meta_title, description, image, noindex, canonical, hideBreadcrumbs } =
+const { title, meta_title, description, image, noindex, canonical } =
   Astro.props;
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const currentPath = Astro.url.pathname.replace(/\/$/, "");
+const autoCanonical = canonical || `${siteUrl}${currentPath}${config.site.trailing_slash ? "/" : ""}`;
+
+// Pagination handling for title and description to avoid duplicates
+const paths = Astro.url.pathname.split("/").filter(Boolean);
+const pageIndex = paths.indexOf("page");
+const pageNum = pageIndex !== -1 && paths[pageIndex + 1] ? paths[pageIndex + 1] : null;
+const paginationSuffix = pageNum ? ` - Страница ${pageNum}` : "";
+
+const finalTitle = plainify(
+  (meta_title ? meta_title : title ? title : config.site.title) + paginationSuffix
+);
+const finalDescription = plainify(
+  (description ? description : config.metadata.meta_description) + paginationSuffix
+);
 ---
 
 <!doctype html>
@@ -86,23 +103,16 @@ const { title, meta_title, description, image, noindex, canonical, hideBreadcrum
     />
 
     <!-- title -->
-    <title>
-      {plainify(meta_title ? meta_title : title ? title : config.site.title)}
-    </title>
+    <title>{finalTitle}</title>
 
     <!-- canonical url -->
-    {canonical && <link rel="canonical" href={canonical} item-prop="url" />}
+    <link rel="canonical" href={autoCanonical} item-prop="url" />
 
     <!-- noindex robots -->
     {noindex && <meta name="robots" content="noindex,nofollow" />}
 
     <!-- meta-description -->
-    <meta
-      name="description"
-      content={plainify(
-        description ? description : config.metadata.meta_description,
-      )}
-    />
+    <meta name="description" content={finalDescription} />
 
     <ClientRouter />
 
@@ -110,20 +120,10 @@ const { title, meta_title, description, image, noindex, canonical, hideBreadcrum
     <meta name="author" content={config.metadata.meta_author} />
 
     <!-- og-title -->
-    <meta
-      property="og:title"
-      content={plainify(
-        meta_title ? meta_title : title ? title : config.site.title,
-      )}
-    />
+    <meta property="og:title" content={finalTitle} />
 
     <!-- og-description -->
-    <meta
-      property="og:description"
-      content={plainify(
-        description ? description : config.metadata.meta_description,
-      )}
-    />
+    <meta property="og:description" content={finalDescription} />
     <meta property="og:type" content="website" />
     <meta
       property="og:url"
@@ -164,6 +164,31 @@ const { title, meta_title, description, image, noindex, canonical, hideBreadcrum
       }`}
     />
     <meta name="twitter:card" content="summary_large_image" />
+
+    <JsonLd
+      type="Organization"
+      data={{
+        name: "ЧАСТНОЕ ПРЕДПРИЯТИЕ «ТЕЛЕОФИС»",
+        url: config.site.base_url,
+        logo: `${config.site.base_url}${config.site.favicon}`,
+        image: `${config.site.base_url}/images/og-image.png`,
+        address: {
+          "@type": "PostalAddress",
+          streetAddress: "ул. Макаёнка, 12г, пом. 257",
+          addressLocality: "Минск",
+          postalCode: "220114",
+          addressCountry: "BY"
+        },
+        contactPoint: {
+          "@type": "ContactPoint",
+          telephone: "+375298462462",
+          contactType: "customer service"
+        },
+        sameAs: [
+          "https://t.me/teleofis24"
+        ]
+      }}
+    />
     <slot name="head" />
   </head>
   <body class="flex flex-col min-h-screen">
