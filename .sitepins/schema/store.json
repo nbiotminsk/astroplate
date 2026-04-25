@@ -160,23 +160,11 @@
     {
       "name": "faq",
       "label": "FAQ",
-      "type": "list",
+      "type": "string",
       "value": [],
       "description": "Frequently Asked Questions",
       "isIgnored": false,
-      "isRequired": false,
-      "fields": [
-        {
-          "name": "question",
-          "label": "Question",
-          "type": "string"
-        },
-        {
-          "name": "answer",
-          "label": "Answer",
-          "type": "string"
-        }
-      ]
+      "isRequired": false
     },
     {
       "name": "draft",
@@ -196,6 +184,8 @@
           "name": "weight",
           "label": "Weight (kg)",
           "type": "number",
+          "value": 0.5,
+          "isIgnored": false,
           "defaultValue": "0.5"
         }
       ]
@@ -210,6 +200,8 @@
           "name": "returnPeriod",
           "label": "Return Period (e.g. P14D)",
           "type": "string",
+          "value": "P14D",
+          "isIgnored": false,
           "defaultValue": "P14D"
         }
       ]
