@@ -1,5 +1,6 @@
 ---
 import BlogCard from "@/components/BlogCard.astro";
+import CallToAction from "@/components/CallToAction.astro";
 import Base from "@/layouts/Base.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import { sortByDate } from "@/lib/utils/sortFunctions";
@@ -87,6 +88,7 @@ const allTags = Array.from(
           <p>Статей пока нет.</p>
         )
       }
+      <CallToAction />
     </div>
   </section>
 </Base>

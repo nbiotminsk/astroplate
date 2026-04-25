@@ -1,5 +1,6 @@
 ---
 import Base from "@/layouts/Base.astro";
+import CallToAction from "@/components/CallToAction.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
 
@@ -47,6 +48,7 @@ const serviceArticles = pages.sort((a, b) =>
           }
         </div>
       </div>
+      <CallToAction />
     </div>
   </section>
 </Base>

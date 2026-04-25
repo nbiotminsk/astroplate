@@ -3,6 +3,7 @@ import ImageMod from "@/components/ImageMod.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
 import config from "@/config/config.json";
 import Base from "@/layouts/Base.astro";
+import CallToAction from "@/components/CallToAction.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { getStoreLabelMeta, normalizeStoreLabel } from "@/lib/utils/storeLabels";
@@ -261,6 +262,7 @@ const productSchema = {
           </button>
         </div>
       </div>
+      <CallToAction />
     </div>
   </section>
 </Base>

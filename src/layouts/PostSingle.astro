@@ -11,6 +11,7 @@ import { render } from "astro:content";
 import { FaRegClock, FaRegFolder, FaRegUserCircle } from "react-icons/fa";
 import ImageMod from "./components/ImageMod.astro";
 import ProductCard from "./components/ProductCard.astro";
+import CallToAction from "./components/CallToAction.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import config from "@/config/config.json";
@@ -183,6 +184,7 @@ const recommendedProducts = catalogEntries
         }
       </div>
     </div>
+    <CallToAction />
   </div>
 </section>
 

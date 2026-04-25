@@ -1,0 +1,30 @@
+---
+const categories = [
+  { name: "Магазин", url: "/store", description: "Оборудование для дистанционного учёта" },
+  { name: "Решения", url: "/solutions", description: "Кейсы и статьи о внедрении систем" },
+  { name: "Услуги", url: "/services", description: "Поверка, замена и обслуживание" }
+];
+---
+
+<div class="mt-20 border-t border-border pt-10">
+  <div class="row items-center justify-between gap-y-10">
+    <div class="lg:col-5">
+      <h2 class="h3 mb-4">Нужна консультация?</h2>
+      <p class="mb-8">
+        Свяжитесь с нашими специалистами для подбора оптимального решения для вашего объекта. Мы поможем настроить систему дистанционного сбора данных.
+      </p>
+      <a href="/contact" class="btn btn-primary">Связаться с нами</a>
+    </div>
+    <div class="lg:col-6">
+      <h3 class="h4 mb-6 text-center lg:text-left">Основные разделы</h3>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {categories.map((cat) => (
+          <a href={cat.url} class="block rounded-lg border border-border bg-light p-4 transition-all hover:border-primary hover:shadow-md dark:bg-darkmode-light">
+            <h4 class="h5 mb-1">{cat.name}</h4>
+            <p class="text-xs">{cat.description}</p>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</div>
