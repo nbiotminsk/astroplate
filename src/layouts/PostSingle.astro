@@ -128,7 +128,7 @@ const recommendedProducts = catalogEntries
         </div>
         <div class="row items-start justify-between">
           <div class="mb-10 flex items-center lg:col-5 lg:mb-0">
-            <h5 class="mr-3">Tags :</h5>
+            <h5 class="mr-3">Теги :</h5>
             <ul>
               {
                 tags.map((tag: string) => (
@@ -145,7 +145,7 @@ const recommendedProducts = catalogEntries
             </ul>
           </div>
           <div class="flex items-center lg:col-4">
-            <h5 class="mr-3">Share :</h5>
+            <h5 class="mr-3">Поделиться :</h5>
             <Share
               className="social-icons"
               title={title}
@@ -173,10 +173,10 @@ const recommendedProducts = catalogEntries
 
     <!-- Related posts -->
     <div class="section pb-0">
-      <h2 class="h3 mb-12 text-center">Related Posts</h2>
+      <h2 class="h3 mb-12 text-center">Похожие статьи</h2>
       <div class="row justify-center">
         {
-          similarPosts.map((post) => (
+          similarPosts.slice(0, 3).map((post) => (
             <div class="lg:col-4 md:col-6 mb-14">
               <BlogCard data={post} />
             </div>
