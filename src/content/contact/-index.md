@@ -62,5 +62,3 @@ draft: false
 </a>
 </div>
 </div>
-
-​
