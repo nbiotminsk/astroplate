@@ -6,6 +6,8 @@ import { getTaxonomy } from "@/lib/taxonomyParser.astro";
 import { sortByDate } from "@/lib/utils/sortFunctions";
 import taxonomyFilter from "@/lib/utils/taxonomyFilter";
 import PageHeader from "@/partials/PageHeader.astro";
+import categoriesConfig from "@/config/categories.json";
+import { humanize } from "@/lib/utils/textConverter";
 
 // get static paths for all categories
 export async function getStaticPaths() {
@@ -20,6 +22,10 @@ export async function getStaticPaths() {
 }
 
 const { category } = Astro.params;
+const config = (categoriesConfig as any)[category!];
+
+const title = config?.title || `Категория: ${humanize(category!)}`;
+const description = config?.description || `Все статьи из категории "${humanize(category!)}" в нашем блоге.`;
 
 // get posts by category
 const BLOG_FOLDER = "blog";
@@ -28,8 +34,8 @@ const filterByCategories = taxonomyFilter(posts, "categories", category!);
 const sortedPosts = sortByDate(filterByCategories);
 ---
 
-<Base title={category}>
-  <PageHeader title={category} />
+<Base title={title} description={description}>
+  <PageHeader title={humanize(category!)} />
   <div class="section-sm pb-0">
     <div class="container">
       <div class="row">
