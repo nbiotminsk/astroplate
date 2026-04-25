@@ -1,0 +1,53 @@
+---
+---
+
+<script>
+  const initSearchLoader = () => {
+    const triggers = document.querySelectorAll('[data-search-trigger]');
+    let isLoaded = false;
+
+    const loadSearch = async () => {
+      if (isLoaded) return;
+      isLoaded = true;
+
+      // Динамически импортируем React и компонент
+      const React = (await import('react')).default;
+      const ReactDOM = (await import('react-dom/client')).default;
+      const SearchModal = (await import('./helpers/SearchModal')).default;
+
+      const container = document.getElementById('search-modal-container');
+      if (container) {
+        const root = ReactDOM.createRoot(container);
+        root.render(React.createElement(SearchModal));
+        
+        // Даем время на рендер и открываем (SearchModal сам слушает клики, 
+        // но нам нужно вызвать первый клик вручную или дождаться инициализации)
+        setTimeout(() => {
+          const searchModal = document.getElementById("searchModal");
+          const searchInput = document.getElementById("searchInput");
+          if (searchModal) {
+            searchModal.classList.add("show");
+            searchInput?.focus();
+          }
+        }, 100);
+      }
+    };
+
+    triggers.forEach(trigger => {
+      trigger.addEventListener('click', (e) => {
+        e.preventDefault();
+        loadSearch();
+      });
+    });
+
+    // Также грузим по горячим клавишам
+    window.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        loadSearch();
+      }
+    });
+  };
+
+  // Инициализация при загрузке страницы
+  document.addEventListener('astro:page-load', initSearchLoader);
+</script>

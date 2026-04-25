@@ -15,7 +15,7 @@ import { ClientRouter } from "astro:transitions";
 import Announcement from "./helpers/Announcement";
 import CartModal from "./helpers/CartModal";
 import CheckoutModal from "./helpers/CheckoutModal";
-import SearchModal from "./helpers/SearchModal";
+import SearchLoader from "./SearchLoader.astro";
 import JsonLd from "@/components/JsonLd.astro";
 
 // font families - extract font names for Font component (filter out type keys)
@@ -200,7 +200,8 @@ const finalDescription = plainify(
     }
     <Announcement client:load />
     <Header />
-    <SearchModal client:idle />
+    <div id="search-modal-container"></div>
+    <SearchLoader />
     <CartModal client:idle />
     <CheckoutModal client:idle />
     <main class="grow" id="main-content">
