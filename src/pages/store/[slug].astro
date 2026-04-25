@@ -55,10 +55,23 @@ const siteUrl = config.site.base_url.replace(/\/$/, "");
 const productUrl = `${siteUrl}/store/${product.id}`;
 const imageUrl = `${siteUrl}${image}`;
 
+const productFaqs = [
+  {
+    question: `Как купить ${title} для организации?`,
+    answer: "Мы работаем с юридическими лицами по безналичному расчету. Вы можете отправить запрос на info@teleofis24.by для получения счета или оставить заявку через форму контактов."
+  },
+  {
+    question: "Есть ли гарантия на оборудование?",
+    answer: "Да, на всё оборудование предоставляется официальная гарантия 24 месяца. Мы также обеспечиваем техническую поддержку и консультации по настройке."
+  },
+  {
+    question: "Возможен ли монтаж и подключение?",
+    answer: "Да, наши специалисты выполняют монтаж, пусконаладку и подключение к платформам мониторинга (например, 'Мой Клиент: Ресурсы')."
+  }
+];
+
 // Google Rich Results - Merchant Center requirements
 const productSchema = {
-  "@context": "https://schema.org",
-  "@type": "Product",
   "@id": `${productUrl}#product`,
   name: title.slice(0, 150),
   description,
@@ -173,6 +186,19 @@ const productSchema = {
     <meta property="product:price:currency" content="BYN" />
     <meta property="product:availability" content={isInStock ? "in stock" : "out of stock"} />
     <JsonLd type="Product" data={productSchema} />
+    <JsonLd
+      type="FAQPage"
+      data={{
+        mainEntity: productFaqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      }}
+    />
   </Fragment>
   <section class="section pb-8 pt-6">
     <div class="container">
@@ -262,6 +288,41 @@ const productSchema = {
           </button>
         </div>
       </div>
+
+      <!-- FAQ Section -->
+      <div class="mt-16 border-t border-border pt-10 dark:border-darkmode-border">
+        <h2 class="h3 mb-8">Часто задаваемые вопросы</h2>
+        <div class="space-y-4">
+          {
+            productFaqs.map((faq) => (
+              <details class="group rounded-lg border border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-light">
+                <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  <span>{faq.question}</span>
+                  <span class="transition-transform group-open:rotate-180">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </summary>
+                <div class="mt-3 text-text-dark dark:text-darkmode-text">
+                  <p>{faq.answer}</p>
+                </div>
+              </details>
+            ))
+          }
+        </div>
+      </div>
+
       <CallToAction />
     </div>
   </section>

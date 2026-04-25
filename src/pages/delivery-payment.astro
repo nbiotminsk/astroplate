@@ -3,8 +3,24 @@ import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import PageHeader from "@/partials/PageHeader.astro";
+import JsonLd from "@/components/JsonLd.astro";
 
 const infoEntries = await getNormalizedCollection("info", ({ data }) => !data.draft);
+
+const deliveryFaqs = [
+  {
+    question: "Какими способами можно оплатить заказ?",
+    answer: "Мы принимаем оплату через систему E-POS (ЕРИП) для физических лиц и безналичный расчет для юридических лиц."
+  },
+  {
+    question: "Осуществляете ли вы доставку по Беларуси?",
+    answer: "Да, мы осуществляем доставку по Минску и всей территории Республики Беларусь. Стоимость и сроки зависят от региона."
+  },
+  {
+    question: "Можно ли заказать монтаж вместе с доставкой?",
+    answer: "Да, при оформлении заказа вы можете указать необходимость монтажа. Наши специалисты согласуют время выезда."
+  }
+];
 ---
 
 <Base
@@ -12,6 +28,21 @@ const infoEntries = await getNormalizedCollection("info", ({ data }) => !data.dr
   meta_title="Доставка и оплата"
   description="Информация о доставке и оплате"
 >
+  <Fragment slot="head">
+    <JsonLd
+      type="FAQPage"
+      data={{
+        mainEntity: deliveryFaqs.map((faq) => ({
+          "@type": "Question",
+          name: faq.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: faq.answer,
+          },
+        })),
+      }}
+    />
+  </Fragment>
   <PageHeader title="Доставка и оплата" compact={true} />
 
   <section class="py-8 xl:py-10">
@@ -59,6 +90,40 @@ const infoEntries = await getNormalizedCollection("info", ({ data }) => !data.dr
           <p>Информация пока не добавлена.</p>
         )
       }
+
+      <!-- FAQ Section -->
+      <div class="mt-16 border-t border-border pt-10 dark:border-darkmode-border">
+        <h2 class="h3 mb-8">Часто задаваемые вопросы</h2>
+        <div class="space-y-4">
+          {
+            deliveryFaqs.map((faq) => (
+              <details class="group rounded-lg border border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-light">
+                <summary class="flex cursor-pointer list-none items-center justify-between font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  <span>{faq.question}</span>
+                  <span class="transition-transform group-open:rotate-180">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="20"
+                      height="20"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </span>
+                </summary>
+                <div class="mt-3 text-text-dark dark:text-darkmode-text">
+                  <p>{faq.answer}</p>
+                </div>
+              </details>
+            ))
+          }
+        </div>
+      </div>
     </div>
   </section>
 </Base>

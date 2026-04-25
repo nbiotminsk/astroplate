@@ -1,88 +1,43 @@
 ---
-import { humanize } from "@/lib/utils/textConverter";
+import { getBreadcrumbs } from "@/lib/utils/breadcrumb";
 
 const { className, title }: { className?: string; title?: string } = Astro.props;
 
-const labelMap: Record<string, string> = {
-  blog: "Блог",
-  tags: "Теги",
-  categories: "Категории",
-  solutions: "Решения",
-  services: "Услуги",
-  contact: "Контакты",
-  store: "Магазин",
-  cart: "Корзина",
-  info: "Информация",
-  "delivery-payment": "Доставка и оплата",
-  "404": "404",
-};
-
-const paths = Astro.url.pathname.split("/").filter((x: string) => x);
-let parts = [
-  {
-    label: "Главная",
-    href: "/",
-    "aria-label": Astro.url.pathname === "/" ? "page" : undefined,
-  },
-];
-
-paths.forEach((label: string, i: number) => {
-  const href = `/${paths.slice(0, i + 1).join("/")}`;
-  const normalizedLabel = label.replace(".html", "").replace(/[-_]/g, " ");
-  const translatedLabel =
-    i === paths.length - 1 && title
-      ? title
-      : labelMap[label] || humanize(normalizedLabel) || "";
-
-  // if path is root and not in labelMap, it's likely a service page, so add "Services" before it
-  if (paths.length === 1 && !labelMap[label]) {
-    parts.push({
-      label: labelMap["services"],
-      href: "/services",
-      "aria-label": undefined,
-    });
-  }
-
-    parts.push({
-      label: translatedLabel,
-      href,
-      "aria-label": Astro.url.pathname === href ? "page" : undefined,
-    });
-});
-
-const baseUrl = Astro.site?.origin || "https://teleofis24.by";
-const currentUrl = Astro.url.pathname;
-const breadcrumbSchema = {
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": parts.map((part: any, index: number) => {
-    const isLast = index === parts.length - 1;
-    const itemUrl = isLast ? `${baseUrl}${currentUrl}` : (part.href ? `${baseUrl}${part.href}` : `${baseUrl}${currentUrl}`);
-    return {
-      "@type": "ListItem",
-      "position": index + 1,
-      "name": part.label,
-      "item": itemUrl
-    };
-  })
-};
+const parts = getBreadcrumbs(Astro.url.pathname, title);
 ---
 
-<script type="application/ld+json" is:inline set:html={JSON.stringify(breadcrumbSchema)} />
-
 <nav aria-label="Breadcrumb" class={className}>
-  <ol class="inline-flex flex-wrap items-center text-sm md:text-base" role="list">
+  <ol
+    class="inline-flex flex-wrap items-center text-sm md:text-base"
+    role="list"
+    itemscope
+    itemtype="https://schema.org/BreadcrumbList"
+  >
     {
-      parts.map(({ label, ...attrs }, index: number) => (
-        <li class="mx-1 flex items-center" role="listitem">
+      parts.map((part, index: number) => (
+        <li
+          class="mx-1 flex items-center"
+          role="listitem"
+          itemprop="itemListElement"
+          itemscope
+          itemtype="https://schema.org/ListItem"
+        >
           {index > 0 && <span class="inline-block mr-1">/</span>}
+          <meta itemprop="position" content={`${index + 1}`} />
           {index !== parts.length - 1 ? (
-            <a class="inline-flex items-center px-1 min-h-[44px] text-primary dark:text-darkmode-primary" {...attrs}>
-              {label}
+            <a
+              class="inline-flex items-center px-1 min-h-[44px] text-primary dark:text-darkmode-primary"
+              href={part.href}
+              itemprop="item"
+            >
+              <span itemprop="name">{part.label}</span>
             </a>
           ) : (
-            <span class="inline-flex items-center px-1 min-h-[44px] text-text-light dark:text-darkmode-text-light">
-              {label}
+            <span
+              class="inline-flex items-center px-1 min-h-[44px] text-text-light dark:text-darkmode-text-light"
+              itemprop="name"
+            >
+              {part.label}
             </span>
           )}
         </li>

@@ -14,15 +14,14 @@ import CallToAction from "./components/CallToAction.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import config from "@/config/config.json";
+import JsonLd from "@/components/JsonLd.astro";
 
 const COLLECTION_FOLDER = "blog";
 const { post } = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
-const postUrl = `${siteUrl}/${post.id}`;
+const postUrl = `${siteUrl}/${COLLECTION_FOLDER}/${post.id}`;
 const articleSchema = {
-  "@context": "https://schema.org",
-  "@type": "BlogPosting",
   "headline": post.data.title,
   "description": post.data.description,
   "image": post.data.image ? [{
@@ -79,7 +78,9 @@ const recommendedProducts = catalogEntries
   .slice(0, 3);
 ---
 
-<script type="application/ld+json" is:inline set:html={JSON.stringify(articleSchema)} />
+<Fragment slot="head">
+  <JsonLd type="BlogPosting" data={articleSchema} />
+</Fragment>
 
 <section class="section pt-7">
   <div class="container">

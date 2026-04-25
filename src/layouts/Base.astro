@@ -15,6 +15,7 @@ import Announcement from "./helpers/Announcement";
 import CartModal from "./helpers/CartModal";
 import CheckoutModal from "./helpers/CheckoutModal";
 import JsonLd from "@/components/JsonLd.astro";
+import { getBreadcrumbs, getBreadcrumbSchema } from "@/lib/utils/breadcrumb";
 
 // font families - extract font names for Font component (filter out type keys)
 const fontEntries = Object.entries(theme.fonts.font_family).filter(
@@ -33,7 +34,7 @@ export interface Props {
 }
 
 // destructure frontmatter
-const { title, meta_title, description, image, noindex, canonical } =
+const { title, meta_title, description, image, noindex, canonical, hideBreadcrumbs } =
   Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
@@ -45,6 +46,9 @@ const paths = Astro.url.pathname.split("/").filter(Boolean);
 const pageIndex = paths.indexOf("page");
 const pageNum = pageIndex !== -1 && paths[pageIndex + 1] ? paths[pageIndex + 1] : null;
 const paginationSuffix = pageNum ? ` - Страница ${pageNum}` : "";
+
+const breadcrumbs = getBreadcrumbs(Astro.url.pathname, title);
+const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
 const finalTitle = plainify(
   (meta_title ? meta_title : title ? title : config.site.title) + paginationSuffix
@@ -162,6 +166,16 @@ const finalDescription = plainify(
     <meta name="twitter:card" content="summary_large_image" />
 
     <JsonLd
+      type="WebSite"
+      data={{
+        name: config.site.title,
+        url: config.site.base_url,
+        description: config.metadata.meta_description,
+        inLanguage: "ru-RU"
+      }}
+    />
+
+    <JsonLd
       type="Organization"
       data={{
         name: "ЧАСТНОЕ ПРЕДПРИЯТИЕ «ТЕЛЕОФИС»",
@@ -185,6 +199,9 @@ const finalDescription = plainify(
         ]
       }}
     />
+
+    {!hideBreadcrumbs && <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />}
+
     <slot name="head" />
   </head>
   <body class="flex flex-col min-h-screen">
