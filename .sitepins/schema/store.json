@@ -177,6 +177,42 @@
           "type": "string"
         }
       ]
+    },
+    {
+      "name": "draft",
+      "label": "Draft",
+      "type": "boolean",
+      "value": false,
+      "isIgnored": false,
+      "defaultValue": "false"
+    },
+    {
+      "name": "shippingDetails",
+      "label": "Shipping Details",
+      "type": "object",
+      "isIgnored": false,
+      "fields": [
+        {
+          "name": "weight",
+          "label": "Weight (kg)",
+          "type": "number",
+          "defaultValue": "0.5"
+        }
+      ]
+    },
+    {
+      "name": "hasMerchantReturnPolicy",
+      "label": "Merchant Return Policy",
+      "type": "object",
+      "isIgnored": false,
+      "fields": [
+        {
+          "name": "returnPeriod",
+          "label": "Return Period (e.g. P14D)",
+          "type": "string",
+          "defaultValue": "P14D"
+        }
+      ]
     }
   ]
 }
