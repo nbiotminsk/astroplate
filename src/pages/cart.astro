@@ -122,16 +122,15 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     const itemsWrap = document.getElementById("cart-page-items");
     const countEl = document.getElementById("cart-page-count");
     const totalEl = document.getElementById("cart-page-total");
-    const clearBtn = document.getElementById("clear-cart-page");
 
-    if (!itemsWrap || !countEl || !totalEl || !clearBtn) return;
+    if (!itemsWrap) return;
 
     const cart = getCart();
     const count = getCartCount();
     const total = getCartTotal();
 
-    countEl.textContent = count.toString();
-    totalEl.textContent = `${total} BYN`;
+    if (countEl) countEl.textContent = count.toString();
+    if (totalEl) totalEl.textContent = `${total} BYN`;
 
     if (cart.length === 0) {
       itemsWrap.innerHTML = `
@@ -212,29 +211,39 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
       });
     });
   };
+const init = () => {
+  if ((window as any)._cartInitialized) return;
+  (window as any)._cartInitialized = true;
 
-  const init = () => {
-    const clearBtn = document.getElementById("clear-cart-page");
-    if (clearBtn) {
-      clearBtn.addEventListener("click", () => {
-        clearCart();
-        renderCartPage();
-      });
-    }
+  const clearBtn = document.getElementById("clear-cart-page");
+  if (clearBtn) {
+    clearBtn.addEventListener("click", () => {
+      clearCart();
+      renderCartPage();
+    });
+  }
 
-    const checkoutBtn = document.getElementById("checkout-btn");
-    if (checkoutBtn) {
-      checkoutBtn.addEventListener("click", () => {
-        document.dispatchEvent(new CustomEvent("checkout:open"));
-      });
-    }
+  const checkoutBtn = document.getElementById("checkout-btn");
+  if (checkoutBtn) {
+    checkoutBtn.addEventListener("click", () => {
+      document.dispatchEvent(new CustomEvent("checkout:open"));
+    });
+  }
+  renderCartPage();
 
-    renderCartPage();
+  // Listen for cart updates from other components
+  window.addEventListener("cart:update", renderCartPage);
+  document.addEventListener("cart:update", renderCartPage);
+};
 
-    // Listen for cart updates from other components
-    document.addEventListener("cart:update", renderCartPage);
-  };
+// Run on page load
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", init);
+} else {
+  init();
+}
 
-  // Run on page load
-  document.addEventListener("astro:page-load", init);
+window.addEventListener("pageshow", (event) => {
+  init();
+});
 </script>

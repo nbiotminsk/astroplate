@@ -511,9 +511,10 @@ const tagIcons: Record<string, string> = {
     requestAnimationFrame(() => initCatalogPage());
   };
 
-  scheduleCatalogInit();
-  document.addEventListener("DOMContentLoaded", scheduleCatalogInit);
-  document.addEventListener("astro:after-swap", scheduleCatalogInit);
-  document.addEventListener("astro:page-load", scheduleCatalogInit);
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", scheduleCatalogInit);
+  } else {
+    scheduleCatalogInit();
+  }
   window.addEventListener("pageshow", scheduleCatalogInit);
 </script>
