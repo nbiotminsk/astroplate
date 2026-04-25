@@ -33,6 +33,14 @@
       "isIgnored": false,
       "isRequired": false,
       "defaultValue": ""
+    },
+    {
+      "name": "draft",
+      "label": "Draft",
+      "type": "boolean",
+      "value": false,
+      "isIgnored": false,
+      "defaultValue": ""
     }
   ]
 }
