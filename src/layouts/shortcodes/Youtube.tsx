@@ -13,9 +13,10 @@ const Youtube = ({
     import("@justinribeiro/lite-youtube");
   }, []);
 
-  // @ts-ignore
+  const LiteYoutube = "lite-youtube" as any;
+
   return (
-    <lite-youtube
+    <LiteYoutube
       className="rounded-lg"
       videoid={id}
       videotitle={title}
