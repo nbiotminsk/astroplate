@@ -1,9 +1,9 @@
 ---
-title: Модуль + счетчик Ду 20 мм в колодец
+title: Модуль NBIoT + Sim + счетчик Ду 20 мм
 category: комплекты
-price: "800"
+price: "740"
 price_currency: BYN
-img: /images/Image_module_sim_prog_20mm.png
+img: /images/20mm_module.png
 brand: Teleofis24
 availability: true
 short_description: Комплект для объектов с повышенным расходом воды.
