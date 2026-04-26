@@ -74,3 +74,30 @@ const faqSchema =
     </div>
   </section>
 </Base>
+
+<script>
+  import { addToCart } from "@/lib/cart";
+
+  const initServiceButtons = () => {
+    const buttons = document.querySelectorAll("[data-order-service]");
+    buttons.forEach((btn) => {
+      if ((btn as HTMLElement).dataset.initialized) return;
+      (btn as HTMLElement).dataset.initialized = "true";
+
+      btn.addEventListener("click", () => {
+        const id = (btn as HTMLElement).dataset.orderService;
+        const title = (btn as HTMLElement).dataset.title;
+        const price = Number((btn as HTMLElement).dataset.price);
+
+        if (id && title && !isNaN(price)) {
+          addToCart({ id, title, price, quantity: 1 });
+          document.dispatchEvent(new CustomEvent("cart:item-added"));
+        }
+      });
+    });
+  };
+
+  // Run on load and after swaps (if using view transitions)
+  initServiceButtons();
+  document.addEventListener("astro:page-load", initServiceButtons);
+</script>

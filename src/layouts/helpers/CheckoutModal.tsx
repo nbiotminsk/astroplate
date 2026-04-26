@@ -346,13 +346,25 @@ const CheckoutModal = () => {
 
                 {error && <div className="text-sm text-red-500">{error}</div>}
 
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="btn btn-primary w-full py-3 disabled:opacity-50"
-                >
-                  {isSubmitting ? "Отправка..." : "Подтвердить заказ"}
-                </button>
+                <div className="space-y-4">
+                  <p className="text-center text-[11px] leading-tight text-text-light dark:text-darkmode-text-light">
+                    Нажимая «Подтвердить заказ», вы принимаете условия{" "}
+                    <a
+                      href="/info/dogovor-oferty"
+                      className="underline hover:text-primary"
+                      target="_blank"
+                    >
+                      договора публичной оферты
+                    </a>
+                  </p>
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="btn btn-primary w-full py-3 disabled:opacity-50"
+                  >
+                    {isSubmitting ? "Отправка..." : "Подтвердить заказ"}
+                  </button>
+                </div>
               </form>
             </div>
           )}
