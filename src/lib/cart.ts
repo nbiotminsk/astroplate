@@ -4,6 +4,7 @@ export interface CartItem {
   price: number;
   quantity: number;
   image?: string;
+  category?: string;
 }
 
 export const CART_KEY = "catalog-cart-v1";

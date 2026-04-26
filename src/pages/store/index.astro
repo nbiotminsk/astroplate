@@ -33,13 +33,17 @@ const products = catalogEntries
       labelPriority: getStoreLabelPriority(label),
     };
   })
-  .sort(
-    (a, b) =>
-      a.labelPriority - b.labelPriority || a.title.localeCompare(b.title, "ru"),
-  );
+  .sort((a, b) => {
+    if (a.category !== b.category) {
+      return a.category.localeCompare(b.category, "ru");
+    }
+    return (
+      a.labelPriority - b.labelPriority || a.title.localeCompare(b.title, "ru")
+    );
+  });
 
 const categorySet = new Set(products.map((product) => product.category));
-const tags = ["Все", ...Array.from(categorySet)];
+const tags = ["Все", ...Array.from(categorySet).sort((a, b) => a.localeCompare(b, "ru"))];
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const itemListSchema = {
@@ -56,7 +60,7 @@ const itemListSchema = {
 const tagIcons: Record<string, string> = {
   Все: "M3 12h18M12 3v18",
   "Счетчики воды": "M12 3C8 7 6 10 6 13a6 6 0 0012 0c0-3-2-6-6-10z",
-  "модули Nbiot":
+  "модуль NBIoT":
     "M12 7a5 5 0 015 5M12 3a9 9 0 019 9M12 11a1 1 0 110 2 1 1 0 010-2zM4 12a8 8 0 018-8M8 12a4 4 0 014-4",
   "модули gsm": "M12 18v-5M8.5 14.5L12 11l3.5 3.5M6 10l6-6 6 6",
   комплекты: "M4 7.5L12 3l8 4.5M4 7.5V16.5L12 21l8-4.5V7.5M12 21V12",
@@ -217,6 +221,7 @@ const tagIcons: Record<string, string> = {
                       data-add-to-cart={product.id}
                       data-price={product.price}
                       data-title={product.title}
+                      data-category={product.category}
                       data-qty-source={product.id}
                       disabled={!product.availability}
                     >
@@ -498,11 +503,18 @@ const tagIcons: Record<string, string> = {
       const sorted = [...cards].sort((a, b) => {
         const labelPriorityA = Number(a.dataset.labelPriority || 2);
         const labelPriorityB = Number(b.dataset.labelPriority || 2);
+        const categoryA = a.dataset.category || "";
+        const categoryB = b.dataset.category || "";
         const priceA = Number(a.dataset.price || 0);
         const priceB = Number(b.dataset.price || 0);
         const titleA = (a.dataset.title || "").toLowerCase();
         const titleB = (b.dataset.title || "").toLowerCase();
 
+        if (mode === "default") {
+          if (categoryA !== categoryB) return categoryA.localeCompare(categoryB, "ru");
+          return labelPriorityA - labelPriorityB || titleA.localeCompare(titleB, "ru");
+        }
+        
         if (labelPriorityA !== labelPriorityB)
           return labelPriorityA - labelPriorityB;
         if (mode === "price-asc") return priceA - priceB;
@@ -531,12 +543,13 @@ const tagIcons: Record<string, string> = {
         if (!id) return;
         const title = button.dataset.title || "";
         const price = Number(button.dataset.price || 0);
+        const category = button.dataset.category || "";
         const qtyInput = document.querySelector(
           `[data-qty-input="${button.dataset.qtySource}"]`,
         ) as HTMLInputElement | null;
         const quantity = Math.max(1, Number(qtyInput?.value || 1));
 
-        addToCart({ id, title, price, quantity });
+        addToCart({ id, title, price, category, quantity });
         renderCart();
         document.dispatchEvent(new CustomEvent("cart:item-added"));
         // location.hash = "cart"; // User might still want to see the local cart update

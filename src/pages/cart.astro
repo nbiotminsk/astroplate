@@ -178,25 +178,57 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 
     itemsWrap.innerHTML = cart
       .map((item) => {
-        const isService = item.id.startsWith("service-");
+        const isService = item.id.startsWith("service-") || item.id.includes("usluga");
         let servicesHtml = "";
 
         if (!isService) {
           const availableForThis = AVAILABLE_SERVICES.filter((service) => {
             const serviceId = `service-${service.id}-${item.id}`;
-            return !cart.some((i) => i.id === serviceId);
+            const alreadyInCart = cart.some((i) => i.id === serviceId);
+            if (alreadyInCart) return false;
+
+            const category = item.category || "";
+            const isNbiot = category.includes("модуль NBIoT");
+            const isMeter = category.includes("Счетчики воды");
+            const isKit = category.includes("комплекты");
+
+            // Fallback to title/id if category is missing (for older cart items)
+            const titleLower = item.title.toLowerCase();
+            const idLower = item.id.toLowerCase();
+            const fallbackNbiot = titleLower.includes("nbiot") || idLower.includes("nbiot");
+            const fallbackMeter = titleLower.includes("счетчик") || titleLower.includes("счётчик") || idLower.includes("schetchik");
+            const fallbackKit = titleLower.includes("комплект");
+
+            const finalIsNbiot = isNbiot || fallbackNbiot;
+            const finalIsMeter = isMeter || fallbackMeter;
+            const finalIsKit = isKit || fallbackKit;
+
+            // Kits show everything
+            if (finalIsKit) return true;
+
+            // NBIoT excludes replacement
+            if (finalIsNbiot) {
+              return service.id !== "replacement";
+            }
+
+            // Simple meters only show replacement
+            if (finalIsMeter) {
+              return service.id === "replacement";
+            }
+
+            return true;
           });
 
           if (availableForThis.length > 0) {
             servicesHtml = `
               <div class="mt-4 border-t border-dashed border-border pt-3 dark:border-darkmode-border">
-                <p class="mb-2 text-[10px] font-bold uppercase tracking-wider text-text-light dark:text-darkmode-text-light">Добавить услуги для этого товара:</p>
+                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-text-light dark:text-darkmode-text-light">Добавить услуги для этого товара:</p>
                 <div class="flex flex-wrap gap-2">
                   ${availableForThis
                     .map(
                       (service) => `
                       <button 
-                        class="btn btn-outline-primary btn-sm px-3 py-1 text-[10px]" 
+                        class="btn btn-outline-primary btn-sm px-3 py-1 text-sm font-medium" 
                         data-add-service="${service.id}" 
                         data-parent-id="${item.id}"
                       >
@@ -216,7 +248,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-4">
               <div class="flex-1">
-                <h4 class="mb-1 text-lg font-semibold">${item.title}</h4>
+                <h4 class="mb-1 ${isService ? 'text-xl text-primary' : 'text-lg'} font-semibold">${item.title}</h4>
                 <p class="mb-0 text-sm text-text-light dark:text-darkmode-text-light">${item.price} BYN за шт.</p>
               </div>
             </div>
