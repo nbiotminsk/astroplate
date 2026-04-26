@@ -1,6 +1,6 @@
 ---
 title: "Blog"
 meta_title: "Our Blog"
-description: "Insights and stories from our team."
+description: "Блог компании Телеофис: новости, технические обзоры оборудования NB-IoT, советы по выбору счетчиков воды и актуальная информация о дистанционном учете в Беларуси."
 draft: false
 ---
