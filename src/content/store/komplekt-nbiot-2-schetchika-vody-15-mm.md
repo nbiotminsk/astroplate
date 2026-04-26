@@ -20,7 +20,7 @@ condition: https://schema.org/NewCondition
 draft: false
 custom_label_0: standart
 review:
-  rating: "4.9"
+  rating: 4.9
   count: 45
 aggregateRating:
   ratingValue: 4.8
@@ -28,7 +28,7 @@ aggregateRating:
   bestRating: 5
 shippingDetails:
   shippingType: Delivery
-  weight: "0.8"
+  weight: 0.8
 hasMerchantReturnPolicy:
   returnPolicyCategory: MerchantReturnsAllowed
   returnPeriod: P30D

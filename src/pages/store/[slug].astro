@@ -73,12 +73,12 @@ const productFaqs = [
 // Extract SKU and MPN safely (handle objects from Sitepins)
 const rawSku = product.data.sku;
 const sku = typeof rawSku === "object" && rawSku !== null 
-  ? (rawSku.value || rawSku.id || product.id) 
+  ? ((rawSku as any).value || (rawSku as any).id || product.id) 
   : (rawSku || product.id);
 
 const rawMpn = product.data.mpn;
 const mpn = typeof rawMpn === "object" && rawMpn !== null 
-  ? (rawMpn.value || rawMpn.id || product.id) 
+  ? ((rawMpn as any).value || (rawMpn as any).id || product.id) 
   : (rawMpn || product.id);
 
 // Google Rich Results - Merchant Center requirements
