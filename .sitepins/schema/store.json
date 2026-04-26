@@ -16,163 +16,107 @@
     },
     {
       "name": "category",
-      "label": "Category",
-      "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "label": "Категория",
+      "type": "select",
+      "options": [
+        "модуль NBIoT",
+        "Счетчики воды",
+        "комплекты",
+        "услуги",
+        "others"
+      ],
+      "defaultValue": "others"
     },
     {
       "name": "price",
-      "label": "Price",
+      "label": "Цена",
       "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "defaultValue": "0"
     },
     {
       "name": "price_currency",
-      "label": "PriceCurrency",
+      "label": "Валюта",
       "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "defaultValue": "BYN"
     },
     {
       "name": "img",
-      "label": "Img",
-      "type": "media",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "label": "Изображение",
+      "type": "media"
     },
     {
       "name": "brand",
-      "label": "Brand",
+      "label": "Бренд",
       "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "defaultValue": "Teleofis"
     },
     {
       "name": "availability",
-      "label": "Availability",
+      "label": "В наличии",
       "type": "boolean",
-      "value": false,
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": "false"
+      "defaultValue": true
     },
     {
       "name": "short_description",
-      "label": "ShortDescription",
-      "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "label": "Краткое описание",
+      "type": "string"
     },
     {
       "name": "description",
-      "label": "Description",
-      "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "label": "Полное описание",
+      "type": "string"
     },
     {
       "name": "features",
-      "label": "Features",
+      "label": "Особенности",
       "type": "Array",
-      "value": [],
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": "",
       "subType": "string"
     },
     {
       "name": "condition",
-      "label": "Condition",
+      "label": "Состояние",
       "type": "string",
-      "value": "https://schema.org/NewCondition",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
       "defaultValue": "https://schema.org/NewCondition"
     },
     {
       "name": "custom_label_0",
-      "label": "custom_label_0",
-      "type": "string",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": ""
+      "label": "Метка товара",
+      "type": "select",
+      "options": [
+        "standart",
+        "premium",
+        "discount"
+      ],
+      "defaultValue": "standart"
     },
     {
       "name": "sku",
-      "label": "sku",
-      "type": "object",
-      "value": "",
-      "description": "",
-      "isIgnored": false,
-      "isRequired": false,
-      "defaultValue": "",
+      "label": "Артикул (SKU)",
+      "type": "string"
+    },
+    {
+      "name": "faq",
+      "label": "Вопросы и ответы (FAQ)",
+      "type": "Array",
+      "subType": "object",
       "fields": [
         {
-          "name": "value",
-          "label": "value",
-          "type": "string",
-          "value": "",
-          "description": "",
-          "isIgnored": false,
-          "isRequired": false,
-          "defaultValue": ""
+          "name": "question",
+          "label": "Вопрос",
+          "type": "string"
         },
         {
-          "name": "id",
-          "label": "id",
-          "type": "string",
-          "value": "",
-          "description": "",
-          "isIgnored": false,
-          "isRequired": false,
-          "defaultValue": ""
+          "name": "answer",
+          "label": "Ответ",
+          "type": "string"
         }
       ]
     },
     {
-      "name": "faq",
-      "label": "FAQ",
-      "type": "string",
-      "value": [],
-      "description": "Frequently Asked Questions",
-      "isIgnored": false,
-      "isRequired": false
-    },
-    {
       "name": "draft",
-      "label": "Draft",
+      "label": "Черновик",
       "type": "boolean",
-      "value": false,
-      "isIgnored": false,
-      "defaultValue": "false"
+      "defaultValue": false
     },
     {
       "name": "shippingDetails",

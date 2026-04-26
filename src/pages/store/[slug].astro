@@ -412,7 +412,7 @@ const productSchema = {
               data-id={product.id}
               data-title={title}
               data-price={price}
-              data-category={category}
+              data-cart-category={category}
               disabled={!isInStock}
             >
               Добавить в корзину
@@ -514,7 +514,7 @@ const productSchema = {
       if (!id) return;
       const title = addToCartButton.dataset.title || "";
       const price = Number(addToCartButton.dataset.price || 0);
-      const category = addToCartButton.dataset.category || "";
+      const category = addToCartButton.dataset.cartCategory || "";
       const quantity = Math.max(1, Number(qtyInput?.value || 1));
 
       // Add main product

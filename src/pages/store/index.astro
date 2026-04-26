@@ -16,6 +16,17 @@ const catalogEntries = await getNormalizedCollection(
   ({ data }) => !data.draft,
 );
 
+const categoryPriority: Record<string, number> = {
+  "модуль NBIoT": 0,
+  "модули gsm": 1,
+  комплекты: 2,
+  "Счетчики воды": 3,
+  услуги: 4,
+};
+
+const getCatPriority = (cat: string) =>
+  categoryPriority[cat] !== undefined ? categoryPriority[cat] : 99;
+
 const products = catalogEntries
   .map((entry) => {
     const priceNumber = Number(entry.data.price ?? 0);
@@ -34,6 +45,12 @@ const products = catalogEntries
     };
   })
   .sort((a, b) => {
+    const priorityA = getCatPriority(a.category);
+    const priorityB = getCatPriority(b.category);
+
+    if (priorityA !== priorityB) {
+      return priorityA - priorityB;
+    }
     if (a.category !== b.category) {
       return a.category.localeCompare(b.category, "ru");
     }
@@ -43,7 +60,15 @@ const products = catalogEntries
   });
 
 const categorySet = new Set(products.map((product) => product.category));
-const tags = ["Все", ...Array.from(categorySet).sort((a, b) => a.localeCompare(b, "ru"))];
+const tags = [
+  "Все",
+  ...Array.from(categorySet).sort((a, b) => {
+    const pA = getCatPriority(a);
+    const pB = getCatPriority(b);
+    if (pA !== pB) return pA - pB;
+    return a.localeCompare(b, "ru");
+  }),
+];
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const itemListSchema = {
@@ -221,7 +246,7 @@ const tagIcons: Record<string, string> = {
                       data-add-to-cart={product.id}
                       data-price={product.price}
                       data-title={product.title}
-                      data-category={product.category}
+                      data-cart-category={product.category}
                       data-qty-source={product.id}
                       disabled={!product.availability}
                     >
@@ -358,9 +383,6 @@ const tagIcons: Record<string, string> = {
     const sortSelect = document.querySelector(
       "#catalog-sort",
     ) as HTMLSelectElement | null;
-    const cards = Array.from(
-      document.querySelectorAll("#catalog-grid [data-category]"),
-    ) as HTMLElement[];
     const addToCartButtons = document.querySelectorAll(
       "[data-add-to-cart]",
     ) as NodeListOf<HTMLButtonElement>;
@@ -388,6 +410,10 @@ const tagIcons: Record<string, string> = {
     ) {
       return;
     }
+
+    const cards = Array.from(
+      grid.querySelectorAll(":scope > article"),
+    ) as HTMLElement[];
 
     const formatPrice = (price: number) => `${price} BYN`;
 
@@ -503,14 +529,27 @@ const tagIcons: Record<string, string> = {
       const sorted = [...cards].sort((a, b) => {
         const labelPriorityA = Number(a.dataset.labelPriority || 2);
         const labelPriorityB = Number(b.dataset.labelPriority || 2);
-        const categoryA = a.dataset.category || "";
-        const categoryB = b.dataset.category || "";
         const priceA = Number(a.dataset.price || 0);
         const priceB = Number(b.dataset.price || 0);
         const titleA = (a.dataset.title || "").toLowerCase();
         const titleB = (b.dataset.title || "").toLowerCase();
+        const categoryPriorityMap: Record<string, number> = {
+          "модуль NBIoT": 0,
+          "модули gsm": 1,
+          комплекты: 2,
+          "Счетчики воды": 3,
+          услуги: 4,
+        };
+        const getCatPrio = (cat: string) =>
+          categoryPriorityMap[cat] !== undefined ? categoryPriorityMap[cat] : 99;
+
+        const categoryA = a.dataset.category || "";
+        const categoryB = b.dataset.category || "";
+        const prioA = getCatPrio(categoryA);
+        const prioB = getCatPrio(categoryB);
 
         if (mode === "default") {
+          if (prioA !== prioB) return prioA - prioB;
           if (categoryA !== categoryB) return categoryA.localeCompare(categoryB, "ru");
           return labelPriorityA - labelPriorityB || titleA.localeCompare(titleB, "ru");
         }
@@ -543,7 +582,7 @@ const tagIcons: Record<string, string> = {
         if (!id) return;
         const title = button.dataset.title || "";
         const price = Number(button.dataset.price || 0);
-        const category = button.dataset.category || "";
+        const category = button.dataset.cartCategory || "";
         const qtyInput = document.querySelector(
           `[data-qty-input="${button.dataset.qtySource}"]`,
         ) as HTMLInputElement | null;
