@@ -1,7 +1,7 @@
 ---
 title: Счетчик воды 20мм с импульсным выходом
 category: Счетчики воды
-price: "0"
+price: "132"
 price_currency: BYN
 img: /images/zomzhlx9sjfg5c3ja8ctccjuy23kc1m1.webp
 brand: ВСКМ
