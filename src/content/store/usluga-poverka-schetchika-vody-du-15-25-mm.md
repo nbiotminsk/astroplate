@@ -1,7 +1,7 @@
 ---
 title: Поверка счетчика воды Ду 15-20 мм
 category: услуги
-price: "65"
+price: "120"
 price_currency: BYN
 img: /images/water_meter_blueprint.png
 brand: Teleofis
@@ -32,4 +32,6 @@ hasMerchantReturnPolicy:
   returnPolicyCategory: MerchantReturnsAllowed
   returnPeriod: P30D
 ---
-​
+В состав работ входит выезд специалиста, демонтаж счетчика и установка временной вставки.
+
+Поверка гос поверка счетчика, монтаж поверенного счетчика на место установки
