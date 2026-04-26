@@ -111,31 +111,39 @@ const storeCollection = defineCollection({
     img: z.string().optional(),
     image: z.string().optional(),
     brand: z.string().optional(),
-    review: z.object({
-      rating: z.number().default(5),
-      count: z.number().default(0),
-    }).default(() => ({ rating: 5, count: 0 })),
-    aggregateRating: z.object({
-      ratingValue: z.number().default(5),
-      reviewCount: z.number().default(0),
-      bestRating: z.number().default(5),
-    }).default(() => ({ ratingValue: 5, reviewCount: 0, bestRating: 5 })),
+    review: z
+      .object({
+        rating: z.number().default(5),
+        count: z.number().default(0),
+      })
+      .default(() => ({ rating: 5, count: 0 })),
+    aggregateRating: z
+      .object({
+        ratingValue: z.number().default(5),
+        reviewCount: z.number().default(0),
+        bestRating: z.number().default(5),
+      })
+      .default(() => ({ ratingValue: 5, reviewCount: 0, bestRating: 5 })),
     availability: z.boolean().default(true),
-    shippingDetails: z.object({
-      shippingType: z.string().default("Delivery"),
-      delivery: z.string().optional(),
-      weight: z.number().optional(),
-      length: z.number().optional(),
-      width: z.number().optional(),
-      height: z.number().optional(),
-    }).optional(),
-    hasMerchantReturnPolicy: z.object({
-      applicableCountry: z.string().optional(),
-      returnPolicyCategory: z.string().default("MerchantReturnsAllowed"),
-      obligationDuration: z.string().optional(),
-      returnPeriod: z.string().optional(),
-      returnShippingCost: z.string().optional(),
-    }).optional(),
+    shippingDetails: z
+      .object({
+        shippingType: z.string().default("Delivery"),
+        delivery: z.string().optional(),
+        weight: z.number().optional(),
+        length: z.number().optional(),
+        width: z.number().optional(),
+        height: z.number().optional(),
+      })
+      .optional(),
+    hasMerchantReturnPolicy: z
+      .object({
+        applicableCountry: z.string().optional(),
+        returnPolicyCategory: z.string().default("MerchantReturnsAllowed"),
+        obligationDuration: z.string().optional(),
+        returnPeriod: z.string().optional(),
+        returnShippingCost: z.string().optional(),
+      })
+      .optional(),
     short_description: z.string().optional(),
     description: z.string().optional(),
     features: z.array(z.string()).optional(),

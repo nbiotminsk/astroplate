@@ -9,10 +9,10 @@ import PageHeader from "@/partials/PageHeader.astro";
 const posts = await getSinglePage("blog");
 const sortedPosts = sortByDate(posts);
 const allCategories = Array.from(
-  new Set(sortedPosts.flatMap((post) => post.data.categories || []))
+  new Set(sortedPosts.flatMap((post) => post.data.categories || [])),
 ).sort((a, b) => a.localeCompare(b));
 const allTags = Array.from(
-  new Set(sortedPosts.flatMap((post) => post.data.tags || []))
+  new Set(sortedPosts.flatMap((post) => post.data.tags || [])),
 ).sort((a, b) => a.localeCompare(b));
 ---
 
@@ -30,14 +30,17 @@ const allTags = Array.from(
           <>
             <div class="mb-8 flex flex-wrap items-center gap-4">
               <div class="flex items-center gap-2">
-                <span class="inline-flex text-dark dark:text-white" aria-hidden="true">
+                <span
+                  class="inline-flex text-dark dark:text-white"
+                  aria-hidden="true"
+                >
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M3 7H21M7 12H17M10 17H14"
                       stroke="currentColor"
                       stroke-width="1.8"
                       stroke-linecap="round"
-                    ></path>
+                    />
                   </svg>
                 </span>
                 <select
@@ -46,19 +49,24 @@ const allTags = Array.from(
                   class="rounded border border-border bg-light px-3 py-2 text-sm dark:bg-darkmode-light"
                 >
                   <option value="">Все категории</option>
-                  {allCategories.map((category) => <option value={category}>{category}</option>)}
+                  {allCategories.map((category) => (
+                    <option value={category}>{category}</option>
+                  ))}
                 </select>
               </div>
               <div class="flex items-center gap-2">
-                <span class="inline-flex text-dark dark:text-white" aria-hidden="true">
+                <span
+                  class="inline-flex text-dark dark:text-white"
+                  aria-hidden="true"
+                >
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none">
                     <path
                       d="M3 12L11 20L21 10L13 2H5V10L3 12Z"
                       stroke="currentColor"
                       stroke-width="1.8"
                       stroke-linejoin="round"
-                    ></path>
-                    <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor"></circle>
+                    />
+                    <circle cx="8.5" cy="8.5" r="1.2" fill="currentColor" />
                   </svg>
                 </span>
                 <select
@@ -67,7 +75,9 @@ const allTags = Array.from(
                   class="rounded border border-border bg-light px-3 py-2 text-sm dark:bg-darkmode-light"
                 >
                   <option value="">Все теги</option>
-                  {allTags.map((tag) => <option value={tag}>{tag}</option>)}
+                  {allTags.map((tag) => (
+                    <option value={tag}>{tag}</option>
+                  ))}
                 </select>
               </div>
             </div>

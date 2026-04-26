@@ -6,11 +6,17 @@ import Base from "@/layouts/Base.astro";
 import CallToAction from "@/components/CallToAction.astro";
 import JsonLd from "@/components/JsonLd.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
-import { getStoreLabelMeta, normalizeStoreLabel } from "@/lib/utils/storeLabels";
+import {
+  getStoreLabelMeta,
+  normalizeStoreLabel,
+} from "@/lib/utils/storeLabels";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
-  const catalogEntries = await getNormalizedCollection("store", ({ data }) => !data.draft);
+  const catalogEntries = await getNormalizedCollection(
+    "store",
+    ({ data }) => !data.draft,
+  );
 
   return catalogEntries.map((entry) => ({
     params: { slug: entry.id },
@@ -23,20 +29,31 @@ const { Content } = await render(product);
 
 const title = product.data.title;
 const category = product.data.category || "others";
-const image = product.data.img || product.data.image || "/images/image-placeholder.png";
-const description = (product.data.description || product.data.short_description || "").slice(0, 5000);
+const image =
+  product.data.img || product.data.image || "/images/image-placeholder.png";
+const description = (
+  product.data.description ||
+  product.data.short_description ||
+  ""
+).slice(0, 5000);
 
 // SEO Enhancement
 const metaTitle = product.data.meta_title || `${title} | Купить в Минске`;
-const isNbiot = category.toLowerCase().includes("nbiot") || title.toLowerCase().includes("nbiot");
-const isHeat = category.toLowerCase().includes("тепл") || title.toLowerCase().includes("тепл") || description.toLowerCase().includes("тепл");
+const isNbiot =
+  category.toLowerCase().includes("nbiot") ||
+  title.toLowerCase().includes("nbiot");
+const isHeat =
+  category.toLowerCase().includes("тепл") ||
+  title.toLowerCase().includes("тепл") ||
+  description.toLowerCase().includes("тепл");
 const keyPhrases = [
   isNbiot ? "модуль NBIoT для учёта воды" : "",
   isHeat ? "модуль для учета тепла" : "",
-  "дистанционный учёт воды"
+  "дистанционный учёт воды",
 ].filter(Boolean);
 
-const metaDescription = product.data.meta_description || 
+const metaDescription =
+  product.data.meta_description ||
   `${title}${category !== "others" ? ` (${category})` : ""}. ${keyPhrases.length > 0 ? `${keyPhrases.join(", ")}. ` : ""}Доступная цена, доставка по Минску и Беларуси. Заказывайте на teleofis24.by!`;
 
 const features = product.data.features || [];
@@ -58,40 +75,47 @@ const imageUrl = `${siteUrl}${image}`;
 const productFaqs = [
   {
     question: `Как купить ${title} для организации?`,
-    answer: "Мы работаем с юридическими лицами по безналичному расчету. Вы можете отправить запрос на info@teleofis24.by для получения счета или оставить заявку через форму контактов."
+    answer:
+      "Мы работаем с юридическими лицами по безналичному расчету. Вы можете отправить запрос на info@teleofis24.by для получения счета или оставить заявку через форму контактов.",
   },
   {
     question: "Есть ли гарантия на оборудование?",
-    answer: "Да, на всё оборудование предоставляется официальная гарантия 24 месяца. Мы также обеспечиваем техническую поддержку и консультации по настройке."
+    answer:
+      "Да, на всё оборудование предоставляется официальная гарантия 24 месяца. Мы также обеспечиваем техническую поддержку и консультации по настройке.",
   },
   {
     question: "Возможен ли монтаж и подключение?",
-    answer: "Да, наши специалисты выполняют монтаж, пусконаладку и подключение к платформам мониторинга (например, 'Мой Клиент: Ресурсы')."
-  }
+    answer:
+      "Да, наши специалисты выполняют монтаж, пусконаладку и подключение к платформам мониторинга (например, 'Мой Клиент: Ресурсы').",
+  },
 ];
 
 // Extract SKU and MPN safely (handle objects from Sitepins)
 const rawSku = product.data.sku;
-const sku = typeof rawSku === "object" && rawSku !== null 
-  ? ((rawSku as any).value || (rawSku as any).id || product.id) 
-  : (rawSku || product.id);
+const sku =
+  typeof rawSku === "object" && rawSku !== null
+    ? (rawSku as any).value || (rawSku as any).id || product.id
+    : rawSku || product.id;
 
 const rawMpn = product.data.mpn;
-const mpn = typeof rawMpn === "object" && rawMpn !== null 
-  ? ((rawMpn as any).value || (rawMpn as any).id || product.id) 
-  : (rawMpn || product.id);
+const mpn =
+  typeof rawMpn === "object" && rawMpn !== null
+    ? (rawMpn as any).value || (rawMpn as any).id || product.id
+    : rawMpn || product.id;
 
 // Google Rich Results - Merchant Center requirements
 const productSchema = {
   "@id": `${productUrl}#product`,
   name: title.slice(0, 150),
   description,
-  image: [{
-    "@type": "ImageObject",
-    "url": imageUrl,
-    "caption": title,
-    "description": title
-  }],
+  image: [
+    {
+      "@type": "ImageObject",
+      url: imageUrl,
+      caption: title,
+      description: title,
+    },
+  ],
   sku: String(sku).slice(0, 100),
   mpn: String(mpn).slice(0, 100),
   category,
@@ -100,28 +124,32 @@ const productSchema = {
     name: String(brand).slice(0, 70),
   },
   itemCondition: product.data.condition || "https://schema.org/NewCondition",
-  ...(product.data.aggregateRating ? {
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: product.data.aggregateRating.ratingValue,
-      reviewCount: product.data.aggregateRating.reviewCount,
-      bestRating: product.data.aggregateRating.bestRating || 5,
-    }
-  } : {}),
-  ...(product.data.review ? {
-    review: {
-      "@type": "Review",
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: product.data.review.rating,
-        bestRating: 5,
-      },
-      author: {
-        "@type": "Person",
-        name: "Покупатель"
+  ...(product.data.aggregateRating
+    ? {
+        aggregateRating: {
+          "@type": "AggregateRating",
+          ratingValue: product.data.aggregateRating.ratingValue,
+          reviewCount: product.data.aggregateRating.reviewCount,
+          bestRating: product.data.aggregateRating.bestRating || 5,
+        },
       }
-    }
-  } : {}),
+    : {}),
+  ...(product.data.review
+    ? {
+        review: {
+          "@type": "Review",
+          reviewRating: {
+            "@type": "Rating",
+            ratingValue: product.data.review.rating,
+            bestRating: 5,
+          },
+          author: {
+            "@type": "Person",
+            name: "Покупатель",
+          },
+        },
+      }
+    : {}),
   additionalProperty: features.map((feature, index) => ({
     "@type": "PropertyValue",
     name: `Характеристика ${index + 1}`,
@@ -146,11 +174,11 @@ const productSchema = {
       shippingRate: {
         "@type": "MonetaryAmount",
         value: "0",
-        currency: "BYN"
+        currency: "BYN",
       },
       shippingDestination: {
         "@type": "DefinedRegion",
-        addressCountry: "BY"
+        addressCountry: "BY",
       },
       deliveryTime: {
         "@type": "ShippingDeliveryTime",
@@ -158,24 +186,25 @@ const productSchema = {
           "@type": "QuantitativeValue",
           minValue: 0,
           maxValue: 1,
-          unitCode: "DAY"
+          unitCode: "DAY",
         },
         transitTime: {
           "@type": "QuantitativeValue",
           minValue: 1,
           maxValue: 3,
-          unitCode: "DAY"
-        }
-      }
+          unitCode: "DAY",
+        },
+      },
     },
     hasMerchantReturnPolicy: {
       "@type": "MerchantReturnPolicy",
       applicableCountry: "BY",
-      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      returnPolicyCategory:
+        "https://schema.org/MerchantReturnFiniteReturnWindow",
       merchantReturnDays: 14,
       returnMethod: "https://schema.org/ReturnByMail",
-      returnFees: "https://schema.org/FreeReturn"
-    }
+      returnFees: "https://schema.org/FreeReturn",
+    },
   },
 };
 ---
@@ -191,7 +220,10 @@ const productSchema = {
     <meta property="og:type" content="product" />
     <meta property="product:price:amount" content={price.toFixed(2)} />
     <meta property="product:price:currency" content="BYN" />
-    <meta property="product:availability" content={isInStock ? "in stock" : "out of stock"} />
+    <meta
+      property="product:availability"
+      content={isInStock ? "in stock" : "out of stock"}
+    />
     <JsonLd type="Product" data={productSchema} />
     <JsonLd
       type="FAQPage"
@@ -226,7 +258,9 @@ const productSchema = {
         </div>
         <div class="lg:col-6">
           <div class="mb-3 flex flex-wrap gap-2">
-            <p class="inline-flex rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light">
+            <p
+              class="inline-flex rounded bg-light px-3 py-1 text-xs dark:bg-darkmode-light"
+            >
               {category}
             </p>
             {
@@ -251,7 +285,9 @@ const productSchema = {
           >
             {price} BYN
           </p>
-          <p class={`mb-4 text-sm ${isInStock ? "text-green-700" : "text-red-700"}`}>
+          <p
+            class={`mb-4 text-sm ${isInStock ? "text-green-700" : "text-red-700"}`}
+          >
             {isInStock ? "В наличии" : "Нет в наличии"}
           </p>
           {description && <p class="mb-6">{description}</p>}
@@ -265,7 +301,9 @@ const productSchema = {
               <>
                 <h4 class="mb-3">Характеристики</h4>
                 <ul class="mb-8 list-disc pl-5">
-                  {features.map((feature) => <li class="mb-2">{feature}</li>)}
+                  {features.map((feature) => (
+                    <li class="mb-2">{feature}</li>
+                  ))}
                 </ul>
               </>
             )
@@ -297,7 +335,9 @@ const productSchema = {
       </div>
 
       <!-- FAQ Section -->
-      <div class="mt-16 border-t border-border pt-10 dark:border-darkmode-border">
+      <div
+        class="mt-16 border-t border-border pt-10 dark:border-darkmode-border"
+      >
         <h2 class="h3 mb-8">Часто задаваемые вопросы</h2>
         <div class="space-y-4">
           {
@@ -342,9 +382,12 @@ const productSchema = {
     const addToCartButton = document.querySelector(
       "#add-to-cart",
     ) as HTMLButtonElement | null;
-    const qtyInput = document.querySelector("#detail-qty") as HTMLInputElement | null;
+    const qtyInput = document.querySelector(
+      "#detail-qty",
+    ) as HTMLInputElement | null;
 
-    if (!addToCartButton || addToCartButton.dataset.initialized === "true") return;
+    if (!addToCartButton || addToCartButton.dataset.initialized === "true")
+      return;
     addToCartButton.dataset.initialized = "true";
 
     addToCartButton.addEventListener("click", () => {

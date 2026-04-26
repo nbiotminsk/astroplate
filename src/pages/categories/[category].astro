@@ -25,7 +25,9 @@ const { category } = Astro.params;
 const config = (categoriesConfig as any)[category!];
 
 const title = config?.title || `Категория: ${humanize(category!)}`;
-const description = config?.description || `Все статьи из категории "${humanize(category!)}" в нашем блоге.`;
+const description =
+  config?.description ||
+  `Все статьи из категории "${humanize(category!)}" в нашем блоге.`;
 
 // get posts by category
 const BLOG_FOLDER = "blog";

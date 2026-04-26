@@ -40,7 +40,9 @@ const CheckoutModal = () => {
     setStep("form");
   };
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
     const { name, value } = e.target;
     if (name === "phone") {
       const digits = value.replace(/\D/g, "");
@@ -137,19 +139,28 @@ const CheckoutModal = () => {
 
   return (
     <>
-      <div 
-        className={`modal-overlay ${isOpen ? "show" : ""}`} 
+      <div
+        className={`modal-overlay ${isOpen ? "show" : ""}`}
         onClick={closeModal}
       />
       <div className={`modal ${isOpen ? "show" : ""}`}>
         <div className="modal-content w-[500px]!">
-          <button 
-            className="modal-close" 
+          <button
+            className="modal-close"
             onClick={closeModal}
             aria-label="Закрыть"
             disabled={isSubmitting}
           >
-            <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" strokeWidth="2.5" fill="none" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              viewBox="0 0 24 24"
+              width="18"
+              height="18"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <line x1="18" y1="6" x2="6" y2="18"></line>
               <line x1="6" y1="6" x2="18" y2="18"></line>
             </svg>
@@ -168,7 +179,17 @@ const CheckoutModal = () => {
                   onClick={() => handleTypeSelect("fiz")}
                   className="flex flex-col items-center justify-center rounded-xl border-2 border-border p-6 transition hover:border-primary hover:bg-primary/5 dark:border-darkmode-border dark:hover:border-darkmode-primary"
                 >
-                  <svg className="mb-3 text-primary dark:text-darkmode-primary" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    className="mb-3 text-primary dark:text-darkmode-primary"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
                     <circle cx="12" cy="7" r="4"></circle>
                   </svg>
@@ -178,8 +199,25 @@ const CheckoutModal = () => {
                   onClick={() => handleTypeSelect("yur")}
                   className="flex flex-col items-center justify-center rounded-xl border-2 border-border p-6 transition hover:border-primary hover:bg-primary/5 dark:border-darkmode-border dark:hover:border-darkmode-primary"
                 >
-                  <svg className="mb-3 text-primary dark:text-darkmode-primary" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
+                  <svg
+                    className="mb-3 text-primary dark:text-darkmode-primary"
+                    width="40"
+                    height="40"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <rect
+                      x="2"
+                      y="7"
+                      width="20"
+                      height="14"
+                      rx="2"
+                      ry="2"
+                    ></rect>
                     <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
                   </svg>
                   <span className="font-bold">Юрлицо</span>
@@ -190,11 +228,20 @@ const CheckoutModal = () => {
 
           {step === "form" && (
             <div>
-              <button 
-                onClick={() => setStep("type")} 
+              <button
+                onClick={() => setStep("type")}
                 className="mb-4 flex items-center gap-1 text-sm text-text-light transition hover:text-primary dark:text-darkmode-text-light dark:hover:text-darkmode-primary"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <line x1="19" y1="12" x2="5" y2="12"></line>
                   <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
@@ -203,12 +250,14 @@ const CheckoutModal = () => {
               <h3 className="mb-6 text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
                 Данные для {checkoutType === "fiz" ? "физлица" : "юрлица"}
               </h3>
-              
+
               <form onSubmit={handleSubmit} className="space-y-4">
                 {checkoutType === "fiz" ? (
                   <>
                     <div>
-                      <label className="mb-1 block text-sm font-medium">Фамилия Имя Отчество</label>
+                      <label className="mb-1 block text-sm font-medium">
+                        Фамилия Имя Отчество
+                      </label>
                       <input
                         required
                         type="text"
@@ -224,7 +273,9 @@ const CheckoutModal = () => {
                   <>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div>
-                        <label className="mb-1 block text-sm font-medium">УНП</label>
+                        <label className="mb-1 block text-sm font-medium">
+                          УНП
+                        </label>
                         <input
                           required
                           type="text"
@@ -236,7 +287,9 @@ const CheckoutModal = () => {
                         />
                       </div>
                       <div>
-                        <label className="mb-1 block text-sm font-medium">Организация</label>
+                        <label className="mb-1 block text-sm font-medium">
+                          Организация
+                        </label>
                         <input
                           required
                           type="text"
@@ -252,7 +305,9 @@ const CheckoutModal = () => {
                 )}
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Телефон</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    Телефон
+                  </label>
                   <input
                     required
                     type="tel"
@@ -275,7 +330,9 @@ const CheckoutModal = () => {
                 </div>
 
                 <div>
-                  <label className="mb-1 block text-sm font-medium">Адрес установки</label>
+                  <label className="mb-1 block text-sm font-medium">
+                    Адрес установки
+                  </label>
                   <textarea
                     required
                     name="address"
@@ -287,11 +344,7 @@ const CheckoutModal = () => {
                   />
                 </div>
 
-                {error && (
-                  <div className="text-sm text-red-500">
-                    {error}
-                  </div>
-                )}
+                {error && <div className="text-sm text-red-500">{error}</div>}
 
                 <button
                   type="submit"
@@ -307,7 +360,16 @@ const CheckoutModal = () => {
           {step === "success" && (
             <div className="py-8 text-center">
               <div className="mb-6 flex justify-center text-emerald-500">
-                <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="64"
+                  height="64"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                   <polyline points="22 4 12 14.01 9 11.01"></polyline>
                 </svg>
@@ -316,10 +378,11 @@ const CheckoutModal = () => {
                 Заказ принят!
               </h3>
               <p className="mb-8 text-text-light dark:text-darkmode-text-light">
-                Спасибо за заказ. Наш менеджер свяжется с вами в ближайшее время для уточнения деталей.
+                Спасибо за заказ. Наш менеджер свяжется с вами в ближайшее время
+                для уточнения деталей.
               </p>
-              <button 
-                onClick={closeModal} 
+              <button
+                onClick={closeModal}
                 className="btn btn-primary w-full py-3"
               >
                 Закрыть

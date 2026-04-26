@@ -1,7 +1,8 @@
 ---
 import { getBreadcrumbs } from "@/lib/utils/breadcrumb";
 
-const { className, title }: { className?: string; title?: string } = Astro.props;
+const { className, title }: { className?: string; title?: string } =
+  Astro.props;
 
 const parts = getBreadcrumbs(Astro.url.pathname, title);
 ---

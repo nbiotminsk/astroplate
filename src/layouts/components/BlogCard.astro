@@ -13,10 +13,15 @@ const { data } = Astro.props;
 const { title, image, date, categories } = data.data;
 ---
 
-<div class="bg-body dark:bg-darkmode-body rounded-xl border border-border/50 dark:border-darkmode-border/50 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+<div
+  class="bg-body dark:bg-darkmode-body rounded-xl border border-border/50 dark:border-darkmode-border/50 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
+>
   {
     image && (
-      <a href={`/${blog_folder}/${data.id}`} class="mb-6 block overflow-hidden rounded-lg">
+      <a
+        href={`/${blog_folder}/${data.id}`}
+        class="mb-6 block overflow-hidden rounded-lg"
+      >
         <ImageMod
           class="mx-auto block rounded object-contain max-w-[250px] w-full transition-transform duration-500 hover:scale-105"
           src={image}

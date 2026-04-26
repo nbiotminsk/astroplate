@@ -22,31 +22,35 @@ const { post } = Astro.props;
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const postUrl = `${siteUrl}/${COLLECTION_FOLDER}/${post.id}`;
 const articleSchema = {
-  "headline": post.data.title,
-  "description": post.data.description,
-  "image": post.data.image ? [{
-    "@type": "ImageObject",
-    "url": `${siteUrl}${post.data.image}`,
-    "caption": post.data.alt_img || post.data.title,
-    "description": post.data.alt_img || post.data.title
-  }] : [],
-  "datePublished": post.data.date,
-  "author": {
+  headline: post.data.title,
+  description: post.data.description,
+  image: post.data.image
+    ? [
+        {
+          "@type": "ImageObject",
+          url: `${siteUrl}${post.data.image}`,
+          caption: post.data.alt_img || post.data.title,
+          description: post.data.alt_img || post.data.title,
+        },
+      ]
+    : [],
+  datePublished: post.data.date,
+  author: {
     "@type": "Person",
-    "name": post.data.author
+    name: post.data.author,
   },
-  "publisher": {
+  publisher: {
     "@type": "Organization",
-    "name": config.site.title,
-    "logo": {
+    name: config.site.title,
+    logo: {
       "@type": "ImageObject",
-      "url": `${siteUrl}${config.site.logo || "/images/favicon.png"}`
-    }
+      url: `${siteUrl}${config.site.logo || "/images/favicon.png"}`,
+    },
   },
-  "mainEntityOfPage": {
+  mainEntityOfPage: {
     "@type": "WebPage",
-    "@id": postUrl
-  }
+    "@id": postUrl,
+  },
 };
 
 const posts = await getSinglePage(COLLECTION_FOLDER);
@@ -69,7 +73,8 @@ const recommendedProducts = catalogEntries
       title: entry.data.title,
       category: entry.data.category ?? "others",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
-      image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      image:
+        entry.data.img || entry.data.image || "/images/image-placeholder.png",
       availability: entry.data.availability !== false,
       customLabel: label,
     };
@@ -147,18 +152,20 @@ const recommendedProducts = catalogEntries
         </div>
         <Disqus className="mt-20" client:only="react" />
 
-        {recommendedProducts.length > 0 && (
-          <div class="mt-20 border-t border-border pt-10">
-            <h2 class="h3 mb-8 text-center">Рекомендуемые товары</h2>
-            <div class="row justify-center">
-              {recommendedProducts.map((product) => (
-                <div class="mb-8 md:col-6 lg:col-4">
-                  <ProductCard product={product} />
-                </div>
-              ))}
+        {
+          recommendedProducts.length > 0 && (
+            <div class="mt-20 border-t border-border pt-10">
+              <h2 class="h3 mb-8 text-center">Рекомендуемые товары</h2>
+              <div class="row justify-center">
+                {recommendedProducts.map((product) => (
+                  <div class="mb-8 md:col-6 lg:col-4">
+                    <ProductCard product={product} />
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          )
+        }
       </article>
     </div>
 
@@ -178,7 +185,6 @@ const recommendedProducts = catalogEntries
     <CallToAction />
   </div>
 </section>
-
 
 <script>
   import { addToCart } from "@/lib/cart";

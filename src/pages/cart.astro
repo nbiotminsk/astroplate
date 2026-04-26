@@ -1,14 +1,13 @@
 ---
 import Base from "@/layouts/Base.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
-
 ---
 
 <style is:global>
   .qty-control {
     display: flex;
     align-items: center;
-    border: 1px solid rgba(0,0,0,0.1);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 6px;
     overflow: hidden;
     height: 28px;
@@ -16,8 +15,8 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     width: fit-content;
   }
   .dark .qty-control {
-    border-color: rgba(255,255,255,0.1);
-    background: rgba(0,0,0,0.2);
+    border-color: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.2);
   }
   .qty-btn {
     width: 28px;
@@ -26,7 +25,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     align-items: center;
     justify-content: center;
     border: none;
-    background: rgba(0,0,0,0.03);
+    background: rgba(0, 0, 0, 0.03);
     cursor: pointer;
     font-size: 16px;
     transition: background 0.2s;
@@ -34,14 +33,14 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     margin: 0;
   }
   .dark .qty-btn {
-    background: rgba(255,255,255,0.05);
+    background: rgba(255, 255, 255, 0.05);
     color: white;
   }
   .qty-btn:hover {
-    background: rgba(0,0,0,0.08);
+    background: rgba(0, 0, 0, 0.08);
   }
   .dark .qty-btn:hover {
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
   }
   .qty-input {
     width: 32px !important;
@@ -77,7 +76,9 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 
       <div class="row">
         <div class="lg:col-8">
-          <div class="rounded border border-border bg-light p-6 dark:border-darkmode-border dark:bg-darkmode-light">
+          <div
+            class="rounded border border-border bg-light p-6 dark:border-darkmode-border dark:bg-darkmode-light"
+          >
             <div id="cart-page-items" class="min-h-[100px]">
               <!-- Items will be rendered here by script -->
               <p class="animate-pulse text-center">Загрузка корзины...</p>
@@ -86,20 +87,35 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
         </div>
 
         <div class="lg:col-4">
-          <div class="sticky top-24 rounded border border-border bg-light p-6 dark:border-darkmode-border dark:bg-darkmode-light">
+          <div
+            class="sticky top-24 rounded border border-border bg-light p-6 dark:border-darkmode-border dark:bg-darkmode-light"
+          >
             <h3 class="mb-6 h4">Итого</h3>
-            <div class="mb-4 flex justify-between border-b border-border pb-4 dark:border-darkmode-border">
+            <div
+              class="mb-4 flex justify-between border-b border-border pb-4 dark:border-darkmode-border"
+            >
               <span>Всего товаров:</span>
               <span id="cart-page-count" class="font-bold">0</span>
             </div>
             <div class="mb-8 flex justify-between text-xl">
               <span>Сумма:</span>
-              <span id="cart-page-total" class="font-bold text-emerald-600">0 BYN</span>
+              <span id="cart-page-total" class="font-bold text-emerald-600"
+                >0 BYN</span
+              >
             </div>
             <div class="flex flex-col gap-4">
-              <button id="checkout-btn" class="btn btn-primary w-full text-center">Перейти к оформлению</button>
-              <button id="clear-cart-page" class="btn btn-outline-primary w-full">Очистить корзину</button>
-              <a href="/store" class="btn btn-link w-full text-center">Вернуться в магазин</a>
+              <button
+                id="checkout-btn"
+                class="btn btn-primary w-full text-center"
+                >Перейти к оформлению</button
+              >
+              <button
+                id="clear-cart-page"
+                class="btn btn-outline-primary w-full">Очистить корзину</button
+              >
+              <a href="/store" class="btn btn-link w-full text-center"
+                >Вернуться в магазин</a
+              >
             </div>
           </div>
         </div>
@@ -211,38 +227,39 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
       });
     });
   };
-const init = () => {
-  if ((window as any)._cartInitialized) return;
-  (window as any)._cartInitialized = true;
+  const init = () => {
+    if ((window as any)._cartInitialized) return;
+    (window as any)._cartInitialized = true;
 
-  const clearBtn = document.getElementById("clear-cart-page");
-  if (clearBtn) {
-    clearBtn.addEventListener("click", () => {
-      clearCart();
-      renderCartPage();
-    });
+    const clearBtn = document.getElementById("clear-cart-page");
+    if (clearBtn) {
+      clearBtn.addEventListener("click", () => {
+        clearCart();
+        renderCartPage();
+      });
+    }
+
+    const checkoutBtn = document.getElementById("checkout-btn");
+    if (checkoutBtn) {
+      checkoutBtn.addEventListener("click", () => {
+        document.dispatchEvent(new CustomEvent("checkout:open"));
+      });
+    }
+    renderCartPage();
+
+    // Listen for cart updates from other components
+    window.addEventListener("cart:update", renderCartPage);
+    document.addEventListener("cart:update", renderCartPage);
+  };
+
+  // Run on page load
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
   }
 
-  const checkoutBtn = document.getElementById("checkout-btn");
-  if (checkoutBtn) {
-    checkoutBtn.addEventListener("click", () => {
-      document.dispatchEvent(new CustomEvent("checkout:open"));
-    });
-  }
-  renderCartPage();
-
-  // Listen for cart updates from other components
-  window.addEventListener("cart:update", renderCartPage);
-  document.addEventListener("cart:update", renderCartPage);
-};
-
-// Run on page load
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
-  init();
-}
-
-window.addEventListener("pageshow", () => {
-  init();
-});</script>
+  window.addEventListener("pageshow", () => {
+    init();
+  });
+</script>

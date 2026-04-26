@@ -6,7 +6,10 @@ import PageHeader from "@/partials/PageHeader.astro";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
-  const entries = await getNormalizedCollection("info", ({ data }) => !data.draft);
+  const entries = await getNormalizedCollection(
+    "info",
+    ({ data }) => !data.draft,
+  );
 
   return entries.map((entry) => ({
     params: {
@@ -28,7 +31,9 @@ const { Content } = await render(entry);
     <div class="container">
       <div class="row justify-center">
         <div class="lg:col-10">
-          <article class="rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light">
+          <article
+            class="rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light"
+          >
             {
               img && (
                 <ImageMod

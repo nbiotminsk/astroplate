@@ -34,27 +34,39 @@ export interface Props {
 }
 
 // destructure frontmatter
-const { title, meta_title, description, image, noindex, canonical, hideBreadcrumbs } =
-  Astro.props;
+const {
+  title,
+  meta_title,
+  description,
+  image,
+  noindex,
+  canonical,
+  hideBreadcrumbs,
+} = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const currentPath = Astro.url.pathname.replace(/\/$/, "");
-const autoCanonical = canonical || `${siteUrl}${currentPath}${config.site.trailing_slash ? "/" : ""}`;
+const autoCanonical =
+  canonical ||
+  `${siteUrl}${currentPath}${config.site.trailing_slash ? "/" : ""}`;
 
 // Pagination handling for title and description to avoid duplicates
 const paths = Astro.url.pathname.split("/").filter(Boolean);
 const pageIndex = paths.indexOf("page");
-const pageNum = pageIndex !== -1 && paths[pageIndex + 1] ? paths[pageIndex + 1] : null;
+const pageNum =
+  pageIndex !== -1 && paths[pageIndex + 1] ? paths[pageIndex + 1] : null;
 const paginationSuffix = pageNum ? ` - Страница ${pageNum}` : "";
 
 const breadcrumbs = getBreadcrumbs(Astro.url.pathname, title);
 const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
 const finalTitle = plainify(
-  (meta_title ? meta_title : title ? title : config.site.title) + paginationSuffix
+  (meta_title ? meta_title : title ? title : config.site.title) +
+    paginationSuffix,
 );
 const finalDescription = plainify(
-  (description ? description : config.metadata.meta_description) + paginationSuffix
+  (description ? description : config.metadata.meta_description) +
+    paginationSuffix,
 );
 ---
 
@@ -68,11 +80,36 @@ const finalDescription = plainify(
       )
     }
     <!-- favicon -->
-    <link rel="icon" type="image/png" sizes="48x48" href="/images/favicon-48x48.png" />
-    <link rel="icon" type="image/png" sizes="96x96" href="/images/favicon-96x96.png" />
-    <link rel="icon" type="image/png" sizes="144x144" href="/images/favicon-144x144.png" />
-    <link rel="icon" type="image/png" sizes="192x192" href="/images/favicon-192x192.png" />
-    <link rel="icon" type="image/png" sizes="512x512" href="/images/favicon-512x512.png" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="48x48"
+      href="/images/favicon-48x48.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="96x96"
+      href="/images/favicon-96x96.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="144x144"
+      href="/images/favicon-144x144.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="/images/favicon-192x192.png"
+    />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="512x512"
+      href="/images/favicon-512x512.png"
+    />
     <link rel="shortcut icon" href={config.site.favicon} />
     <!-- theme meta -->
     <meta name="theme-name" content="astroplate" />
@@ -89,7 +126,10 @@ const finalDescription = plainify(
     />
     <meta name="generator" content={Astro.generator} />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta http-equiv="Cache-Control" content="public, max-age=0, must-revalidate" />
+    <meta
+      http-equiv="Cache-Control"
+      content="public, max-age=0, must-revalidate"
+    />
     <meta http-equiv="Pragma" content="no-cache" />
     <meta http-equiv="Expires" content="0" />
 
@@ -174,7 +214,7 @@ const finalDescription = plainify(
         name: config.site.title,
         url: config.site.base_url,
         description: config.metadata.meta_description,
-        inLanguage: "ru-RU"
+        inLanguage: "ru-RU",
       }}
     />
 
@@ -190,20 +230,22 @@ const finalDescription = plainify(
           streetAddress: "ул. Макаёнка, 12г, пом. 257",
           addressLocality: "Минск",
           postalCode: "220114",
-          addressCountry: "BY"
+          addressCountry: "BY",
         },
         contactPoint: {
           "@type": "ContactPoint",
           telephone: "+375298462462",
-          contactType: "customer service"
+          contactType: "customer service",
         },
-        sameAs: [
-          "https://t.me/teleofis24"
-        ]
+        sameAs: ["https://t.me/teleofis24"],
       }}
     />
 
-    {!hideBreadcrumbs && <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />}
+    {
+      !hideBreadcrumbs && (
+        <JsonLd type="BreadcrumbList" data={breadcrumbSchema} />
+      )
+    }
 
     <slot name="head" />
   </head>

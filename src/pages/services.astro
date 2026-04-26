@@ -6,7 +6,7 @@ import PageHeader from "@/partials/PageHeader.astro";
 
 const pages = await getSinglePage("pages");
 const serviceArticles = pages.sort((a, b) =>
-  a.data.title.localeCompare(b.data.title)
+  a.data.title.localeCompare(b.data.title),
 );
 ---
 
@@ -33,7 +33,9 @@ const serviceArticles = pages.sort((a, b) =>
                         </a>
                       </h3>
                       {article.data.description && (
-                        <p class="mb-5 text-text-dark">{article.data.description}</p>
+                        <p class="mb-5 text-text-dark">
+                          {article.data.description}
+                        </p>
                       )}
                       <a class="btn btn-sm btn-primary" href={`/${article.id}`}>
                         Подробнее

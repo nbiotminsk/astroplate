@@ -10,7 +10,10 @@ const categories = await getTaxonomy(BLOG_FOLDER, "categories");
 const allCategories = await getAllTaxonomy(BLOG_FOLDER, "categories");
 ---
 
-<Base title={"Категории блога"} description={"Список всех категорий статей в нашем блоге."}>
+<Base
+  title={"Категории блога"}
+  description={"Список всех категорий статей в нашем блоге."}
+>
   <PageHeader title={"Категории"} />
   <section class="section">
     <div class="container text-center">

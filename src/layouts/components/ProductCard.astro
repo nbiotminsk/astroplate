@@ -3,14 +3,7 @@ import ImageMod from "./ImageMod.astro";
 import { FaCrown, FaShoppingBasket } from "react-icons/fa";
 
 const { product } = Astro.props;
-const {
-  id,
-  title,
-  price,
-  image,
-  availability,
-  customLabel,
-} = product;
+const { id, title, price, image, availability, customLabel } = product;
 ---
 
 <div
@@ -22,19 +15,23 @@ const {
         : "border-border dark:border-darkmode-border"
   }`}
 >
-  {customLabel === "premium" ? (
-    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-      <FaCrown className="text-amber-500 dark:text-amber-300" />
-      <span>TOP</span>
-    </div>
-  ) : customLabel === "discount" ? (
-    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
-      <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
-      <span>SALE</span>
-    </div>
-  ) : null}
+  {
+    customLabel === "premium" ? (
+      <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
+        <FaCrown className="text-amber-500 dark:text-amber-300" />
+        <span>TOP</span>
+      </div>
+    ) : customLabel === "discount" ? (
+      <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
+        <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
+        <span>SALE</span>
+      </div>
+    ) : null
+  }
   <a href={`/store/${id}`} aria-label={`Открыть ${title}`}>
-    <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body">
+    <div
+      class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body"
+    >
       <ImageMod
         class="h-full w-full object-contain"
         src={image}
@@ -46,19 +43,21 @@ const {
       />
     </div>
   </a>
-  <h4 class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark text-lg">
+  <h4
+    class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark text-lg"
+  >
     {title}
   </h4>
   <div class="mt-auto flex flex-col gap-2 pt-4">
     <div class="flex flex-col gap-1">
       <p
         class={`min-h-8 text-lg font-semibold leading-none ${
-        customLabel === "premium"
-          ? "text-amber-700 dark:text-amber-300"
-          : customLabel === "discount"
-            ? "text-emerald-600 dark:text-emerald-300"
-            : "text-emerald-600"
-      }`}
+          customLabel === "premium"
+            ? "text-amber-700 dark:text-amber-300"
+            : customLabel === "discount"
+              ? "text-emerald-600 dark:text-emerald-300"
+              : "text-emerald-600"
+        }`}
       >
         {price} BYN
       </p>
@@ -71,7 +70,9 @@ const {
       </p>
     </div>
 
-    <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
+    <div
+      class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0"
+    >
       <button
         type="button"
         class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${

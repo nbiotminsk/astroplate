@@ -48,7 +48,8 @@ const topProducts = catalogEntries
       title: entry.data.title,
       category: entry.data.category ?? "Без категории",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
-      image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      image:
+        entry.data.img || entry.data.image || "/images/image-placeholder.png",
       customLabel: label,
       labelPriority: getStoreLabelPriority(label),
     };
@@ -127,17 +128,27 @@ const siteUrl = "https://teleofis24.by";
       <div class="row items-center gap-y-10">
         <div class="md:col-6">
           <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
-          <h1 class="mb-5 text-h4 leading-tight md:text-h3">{homepage.hero.title}</h1>
+          <h1 class="mb-5 text-h4 leading-tight md:text-h3">
+            {homepage.hero.title}
+          </h1>
           <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
           <div class="mb-8 flex flex-col sm:flex-row flex-wrap gap-4">
-            <a class="btn btn-primary w-full sm:w-auto text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95" href={homepage.hero.primaryCta.link}>
+            <a
+              class="btn btn-primary w-full sm:w-auto text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
+              href={homepage.hero.primaryCta.link}
+            >
               {homepage.hero.primaryCta.label}
             </a>
-            <a class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:text-black dark:hover:text-black hover:shadow-lg active:scale-95" href={homepage.hero.secondaryCta.link}>
+            <a
+              class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:text-black dark:hover:text-black hover:shadow-lg active:scale-95"
+              href={homepage.hero.secondaryCta.link}
+            >
               {homepage.hero.secondaryCta.label}
             </a>
           </div>
-          <ul class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2">
+          <ul
+            class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2"
+          >
             {
               homepage.hero.trustItems.map((item: string) => (
                 <li class="flex items-center gap-2">
@@ -230,10 +241,16 @@ const siteUrl = "https://teleofis24.by";
                     <span>{product.price} BYN</span>
                   </p>
                   <div class="mt-auto flex flex-col gap-2 pt-4 sm:flex-row">
-                    <a class="btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] sm:w-auto sm:py-1.5 sm:text-sm hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)]" href={`/store/${product.id}`}>
+                    <a
+                      class="btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] sm:w-auto sm:py-1.5 sm:text-sm hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)]"
+                      href={`/store/${product.id}`}
+                    >
                       Купить
                     </a>
-                    <a class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:w-auto sm:py-1.5 sm:text-sm" href={`/store/${product.id}`}>
+                    <a
+                      class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:w-auto sm:py-1.5 sm:text-sm"
+                      href={`/store/${product.id}`}
+                    >
                       Подробнее
                     </a>
                   </div>
@@ -244,7 +261,10 @@ const siteUrl = "https://teleofis24.by";
         }
       </div>
       <div class="mt-8 text-center">
-        <a class="btn btn-outline-primary" href={homepage.popularProducts.viewAll.link}>
+        <a
+          class="btn btn-outline-primary"
+          href={homepage.popularProducts.viewAll.link}
+        >
           {homepage.popularProducts.viewAll.label}
         </a>
       </div>
@@ -338,14 +358,22 @@ const siteUrl = "https://teleofis24.by";
           <aside class="buy-help-card">
             <div class="flex items-center gap-2">
               <FaCamera className="buy-help-icon" />
-              <h3 class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+              <h3
+                class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark"
+              >
                 {homepage.howToBuy.helpCard.title}
               </h3>
             </div>
             <p class="mt-3 text-sm">{homepage.howToBuy.helpCard.text}</p>
-            <form id="meter-photo-form" class="mt-4 space-y-3" enctype="multipart/form-data">
+            <form
+              id="meter-photo-form"
+              class="mt-4 space-y-3"
+              enctype="multipart/form-data"
+            >
               <label class="block">
-                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                <span
+                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
+                >
                   Ваше имя
                 </span>
                 <input
@@ -358,7 +386,9 @@ const siteUrl = "https://teleofis24.by";
                 />
               </label>
               <label class="block">
-                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                <span
+                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
+                >
                   Телефон
                 </span>
                 <input
@@ -371,12 +401,16 @@ const siteUrl = "https://teleofis24.by";
                   autocomplete="tel"
                   required
                 />
-                <span class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light">
+                <span
+                  class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light"
+                >
                   Формат: +375XXXXXXXXX
                 </span>
               </label>
               <label class="block">
-                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                <span
+                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
+                >
                   Адрес установки
                 </span>
                 <input
@@ -389,7 +423,9 @@ const siteUrl = "https://teleofis24.by";
                 />
               </label>
               <label class="block">
-                <span class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
+                <span
+                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
+                >
                   Прикрепите фото
                 </span>
                 <input
@@ -401,14 +437,20 @@ const siteUrl = "https://teleofis24.by";
                   data-max-size="5242880"
                   required
                 />
-                <span class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light">
+                <span
+                  class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light"
+                >
                   До 5 МБ
                 </span>
               </label>
               <button class="btn btn-primary w-full text-center" type="submit">
                 {homepage.howToBuy.helpCard.button.label}
               </button>
-              <p id="meter-photo-status" class="text-sm text-text-light dark:text-darkmode-text-light"></p>
+              <p
+                id="meter-photo-status"
+                class="text-sm text-text-light dark:text-darkmode-text-light"
+              >
+              </p>
             </form>
             <ul class="mt-4 space-y-2 text-sm">
               {
@@ -436,7 +478,15 @@ const siteUrl = "https://teleofis24.by";
       const addressInput = document.getElementById("meter-address");
       const phoneError = document.createElement("p");
 
-      if (!form || !status || !photoInput || !nameInput || !phoneInput || !addressInput) return;
+      if (
+        !form ||
+        !status ||
+        !photoInput ||
+        !nameInput ||
+        !phoneInput ||
+        !addressInput
+      )
+        return;
       phoneError.className = "mt-1 text-xs text-red-500";
       phoneError.setAttribute("aria-live", "polite");
       phoneInput.insertAdjacentElement("afterend", phoneError);
@@ -515,9 +565,11 @@ const siteUrl = "https://teleofis24.by";
 
           form.reset();
           phoneError.textContent = "";
-          status.textContent = "Фото отправлено. Мы свяжемся с вами после обработки.";
+          status.textContent =
+            "Фото отправлено. Мы свяжемся с вами после обработки.";
         } catch (error) {
-          status.textContent = error instanceof Error ? error.message : "Ошибка отправки фото.";
+          status.textContent =
+            error instanceof Error ? error.message : "Ошибка отправки фото.";
         }
       });
     })();
@@ -585,8 +637,12 @@ const siteUrl = "https://teleofis24.by";
                 <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
                   {item.object}
                 </h3>
-                <p class="mt-3 text-sm"><strong>Проблема:</strong> {item.problem}</p>
-                <p class="mt-3 text-sm"><strong>Результат:</strong> {item.result}</p>
+                <p class="mt-3 text-sm">
+                  <strong>Проблема:</strong> {item.problem}
+                </p>
+                <p class="mt-3 text-sm">
+                  <strong>Результат:</strong> {item.result}
+                </p>
               </article>
             </div>
           ))
@@ -607,8 +663,12 @@ const siteUrl = "https://teleofis24.by";
           <a class="btn btn-primary" href={homepage.finalCta.primary.link}>
             {homepage.finalCta.primary.label}
           </a>
-          <a class="btn btn-outline-primary" href={homepage.finalCta.secondary.link}>
-            <FaPhoneAlt className="mr-2 inline" /> {homepage.finalCta.secondary.label}
+          <a
+            class="btn btn-outline-primary"
+            href={homepage.finalCta.secondary.link}
+          >
+            <FaPhoneAlt className="mr-2 inline" />
+            {homepage.finalCta.secondary.label}
           </a>
         </div>
       </div>

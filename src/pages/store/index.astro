@@ -26,13 +26,17 @@ const products = catalogEntries
       title: entry.data.title,
       category: entry.data.category ?? "others",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
-      image: entry.data.img || entry.data.image || "/images/image-placeholder.png",
+      image:
+        entry.data.img || entry.data.image || "/images/image-placeholder.png",
       availability: entry.data.availability !== false,
       customLabel: label,
       labelPriority: getStoreLabelPriority(label),
     };
   })
-  .sort((a, b) => a.labelPriority - b.labelPriority || a.title.localeCompare(b.title, "ru"));
+  .sort(
+    (a, b) =>
+      a.labelPriority - b.labelPriority || a.title.localeCompare(b.title, "ru"),
+  );
 
 const categorySet = new Set(products.map((product) => product.category));
 const tags = ["Все", ...Array.from(categorySet)];
@@ -41,30 +45,30 @@ const siteUrl = config.site.base_url.replace(/\/$/, "");
 const itemListSchema = {
   "@context": "https://schema.org",
   "@type": "ItemList",
-  "numberOfItems": products.length,
-  "itemListElement": products.map((product, index) => ({
+  numberOfItems: products.length,
+  itemListElement: products.map((product, index) => ({
     "@type": "ListItem",
-    "position": index + 1,
-    "url": `${siteUrl}/store/${product.id}`
-  }))
+    position: index + 1,
+    url: `${siteUrl}/store/${product.id}`,
+  })),
 };
 
 const tagIcons: Record<string, string> = {
   Все: "M3 12h18M12 3v18",
-  "Счетчики воды":
-    "M12 3C8 7 6 10 6 13a6 6 0 0012 0c0-3-2-6-6-10z",
+  "Счетчики воды": "M12 3C8 7 6 10 6 13a6 6 0 0012 0c0-3-2-6-6-10z",
   "модули Nbiot":
     "M12 7a5 5 0 015 5M12 3a9 9 0 019 9M12 11a1 1 0 110 2 1 1 0 010-2zM4 12a8 8 0 018-8M8 12a4 4 0 014-4",
-  "модули gsm":
-    "M12 18v-5M8.5 14.5L12 11l3.5 3.5M6 10l6-6 6 6",
-  комплекты:
-    "M4 7.5L12 3l8 4.5M4 7.5V16.5L12 21l8-4.5V7.5M12 21V12",
-  услуги:
-    "M9 12l2 2 4-4M12 21a9 9 0 100-18 9 9 0 000 18z",
+  "модули gsm": "M12 18v-5M8.5 14.5L12 11l3.5 3.5M6 10l6-6 6 6",
+  комплекты: "M4 7.5L12 3l8 4.5M4 7.5V16.5L12 21l8-4.5V7.5M12 21V12",
+  услуги: "M9 12l2 2 4-4M12 21a9 9 0 100-18 9 9 0 000 18z",
 };
 ---
 
-<Base title="Магазин" description="Магазин товаров с ценами и фильтрами по категориям" hideBreadcrumbs={true}>
+<Base
+  title="Магазин"
+  description="Магазин товаров с ценами и фильтрами по категориям"
+  hideBreadcrumbs={true}
+>
   <Fragment slot="head">
     <JsonLd type="ItemList" data={itemListSchema} />
   </Fragment>
@@ -80,8 +84,13 @@ const tagIcons: Record<string, string> = {
 
   <section class="section pb-6 pt-0">
     <div class="container">
-      <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
-        <div class="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:flex-wrap" id="catalog-tags">
+      <div
+        class="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between"
+      >
+        <div
+          class="grid w-full grid-cols-2 gap-3 sm:flex sm:w-auto sm:flex-row sm:flex-wrap"
+          id="catalog-tags"
+        >
           {
             tags.map((tag, index) => (
               <button
@@ -157,7 +166,10 @@ const tagIcons: Record<string, string> = {
                     <span>SALE</span>
                   </div>
                 ) : null}
-                <a href={`/store/${product.id}`} aria-label={`Открыть ${product.title}`}>
+                <a
+                  href={`/store/${product.id}`}
+                  aria-label={`Открыть ${product.title}`}
+                >
                   <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body">
                     <ImageMod
                       class="h-full w-full object-contain"
@@ -176,12 +188,12 @@ const tagIcons: Record<string, string> = {
                   <div class="flex flex-col gap-1">
                     <p
                       class={`min-h-8 text-lg font-semibold leading-none ${
-                      product.customLabel === "premium"
-                        ? "text-amber-700 dark:text-amber-300"
-                        : product.customLabel === "discount"
-                          ? "text-emerald-600 dark:text-emerald-300"
-                          : "text-emerald-600"
-                    }`}
+                        product.customLabel === "premium"
+                          ? "text-amber-700 dark:text-amber-300"
+                          : product.customLabel === "discount"
+                            ? "text-emerald-600 dark:text-emerald-300"
+                            : "text-emerald-600"
+                      }`}
                     >
                       {product.price} BYN
                     </p>
@@ -198,7 +210,9 @@ const tagIcons: Record<string, string> = {
                     <button
                       type="button"
                       class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
-                        !product.availability ? "cursor-not-allowed opacity-50" : ""
+                        !product.availability
+                          ? "cursor-not-allowed opacity-50"
+                          : ""
                       }`}
                       data-add-to-cart={product.id}
                       data-price={product.price}
@@ -234,15 +248,22 @@ const tagIcons: Record<string, string> = {
 
   <section class="section pt-2" id="cart">
     <div class="container">
-      <div class="rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light">
+      <div
+        class="rounded border border-border bg-light p-5 dark:border-darkmode-border dark:bg-darkmode-light"
+      >
         <div class="mb-4 flex items-center justify-between gap-3">
           <h3 class="mb-0">Корзина</h3>
-          <span id="cart-count" class="rounded bg-body px-3 py-1 text-sm dark:bg-darkmode-body">
+          <span
+            id="cart-count"
+            class="rounded bg-body px-3 py-1 text-sm dark:bg-darkmode-body"
+          >
             0 товаров
           </span>
         </div>
         <div id="cart-items" class="mb-4"></div>
-        <div class="mb-4 flex items-center justify-between border-t border-border pt-4 dark:border-darkmode-border">
+        <div
+          class="mb-4 flex items-center justify-between border-t border-border pt-4 dark:border-darkmode-border"
+        >
           <strong>Итого:</strong>
           <strong id="cart-total">0 BYN</strong>
         </div>
@@ -338,15 +359,28 @@ const tagIcons: Record<string, string> = {
     const addToCartButtons = document.querySelectorAll(
       "[data-add-to-cart]",
     ) as NodeListOf<HTMLButtonElement>;
-    const cartItemsWrap = document.querySelector("#cart-items") as HTMLElement | null;
-    const cartCount = document.querySelector("#cart-count") as HTMLElement | null;
-    const cartTotal = document.querySelector("#cart-total") as HTMLElement | null;
+    const cartItemsWrap = document.querySelector(
+      "#cart-items",
+    ) as HTMLElement | null;
+    const cartCount = document.querySelector(
+      "#cart-count",
+    ) as HTMLElement | null;
+    const cartTotal = document.querySelector(
+      "#cart-total",
+    ) as HTMLElement | null;
     const clearCartButton = document.querySelector(
       "#clear-cart",
     ) as HTMLButtonElement | null;
     let activeTag = "Все";
 
-    if (!grid || !sortSelect || !cartItemsWrap || !cartCount || !cartTotal || !clearCartButton) {
+    if (
+      !grid ||
+      !sortSelect ||
+      !cartItemsWrap ||
+      !cartCount ||
+      !cartTotal ||
+      !clearCartButton
+    ) {
       return;
     }
 
@@ -399,33 +433,42 @@ const tagIcons: Record<string, string> = {
           });
         });
 
-      cartItemsWrap.querySelectorAll("[data-inc-item]").forEach((button: Element) => {
-        const btn = button as HTMLButtonElement;
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.incItem || "";
-          const item = getCart().find((i) => i.id === id);
-          if (item) updateQuantity(id, item.quantity + 1);
-          renderCart();
+      cartItemsWrap
+        .querySelectorAll("[data-inc-item]")
+        .forEach((button: Element) => {
+          const btn = button as HTMLButtonElement;
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.incItem || "";
+            const item = getCart().find((i) => i.id === id);
+            if (item) updateQuantity(id, item.quantity + 1);
+            renderCart();
+          });
         });
-      });
 
-      cartItemsWrap.querySelectorAll("[data-dec-item]").forEach((button: Element) => {
-        const btn = button as HTMLButtonElement;
-        btn.addEventListener("click", () => {
-          const id = btn.dataset.decItem || "";
-          const item = getCart().find((i) => i.id === id);
-          if (item) updateQuantity(id, item.quantity - 1);
-          renderCart();
+      cartItemsWrap
+        .querySelectorAll("[data-dec-item]")
+        .forEach((button: Element) => {
+          const btn = button as HTMLButtonElement;
+          btn.addEventListener("click", () => {
+            const id = btn.dataset.decItem || "";
+            const item = getCart().find((i) => i.id === id);
+            if (item) updateQuantity(id, item.quantity - 1);
+            renderCart();
+          });
         });
-      });
 
-      cartItemsWrap.querySelectorAll("[data-item-qty]").forEach((input: Element) => {
-        const qtyInput = input as HTMLInputElement;
-        qtyInput.addEventListener("change", () => {
-          updateQuantity(qtyInput.dataset.itemQty || "", Number(qtyInput.value));
-          renderCart();
+      cartItemsWrap
+        .querySelectorAll("[data-item-qty]")
+        .forEach((input: Element) => {
+          const qtyInput = input as HTMLInputElement;
+          qtyInput.addEventListener("change", () => {
+            updateQuantity(
+              qtyInput.dataset.itemQty || "",
+              Number(qtyInput.value),
+            );
+            renderCart();
+          });
         });
-      });
     };
 
     const activateTag = (tagName: string) => {
@@ -444,7 +487,8 @@ const tagIcons: Record<string, string> = {
       });
 
       cards.forEach((card: HTMLElement) => {
-        const shouldShow = tagName === "Все" || card.dataset.category === tagName;
+        const shouldShow =
+          tagName === "Все" || card.dataset.category === tagName;
         card.style.display = shouldShow ? "" : "none";
       });
     };
@@ -459,7 +503,8 @@ const tagIcons: Record<string, string> = {
         const titleA = (a.dataset.title || "").toLowerCase();
         const titleB = (b.dataset.title || "").toLowerCase();
 
-        if (labelPriorityA !== labelPriorityB) return labelPriorityA - labelPriorityB;
+        if (labelPriorityA !== labelPriorityB)
+          return labelPriorityA - labelPriorityB;
         if (mode === "price-asc") return priceA - priceB;
         if (mode === "price-desc") return priceB - priceA;
         if (mode === "title-asc") return titleA.localeCompare(titleB, "ru");

@@ -5,21 +5,27 @@ import { getNormalizedCollection } from "@/lib/contentCollections";
 import PageHeader from "@/partials/PageHeader.astro";
 import JsonLd from "@/components/JsonLd.astro";
 
-const infoEntries = await getNormalizedCollection("info", ({ data }) => !data.draft);
+const infoEntries = await getNormalizedCollection(
+  "info",
+  ({ data }) => !data.draft,
+);
 
 const deliveryFaqs = [
   {
     question: "Какими способами можно оплатить заказ?",
-    answer: "Мы принимаем оплату через систему E-POS (ЕРИП) для физических лиц и безналичный расчет для юридических лиц."
+    answer:
+      "Мы принимаем оплату через систему E-POS (ЕРИП) для физических лиц и безналичный расчет для юридических лиц.",
   },
   {
     question: "Осуществляете ли вы доставку по Беларуси?",
-    answer: "Да, мы осуществляем доставку по Минску и всей территории Республики Беларусь. Стоимость и сроки зависят от региона."
+    answer:
+      "Да, мы осуществляем доставку по Минску и всей территории Республики Беларусь. Стоимость и сроки зависят от региона.",
   },
   {
     question: "Можно ли заказать монтаж вместе с доставкой?",
-    answer: "Да, при оформлении заказа вы можете указать необходимость монтажа. Наши специалисты согласуют время выезда."
-  }
+    answer:
+      "Да, при оформлении заказа вы можете указать необходимость монтажа. Наши специалисты согласуют время выезда.",
+  },
 ];
 ---
 
@@ -54,26 +60,24 @@ const deliveryFaqs = [
               <div class="mb-8 md:col-6 xl:col-4">
                 <article class="flex h-full flex-col rounded-lg border border-border bg-light p-6 dark:bg-darkmode-light">
                   <div class="flex-1">
-                    {
-                      entry.data.img && (
-                        <ImageMod
-                          class="mb-6 rounded"
-                          src={entry.data.img}
-                          width={1200}
-                          height={600}
-                          alt={entry.data.title}
-                          format="webp"
-                        />
-                      )
-                    }
-                    <h2 class="card-title mb-3 text-text-dark dark:text-darkmode-text-dark">{entry.data.title}</h2>
-                    {
-                      entry.data.description && (
-                        <p class="mb-5 text-text-dark dark:text-darkmode-text">
-                          {entry.data.description}
-                        </p>
-                      )
-                    }
+                    {entry.data.img && (
+                      <ImageMod
+                        class="mb-6 rounded"
+                        src={entry.data.img}
+                        width={1200}
+                        height={600}
+                        alt={entry.data.title}
+                        format="webp"
+                      />
+                    )}
+                    <h2 class="card-title mb-3 text-text-dark dark:text-darkmode-text-dark">
+                      {entry.data.title}
+                    </h2>
+                    {entry.data.description && (
+                      <p class="mb-5 text-text-dark dark:text-darkmode-text">
+                        {entry.data.description}
+                      </p>
+                    )}
                   </div>
 
                   <a
@@ -92,7 +96,9 @@ const deliveryFaqs = [
       }
 
       <!-- FAQ Section -->
-      <div class="mt-16 border-t border-border pt-10 dark:border-darkmode-border">
+      <div
+        class="mt-16 border-t border-border pt-10 dark:border-darkmode-border"
+      >
         <h2 class="h3 mb-8">Часто задаваемые вопросы</h2>
         <div class="space-y-4">
           {

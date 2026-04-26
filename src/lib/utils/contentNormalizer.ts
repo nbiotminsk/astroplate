@@ -8,7 +8,9 @@ const COMMON_DEFAULTS = {
   description: "",
 };
 
-const COLLECTION_DEFAULTS: Partial<Record<CollectionKey, Record<string, unknown>>> = {
+const COLLECTION_DEFAULTS: Partial<
+  Record<CollectionKey, Record<string, unknown>>
+> = {
   blog: {
     author: "Admin",
     categories: ["others"],
@@ -38,8 +40,9 @@ export const resolveDate = (date?: Date | string | number | null): Date => {
   return getBuildDate();
 };
 
-const resolveCollectionDefaults = <C extends CollectionKey>(collectionName: C) =>
-  COLLECTION_DEFAULTS[collectionName] ?? {};
+const resolveCollectionDefaults = <C extends CollectionKey>(
+  collectionName: C,
+) => COLLECTION_DEFAULTS[collectionName] ?? {};
 
 export const normalizeCollectionData = <C extends CollectionKey>(
   collectionName: C,
@@ -53,7 +56,9 @@ export const normalizeCollectionData = <C extends CollectionKey>(
     ...data,
     draft: typeof data.draft === "boolean" ? data.draft : false,
     description:
-      typeof data.description === "string" ? data.description : COMMON_DEFAULTS.description,
+      typeof data.description === "string"
+        ? data.description
+        : COMMON_DEFAULTS.description,
     date: resolveDate(data.date),
   };
 };

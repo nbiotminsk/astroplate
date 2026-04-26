@@ -32,4 +32,5 @@ hasMerchantReturnPolicy:
   returnPolicyCategory: MerchantReturnsAllowed
   returnPeriod: P30D
 ---
+
 ​

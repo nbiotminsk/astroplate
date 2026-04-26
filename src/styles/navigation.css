@@ -31,7 +31,7 @@
   @apply mr-0;
 }
 
-.nav-dropdown>svg {
+.nav-dropdown > svg {
   @apply pointer-events-none;
 }
 
@@ -63,7 +63,7 @@
     @apply bg-dark absolute -top-1 left-0 flex h-6 w-6 items-center justify-center rounded-full transition-all duration-300 dark:bg-white;
   }
 
-  input:checked+label {
+  input:checked + label {
     span {
       @apply lg:left-4;
     }

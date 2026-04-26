@@ -49,7 +49,9 @@ export const getBreadcrumbs = (pathname: string, title?: string) => {
   return parts;
 };
 
-export const getBreadcrumbSchema = (parts: { label: string; href: string }[]) => {
+export const getBreadcrumbSchema = (
+  parts: { label: string; href: string }[],
+) => {
   const siteUrl = config.site.base_url.replace(/\/$/, "");
   return {
     "@context": "https://schema.org",

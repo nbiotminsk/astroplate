@@ -295,7 +295,6 @@
 }
 
 @media (max-width: 767px) {
-
   .buy-timeline::before {
     @apply left-4;
   }
