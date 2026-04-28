@@ -1,7 +1,7 @@
 ---
 title: Модуль NBIoT + сим-карта + подключение к платформе
 category: "модуль NBIoT"
-price: "620"
+price: "626"
 price_currency: "BYN"
 img: "/images/module_nb.jpg"
 brand: "Teleofis"
