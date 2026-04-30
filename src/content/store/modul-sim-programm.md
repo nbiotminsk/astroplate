@@ -1,5 +1,6 @@
 ---
 title: Модуль NBIoT + сим-карта + подключение к платформе
+meta_title: Модуль дистанционного съема показаний счетчиков воды (NB-IoT модем)
 category: "модуль NBIoT"
 price: "626"
 price_currency: "BYN"
