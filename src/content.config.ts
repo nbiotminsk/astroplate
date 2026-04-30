@@ -120,10 +120,10 @@ const storeCollection = defineCollection({
     aggregateRating: z
       .object({
         ratingValue: z.number().default(5),
-        reviewCount: z.number().default(0),
+        reviewCount: z.number().default(1),
         bestRating: z.number().default(5),
       })
-      .default(() => ({ ratingValue: 5, reviewCount: 0, bestRating: 5 })),
+      .default(() => ({ ratingValue: 5, reviewCount: 1, bestRating: 5 })),
     availability: z.boolean().default(true),
     shippingDetails: z
       .object({

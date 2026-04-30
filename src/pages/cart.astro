@@ -68,7 +68,11 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
   }
 </style>
 
-<Base title="Корзина" description="Ваша корзина заказов в магазине teleofis24.by. Проверьте список выбранных товаров, модулей NB-IoT и счетчиков воды перед оформлением заказа." hideBreadcrumbs={true}>
+<Base
+  title="Корзина"
+  description="Ваша корзина заказов в магазине teleofis24.by. Проверьте список выбранных товаров, модулей NB-IoT и счетчиков воды перед оформлением заказа."
+  hideBreadcrumbs={true}
+>
   <section class="section pb-8 pt-6">
     <div class="container">
       <Breadcrumbs className="mb-6" title="Корзина" />
@@ -109,8 +113,14 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
                 class="btn btn-primary w-full text-center"
                 >Перейти к оформлению</button
               >
-              <p class="mt-2 text-center text-[11px] leading-tight text-text-light dark:text-darkmode-text-light">
-                Нажимая кнопку, вы принимаете условия <a href="/info/dogovor-oferty" class="underline hover:text-primary">договора публичной оферты</a>
+              <p
+                class="mt-2 text-center text-[11px] leading-tight text-text-light dark:text-darkmode-text-light"
+              >
+                Нажимая кнопку, вы принимаете условия <a
+                  href="/info/dogovor-oferty"
+                  class="underline hover:text-primary"
+                  >договора публичной оферты</a
+                >
               </p>
               <button
                 id="clear-cart-page"
@@ -178,7 +188,8 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
 
     itemsWrap.innerHTML = cart
       .map((item) => {
-        const isService = item.id.startsWith("service-") || item.id.includes("usluga");
+        const isService =
+          item.id.startsWith("service-") || item.id.includes("usluga");
         let servicesHtml = "";
 
         if (!isService) {
@@ -195,8 +206,12 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
             // Fallback to title/id if category is missing (for older cart items)
             const titleLower = item.title.toLowerCase();
             const idLower = item.id.toLowerCase();
-            const fallbackNbiot = titleLower.includes("nbiot") || idLower.includes("nbiot");
-            const fallbackMeter = titleLower.includes("счетчик") || titleLower.includes("счётчик") || idLower.includes("schetchik");
+            const fallbackNbiot =
+              titleLower.includes("nbiot") || idLower.includes("nbiot");
+            const fallbackMeter =
+              titleLower.includes("счетчик") ||
+              titleLower.includes("счётчик") ||
+              idLower.includes("schetchik");
             const fallbackKit = titleLower.includes("комплект");
 
             const finalIsNbiot = isNbiot || fallbackNbiot;
@@ -248,7 +263,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
           <div class="flex flex-wrap items-center justify-between gap-4">
             <div class="flex items-center gap-4">
               <div class="flex-1">
-                <h4 class="mb-1 ${isService ? 'text-xl text-primary' : 'text-lg'} font-semibold">${item.title}</h4>
+                <h4 class="mb-1 ${isService ? "text-xl text-primary" : "text-lg"} font-semibold">${item.title}</h4>
                 <p class="mb-0 text-sm text-text-light dark:text-darkmode-text-light">${item.price} BYN за шт.</p>
               </div>
             </div>

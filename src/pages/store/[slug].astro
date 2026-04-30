@@ -132,7 +132,7 @@ const productSchema = {
     name: String(brand).slice(0, 70),
   },
   itemCondition: product.data.condition || "https://schema.org/NewCondition",
-  ...(product.data.aggregateRating
+  ...(product.data.aggregateRating && product.data.aggregateRating.reviewCount > 0
     ? {
         aggregateRating: {
           "@type": "AggregateRating",
@@ -318,84 +318,184 @@ const productSchema = {
           }
 
           <!-- Services Section -->
-          <div class="mb-6 space-y-3 rounded-xl border border-border bg-light/50 p-5 dark:border-darkmode-border dark:bg-darkmode-light/30">
-            <h4 class="mb-3 text-base font-bold text-text-dark dark:text-darkmode-text-dark">Дополнительные услуги:</h4>
-            
+          <div
+            class="mb-6 space-y-3 rounded-xl border border-border bg-light/50 p-5 dark:border-darkmode-border dark:bg-darkmode-light/30"
+          >
+            <h4
+              class="mb-3 text-base font-bold text-text-dark dark:text-darkmode-text-dark"
+            >
+              Дополнительные услуги:
+            </h4>
+
             <div class="flex flex-col gap-4">
-              {/* Service 1: Replacement - Only for simple meters or kits, hidden for NBIoT modules */}
-              {(isKit || (isMeter && !isNbiot)) && (
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div class="flex items-center gap-3">
-                    <div class="relative flex items-center">
-                      <input 
-                        type="checkbox" 
-                        id="service-replacement" 
-                        class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border" 
-                      />
-                      <svg class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {
+                /* Service 1: Replacement - Only for simple meters or kits, hidden for NBIoT modules */
+              }
+              {
+                (isKit || (isMeter && !isNbiot)) && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <div class="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          id="service-replacement"
+                          class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                        />
+                        <svg
+                          class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <label
+                        for="service-replacement"
+                        class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                      >
+                        Замена счетчика на объекте{" "}
+                        <span class="ml-1 text-emerald-600 font-bold">
+                          (80 руб)
+                        </span>
+                      </label>
                     </div>
-                    <label for="service-replacement" class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark">
-                      Замена счетчика на объекте <span class="ml-1 text-emerald-600 font-bold">(80 руб)</span>
-                    </label>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-text-light uppercase tracking-wider">
+                        Кол-во:
+                      </span>
+                      <input
+                        type="number"
+                        id="qty-replacement"
+                        min="1"
+                        value="1"
+                        class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2 ml-auto">
-                    <span class="text-xs text-text-light uppercase tracking-wider">Кол-во:</span>
-                    <input type="number" id="qty-replacement" min="1" value="1" class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body" disabled />
-                  </div>
-                </div>
-              )}
+                )
+              }
 
-              {/* Service 2: Warranty - Hidden for simple meters, shown for kits and NBIoT */}
-              {(isKit || !isMeter || isNbiot) && (
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div class="flex items-center gap-3">
-                    <div class="relative flex items-center">
-                      <input 
-                        type="checkbox" 
-                        id="service-warranty" 
-                        class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border" 
-                      />
-                      <svg class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {
+                /* Service 2: Warranty - Hidden for simple meters, shown for kits and NBIoT */
+              }
+              {
+                (isKit || !isMeter || isNbiot) && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <div class="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          id="service-warranty"
+                          class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                        />
+                        <svg
+                          class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <label
+                        for="service-warranty"
+                        class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                      >
+                        Расширенная гарантия 24 мес{" "}
+                        <span class="ml-1 text-emerald-600 font-bold">
+                          (100 руб)
+                        </span>
+                      </label>
                     </div>
-                    <label for="service-warranty" class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark">
-                      Расширенная гарантия 24 мес <span class="ml-1 text-emerald-600 font-bold">(100 руб)</span>
-                    </label>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-text-light uppercase tracking-wider">
+                        Кол-во:
+                      </span>
+                      <input
+                        type="number"
+                        id="qty-warranty"
+                        min="1"
+                        value="1"
+                        class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2 ml-auto">
-                    <span class="text-xs text-text-light uppercase tracking-wider">Кол-во:</span>
-                    <input type="number" id="qty-warranty" min="1" value="1" class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body" disabled />
-                  </div>
-                </div>
-              )}
+                )
+              }
 
-              {/* Service 3: Battery - Hidden for simple meters, shown for kits and NBIoT */}
-              {(isKit || !isMeter || isNbiot) && (
-                <div class="flex flex-wrap items-center justify-between gap-3">
-                  <div class="flex items-center gap-3">
-                    <div class="relative flex items-center">
-                      <input 
-                        type="checkbox" 
-                        id="service-battery" 
-                        class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border" 
-                      />
-                      <svg class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              {
+                /* Service 3: Battery - Hidden for simple meters, shown for kits and NBIoT */
+              }
+              {
+                (isKit || !isMeter || isNbiot) && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <div class="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          id="service-battery"
+                          class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                        />
+                        <svg
+                          class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <label
+                        for="service-battery"
+                        class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                      >
+                        Дополнительная батарейка{" "}
+                        <span class="ml-1 text-emerald-600 font-bold">
+                          (40 руб)
+                        </span>
+                      </label>
                     </div>
-                    <label for="service-battery" class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark">
-                      Дополнительная батарейка <span class="ml-1 text-emerald-600 font-bold">(40 руб)</span>
-                    </label>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-text-light uppercase tracking-wider">
+                        Кол-во:
+                      </span>
+                      <input
+                        type="number"
+                        id="qty-battery"
+                        min="1"
+                        value="1"
+                        class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                        disabled
+                      />
+                    </div>
                   </div>
-                  <div class="flex items-center gap-2 ml-auto">
-                    <span class="text-xs text-text-light uppercase tracking-wider">Кол-во:</span>
-                    <input type="number" id="qty-battery" min="1" value="1" class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body" disabled />
-                  </div>
-                </div>
-              )}
+                )
+              }
             </div>
           </div>
 
           <div class="mb-4 flex items-center gap-4">
             <div class="flex items-center gap-2">
-              <label for="detail-qty" class="text-sm font-semibold uppercase tracking-wider text-text-light">Кол-во:</label>
+              <label
+                for="detail-qty"
+                class="text-sm font-semibold uppercase tracking-wider text-text-light"
+                >Кол-во:</label
+              >
               <input
                 id="detail-qty"
                 type="number"
@@ -479,15 +579,27 @@ const productSchema = {
 
     // Services logic
     const services = [
-      { id: "replacement", price: 80, title: "Услуга: Замена счетчика на объекте" },
-      { id: "warranty", price: 100, title: "Услуга: Расширенная гарантия 24 мес" },
-      { id: "battery", price: 40, title: "Дополнительная батарейка" }
+      {
+        id: "replacement",
+        price: 80,
+        title: "Услуга: Замена счетчика на объекте",
+      },
+      {
+        id: "warranty",
+        price: 100,
+        title: "Услуга: Расширенная гарантия 24 мес",
+      },
+      { id: "battery", price: 40, title: "Дополнительная батарейка" },
     ];
 
-    services.forEach(service => {
-      const checkbox = document.getElementById(`service-${service.id}`) as HTMLInputElement | null;
-      const qty = document.getElementById(`qty-${service.id}`) as HTMLInputElement | null;
-      
+    services.forEach((service) => {
+      const checkbox = document.getElementById(
+        `service-${service.id}`,
+      ) as HTMLInputElement | null;
+      const qty = document.getElementById(
+        `qty-${service.id}`,
+      ) as HTMLInputElement | null;
+
       if (checkbox && qty) {
         checkbox.addEventListener("change", () => {
           qty.disabled = !checkbox.checked;
@@ -500,9 +612,13 @@ const productSchema = {
 
     // Sync service quantity with main quantity if enabled
     qtyInput?.addEventListener("change", () => {
-      services.forEach(service => {
-        const checkbox = document.getElementById(`service-${service.id}`) as HTMLInputElement | null;
-        const qty = document.getElementById(`qty-${service.id}`) as HTMLInputElement | null;
+      services.forEach((service) => {
+        const checkbox = document.getElementById(
+          `service-${service.id}`,
+        ) as HTMLInputElement | null;
+        const qty = document.getElementById(
+          `qty-${service.id}`,
+        ) as HTMLInputElement | null;
         if (checkbox?.checked && qty) {
           qty.value = qtyInput.value;
         }
@@ -521,17 +637,21 @@ const productSchema = {
       addToCart({ id, title, price, category, quantity });
 
       // Add services
-      services.forEach(service => {
-        const checkbox = document.getElementById(`service-${service.id}`) as HTMLInputElement | null;
-        const qty = document.getElementById(`qty-${service.id}`) as HTMLInputElement | null;
-        
+      services.forEach((service) => {
+        const checkbox = document.getElementById(
+          `service-${service.id}`,
+        ) as HTMLInputElement | null;
+        const qty = document.getElementById(
+          `qty-${service.id}`,
+        ) as HTMLInputElement | null;
+
         if (checkbox?.checked) {
           const serviceQty = Math.max(1, Number(qty?.value || 1));
           addToCart({
             id: `service-${service.id}-${id}`, // Unique ID for service related to this product
             title: service.title,
             price: service.price,
-            quantity: serviceQty
+            quantity: serviceQty,
           });
         }
       });

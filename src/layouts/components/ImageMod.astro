@@ -35,7 +35,9 @@ let {
 src = `/public${src}`;
 
 // Glob pattern to load images from the /public/images folder
-const images = import.meta.glob("/public/images/**/*.{jpeg,jpg,png,gif,svg,webp}");
+const images = import.meta.glob(
+  "/public/images/**/*.{jpeg,jpg,png,gif,svg,webp}",
+);
 
 // Check if the source path is valid
 const isValidPath = images[src] ? true : false;

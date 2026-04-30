@@ -546,7 +546,9 @@ const tagIcons: Record<string, string> = {
           комплектующие: 5,
         };
         const getCatPrio = (cat: string) =>
-          categoryPriorityMap[cat] !== undefined ? categoryPriorityMap[cat] : 99;
+          categoryPriorityMap[cat] !== undefined
+            ? categoryPriorityMap[cat]
+            : 99;
 
         const categoryA = a.dataset.category || "";
         const categoryB = b.dataset.category || "";
@@ -555,10 +557,14 @@ const tagIcons: Record<string, string> = {
 
         if (mode === "default") {
           if (prioA !== prioB) return prioA - prioB;
-          if (categoryA !== categoryB) return categoryA.localeCompare(categoryB, "ru");
-          return labelPriorityA - labelPriorityB || titleA.localeCompare(titleB, "ru");
+          if (categoryA !== categoryB)
+            return categoryA.localeCompare(categoryB, "ru");
+          return (
+            labelPriorityA - labelPriorityB ||
+            titleA.localeCompare(titleB, "ru")
+          );
         }
-        
+
         if (labelPriorityA !== labelPriorityB)
           return labelPriorityA - labelPriorityB;
         if (mode === "price-asc") return priceA - priceB;
