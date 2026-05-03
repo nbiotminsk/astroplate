@@ -6,7 +6,7 @@
 
 @theme {
   /* === Colors === */
-  --color-primary: #2d3fe3;
+  --color-primary: #2D3FE3;
   --color-body: #fff;
   --color-border: #eaeaea;
   --color-light: #f6f6f6;
@@ -16,14 +16,14 @@
   --color-text-light: #717171;
 
   /* === Darkmode Colors === */
-  --color-darkmode-primary: #536dfe;
+  --color-darkmode-primary: #536DFE;
   --color-darkmode-body: #1c1c1c;
-  --color-darkmode-border: #3e3e3e;
+  --color-darkmode-border: #3E3E3E;
   --color-darkmode-light: #222222;
   --color-darkmode-dark: #fff;
-  --color-darkmode-text: #b4afb6;
+  --color-darkmode-text: #B4AFB6;
   --color-darkmode-text-dark: #fff;
-  --color-darkmode-text-light: #b4afb6;
+  --color-darkmode-text-light: #B4AFB6;
 
   /* === Font Families === */
   --font-primary: Golos Text, sans-serif;
