@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Generate Theme and JSON
+        run: node scripts/themeGenerator.js && node scripts/jsonGenerator.js
+
       - name: Run Check (Lint & Types)
         run: npm run check
 
