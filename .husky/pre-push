@@ -1,0 +1,2 @@
+echo "Running checks before push..."
+npm run check && npm run build

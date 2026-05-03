@@ -5,7 +5,6 @@
   "description": "Astro and Tailwindcss boilerplate",
   "author": "zeon.studio",
   "license": "MIT",
-
   "type": "module",
   "scripts": {
     "dev": "concurrently \"node scripts/themeGenerator.js --watch\" \"node scripts/jsonGenerator.js && astro dev\"",
@@ -16,7 +15,8 @@
     "generate-json": "node scripts/jsonGenerator.js",
     "remove-darkmode": "node scripts/removeDarkmode.js && yarn format",
     "deploy:cf-workers": "npm run build && wrangler deploy",
-    "preview:cf-workers": "npm run build && wrangler dev"
+    "preview:cf-workers": "npm run build && wrangler dev",
+    "prepare": "husky"
   },
   "dependencies": {
     "@astrojs/check": "0.9.8",
@@ -51,6 +51,7 @@
     "@types/react-dom": "19.2.3",
     "concurrently": "^9.2.1",
     "eslint": "^10.2.0",
+    "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "prettier-plugin-astro": "^0.14.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
