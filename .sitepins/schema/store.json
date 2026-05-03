@@ -83,11 +83,7 @@
       "name": "custom_label_0",
       "label": "Метка товара",
       "type": "select",
-      "options": [
-        "standart",
-        "premium",
-        "discount"
-      ],
+      "options": ["standart", "premium", "discount"],
       "defaultValue": "standart"
     },
     {

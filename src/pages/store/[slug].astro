@@ -132,7 +132,8 @@ const productSchema = {
     name: String(brand).slice(0, 70),
   },
   itemCondition: product.data.condition || "https://schema.org/NewCondition",
-  ...(product.data.aggregateRating && product.data.aggregateRating.reviewCount > 0
+  ...(product.data.aggregateRating &&
+  product.data.aggregateRating.reviewCount > 0
     ? {
         aggregateRating: {
           "@type": "AggregateRating",

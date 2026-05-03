@@ -4,8 +4,6 @@
   "code": "src/layouts",
   "arrangement": [],
   "public": "public",
-  "configs": [
-    "src/config"
-  ],
+  "configs": ["src/config"],
   "custom-commit": true
 }

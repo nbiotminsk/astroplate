@@ -27,6 +27,7 @@ metadata:
 ### 2. Явный статус на каждом этапе
 
 После каждого шага выводи краткий статус:
+
 - ✓ — gate пройден
 - ✗ — gate не пройден (+ причина)
 - ⏳ — ожидание (для CI/CD)
@@ -59,6 +60,7 @@ npm run check
 **Gate:** вывод без ошибок. Warnings допустимы, ошибки — нет.
 
 Если есть ошибки:
+
 - Попробуй исправить, следуя принципам из `skills/code-cleaner/SKILL.md`.
 - После исправления перезапусти `npm run check`.
 - Если ошибка неясна — СТОП, доложи пользователю.
@@ -79,6 +81,7 @@ npm run build
 ```
 
 Этот скрипт выполняет:
+
 1. `node scripts/themeGenerator.js` — генерация CSS-темы из `theme.json`
 2. `node scripts/jsonGenerator.js` — генерация JSON-индексов для поиска
 3. `astro build` — сборка статического сайта в `dist/`
@@ -86,6 +89,7 @@ npm run build
 **Gate:** сборка завершена без ошибок. Директория `dist/` создана.
 
 Если сборка падает:
+
 - Прочитай ошибку. Чаще всего это: битый frontmatter, несуществующий импорт, ошибка в Astro-компоненте.
 - Исправь и вернись на Этап 1 (перепроверка).
 
@@ -107,6 +111,7 @@ git push origin main
 ```
 
 **Правила коммит-сообщений:**
+
 - Краткое описание на русском или английском.
 - Формат: `fix: ...`, `feat: ...`, `chore: ...`, `style: ...`.
 - Примеры: `fix: исправлена типизация в ProductCard`, `chore: форматирование и удаление мёртвых импортов`.
@@ -114,6 +119,7 @@ git push origin main
 **Gate:** `git push` выполнен без ошибок (no conflicts, no rejected).
 
 Если push отклонён:
+
 - Скорее всего, удалённая ветка опережает. Выполни `git pull --rebase origin main`, разреши конфликты если есть, затем push повторно.
 
 ### Этап 5. Мониторинг GitHub Actions
@@ -121,6 +127,7 @@ git push origin main
 После push в `main`, GitHub Actions автоматически запускает workflow `CI/CD Pipeline` (`.github/workflows/deploy.yml`).
 
 Workflow делает:
+
 1. Checkout репозитория
 2. Setup Node.js 22 + yarn cache
 3. `yarn install --frozen-lockfile`
@@ -129,12 +136,14 @@ Workflow делает:
 6. Deploy `dist/` в ветку `deploy` через `peaceiris/actions-gh-pages@v4`
 
 Для мониторинга:
+
 - Открой `https://github.com/nbiotminsk/astroplate/actions` в браузере.
 - Или используй GitHub CLI: `gh run list --limit 1 && gh run view <run-id>`.
 
 **Gate:** workflow завершён со статусом `success`.
 
 Если workflow упал:
+
 - Прочитай логи через `gh run view <run-id> --log-failed` или в браузере.
 - Чаще всего причины: `yarn.lock` не синхронизирован с `package.json`, ошибка в check/build.
 - Исправь локально, вернись на Этап 1.
