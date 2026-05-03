@@ -16,6 +16,7 @@ import CartModal from "./helpers/CartModal";
 import CheckoutModal from "./helpers/CheckoutModal";
 import JsonLd from "@/components/JsonLd.astro";
 import { getBreadcrumbs, getBreadcrumbSchema } from "@/lib/utils/breadcrumb";
+import { SEO } from "astro-seo";
 
 // font families - extract font names for Font component (filter out type keys)
 const fontEntries = Object.entries(theme.fonts.font_family).filter(
@@ -79,59 +80,94 @@ const finalDescription = plainify(
         <GoogleTagmanager id={config.google_tag_manager.gtm_id} />
       )
     }
-    <!-- favicon -->
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="48x48"
-      href="/images/favicon-48x48.png"
+    <SEO
+      title={finalTitle}
+      description={finalDescription}
+      canonical={autoCanonical}
+      noindex={noindex}
+      nofollow={noindex}
+      openGraph={{
+        basic: {
+          title: finalTitle,
+          type: "website",
+          image: `${config.site.base_url}${image ? image : config.metadata.meta_image}`,
+          url: `${config.site.base_url}/${Astro.url.pathname.replace("/", "")}`,
+        },
+        optional: {
+          description: finalDescription,
+          locale: "ru_RU",
+          siteName: config.site.title,
+        },
+      }}
+      twitter={{
+        card: "summary_large_image",
+        title: finalTitle,
+        description: finalDescription,
+        image: `${config.site.base_url}${image ? image : config.metadata.meta_image}`,
+      }}
+      extend={{
+        meta: [
+          { name: "author", content: config.metadata.meta_author },
+          { name: "theme-name", content: "astroplate" },
+          { name: "msapplication-TileColor", content: "#000000" },
+          {
+            name: "theme-color",
+            content: "#fff",
+            media: "(prefers-color-scheme: light)",
+          },
+          {
+            name: "theme-color",
+            content: "#000",
+            media: "(prefers-color-scheme: dark)",
+          },
+          { name: "generator", content: Astro.generator },
+          {
+            name: "viewport",
+            content: "width=device-width, initial-scale=1, maximum-scale=5",
+          },
+          { httpEquiv: "Content-Type", content: "text/html; charset=UTF-8" },
+          {
+            httpEquiv: "Cache-Control",
+            content: "public, max-age=0, must-revalidate",
+          },
+          { httpEquiv: "Pragma", content: "no-cache" },
+          { httpEquiv: "Expires", content: "0" },
+        ],
+        link: [
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "48x48",
+            href: "/images/favicon-48x48.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "96x96",
+            href: "/images/favicon-96x96.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "144x144",
+            href: "/images/favicon-144x144.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "192x192",
+            href: "/images/favicon-192x192.png",
+          },
+          {
+            rel: "icon",
+            type: "image/png",
+            sizes: "512x512",
+            href: "/images/favicon-512x512.png",
+          },
+          { rel: "shortcut icon", href: config.site.favicon },
+        ],
+      }}
     />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="96x96"
-      href="/images/favicon-96x96.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="144x144"
-      href="/images/favicon-144x144.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="192x192"
-      href="/images/favicon-192x192.png"
-    />
-    <link
-      rel="icon"
-      type="image/png"
-      sizes="512x512"
-      href="/images/favicon-512x512.png"
-    />
-    <link rel="shortcut icon" href={config.site.favicon} />
-    <!-- theme meta -->
-    <meta name="theme-name" content="astroplate" />
-    <meta name="msapplication-TileColor" content="#000000" />
-    <meta
-      name="theme-color"
-      media="(prefers-color-scheme: light)"
-      content="#fff"
-    />
-    <meta
-      name="theme-color"
-      media="(prefers-color-scheme: dark)"
-      content="#000"
-    />
-    <meta name="generator" content={Astro.generator} />
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <meta
-      http-equiv="Cache-Control"
-      content="public, max-age=0, must-revalidate"
-    />
-    <meta http-equiv="Pragma" content="no-cache" />
-    <meta http-equiv="Expires" content="0" />
 
     <!-- google font css - Astro 6 built-in Font API -->
     {
@@ -140,73 +176,6 @@ const finalDescription = plainify(
         return <Font cssVariable={cssVar} preload />;
       })
     }
-
-    <!-- responsive meta -->
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1, maximum-scale=5"
-    />
-
-    <!-- title -->
-    <title>{finalTitle}</title>
-
-    <!-- canonical url -->
-    <link rel="canonical" href={autoCanonical} item-prop="url" />
-
-    <!-- noindex robots -->
-    {noindex && <meta name="robots" content="noindex,nofollow" />}
-
-    <!-- meta-description -->
-    <meta name="description" content={finalDescription} />
-
-    <!-- author from config.json -->
-    <meta name="author" content={config.metadata.meta_author} />
-
-    <!-- og-title -->
-    <meta property="og:title" content={finalTitle} />
-
-    <!-- og-description -->
-    <meta property="og:description" content={finalDescription} />
-    <meta property="og:type" content="website" />
-    <meta
-      property="og:url"
-      content={`${config.site.base_url}/${Astro.url.pathname.replace("/", "")}`}
-    />
-
-    <!-- twitter-title -->
-    <meta
-      name="twitter:title"
-      content={plainify(
-        meta_title ? meta_title : title ? title : config.site.title,
-      )}
-    />
-
-    <!-- twitter-description -->
-    <meta
-      name="twitter:description"
-      content={plainify(
-        description ? description : config.metadata.meta_description,
-      )}
-    />
-
-    <!-- og-image -->
-    <meta
-      property="og:image"
-      content={`${config.site.base_url}${
-        image ? image : config.metadata.meta_image
-      }`}
-    />
-    <meta property="og:locale" content="ru_RU" />
-    <meta property="og:site_name" content={config.site.title} />
-
-    <!-- twitter-image -->
-    <meta
-      name="twitter:image"
-      content={`${config.site.base_url}${
-        image ? image : config.metadata.meta_image
-      }`}
-    />
-    <meta name="twitter:card" content="summary_large_image" />
 
     <JsonLd
       type="WebSite"
