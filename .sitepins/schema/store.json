@@ -15,6 +15,16 @@
       "defaultValue": ""
     },
     {
+      "name": "meta_title",
+      "label": "SEO Title (meta_title)",
+      "type": "string"
+    },
+    {
+      "name": "meta_description",
+      "label": "SEO Description (meta_description)",
+      "type": "string"
+    },
+    {
       "name": "category",
       "label": "Категория",
       "type": "select",

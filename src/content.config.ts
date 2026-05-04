@@ -105,6 +105,8 @@ const storeCollection = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "src/content/store" }),
   schema: z.looseObject({
     title: z.string(),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
     category: z.string().default("others"),
     price: z.union([z.string(), z.number()]).default("0"),
     price_currency: z.union([z.string(), z.number()]).default("BYN"),
