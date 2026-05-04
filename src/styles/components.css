@@ -202,11 +202,11 @@
 }
 
 .info-card {
-  @apply rounded-2xl border border-border bg-body p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
+  @apply rounded-2xl border border-border bg-body p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
 }
 
 .info-card-icon {
-  @apply text-primary dark:text-darkmode-primary text-3xl;
+  @apply mx-auto block h-[1em] w-[1em] fill-current text-2xl text-primary dark:text-darkmode-primary;
 }
 
 .trust-card {
@@ -214,7 +214,7 @@
 }
 
 .trust-card-icon {
-  @apply text-primary dark:text-darkmode-primary mx-auto text-3xl;
+  @apply mx-auto block h-[1em] w-[1em] fill-current text-2xl text-primary dark:text-darkmode-primary;
 }
 
 .buy-timeline-panel {
@@ -227,7 +227,7 @@
 
 .buy-timeline::before {
   content: "";
-  @apply border-border dark:border-darkmode-border absolute left-4 top-3 h-[calc(100%-1.5rem)] border-l-2;
+  @apply absolute left-4 top-3 h-[calc(100%-1.5rem)] border-l-2 border-border dark:border-darkmode-border;
 }
 
 .buy-timeline-item {
@@ -235,7 +235,7 @@
 }
 
 .buy-step-index {
-  @apply border-primary bg-primary dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark z-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-sm font-semibold text-white shadow-sm;
+  @apply z-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-primary bg-primary text-sm font-semibold text-white shadow-sm dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark;
 }
 
 .buy-step-text {
@@ -251,15 +251,15 @@
 }
 
 .buy-help-icon {
-  @apply text-primary dark:text-darkmode-primary text-2xl;
+  @apply fill-current text-2xl text-primary dark:text-darkmode-primary;
 }
 
 .integration-card {
-  @apply rounded-2xl border border-border bg-body p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
+  @apply rounded-2xl border border-border bg-body p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
 }
 
 .integration-card-icon {
-  @apply text-primary dark:text-darkmode-primary text-3xl;
+  @apply mx-auto block h-[1em] w-[1em] fill-current text-2xl text-primary dark:text-darkmode-primary;
 }
 
 .business-block {
