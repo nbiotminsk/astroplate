@@ -251,7 +251,7 @@
 }
 
 .buy-help-icon {
-  @apply fill-current text-2xl text-primary dark:text-darkmode-primary;
+  @apply h-[1em] w-[1em] fill-current text-xl text-primary dark:text-darkmode-primary;
 }
 
 .integration-card {
