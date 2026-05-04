@@ -1,6 +1,5 @@
 ---
 import ImageMod from "./ImageMod.astro";
-import { FaCrown, FaShoppingBasket } from "react-icons/fa";
 
 const { product } = Astro.props;
 const { id, title, price, image, availability, customLabel } = product;
@@ -18,12 +17,16 @@ const { id, title, price, image, availability, customLabel } = product;
   {
     customLabel === "premium" ? (
       <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-        <FaCrown className="text-amber-500 dark:text-amber-300" />
+        <svg class="h-[1em] w-[1em] text-amber-500 dark:text-amber-300">
+          <use xlink:href="#icon-FaCrown" />
+        </svg>
         <span>TOP</span>
       </div>
     ) : customLabel === "discount" ? (
       <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
-        <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
+        <svg class="h-[1em] w-[1em] text-emerald-500 dark:text-emerald-300">
+          <use xlink:href="#icon-FaShoppingBasket" />
+        </svg>
         <span>SALE</span>
       </div>
     ) : null

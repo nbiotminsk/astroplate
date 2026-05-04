@@ -8,27 +8,7 @@ import {
   normalizeStoreLabel,
 } from "@/lib/utils/storeLabels";
 import JsonLd from "@/components/JsonLd.astro";
-import {
-  FaBroadcastTower,
-  FaBuilding,
-  FaCamera,
-  FaCertificate,
-  FaCheck,
-  FaCogs,
-  FaCrown,
-  FaFire,
-  FaHeadset,
-  FaLayerGroup,
-  FaMobileAlt,
-  FaPhoneAlt,
-  FaPlug,
-  FaShoppingBasket,
-  FaThermometerHalf,
-  FaTint,
-  FaTools,
-  FaTruck,
-  FaWater,
-} from "react-icons/fa";
+const siteUrl = "https://teleofis24.by";
 
 const homepageEntry = await getListPage("homepage", "-index");
 const homepage = homepageEntry.data as any;
@@ -55,26 +35,6 @@ const topProducts = catalogEntries
   })
   .sort((a, b) => a.labelPriority - b.labelPriority || b.price - a.price)
   .slice(0, 4);
-
-const iconMap = {
-  FaWater,
-  FaFire,
-  FaBroadcastTower,
-  FaThermometerHalf,
-  FaCogs,
-  FaTint,
-  FaCertificate,
-  FaTruck,
-  FaTools,
-  FaHeadset,
-  FaBuilding,
-  FaCheck,
-  FaMobileAlt,
-  FaPlug,
-  FaLayerGroup,
-} as const;
-
-const siteUrl = "https://teleofis24.by";
 ---
 
 <Base
@@ -151,7 +111,9 @@ const siteUrl = "https://teleofis24.by";
             {
               homepage.hero.trustItems.map((item: string) => (
                 <li class="flex items-center gap-2">
-                  <FaCheck className="text-primary" />
+                  <svg class="h-[1em] w-[1em] text-primary">
+                    <use xlink:href="#icon-FaCheck" />
+                  </svg>
                   <span>{item}</span>
                 </li>
               ))
@@ -205,12 +167,16 @@ const siteUrl = "https://teleofis24.by";
                 >
                   {product.customLabel === "premium" ? (
                     <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-                      <FaCrown className="text-amber-500 dark:text-amber-300" />
+                      <svg class="h-[1em] w-[1em] text-amber-500 dark:text-amber-300">
+                        <use xlink:href="#icon-FaCrown" />
+                      </svg>
                       <span>TOP</span>
                     </div>
                   ) : product.customLabel === "discount" ? (
                     <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
-                      <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
+                      <svg class="h-[1em] w-[1em] text-emerald-500 dark:text-emerald-300">
+                        <use xlink:href="#icon-FaShoppingBasket" />
+                      </svg>
                       <span>SALE</span>
                     </div>
                   ) : null}
@@ -235,7 +201,9 @@ const siteUrl = "https://teleofis24.by";
                     }`}
                   >
                     {product.customLabel === "premium" ? (
-                      <FaCrown className="text-amber-500 dark:text-amber-300" />
+                      <svg class="h-[1em] w-[1em] text-amber-500 dark:text-amber-300">
+                        <use xlink:href="#icon-FaCrown" />
+                      </svg>
                     ) : null}
                     <span>{product.price} BYN</span>
                   </p>
@@ -278,26 +246,25 @@ const siteUrl = "https://teleofis24.by";
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.solutions.items.map((item: any) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
-            return (
-              <div class="sm:col-6 lg:col-4">
-                <article class="info-card h-full">
-                  <Icon className="info-card-icon" />
-                  <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
-                    {item.title}
-                  </h3>
-                  <p class="mt-2">{item.text}</p>
-                  <a
-                    class="mt-4 inline-block font-semibold hover:underline"
-                    href={homepage.solutions.moreLink}
-                  >
-                    {homepage.solutions.moreLabel}
-                  </a>
-                </article>
-              </div>
-            );
-          })
+          homepage.solutions.items.map((item: any) => (
+            <div class="sm:col-6 lg:col-4">
+              <article class="info-card h-full">
+                <svg class="info-card-icon">
+                  <use xlink:href={`#icon-${item.icon}`} />
+                </svg>
+                <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+                <p class="mt-2">{item.text}</p>
+                <a
+                  class="mt-4 inline-block font-semibold hover:underline"
+                  href={homepage.solutions.moreLink}
+                >
+                  {homepage.solutions.moreLabel}
+                </a>
+              </article>
+            </div>
+          ))
         }
       </div>
     </div>
@@ -311,19 +278,18 @@ const siteUrl = "https://teleofis24.by";
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.whyUs.items.map((item: any) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCheck;
-            return (
-              <div class="sm:col-6 lg:col-4">
-                <article class="trust-card h-full">
-                  <Icon className="trust-card-icon" />
-                  <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
-                    {item.title}
-                  </h3>
-                </article>
-              </div>
-            );
-          })
+          homepage.whyUs.items.map((item: any) => (
+            <div class="sm:col-6 lg:col-4">
+              <article class="trust-card h-full">
+                <svg class="trust-card-icon">
+                  <use xlink:href={`#icon-${item.icon}`} />
+                </svg>
+                <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+              </article>
+            </div>
+          ))
         }
       </div>
     </div>
@@ -356,7 +322,9 @@ const siteUrl = "https://teleofis24.by";
         <div class="lg:col-5">
           <aside class="buy-help-card">
             <div class="flex items-center gap-2">
-              <FaCamera className="buy-help-icon" />
+              <svg class="buy-help-icon">
+                <use xlink:href="#icon-FaCamera"></use>
+              </svg>
               <h3
                 class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark"
               >
@@ -455,7 +423,9 @@ const siteUrl = "https://teleofis24.by";
               {
                 homepage.howToBuy.helpCard.highlights.map((item: string) => (
                   <li class="flex items-start gap-2">
-                    <FaCheck className="mt-1 text-primary" />
+                    <svg class="mt-1 h-[1em] w-[1em] text-primary">
+                      <use xlink:href="#icon-FaCheck" />
+                    </svg>
                     <span>{item}</span>
                   </li>
                 ))
@@ -582,20 +552,19 @@ const siteUrl = "https://teleofis24.by";
       </h2>
       <div class="row gap-y-6">
         {
-          homepage.integrations.items.map((item: any) => {
-            const Icon = iconMap[item.icon as keyof typeof iconMap] || FaCogs;
-            return (
-              <div class="sm:col-6 lg:col-3">
-                <article class="integration-card h-full">
-                  <Icon className="integration-card-icon" />
-                  <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                    {item.title}
-                  </h3>
-                  <p class="mt-2 text-sm">{item.text}</p>
-                </article>
-              </div>
-            );
-          })
+          homepage.integrations.items.map((item: any) => (
+            <div class="sm:col-6 lg:col-3">
+              <article class="integration-card h-full">
+                <svg class="integration-card-icon">
+                  <use xlink:href={`#icon-${item.icon}`} />
+                </svg>
+                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                  {item.title}
+                </h3>
+                <p class="mt-2 text-sm">{item.text}</p>
+              </article>
+            </div>
+          ))
         }
       </div>
     </div>
@@ -666,7 +635,9 @@ const siteUrl = "https://teleofis24.by";
             class="btn btn-outline-primary"
             href={homepage.finalCta.secondary.link}
           >
-            <FaPhoneAlt className="mr-2 inline" />
+            <svg class="mr-2 inline h-[1em] w-[1em]">
+              <use xlink:href="#icon-FaPhoneAlt"></use>
+            </svg>
             {homepage.finalCta.secondary.label}
           </a>
         </div>
