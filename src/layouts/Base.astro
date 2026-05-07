@@ -92,7 +92,7 @@ const finalDescription = plainify(
           title: finalTitle,
           type: "website",
           image: `${config.site.base_url}${image ? image : config.metadata.meta_image}`,
-          url: `${config.site.base_url}/${Astro.url.pathname.replace("/", "")}`,
+          url: autoCanonical,
         },
         optional: {
           description: finalDescription,

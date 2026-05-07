@@ -77,7 +77,7 @@ const availabilitySchema = isInStock
 const gtin = product.data.gtin || product.data.gtin13 || product.data.gtin14;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
-const productUrl = `${siteUrl}/store/${product.id}`;
+const productUrl = `${siteUrl}/store/${product.id}/`;
 const imageUrl = `${siteUrl}${image}`;
 
 const productFaqs = [
