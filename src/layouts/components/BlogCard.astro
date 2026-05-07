@@ -19,7 +19,7 @@ const { title, image, date, categories } = data.data;
   {
     image && (
       <a
-        href={`/${blog_folder}/${data.id}`}
+        href={`/${blog_folder}/${data.id}/`}
         class="mb-6 block overflow-hidden rounded-lg"
       >
         <ImageMod
@@ -35,7 +35,7 @@ const { title, image, date, categories } = data.data;
     )
   }
   <h4 class="card-title mb-3 text-text-dark dark:text-darkmode-text-dark">
-    <a href={`/${blog_folder}/${data.id}`}>
+    <a href={`/${blog_folder}/${data.id}/`}>
       {title}
     </a>
   </h4>
@@ -44,7 +44,7 @@ const { title, image, date, categories } = data.data;
       <FaRegFolder className={"mr-2 -mt-1 inline-block"} />
       {
         categories.map((category: string, index: number) => (
-          <a href={`/categories/${slugify(category)}`}>
+          <a href={`/categories/${slugify(category)}/`}>
             {humanize(category)}
             {index !== categories.length - 1 && ","}
           </a>
@@ -56,7 +56,7 @@ const { title, image, date, categories } = data.data;
   <p class="mb-6 text-sm leading-relaxed text-justify">
     {plainify(data.body?.slice(0, Number(summary_length)))}
   </p>
-  <a class="btn btn-outline-primary btn-sm" href={`/${blog_folder}/${data.id}`}>
+  <a class="btn btn-outline-primary btn-sm" href={`/${blog_folder}/${data.id}/`}>
     Подробнее
   </a>
 </div>

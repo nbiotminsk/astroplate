@@ -7,23 +7,23 @@
     },
     {
       "name": "Магазин",
-      "url": "/store"
+      "url": "/store/"
     },
     {
       "name": "Решения",
-      "url": "/solutions"
+      "url": "/solutions/"
     },
     {
       "name": "Услуги",
-      "url": "/services"
+      "url": "/services/"
     },
     {
       "name": "Доставка и оплата",
-      "url": "/info"
+      "url": "/info/"
     },
     {
       "name": "Контакты",
-      "url": "/contact"
+      "url": "/contact/"
     }
   ],
   "footer": []
