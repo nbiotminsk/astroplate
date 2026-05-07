@@ -60,40 +60,40 @@ popularProducts:
       image: /images/service-1.png
       buy:
         label: Купить
-        link: /store/gsm-modul-connect-g100
+        link: /store/gsm-modul-connect-g100/
       details:
         label: Подробнее
-        link: /store/gsm-modul-connect-g100
+        link: /store/gsm-modul-connect-g100/
     - title: Водомер SmartFlow W-15
       specs: Дистанционный учёт воды, импульсные входы
       price: 149 BYN
       image: /images/service-2.png
       buy:
         label: Купить
-        link: /store/vodomer-smartflow-w-15
+        link: /store/vodomer-smartflow-w-15/
       details:
         label: Подробнее
-        link: /store/vodomer-smartflow-w-15
+        link: /store/vodomer-smartflow-w-15/
     - title: Ремонт модуля Zeta Тахат
       specs: Контроль температуры и аварий, обслуживание модемов
       price: 120 BYN
       image: /images/service-3.png
       buy:
         label: Заказать
-        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat
+        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat/
       details:
         label: Подробнее
-        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat
+        link: /store/usluga-remont-obsluzhivanie-modulya-zeta-tahat/
     - title: Модуль NBIOT + 2 счетчика
       specs: Готовый комплект для учета воды
       price: 329 BYN
       image: /images/banner.png
       buy:
         label: Купить
-        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm
+        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm/
       details:
         label: Подробнее
-        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm
+        link: /store/komplekt-nbiot-2-schetchika-vody-15-mm/
 
 solutions:
   title: Готовые решения под задачи
