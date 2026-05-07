@@ -25,7 +25,7 @@ export const getBreadcrumbs = (pathname: string, title?: string) => {
   ];
 
   paths.forEach((label, i) => {
-    const href = `/${paths.slice(0, i + 1).join("/")}`;
+    const href = `/${paths.slice(0, i + 1).join("/")}/`;
     const normalizedLabel = label.replace(".html", "").replace(/[-_]/g, " ");
     const translatedLabel =
       i === paths.length - 1 && title
@@ -36,7 +36,7 @@ export const getBreadcrumbs = (pathname: string, title?: string) => {
     if (paths.length === 1 && !labelMap[label]) {
       parts.push({
         label: labelMap["services"],
-        href: "/services",
+        href: "/services/",
       });
     }
 
