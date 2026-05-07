@@ -79,7 +79,7 @@ const itemListSchema = {
   itemListElement: products.map((product, index) => ({
     "@type": "ListItem",
     position: index + 1,
-    url: `${siteUrl}/store/${product.id}`,
+    url: `${siteUrl}/store/${product.id}/`,
   })),
 };
 

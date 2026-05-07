@@ -20,7 +20,7 @@ const COLLECTION_FOLDER = "blog";
 const { post } = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
-const postUrl = `${siteUrl}/${COLLECTION_FOLDER}/${post.id}`;
+const postUrl = `${siteUrl}/${COLLECTION_FOLDER}/${post.id}/`;
 const articleSchema = {
   headline: post.data.title,
   description: post.data.description,
