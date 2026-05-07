@@ -1,0 +1,1 @@
+import{C as o,b as d}from"./cart.9l95F7No.js";const n=()=>{const t=document.getElementById("cart-count-badge");if(t){const e=d();t.textContent=e.toString(),t.classList.toggle("hidden",e===0),t.classList.toggle("flex",e>0)}};document.addEventListener("DOMContentLoaded",n);n();window.addEventListener(o,n);

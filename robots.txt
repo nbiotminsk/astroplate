@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+Disallow: /api/*
+
+Sitemap: https://teleofis24.by/sitemap-index.xml
+
+# Crawl-delay для ботов (опционально)
+Crawl-delay: 1
+
+# Yandex-specific directives
+Host: teleofis24.by
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid /
