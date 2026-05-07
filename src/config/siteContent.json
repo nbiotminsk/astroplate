@@ -6,7 +6,7 @@
       "subtitle": "Продажа оборудования, монтаж, удалённый мониторинг, обслуживание модулей и оплата онлайн через E-POS.",
       "primaryCta": {
         "label": "Перейти в магазин",
-        "link": "/store"
+        "link": "/store/"
       },
       "secondaryCta": {
         "label": "Получить счёт для организации",
@@ -23,7 +23,7 @@
       "title": "Популярные товары",
       "viewAll": {
         "label": "Перейти в магазин",
-        "link": "/store"
+        "link": "/store/"
       },
       "items": [
         {
@@ -33,11 +33,11 @@
           "image": "/images/service-1.png",
           "buy": {
             "label": "Купить",
-            "link": "/store"
+            "link": "/store/"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/store"
+            "link": "/store/"
           }
         },
         {
@@ -47,11 +47,11 @@
           "image": "/images/service-2.png",
           "buy": {
             "label": "Купить",
-            "link": "/store"
+            "link": "/store/"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/store"
+            "link": "/store/"
           }
         },
         {
@@ -61,11 +61,11 @@
           "image": "/images/service-3.png",
           "buy": {
             "label": "Купить",
-            "link": "/store"
+            "link": "/store/"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/store"
+            "link": "/store/"
           }
         },
         {
@@ -75,11 +75,11 @@
           "image": "/images/banner.png",
           "buy": {
             "label": "Купить",
-            "link": "/store"
+            "link": "/store/"
           },
           "details": {
             "label": "Подробнее",
-            "link": "/store"
+            "link": "/store/"
           }
         }
       ]
@@ -282,19 +282,19 @@
         "links": [
           {
             "label": "Контроллеры",
-            "href": "/store"
+            "href": "/store/"
           },
           {
             "label": "Модули связи",
-            "href": "/store"
+            "href": "/store/"
           },
           {
             "label": "Датчики",
-            "href": "/store"
+            "href": "/store/"
           },
           {
             "label": "Промышленные роутеры",
-            "href": "/store"
+            "href": "/store/"
           }
         ]
       },

@@ -31,7 +31,7 @@ const { id, title, price, image, availability, customLabel } = product;
       </div>
     ) : null
   }
-  <a href={`/store/${id}`} aria-label={`Открыть ${title}`}>
+  <a href={`/store/${id}/`} aria-label={`Открыть ${title}`}>
     <div
       class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body"
     >
@@ -99,7 +99,7 @@ const { id, title, price, image, availability, customLabel } = product;
       />
       <a
         class="btn btn-outline-primary w-full text-center py-2.5 text-base text-emerald-600/70 sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:hover:text-emerald-600 sm:hover:underline"
-        href={`/store/${id}`}
+        href={`/store/${id}/`}
       >
         Подробнее
       </a>
