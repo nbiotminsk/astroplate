@@ -56,7 +56,10 @@ const { title, image, date, categories } = data.data;
   <p class="mb-6 text-sm leading-relaxed text-justify">
     {plainify(data.body?.slice(0, Number(summary_length)))}
   </p>
-  <a class="btn btn-outline-primary btn-sm" href={`/${blog_folder}/${data.id}/`}>
+  <a
+    class="btn btn-outline-primary btn-sm"
+    href={`/${blog_folder}/${data.id}/`}
+  >
     Подробнее
   </a>
 </div>
