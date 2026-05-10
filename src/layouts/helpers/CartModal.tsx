@@ -18,7 +18,7 @@ const CartModal = () => {
 
   const closeModal = () => setIsOpen(false);
 
-  if (!isOpen) return null;
+  if (!isOpen) return <div id="cart-modal-root" />;
 
   return (
     <>

@@ -135,7 +135,7 @@ const CheckoutModal = () => {
     }
   };
 
-  if (!isOpen) return null;
+  if (!isOpen) return <div id="checkout-modal-root" />;
 
   return (
     <>

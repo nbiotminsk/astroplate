@@ -1,7 +1,7 @@
 ---
 import ImageMod from "./ImageMod.astro";
 
-const { product } = Astro.props;
+const { product, loading, fetchpriority } = Astro.props;
 const { id, title, price, image, availability, customLabel } = product;
 ---
 
@@ -42,7 +42,8 @@ const { id, title, price, image, availability, customLabel } = product;
         width={760}
         height={440}
         format="webp"
-        loading="lazy"
+        loading={loading ?? "lazy"}
+        fetchpriority={fetchpriority}
       />
     </div>
   </a>

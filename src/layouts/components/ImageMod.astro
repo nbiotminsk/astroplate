@@ -11,6 +11,7 @@ interface Props {
   quality?: number;
   loading?: "eager" | "lazy" | null | undefined;
   decoding?: "async" | "auto" | "sync" | null | undefined;
+  fetchpriority?: "high" | "low" | "auto";
   format?: "auto" | "avif" | "jpeg" | "png" | "svg" | "webp";
   fit?: "cover" | "contain" | "fill" | "none" | "scale-down";
   class?: string;
@@ -26,6 +27,7 @@ let {
   quality,
   loading,
   decoding,
+  fetchpriority,
   class: className,
   format,
   style,
@@ -60,6 +62,7 @@ const isValidPath = images[src] ? true : false;
       loading={loading}
       fit={fit ? fit : "contain"}
       decoding={decoding}
+      fetchpriority={fetchpriority}
       class={className}
       format={format}
       style={style}

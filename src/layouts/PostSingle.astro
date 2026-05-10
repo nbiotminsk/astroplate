@@ -1,7 +1,6 @@
 ---
 import BlogCard from "@/components/BlogCard.astro";
 import Breadcrumbs from "@/components/Breadcrumbs.astro";
-import Disqus from "@/helpers/Disqus";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import dateFormat from "@/lib/utils/dateFormat";
 import similarItems from "@/lib/utils/similarItems";
@@ -14,9 +13,11 @@ import CallToAction from "./components/CallToAction.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import { normalizeStoreLabel } from "@/lib/utils/storeLabels";
 import config from "@/config/config.json";
+import Disqus from "@/helpers/Disqus";
 import JsonLd from "@/components/JsonLd.astro";
 
 const COLLECTION_FOLDER = "blog";
+const { disqus } = config;
 const { post } = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
@@ -150,16 +151,20 @@ const recommendedProducts = catalogEntries
             </ul>
           </div>
         </div>
-        <Disqus className="mt-20" client:only="react" />
+        {disqus.enable && <Disqus className="mt-20" client:only="react" />}
 
         {
           recommendedProducts.length > 0 && (
             <div class="mt-20 border-t border-border pt-10">
               <h2 class="h3 mb-8 text-center">Рекомендуемые товары</h2>
               <div class="row justify-center">
-                {recommendedProducts.map((product) => (
+                {recommendedProducts.map((product, idx) => (
                   <div class="mb-8 md:col-6 lg:col-4">
-                    <ProductCard product={product} />
+                    <ProductCard
+                      product={product}
+                      loading={idx === 0 ? "eager" : "lazy"}
+                      fetchpriority={idx === 0 ? "high" : undefined}
+                    />
                   </div>
                 ))}
               </div>

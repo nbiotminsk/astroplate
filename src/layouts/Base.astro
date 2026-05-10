@@ -11,7 +11,7 @@ import {
   GoogleTagmanagerNoscript,
 } from "@digi4care/astro-google-tagmanager";
 import { Font } from "astro:assets";
-import Announcement from "./helpers/Announcement";
+import Announcement from "./helpers/Announcement.astro";
 import CartModal from "./helpers/CartModal";
 import CheckoutModal from "./helpers/CheckoutModal";
 import JsonLd from "@/components/JsonLd.astro";
@@ -220,7 +220,7 @@ const finalDescription = plainify(
         <GoogleTagmanagerNoscript id={config.google_tag_manager.gtm_id} />
       )
     }
-    <Announcement client:idle />
+    <Announcement />
     <Header />
     <CartModal client:idle />
     <CheckoutModal client:idle />
