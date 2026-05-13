@@ -80,7 +80,7 @@ const siteUrl = config.site.base_url.replace(/\/$/, "");
 const productUrl = `${siteUrl}/store/${product.id}/`;
 const imageUrl = `${siteUrl}${image}`;
 
-const productFaqs = [
+const defaultProductFaqs = [
   {
     question: `Как купить ${title} для организации?`,
     answer:
@@ -97,6 +97,7 @@ const productFaqs = [
       "Да, наши специалисты выполняют монтаж, пусконаладку и подключение к платформам мониторинга (например, 'Мой Клиент: Ресурсы').",
   },
 ];
+const productFaqs = [...(product.data.faq || []), ...defaultProductFaqs];
 
 // Extract SKU and MPN safely (handle objects from Sitepins)
 const rawSku = product.data.sku;

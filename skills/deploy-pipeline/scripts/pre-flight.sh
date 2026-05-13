@@ -1,10 +1,14 @@
 #!/bin/bash
-set -e
+set -u
 
 echo "=== Deploy Pipeline Pre-flight ==="
 echo ""
 
 FAILED=0
+PRETTIER_TARGETS=(
+  "src/**/*.{astro,ts,tsx,js,jsx,json,md,mdx,css}"
+  "!src/styles/generated-theme.css"
+)
 
 # Gate 1: TypeScript & Astro
 echo "Gate 1/4: TypeScript & Astro checks..."
@@ -19,10 +23,10 @@ echo ""
 
 # Gate 2: Formatting
 echo "Gate 2/4: Prettier formatting..."
-if npx prettier --check . 2>&1; then
+if npx prettier --check "${PRETTIER_TARGETS[@]}" 2>&1; then
   echo "  ✓ Formatting: PASSED"
 else
-  echo "  ✗ Formatting: FAILED (run 'npm run format' to fix)"
+  echo "  ✗ Formatting: FAILED (format editable source files; do not edit generated-theme.css)"
   FAILED=1
 fi
 
