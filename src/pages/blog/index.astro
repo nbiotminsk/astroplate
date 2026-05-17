@@ -22,6 +22,8 @@ const tags = await getTaxonomy(BLOG_FOLDER, "tags");
 const sortedPosts = sortByDate(posts);
 const totalPages: number = Math.ceil(posts.length / config.settings.pagination);
 const currentPosts = sortedPosts.slice(0, config.settings.pagination);
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const nextUrl = totalPages > 1 ? `${siteUrl}/blog/page/2/` : undefined;
 ---
 
 <Base
@@ -29,6 +31,7 @@ const currentPosts = sortedPosts.slice(0, config.settings.pagination);
   meta_title={postIndex.data.meta_title}
   image={postIndex.data.image}
   description={postIndex.data.description}
+  nextUrl={nextUrl}
 >
   <PageHeader title={postIndex?.data.title} />
   <section class="section">

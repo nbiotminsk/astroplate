@@ -30,8 +30,13 @@ export interface Props {
   meta_title?: string;
   description?: string;
   image?: string;
+  ogType?: string;
+  imageWidth?: number;
+  imageHeight?: number;
   noindex?: boolean;
   canonical?: string;
+  prevUrl?: string;
+  nextUrl?: string;
   hideBreadcrumbs?: boolean;
 }
 
@@ -41,16 +46,28 @@ const {
   meta_title,
   description,
   image,
+  ogType = "website",
+  imageWidth = 1200,
+  imageHeight = 630,
   noindex,
   canonical,
+  prevUrl,
+  nextUrl,
   hideBreadcrumbs,
 } = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
+const toAbsoluteUrl = (url: string) =>
+  /^https?:\/\//.test(url)
+    ? url
+    : `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
 const currentPath = Astro.url.pathname.replace(/\/$/, "");
 const autoCanonical =
   canonical ||
   `${siteUrl}${currentPath}${config.site.trailing_slash ? "/" : ""}`;
+const ogImage = toAbsoluteUrl(image ? image : config.metadata.meta_image);
+const twitterSite = (config.metadata as any).twitter_site;
+const twitterCreator = (config.metadata as any).twitter_creator;
 
 // Pagination handling for title and description to avoid duplicates
 const paths = Astro.url.pathname.split("/").filter(Boolean);
@@ -73,7 +90,7 @@ const finalDescription = plainify(
 ---
 
 <!doctype html>
-<html lang="ru">
+<html lang="ru-RU">
   <head>
     <!-- google tag manager -->
     {
@@ -87,11 +104,22 @@ const finalDescription = plainify(
       canonical={autoCanonical}
       noindex={noindex}
       nofollow={noindex}
+      robotsExtras="max-snippet:-1, max-image-preview:large"
+      languageAlternates={[
+        {
+          href: autoCanonical,
+          hrefLang: "x-default",
+        },
+        {
+          href: autoCanonical,
+          hrefLang: "ru-RU",
+        },
+      ]}
       openGraph={{
         basic: {
           title: finalTitle,
-          type: "website",
-          image: `${config.site.base_url}${image ? image : config.metadata.meta_image}`,
+          type: ogType,
+          image: ogImage,
           url: autoCanonical,
         },
         optional: {
@@ -99,12 +127,20 @@ const finalDescription = plainify(
           locale: "ru_RU",
           siteName: config.site.title,
         },
+        image: {
+          width: imageWidth,
+          height: imageHeight,
+          alt: finalTitle,
+        },
       }}
       twitter={{
         card: "summary_large_image",
+        site: twitterSite,
+        creator: twitterCreator,
         title: finalTitle,
         description: finalDescription,
-        image: `${config.site.base_url}${image ? image : config.metadata.meta_image}`,
+        image: ogImage,
+        imageAlt: finalTitle,
       }}
       extend={{
         meta: [
@@ -160,6 +196,8 @@ const finalDescription = plainify(
             href: "/images/favicon-512x512.png",
           },
           { rel: "shortcut icon", href: config.site.favicon },
+          ...(prevUrl ? [{ rel: "prev", href: prevUrl }] : []),
+          ...(nextUrl ? [{ rel: "next", href: nextUrl }] : []),
         ],
       }}
     />
@@ -179,6 +217,15 @@ const finalDescription = plainify(
         url: config.site.base_url,
         description: config.metadata.meta_description,
         inLanguage: "ru-RU",
+      }}
+    />
+
+    <JsonLd
+      type="ImageObject"
+      data={{
+        url: ogImage,
+        width: imageWidth,
+        height: imageHeight,
       }}
     />
 

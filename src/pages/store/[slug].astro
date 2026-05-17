@@ -78,7 +78,17 @@ const gtin = product.data.gtin || product.data.gtin13 || product.data.gtin14;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const productUrl = `${siteUrl}/store/${product.id}/`;
-const imageUrl = `${siteUrl}${image}`;
+const toAbsoluteUrl = (url: string) =>
+  /^https?:\/\//.test(url)
+    ? url
+    : `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
+const productImages = Array.from(
+  new Set(
+    [product.data.img, product.data.image, image].filter(
+      (productImage): productImage is string => Boolean(productImage),
+    ),
+  ),
+);
 
 const defaultProductFaqs = [
   {
@@ -117,14 +127,14 @@ const productSchema = {
   "@id": `${productUrl}#product`,
   name: title.slice(0, 150),
   description,
-  image: [
-    {
-      "@type": "ImageObject",
-      url: imageUrl,
-      caption: title,
-      description: title,
-    },
-  ],
+  image: productImages.map((productImage) => ({
+    "@type": "ImageObject",
+    url: toAbsoluteUrl(productImage),
+    width: 1200,
+    height: 630,
+    caption: title,
+    description: title,
+  })),
   sku: String(sku).slice(0, 100),
   mpn: String(mpn).slice(0, 100),
   category,
@@ -224,10 +234,10 @@ const productSchema = {
   meta_title={metaTitle as string}
   description={metaDescription as string}
   image={image}
+  ogType="product"
   canonical={productUrl}
 >
   <Fragment slot="head">
-    <meta property="og:type" content="product" />
     <meta property="product:price:amount" content={price.toFixed(2)} />
     <meta property="product:price:currency" content="BYN" />
     <meta

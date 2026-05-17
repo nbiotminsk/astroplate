@@ -28,6 +28,17 @@ const currentPage = slug && !isNaN(Number(slug)) ? Number(slug) : 1;
 const indexOfLastPost = currentPage * config.settings.pagination;
 const indexOfFirstPost = indexOfLastPost - config.settings.pagination;
 const currentPosts = sortedPosts.slice(indexOfFirstPost, indexOfLastPost);
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const prevUrl =
+  currentPage === 2
+    ? `${siteUrl}/blog/`
+    : currentPage > 2
+      ? `${siteUrl}/blog/page/${currentPage - 1}/`
+      : undefined;
+const nextUrl =
+  currentPage < totalPages
+    ? `${siteUrl}/blog/page/${currentPage + 1}/`
+    : undefined;
 
 export async function getStaticPaths() {
   const BLOG_FOLDER = "blog";
@@ -51,6 +62,8 @@ export async function getStaticPaths() {
   meta_title={postIndex.data.meta_title}
   image={postIndex.data.image}
   description={postIndex.data.description}
+  prevUrl={prevUrl}
+  nextUrl={nextUrl}
 >
   <PageHeader title={postIndex.data.title} />
   <section class="section">
