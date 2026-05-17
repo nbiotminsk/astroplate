@@ -194,7 +194,7 @@
 }
 
 .catalog-card-image {
-  @apply w-full rounded-xl border border-border bg-light p-2 dark:border-darkmode-border dark:bg-darkmode-body;
+  @apply w-full h-48 object-contain rounded-xl border border-border bg-light p-2 dark:border-darkmode-border dark:bg-darkmode-body;
 }
 
 .card-title {
