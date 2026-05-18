@@ -44,6 +44,18 @@ jobs:
             chmod 644 dist/.htaccess
           fi
 
+      - name: Preserve old assets for cached users
+        run: |
+          git fetch origin deploy || echo "No deploy branch yet"
+          # Извлекаем старую папку _astro из ветки deploy, если она есть
+          git checkout origin/deploy -- _astro || echo "No _astro folder in previous deploy"
+          if [ -d "_astro" ]; then
+            echo "Merging old assets into new build..."
+            # Копируем старые ассеты в dist (не перезаписывая новые)
+            cp -n -r _astro/* dist/_astro/ || true
+            rm -rf _astro
+          fi
+
       - name: Deploy to Deploy Branch
         uses: peaceiris/actions-gh-pages@v4
         with:
