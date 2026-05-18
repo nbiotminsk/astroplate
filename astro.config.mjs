@@ -55,7 +55,35 @@ export default defineConfig({
   base: config.site.base_path ? config.site.base_path : "/",
   trailingSlash: config.site.trailing_slash ? "always" : "never",
   image: { service: sharp() },
-  vite: { plugins: [tailwindcss()] },
+  vite: {
+    plugins: [tailwindcss()],
+    build: {
+      rollupOptions: {
+        output: {
+          entryFileNames: "_astro/[name].js",
+          chunkFileNames: "_astro/[name].js",
+          assetFileNames: (assetInfo) => {
+            if (assetInfo.name && assetInfo.name.endsWith(".css")) {
+              return "_astro/[name][extname]";
+            }
+            return "_astro/[name].[hash][extname]";
+          },
+        },
+      },
+    },
+    environments: {
+      client: {
+        build: {
+          rollupOptions: {
+            output: {
+              entryFileNames: "_astro/[name].js",
+              chunkFileNames: "_astro/[name].js",
+            },
+          },
+        },
+      },
+    },
+  },
   fonts: fontsConfig,
   integrations: [
     react(),
