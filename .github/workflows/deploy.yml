@@ -28,7 +28,10 @@ jobs:
         run: yarn install --frozen-lockfile
 
       - name: Run Check (Lint & Types)
-        run: npm run check
+        run: |
+          node scripts/themeGenerator.js
+          node scripts/jsonGenerator.js
+          npm run check
 
       - name: Build Project
         run: npm run build
