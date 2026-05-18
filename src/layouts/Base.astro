@@ -259,6 +259,12 @@ const finalDescription = plainify(
     }
 
     <slot name="head" />
+    <script>
+      window.addEventListener("vite:preloadError", (event) => {
+        // Принудительно перезагружаем страницу с сервера, игнорируя кэш
+        window.location.reload();
+      });
+    </script>
   </head>
   <body class="flex flex-col min-h-screen">
     {/* google tag manager noscript */}
