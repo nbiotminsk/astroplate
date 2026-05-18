@@ -27,7 +27,6 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-
       - name: Run Check (Lint & Types)
         run: npm run check
 
