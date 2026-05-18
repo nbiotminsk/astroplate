@@ -266,16 +266,23 @@ const finalDescription = plainify(
       });
 
       // Отлавливаем ошибки загрузки статических CSS/JS файлов (например, из-за старого кэша HTML)
-      window.addEventListener("error", (e) => {
-        const target = e.target;
-        if (target && (target.tagName === "LINK" || target.tagName === "SCRIPT")) {
-          // Защита от бесконечного цикла перезагрузок
-          if (!sessionStorage.getItem("reloaded_once")) {
-            sessionStorage.setItem("reloaded_once", "true");
-            window.location.reload();
+      window.addEventListener(
+        "error",
+        (e) => {
+          const target = e.target as HTMLElement;
+          if (
+            target &&
+            (target.tagName === "LINK" || target.tagName === "SCRIPT")
+          ) {
+            // Защита от бесконечного цикла перезагрузок
+            if (!sessionStorage.getItem("reloaded_once")) {
+              sessionStorage.setItem("reloaded_once", "true");
+              window.location.reload();
+            }
           }
-        }
-      }, true);
+        },
+        true,
+      );
     </script>
   </head>
   <body class="flex flex-col min-h-screen">
