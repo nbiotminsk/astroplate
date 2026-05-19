@@ -261,7 +261,7 @@ const finalDescription = plainify(
     <slot name="head" />
     <script>
       // Отлавливаем ошибки динамического импорта Vite
-      window.addEventListener("vite:preloadError", (event) => {
+      window.addEventListener("vite:preloadError", () => {
         window.location.reload();
       });
 
