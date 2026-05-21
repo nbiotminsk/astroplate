@@ -114,6 +114,10 @@ const finalDescription = plainify(
           href: autoCanonical,
           hrefLang: "ru-RU",
         },
+        {
+          href: autoCanonical,
+          hrefLang: "ru-BY",
+        },
       ]}
       openGraph={{
         basic: {
@@ -146,6 +150,10 @@ const finalDescription = plainify(
         meta: [
           { name: "author", content: config.metadata.meta_author },
           { name: "theme-name", content: "astroplate" },
+          { name: "geo.region", content: "BY-HM" },
+          { name: "geo.placename", content: "Минск" },
+          { name: "geo.position", content: "53.9248;27.6256" },
+          { name: "ICBM", content: "53.9248, 27.6256" },
           { name: "msapplication-TileColor", content: "#000000" },
           {
             name: "theme-color",
@@ -236,6 +244,7 @@ const finalDescription = plainify(
         url: config.site.base_url,
         logo: `${config.site.base_url}${config.site.favicon}`,
         image: `${config.site.base_url}/images/og-image.png`,
+        email: "info@teleofis24.by",
         address: {
           "@type": "PostalAddress",
           streetAddress: "ул. Макаёнка, 12г, пом. 257",
