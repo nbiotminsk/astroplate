@@ -3,7 +3,7 @@ title: "Сравнение NB-IoT модулей для счетчиков во�
 meta_title: "Сравнение NB-IoT радиомодемов для счетчиков воды в Минске"
 description: "Технический обзор и сравнение популярных NB-IoT модемов для дистанционного учета воды: TELEOFIS RTU102, Zeta NB Тахат и Вега. Плюсы, минусы, автономность и цены."
 date: 2026-05-21
-image: "/images/og-image.png"
+image: "/images/blog/nbiot-module-sravnenie.png"
 author: "Николай Викторович"
 categories:
   - Оборудование
