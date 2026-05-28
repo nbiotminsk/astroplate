@@ -778,6 +778,112 @@ const productSchema = {
                 )
               }
 
+              {
+                /* Service 6: Module Config - Shown for kits and NBIoT modules */
+              }
+              {
+                (isKit || !isMeter || isNbiot) && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <div class="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          id="service-module_config"
+                          class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                        />
+                        <svg
+                          class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <label
+                        for="service-module_config"
+                        class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                      >
+                        Настройка и конфигурирование модуля{" "}
+                        <span class="ml-1 text-emerald-600 font-bold">
+                          (40 руб)
+                        </span>
+                      </label>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-text-light uppercase tracking-wider">
+                        Кол-во:
+                      </span>
+                      <input
+                        type="number"
+                        id="qty-module_config"
+                        min="1"
+                        value="1"
+                        class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                )
+              }
+
+              {
+                /* Service 7: Platform Integration - Shown for kits and NBIoT modules */
+              }
+              {
+                (isKit || !isMeter || isNbiot) && (
+                  <div class="flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                      <div class="relative flex items-center">
+                        <input
+                          type="checkbox"
+                          id="service-platform_integration"
+                          class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                        />
+                        <svg
+                          class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          stroke-width="4"
+                          stroke-linecap="round"
+                          stroke-linejoin="round"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      </div>
+                      <label
+                        for="service-platform_integration"
+                        class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                      >
+                        Добавление модуля на платформу УП «Минскводоканал»{" "}
+                        <span class="ml-1 text-emerald-600 font-bold">
+                          (44 - хит!)
+                        </span>
+                      </label>
+                    </div>
+                    <div class="flex items-center gap-2 ml-auto">
+                      <span class="text-xs text-text-light uppercase tracking-wider">
+                        Кол-во:
+                      </span>
+                      <input
+                        type="number"
+                        id="qty-platform_integration"
+                        min="1"
+                        value="1"
+                        class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                        disabled
+                      />
+                    </div>
+                  </div>
+                )
+              }
+
               {/* Service: Delivery Minsk */}
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
@@ -988,6 +1094,16 @@ const productSchema = {
         id: "software_license",
         price: 44,
         title: "Лицензия ПО «Мой Клиент: Ресурсы» (1 год)",
+      },
+      {
+        id: "module_config",
+        price: 40,
+        title: "Настройка и конфигурирование модуля",
+      },
+      {
+        id: "platform_integration",
+        price: 44,
+        title: "Добавление модуля на платформу УП «Минскводоканал»",
       },
       {
         id: "standard_install",
