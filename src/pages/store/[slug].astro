@@ -109,6 +109,16 @@ const defaultProductFaqs = [
 ];
 const productFaqs = [...(product.data.faq || []), ...defaultProductFaqs];
 
+const installationSlugs = [
+  "modul-sim-programm",
+  "radiomodem-2576-ver-2",
+  "komplekt-nbiot-2-schetchika-vody-15-mm",
+  "komplekt-nbiot-schetchik-vody-du-20-mm",
+  "rtu102-nb-iot",
+  "vega-nb11",
+];
+const showInstallationServices = installationSlugs.includes(product.id);
+
 // Extract SKU and MPN safely (handle objects from Sitepins)
 const rawSku = product.data.sku;
 const sku =
@@ -341,6 +351,153 @@ const productSchema = {
 
             <div class="flex flex-col gap-4">
               {
+                showInstallationServices && (
+                  <>
+                    {/* Service: Standard Install */}
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            id="service-standard_install"
+                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                          />
+                          <svg
+                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                        <label
+                          for="service-standard_install"
+                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                        >
+                          Подключение и монтаж «под ключ» (Стандарт){" "}
+                          <span class="ml-1 text-emerald-600 font-bold">
+                            (106 руб)
+                          </span>
+                        </label>
+                      </div>
+                      <div class="flex items-center gap-2 ml-auto">
+                        <span class="text-xs text-text-light uppercase tracking-wider">
+                          Кол-во:
+                        </span>
+                        <input
+                          type="number"
+                          id="qty-standard_install"
+                          min="1"
+                          value="1"
+                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                          disabled
+                        />
+                      </div>
+                    </div>
+
+                    {/* Service: Well Install */}
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            id="service-well_install"
+                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                          />
+                          <svg
+                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                        <label
+                          for="service-well_install"
+                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                        >
+                          Подключение и монтаж в колодце{" "}
+                          <span class="ml-1 text-emerald-600 font-bold">
+                            (176 руб)
+                          </span>
+                        </label>
+                      </div>
+                      <div class="flex items-center gap-2 ml-auto">
+                        <span class="text-xs text-text-light uppercase tracking-wider">
+                          Кол-во:
+                        </span>
+                        <input
+                          type="number"
+                          id="qty-well_install"
+                          min="1"
+                          value="1"
+                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                          disabled
+                        />
+                      </div>
+                    </div>
+
+                    {/* Service: Urgent Install */}
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            id="service-urgent_install"
+                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                          />
+                          <svg
+                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                        <label
+                          for="service-urgent_install"
+                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                        >
+                          Срочный монтаж (в течение 48 часов){" "}
+                          <span class="ml-1 text-emerald-600 font-bold">
+                            (+60 руб)
+                          </span>
+                        </label>
+                      </div>
+                      <div class="flex items-center gap-2 ml-auto">
+                        <span class="text-xs text-text-light uppercase tracking-wider">
+                          Кол-во:
+                        </span>
+                        <input
+                          type="number"
+                          id="qty-urgent_install"
+                          min="1"
+                          value="1"
+                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                          disabled
+                        />
+                      </div>
+                    </div>
+                  </>
+                )
+              }
+
+              {
                 /* Service 1: Replacement - Only for simple meters or kits, hidden for NBIoT modules */
               }
               {
@@ -498,6 +655,104 @@ const productSchema = {
                   </div>
                 )
               }
+
+              {/* Service: Delivery Minsk */}
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-delivery_minsk"
+                      class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                    />
+                    <svg
+                      class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <label
+                    for="service-delivery_minsk"
+                    class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                  >
+                    Доставка по Минску (в пределах МКАД){" "}
+                    <span class="ml-1 text-emerald-600 font-bold">
+                      (30 руб)
+                    </span>
+                  </label>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                  <span
+                    class="text-xs text-text-light uppercase tracking-wider"
+                  >
+                    Кол-во:
+                  </span>
+                  <input
+                    type="number"
+                    id="qty-delivery_minsk"
+                    min="1"
+                    value="1"
+                    class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                    disabled
+                  />
+                </div>
+              </div>
+
+              {/* Service: Delivery Suburb */}
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <div class="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      id="service-delivery_suburb"
+                      class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                    />
+                    <svg
+                      class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                  </div>
+                  <label
+                    for="service-delivery_suburb"
+                    class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                  >
+                    Доставка за МКАД (пригород, +2 руб/км){" "}
+                    <span class="ml-1 text-emerald-600 font-bold">
+                      (30 руб)
+                    </span>
+                  </label>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                  <span
+                    class="text-xs text-text-light uppercase tracking-wider"
+                  >
+                    Кол-во:
+                  </span>
+                  <input
+                    type="number"
+                    id="qty-delivery_suburb"
+                    min="1"
+                    value="1"
+                    class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                    disabled
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
@@ -602,6 +857,31 @@ const productSchema = {
         title: "Услуга: Расширенная гарантия 24 мес",
       },
       { id: "battery", price: 40, title: "Дополнительная батарейка" },
+      {
+        id: "standard_install",
+        price: 106,
+        title: "Подключение и монтаж «под ключ» (Стандарт)",
+      },
+      {
+        id: "well_install",
+        price: 176,
+        title: "Подключение и монтаж в колодце",
+      },
+      {
+        id: "urgent_install",
+        price: 60,
+        title: "Срочный монтаж (в течение 48 часов)",
+      },
+      {
+        id: "delivery_minsk",
+        price: 30,
+        title: "Доставка по Минску (в пределах МКАД)",
+      },
+      {
+        id: "delivery_suburb",
+        price: 30,
+        title: "Доставка за МКАД (пригород, +2 руб/км)",
+      },
     ];
 
     services.forEach((service) => {
@@ -621,6 +901,66 @@ const productSchema = {
         });
       }
     });
+
+    // Mutual exclusivity for Standard and Well installation
+    const standardCheckbox = document.getElementById(
+      "service-standard_install",
+    ) as HTMLInputElement | null;
+    const wellCheckbox = document.getElementById(
+      "service-well_install",
+    ) as HTMLInputElement | null;
+
+    if (standardCheckbox && wellCheckbox) {
+      standardCheckbox.addEventListener("change", () => {
+        if (standardCheckbox.checked) {
+          wellCheckbox.checked = false;
+          const wellQty = document.getElementById(
+            "qty-well_install",
+          ) as HTMLInputElement | null;
+          if (wellQty) wellQty.disabled = true;
+        }
+      });
+
+      wellCheckbox.addEventListener("change", () => {
+        if (wellCheckbox.checked) {
+          standardCheckbox.checked = false;
+          const standardQty = document.getElementById(
+            "qty-standard_install",
+          ) as HTMLInputElement | null;
+          if (standardQty) standardQty.disabled = true;
+        }
+      });
+    }
+
+    // Mutual exclusivity for Delivery Minsk and Suburb
+    const deliveryMinskCheckbox = document.getElementById(
+      "service-delivery_minsk",
+    ) as HTMLInputElement | null;
+    const deliverySuburbCheckbox = document.getElementById(
+      "service-delivery_suburb",
+    ) as HTMLInputElement | null;
+
+    if (deliveryMinskCheckbox && deliverySuburbCheckbox) {
+      deliveryMinskCheckbox.addEventListener("change", () => {
+        if (deliveryMinskCheckbox.checked) {
+          deliverySuburbCheckbox.checked = false;
+          const suburbQty = document.getElementById(
+            "qty-delivery_suburb",
+          ) as HTMLInputElement | null;
+          if (suburbQty) suburbQty.disabled = true;
+        }
+      });
+
+      deliverySuburbCheckbox.addEventListener("change", () => {
+        if (deliverySuburbCheckbox.checked) {
+          deliveryMinskCheckbox.checked = false;
+          const minskQty = document.getElementById(
+            "qty-delivery_minsk",
+          ) as HTMLInputElement | null;
+          if (minskQty) minskQty.disabled = true;
+        }
+      });
+    }
 
     // Sync service quantity with main quantity if enabled
     qtyInput?.addEventListener("change", () => {

@@ -160,6 +160,31 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
       title: "Услуга: Расширенная гарантия 24 мес",
     },
     { id: "battery", price: 40, title: "Дополнительная батарейка" },
+    {
+      id: "standard_install",
+      price: 106,
+      title: "Подключение и монтаж «под ключ» (Стандарт)",
+    },
+    {
+      id: "well_install",
+      price: 176,
+      title: "Подключение и монтаж в колодце",
+    },
+    {
+      id: "urgent_install",
+      price: 60,
+      title: "Срочный монтаж (в течение 48 часов)",
+    },
+    {
+      id: "delivery_minsk",
+      price: 30,
+      title: "Доставка по Минску (в пределах МКАД)",
+    },
+    {
+      id: "delivery_suburb",
+      price: 30,
+      title: "Доставка за МКАД (пригород, +2 руб/км)",
+    },
   ];
 
   const renderCartPage = () => {
@@ -203,7 +228,55 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
             const isMeter = category.includes("Счетчики воды");
             const isKit = category.includes("комплекты");
 
-            // Fallback to title/id if category is missing (for older cart items)
+            const installationSlugs = [
+              "modul-sim-programm",
+              "radiomodem-2576-ver-2",
+              "komplekt-nbiot-2-schetchika-vody-15-mm",
+              "komplekt-nbiot-schetchik-vody-du-20-mm",
+              "rtu102-nb-iot",
+              "vega-nb11",
+            ];
+            const hasInstallation = installationSlugs.includes(item.id);
+
+            if (
+              service.id === "standard_install" ||
+              service.id === "well_install" ||
+              service.id === "urgent_install"
+            ) {
+              if (service.id === "standard_install") {
+                const wellInCart = cart.some(
+                  (i) => i.id === `service-well_install-${item.id}`,
+                );
+                if (wellInCart) return false;
+              }
+              if (service.id === "well_install") {
+                const standardInCart = cart.some(
+                  (i) => i.id === `service-standard_install-${item.id}`,
+                );
+                if (standardInCart) return false;
+              }
+              return hasInstallation;
+            }
+
+            if (
+              service.id === "delivery_minsk" ||
+              service.id === "delivery_suburb"
+            ) {
+              if (service.id === "delivery_minsk") {
+                const suburbInCart = cart.some(
+                  (i) => i.id === `service-delivery_suburb-${item.id}`,
+                );
+                if (suburbInCart) return false;
+              }
+              if (service.id === "delivery_suburb") {
+                const minskInCart = cart.some(
+                  (i) => i.id === `service-delivery_minsk-${item.id}`,
+                );
+                if (minskInCart) return false;
+              }
+              return true; // Available for all products
+            }
+
             const titleLower = item.title.toLowerCase();
             const idLower = item.id.toLowerCase();
             const fallbackNbiot =
@@ -218,7 +291,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
             const finalIsMeter = isMeter || fallbackMeter;
             const finalIsKit = isKit || fallbackKit;
 
-            // Kits show everything
+            // Kits show everything (replacement, warranty, battery)
             if (finalIsKit) return true;
 
             // NBIoT excludes replacement

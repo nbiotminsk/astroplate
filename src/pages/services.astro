@@ -3,6 +3,7 @@ import Base from "@/layouts/Base.astro";
 import CallToAction from "@/components/CallToAction.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
+import ImageMod from "@/components/ImageMod.astro";
 
 const pages = await getSinglePage("pages");
 const serviceArticles = pages.sort((a, b) =>
@@ -17,35 +18,96 @@ const serviceArticles = pages.sort((a, b) =>
 >
   <PageHeader title="Услуги" compact={true} />
 
-  <section class="py-8 xl:py-10">
+  <section
+    class="py-12 xl:py-16 bg-gradient-to-b from-body via-light/10 to-body dark:from-darkmode-body dark:via-darkmode-light/5 dark:to-darkmode-body"
+  >
     <div class="container">
       <div class="row justify-center">
-        <div class="lg:col-10">
+        <div class="lg:col-12 xl:col-10">
           {
             serviceArticles.length ? (
-              <div class="row">
-                {serviceArticles.map((article) => (
-                  <div class="mb-6 md:col-6 lg:col-4">
-                    <article class="h-full rounded border border-border bg-light p-6 dark:bg-darkmode-light">
-                      <h3 class="h5 mb-3">
-                        <a href={`/${article.id}`} class="hover:text-primary">
-                          {article.data.title}
-                        </a>
-                      </h3>
-                      {article.data.description && (
-                        <p class="mb-5 text-text-dark">
-                          {article.data.description}
-                        </p>
-                      )}
-                      <a class="btn btn-sm btn-primary" href={`/${article.id}`}>
-                        Подробнее
-                      </a>
-                    </article>
-                  </div>
-                ))}
+              <div class="row g-4">
+                {serviceArticles.map((article) => {
+                  const image = article.data.image;
+                  return (
+                    <div class="mb-8 md:col-6 lg:col-4">
+                      <article class="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border/40 bg-white/40 dark:bg-darkmode-light/10 backdrop-blur-md p-6 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ease-out before:absolute before:inset-0 before:rounded-2xl before:border before:border-white/10 before:pointer-events-none">
+                        {/* Subtle top glow border */}
+                        <div class="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                        <div>
+                          {/* Image Container */}
+                          <div class="relative mb-5 overflow-hidden rounded-xl bg-light/50 dark:bg-darkmode-light/30 aspect-[16/10]">
+                            {image ? (
+                              <ImageMod
+                                src={image}
+                                height={200}
+                                width={320}
+                                alt={article.data.title}
+                                class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                                format="webp"
+                              />
+                            ) : (
+                              <div class="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-primary/20">
+                                <span class="text-xs text-primary/60 font-semibold uppercase tracking-wider">
+                                  Телеофис
+                                </span>
+                              </div>
+                            )}
+                            {/* Glassmorphism tag overlay */}
+                            <div class="absolute right-3 top-3 rounded-lg bg-black/40 px-2.5 py-1 text-[11px] font-bold text-white uppercase tracking-wider backdrop-blur-sm border border-white/10">
+                              Услуга
+                            </div>
+                          </div>
+
+                          <h3 class="h5 mb-3 font-bold line-clamp-2">
+                            <a
+                              href={`/${article.id}`}
+                              class="text-text-dark dark:text-darkmode-text-dark hover:text-primary transition-colors duration-200"
+                            >
+                              {article.data.title}
+                            </a>
+                          </h3>
+
+                          {article.data.description && (
+                            <p class="mb-6 text-sm text-text dark:text-darkmode-text/80 line-clamp-3 leading-relaxed">
+                              {article.data.description}
+                            </p>
+                          )}
+                        </div>
+
+                        <div class="mt-auto pt-2">
+                          <a
+                            class="inline-flex items-center justify-center gap-2 btn btn-sm btn-outline-primary w-full py-2.5 text-xs font-bold uppercase tracking-wider rounded-xl backdrop-blur-sm group-hover:bg-primary group-hover:text-white transition-all duration-300"
+                            href={`/${article.id}`}
+                          >
+                            Подробнее
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              stroke-width="2.5"
+                              stroke-linecap="round"
+                              stroke-linejoin="round"
+                              class="group-hover:translate-x-1 transition-transform duration-200"
+                            >
+                              <line x1="5" y1="12" x2="19" y2="12" />
+                              <polyline points="12 5 19 12 12 19" />
+                            </svg>
+                          </a>
+                        </div>
+                      </article>
+                    </div>
+                  );
+                })}
               </div>
             ) : (
-              <p>Материалы пока не добавлены.</p>
+              <p class="text-center text-text-light dark:text-darkmode-text-light py-10">
+                Материалы пока не добавлены.
+              </p>
             )
           }
         </div>
