@@ -2,7 +2,7 @@
 title: "Лицензия ПО «Мой Клиент: Ресурсы» (1 теплосчетчик, 1 год)"
 meta_title: "Купить лицензию «Мой Клиент: Ресурсы» на 1 теплосчетчик на 1 год"
 meta_description: "Лицензия на ПО «Мой Клиент: Ресурсы» с ограничением на 1 теплосчетчик сроком на 1 год за 150 BYN. Программа сбора данных с приборов учета тепла."
-category: "others"
+category: "другое"
 price: "150"
 price_currency: "BYN"
 img: "/images/store/moy-klient-resursy-license-heat-1yr.png"

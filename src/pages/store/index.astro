@@ -37,7 +37,7 @@ const products = catalogEntries
     return {
       id: entry.id,
       title: entry.data.title,
-      category: entry.data.category ?? "others",
+      category: entry.data.category ?? "другое",
       price: Number.isNaN(priceNumber) ? 0 : priceNumber,
       image:
         entry.data.img || entry.data.image || "/images/image-placeholder.png",

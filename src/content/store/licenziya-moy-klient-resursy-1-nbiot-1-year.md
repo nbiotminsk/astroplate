@@ -2,7 +2,7 @@
 title: "Лицензия ПО «Мой Клиент: Ресурсы» (1 модуль, 1 год)"
 meta_title: "Купить лицензию «Мой Клиент: Ресурсы» на 1 NB-IoT модуль на 1 год"
 meta_description: "Лицензия на ПО «Мой Клиент: Ресурсы» с ограничением на 1 модуль NB-IoT сроком на 1 год за 44 BYN. Программа сбора данных с приборов учета."
-category: "others"
+category: "другое"
 price: "44"
 price_currency: "BYN"
 img: "/images/store/moy-klient-resursy-license-1yr.png"
