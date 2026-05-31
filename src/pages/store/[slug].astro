@@ -505,7 +505,7 @@ const productSchema = {
                           >
                             Подключение и монтаж{" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (280 руб)
+                              ({isKitCategory ? 112 : 280} руб)
                             </span>
                           </label>
                         </div>
@@ -552,7 +552,7 @@ const productSchema = {
                           >
                             Подключение и монтаж в колодце{" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (350 руб)
+                              ({isKitCategory ? 182 : 350} руб)
                             </span>
                           </label>
                         </div>
@@ -1205,6 +1205,9 @@ const productSchema = {
     }
 
     // Services logic
+    const category = addToCartButton.dataset.cartCategory || "";
+    const isKit = category.toLowerCase().trim() === "комплекты";
+
     const services = [
       {
         id: "battery_replacement",
@@ -1233,12 +1236,12 @@ const productSchema = {
       },
       {
         id: "standard_install",
-        price: 280,
+        price: isKit ? 112 : 280,
         title: "Подключение и монтаж",
       },
       {
         id: "well_install",
-        price: 350,
+        price: isKit ? 182 : 350,
         title: "Подключение и монтаж в колодце",
       },
       {

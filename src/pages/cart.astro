@@ -127,12 +127,14 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
                     <span class="block text-xs text-text-light dark:text-darkmode-text-light mb-1.5">30 руб. + 2 руб. за км</span>
                     <div id="km-selector-wrapper" class="hidden mt-2 items-center gap-2">
                       <span class="text-xs text-text-light dark:text-darkmode-text-light">Расстояние:</span>
-                      <div class="qty-control" style="height: 28px !important;">
+                      <div class="qty-control" style="height: 28px !important; display: flex; align-items: center;">
                         <button type="button" class="qty-btn" id="km-btn-dec" style="width: 24px; height: 28px; font-size: 14px; font-weight: bold;">-</button>
-                        <input type="number" id="delivery-km" value="5" min="1" class="qty-input" style="width: 28px !important; min-width: 28px !important; max-width: 28px !important; font-size: 13px !important; text-align: center; border: none !important; font-weight: bold; background: transparent; padding: 0 !important; margin: 0 !important;" readonly />
+                        <div style="display: flex; align-items: center; justify-content: center; min-width: 48px; height: 28px; font-weight: bold; font-size: 13px; gap: 2px;">
+                          <input type="number" id="delivery-km" value="5" min="1" class="qty-input" style="width: 20px !important; min-width: 20px !important; max-width: 20px !important; font-size: 13px !important; text-align: right; border: none !important; font-weight: bold; background: transparent; padding: 0 !important; margin: 0 !important; outline: none !important; box-shadow: none !important;" readonly />
+                          <span class="text-xs font-semibold text-text-dark dark:text-darkmode-text-dark" style="margin-top: -1px; pointer-events: none;">км</span>
+                        </div>
                         <button type="button" class="qty-btn" id="km-btn-inc" style="width: 24px; height: 28px; font-size: 14px; font-weight: bold;">+</button>
                       </div>
-                      <span class="text-xs font-semibold text-text-dark dark:text-darkmode-text-dark">км</span>
                     </div>
                   </div>
                 </label>

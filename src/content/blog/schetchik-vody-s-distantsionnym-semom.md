@@ -42,7 +42,7 @@ draft: false
 
 Готовые комплекты из нашего магазина:
 
-- [Модуль NBIoT + сим-карта + подключение к платформе](/store/modul-sim-programm/)
+- [Модуль NBIoT + Sim + лицензия ПО](/store/modul-sim-programm/)
 - [Модуль NBIOT + 2 счётчика воды 15 мм](/store/komplekt-nbiot-2-schetchika-vody-15-mm/)
 - [Модуль NBIoT + счётчик Ду 20 мм](/store/komplekt-nbiot-schetchik-vody-du-20-mm/)
 - [УСПД TELEOFIS RTU102 NB-IoT](/store/rtu102-nb-iot/)
