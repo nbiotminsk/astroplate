@@ -9,6 +9,7 @@ import remarkToc from "remark-toc";
 import sharp from "sharp";
 import fs from "node:fs";
 import path from "node:path";
+import matter from "gray-matter";
 import { fileURLToPath } from "node:url";
 import config from "./src/config/config.json";
 import theme from "./src/config/theme.json";
@@ -48,6 +49,52 @@ const fontsConfig = Object.entries(theme.fonts.font_family)
       fallbacks: [fallback],
     };
   });
+
+// Remark plugin to dynamically resolve store item prices in markdown files
+function remarkResolvePrices() {
+  const storeDir = path.join(path.dirname(fileURLToPath(import.meta.url)), "src/content/store");
+  const priceCache = {};
+
+  if (fs.existsSync(storeDir)) {
+    const files = fs.readdirSync(storeDir);
+    for (const file of files) {
+      if (file.endsWith(".md") || file.endsWith(".mdx")) {
+        const filePath = path.join(storeDir, file);
+        try {
+          const content = fs.readFileSync(filePath, "utf-8");
+          const parsed = matter(content);
+          const price = parsed.data.price;
+          const slug = file.replace(/\.(md|mdx)$/, "");
+          if (price !== undefined) {
+            priceCache[slug] = String(price);
+          }
+        } catch (e) {
+          console.error(`Error parsing price for ${file}:`, e);
+        }
+      }
+    }
+  }
+
+  return (tree) => {
+    function visit(node) {
+      if (node.value && typeof node.value === "string") {
+        node.value = node.value.replace(/\{\{price:([a-zA-Z0-9_-]+)\}\}/g, (match, slug) => {
+          if (priceCache[slug] !== undefined) {
+            return priceCache[slug];
+          }
+          console.warn(`[remarkResolvePrices] Warning: Price for slug "${slug}" not found in store collection.`);
+          return match;
+        });
+      }
+
+      if (node.children && Array.isArray(node.children)) {
+        node.children.forEach(visit);
+      }
+    }
+
+    visit(tree);
+  };
+}
 
 // https://astro.build/config
 export default defineConfig({
@@ -131,7 +178,7 @@ export default defineConfig({
     mdx(),
   ],
   markdown: {
-    remarkPlugins: [remarkToc, [remarkCollapse, { test: "Table of contents" }]],
+    remarkPlugins: [remarkResolvePrices, remarkToc, [remarkCollapse, { test: "Table of contents" }]],
     shikiConfig: { theme: "one-dark-pro", wrap: true },
   },
 });

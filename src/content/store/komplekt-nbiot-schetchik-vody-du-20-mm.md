@@ -3,7 +3,7 @@ title: Модуль NBIoT + Sim + счетчик Ду 20 мм
 meta_title: "Комплект для дистанционного съема воды: счетчик Ду 20 мм и NB-IoT модуль"
 meta_description: "Комплект для автоматизации учета воды на коммерческих объектах и в частных домах. Счетчик Ду-20 с импульсным выходом и NB-IoT модем в сборе."
 category: комплекты
-price: "740"
+price: "646"
 price_currency: BYN
 img: /images/20mm_module.png
 brand: Teleofis24

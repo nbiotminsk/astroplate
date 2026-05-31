@@ -6,7 +6,7 @@ meta_description: "Готовый комплект для дистанционн
   Ду-15 с импульсным выходом и NB-IoT модуль. Автоматическая передача показаний
   без участия человека."
 category: комплекты
-price: "756"
+price: "688"
 price_currency: BYN
 img: /images/15mm_water_module_sim.png
 brand: Teleofis

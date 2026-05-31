@@ -31,3 +31,4 @@ node_modules
 venv/
 scratch/
 
+.vercel

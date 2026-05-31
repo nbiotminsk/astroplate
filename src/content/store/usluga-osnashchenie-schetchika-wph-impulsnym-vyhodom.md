@@ -5,7 +5,7 @@ meta_description: "Услуга по оснащению турбинного с�
 category: "услуги"
 price: "59"
 price_currency: "BYN"
-img: "/images/store/woltman-pulse-sensor.png"
+img: "/images/store/wph-pulse-service.png"
 brand: "Teleofis"
 availability: true
 short_description: "Услуга по оснащению промышленного турбинного счетчика воды WPH (Вольтмана) импульсным датчиком для интеграции в АСКУЭ."

@@ -21,8 +21,8 @@ const categoryPriority: Record<string, number> = {
   "модули gsm": 1,
   комплекты: 2,
   "Счетчики воды": 3,
-  услуги: 4,
-  комплектующие: 5,
+  комплектующие: 4,
+  услуги: 5,
 };
 
 const getCatPriority = (cat: string) =>
@@ -43,9 +43,14 @@ const products = catalogEntries
       availability: entry.data.availability !== false,
       customLabel: label,
       labelPriority: getStoreLabelPriority(label),
+      isService: entry.data.category === "услуги",
     };
   })
   .sort((a, b) => {
+    if (a.isService !== b.isService) {
+      return a.isService ? 1 : -1;
+    }
+
     const priorityA = getCatPriority(a.category);
     const priorityB = getCatPriority(b.category);
 
@@ -169,112 +174,239 @@ const tagIcons: Record<string, string> = {
       </div>
 
       <div class="row" id="catalog-grid">
+        <div class="col-12 mb-5" data-catalog-heading="product">
+          <div
+            class="flex items-center gap-3 border-b border-border pb-3 dark:border-darkmode-border"
+          >
+            <h2 class="mb-0 text-2xl">Товары</h2>
+            <span class="text-sm text-text-light dark:text-darkmode-text-light">
+              Оборудование и комплектующие
+            </span>
+          </div>
+        </div>
         {
-          products.map((product) => (
-            <article
-              class="mb-8 md:col-6 xl:col-3"
-              data-category={product.category}
-              data-price={product.price}
-              data-title={product.title}
-              data-label-priority={product.labelPriority}
-              data-custom-label={product.customLabel}
-            >
-              <div
-                class={`catalog-card group relative flex h-full flex-col rounded-2xl border bg-body p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-darkmode-light ${
-                  product.customLabel === "premium"
-                    ? "border-amber-300 dark:border-amber-500/50"
-                    : product.customLabel === "discount"
-                      ? "border-emerald-300 dark:border-emerald-500/50"
-                      : "border-border dark:border-darkmode-border"
-                }`}
+          products
+            .filter((product) => !product.isService)
+            .map((product) => (
+              <article
+                class="mb-8 md:col-6 xl:col-3"
+                data-category={product.category}
+                data-item-kind="product"
+                data-price={product.price}
+                data-title={product.title}
+                data-label-priority={product.labelPriority}
+                data-custom-label={product.customLabel}
               >
-                {product.customLabel === "premium" ? (
-                  <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-                    <FaCrown className="text-amber-500 dark:text-amber-300" />
-                    <span>TOP</span>
-                  </div>
-                ) : product.customLabel === "discount" ? (
-                  <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
-                    <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
-                    <span>SALE</span>
-                  </div>
-                ) : null}
-                <a
-                  href={`/store/${product.id}/`}
-                  aria-label={`Открыть ${product.title}`}
+                <div
+                  class={`catalog-card group relative flex h-full flex-col rounded-2xl border bg-body p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-darkmode-light ${
+                    product.customLabel === "premium"
+                      ? "border-amber-300 dark:border-amber-500/50"
+                      : product.customLabel === "discount"
+                        ? "border-emerald-300 dark:border-emerald-500/50"
+                        : "border-border dark:border-darkmode-border"
+                  }`}
                 >
-                  <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body">
-                    <ImageMod
-                      class="h-full w-full object-contain"
-                      src={product.image}
-                      alt={product.title}
-                      width={760}
-                      height={440}
-                      format="webp"
-                    />
-                  </div>
-                </a>
-                <h4 class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark">
-                  {product.title}
-                </h4>
-                <div class="mt-auto flex flex-col gap-2 pt-4">
-                  <div class="flex flex-col gap-1">
-                    <p
-                      class={`min-h-8 text-lg font-semibold leading-none ${
-                        product.customLabel === "premium"
-                          ? "text-amber-700 dark:text-amber-300"
-                          : product.customLabel === "discount"
-                            ? "text-emerald-600 dark:text-emerald-300"
-                            : "text-emerald-600"
-                      }`}
-                    >
-                      {product.price} BYN
-                    </p>
-                    <p
-                      class={`min-h-6 text-sm leading-none ${
-                        product.availability ? "text-green-700" : "text-red-700"
-                      }`}
-                    >
-                      {product.availability ? "В наличии" : "Нет в наличии"}
-                    </p>
-                  </div>
+                  {product.customLabel === "premium" ? (
+                    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
+                      <FaCrown className="text-amber-500 dark:text-amber-300" />
+                      <span>TOP</span>
+                    </div>
+                  ) : product.customLabel === "discount" ? (
+                    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
+                      <FaShoppingBasket className="text-emerald-500 dark:text-emerald-300" />
+                      <span>SALE</span>
+                    </div>
+                  ) : null}
+                  <a
+                    href={`/store/${product.id}/`}
+                    aria-label={`Открыть ${product.title}`}
+                  >
+                    <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-border bg-light dark:border-darkmode-border dark:bg-darkmode-body">
+                      <ImageMod
+                        class="h-full w-full object-contain"
+                        src={product.image}
+                        alt={product.title}
+                        width={760}
+                        height={440}
+                        format="webp"
+                      />
+                    </div>
+                  </a>
+                  <h4 class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark">
+                    {product.title}
+                  </h4>
+                  <div class="mt-auto flex flex-col gap-2 pt-4">
+                    <div class="flex flex-col gap-1">
+                      <p
+                        class={`min-h-8 text-lg font-semibold leading-none ${
+                          product.customLabel === "premium"
+                            ? "text-amber-700 dark:text-amber-300"
+                            : product.customLabel === "discount"
+                              ? "text-emerald-600 dark:text-emerald-300"
+                              : "text-emerald-600"
+                        }`}
+                      >
+                        {product.price} BYN
+                      </p>
+                      <p
+                        class={`min-h-6 text-sm leading-none ${
+                          product.availability
+                            ? "text-green-700"
+                            : "text-red-700"
+                        }`}
+                      >
+                        {product.availability ? "В наличии" : "Нет в наличии"}
+                      </p>
+                    </div>
 
-                  <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
-                    <button
-                      type="button"
-                      class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
-                        !product.availability
-                          ? "cursor-not-allowed opacity-50"
-                          : ""
-                      }`}
-                      data-add-to-cart={product.id}
-                      data-price={product.price}
-                      data-title={product.title}
-                      data-cart-category={product.category}
-                      data-qty-source={product.id}
-                      disabled={!product.availability}
-                    >
-                      Купить
-                    </button>
-                    <input
-                      id={`qty-${product.id}`}
-                      type="number"
-                      min="1"
-                      value="1"
-                      class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
-                      data-qty-input={product.id}
-                    />
-                    <a
-                      class="btn btn-outline-primary w-full text-center py-2.5 text-base text-emerald-600/70 sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:hover:text-emerald-600 sm:hover:underline"
-                      href={`/store/${product.id}/`}
-                    >
-                      Подробнее
-                    </a>
+                    <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
+                      <button
+                        type="button"
+                        class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
+                          !product.availability
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                        }`}
+                        data-add-to-cart={product.id}
+                        data-price={product.price}
+                        data-title={product.title}
+                        data-cart-category={product.category}
+                        data-qty-source={product.id}
+                        disabled={!product.availability}
+                      >
+                        Купить
+                      </button>
+                      <input
+                        id={`qty-${product.id}`}
+                        type="number"
+                        min="1"
+                        value="1"
+                        class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
+                        data-qty-input={product.id}
+                      />
+                      <a
+                        class="btn btn-outline-primary w-full text-center py-2.5 text-base text-emerald-600/70 sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:hover:text-emerald-600 sm:hover:underline"
+                        href={`/store/${product.id}/`}
+                      >
+                        Подробнее
+                      </a>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </article>
-          ))
+              </article>
+            ))
+        }
+        <div class="col-12 mb-5 mt-2" data-catalog-heading="service">
+          <div
+            class="flex items-center gap-3 border-b border-sky-200 pb-3 dark:border-sky-800"
+          >
+            <h2 class="mb-0 text-2xl text-sky-900 dark:text-sky-200">Услуги</h2>
+            <span class="text-sm text-sky-700 dark:text-sky-300">
+              Подключение, настройка и обслуживание
+            </span>
+          </div>
+        </div>
+        {
+          products
+            .filter((product) => product.isService)
+            .map((product) => (
+              <article
+                class="mb-8 md:col-6 xl:col-3"
+                data-category={product.category}
+                data-item-kind="service"
+                data-price={product.price}
+                data-title={product.title}
+                data-label-priority={product.labelPriority}
+                data-custom-label={product.customLabel}
+              >
+                <div class="catalog-card catalog-card--service group relative flex h-full flex-col rounded-2xl border border-sky-300 bg-sky-50/60 p-4 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-sky-700 dark:bg-sky-950/20">
+                  <div class="absolute left-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-sky-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-sky-800 shadow-sm backdrop-blur dark:border-sky-600 dark:bg-sky-950/90 dark:text-sky-200">
+                    <svg
+                      class="h-3.5 w-3.5"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M14.7 6.3a4 4 0 01-5 5L4 17v3h3l5.7-5.7a4 4 0 005-5l-2.3 2.3-3-3 2.3-2.3z" />
+                    </svg>
+                    <span>Услуга</span>
+                  </div>
+                  <a
+                    href={`/store/${product.id}/`}
+                    aria-label={`Открыть ${product.title}`}
+                  >
+                    <div class="catalog-card__image mb-4 flex h-48 items-center justify-center overflow-hidden rounded-xl border border-sky-200 bg-sky-100/70 dark:border-sky-800 dark:bg-sky-950/30">
+                      <ImageMod
+                        class="h-full w-full object-contain"
+                        src={product.image}
+                        alt={product.title}
+                        width={760}
+                        height={440}
+                        format="webp"
+                      />
+                    </div>
+                  </a>
+                  <h4 class="card-title mb-4 min-h-10 text-text-dark dark:text-darkmode-text-dark">
+                    {product.title}
+                  </h4>
+                  <div class="mt-auto flex flex-col gap-2 pt-4">
+                    <div class="flex flex-col gap-1">
+                      <p class="min-h-8 text-lg font-semibold leading-none text-emerald-600">
+                        {product.price} BYN
+                      </p>
+                      <p
+                        class={`min-h-6 text-sm leading-none ${
+                          product.availability
+                            ? "text-green-700"
+                            : "text-red-700"
+                        }`}
+                      >
+                        {product.availability
+                          ? "Доступно к заказу"
+                          : "Нет в наличии"}
+                      </p>
+                    </div>
+
+                    <div class="flex flex-col gap-2 pt-2 sm:grid sm:grid-cols-[1fr_64px_1fr] sm:items-center sm:pt-0">
+                      <button
+                        type="button"
+                        class={`btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)] active:scale-95 sm:btn-sm sm:min-w-0 sm:px-2 sm:py-1 sm:text-sm ${
+                          !product.availability
+                            ? "cursor-not-allowed opacity-50"
+                            : ""
+                        }`}
+                        data-add-to-cart={product.id}
+                        data-price={product.price}
+                        data-title={product.title}
+                        data-cart-category={product.category}
+                        data-qty-source={product.id}
+                        disabled={!product.availability}
+                      >
+                        Заказать
+                      </button>
+                      <input
+                        id={`qty-${product.id}`}
+                        type="number"
+                        min="1"
+                        value="1"
+                        class="hidden w-full rounded border border-border bg-body px-2 py-1 text-sm dark:border-darkmode-border dark:bg-darkmode-body sm:block"
+                        data-qty-input={product.id}
+                      />
+                      <a
+                        class="btn btn-outline-primary w-full text-center py-2.5 text-base text-emerald-600/70 sm:btn-sm sm:min-w-0 sm:border-transparent sm:bg-transparent sm:px-2 sm:py-1 sm:text-sm sm:hover:text-emerald-600 sm:hover:underline"
+                        href={`/store/${product.id}/`}
+                      >
+                        Подробнее
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            ))
         }
       </div>
     </div>
@@ -325,6 +457,14 @@ const tagIcons: Record<string, string> = {
   .catalog-card:hover {
     transform: translateY(-6px);
     box-shadow: 0 20px 38px rgba(15, 23, 42, 0.12);
+  }
+
+  .catalog-card--service {
+    box-shadow: 0 10px 24px rgba(14, 116, 144, 0.1);
+  }
+
+  .catalog-card--service:hover {
+    box-shadow: 0 20px 38px rgba(14, 116, 144, 0.18);
   }
 
   .catalog-card__image {
@@ -418,6 +558,12 @@ const tagIcons: Record<string, string> = {
     const cards = Array.from(
       grid.querySelectorAll(":scope > article"),
     ) as HTMLElement[];
+    const productHeading = grid.querySelector(
+      '[data-catalog-heading="product"]',
+    ) as HTMLElement | null;
+    const serviceHeading = grid.querySelector(
+      '[data-catalog-heading="service"]',
+    ) as HTMLElement | null;
 
     const formatPrice = (price: number) => `${price} BYN`;
 
@@ -526,6 +672,25 @@ const tagIcons: Record<string, string> = {
           tagName === "Все" || card.dataset.category === tagName;
         card.style.display = shouldShow ? "" : "none";
       });
+
+      if (productHeading) {
+        productHeading.style.display = cards.some(
+          (card) =>
+            card.dataset.itemKind === "product" &&
+            card.style.display !== "none",
+        )
+          ? ""
+          : "none";
+      }
+      if (serviceHeading) {
+        serviceHeading.style.display = cards.some(
+          (card) =>
+            card.dataset.itemKind === "service" &&
+            card.style.display !== "none",
+        )
+          ? ""
+          : "none";
+      }
     };
 
     const sortCards = () => {
@@ -542,8 +707,8 @@ const tagIcons: Record<string, string> = {
           "модули gsm": 1,
           комплекты: 2,
           "Счетчики воды": 3,
-          услуги: 4,
-          комплектующие: 5,
+          комплектующие: 4,
+          услуги: 5,
         };
         const getCatPrio = (cat: string) =>
           categoryPriorityMap[cat] !== undefined
@@ -552,8 +717,12 @@ const tagIcons: Record<string, string> = {
 
         const categoryA = a.dataset.category || "";
         const categoryB = b.dataset.category || "";
+        const kindA = a.dataset.itemKind || "product";
+        const kindB = b.dataset.itemKind || "product";
         const prioA = getCatPrio(categoryA);
         const prioB = getCatPrio(categoryB);
+
+        if (kindA !== kindB) return kindA === "service" ? 1 : -1;
 
         if (mode === "default") {
           if (prioA !== prioB) return prioA - prioB;
@@ -574,7 +743,14 @@ const tagIcons: Record<string, string> = {
         return titleA.localeCompare(titleB, "ru");
       });
 
-      sorted.forEach((card: HTMLElement) => grid.appendChild(card));
+      if (productHeading) grid.appendChild(productHeading);
+      sorted
+        .filter((card) => card.dataset.itemKind === "product")
+        .forEach((card: HTMLElement) => grid.appendChild(card));
+      if (serviceHeading) grid.appendChild(serviceHeading);
+      sorted
+        .filter((card) => card.dataset.itemKind === "service")
+        .forEach((card: HTMLElement) => grid.appendChild(card));
       activateTag(activeTag);
     };
 

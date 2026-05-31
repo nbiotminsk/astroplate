@@ -5,7 +5,7 @@ meta_description: "Профессиональная установка, наст
 category: "услуги"
 price: "280"
 price_currency: "BYN"
-img: "/images/Image_tehobsluzhivanie.png"
+img: "/images/store/nbiot-setup-service.png"
 brand: "Teleofis"
 availability: true
 short_description: "Услуга по наладке и вводу в эксплуатацию модуля NB-IoT и подключение к платформе «Мой Клиент: Ресурсы»."
