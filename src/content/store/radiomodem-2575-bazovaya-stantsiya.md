@@ -2,7 +2,7 @@
 title: "Радиомодем 2575 (Базовая станция)"
 meta_title: "Радиомодем 2575 (Базовая станция) Nero Electronics купить в Минске"
 meta_description: "Купить базовую станцию (радиомодем) Nero Electronics 2575 для АСКУЭ и телеметрии за 2400 BYN в Минске. Дальность до 12 км, обслуживание до 100 000 точек."
-category: "Модем"
+category: "Базовая станция"
 price: "2400"
 price_currency: "BYN"
 img: "/images/store/neroelectronics-base-station-2575.png"

@@ -2,7 +2,7 @@
 title: "4G/GPRS модем iRZ ATM42.B"
 meta_title: "Промышленный 4G/GPRS модем iRZ ATM42.B купить в Минске"
 meta_description: "Купить промышленный 4G/GPRS модем iRZ ATM42.B со встроенным блоком питания ~220В за 500 BYN в Минске. Официальная гарантия, быстрая доставка."
-category: "Модемы"
+category: "модуль GPRS"
 price: "500"
 price_currency: "BYN"
 img: "/images/store/irz-atm42-b.png"
