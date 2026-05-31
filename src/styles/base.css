@@ -1,9 +1,9 @@
 html {
-  @apply text-base-sm md:text-base;
+  @apply text-base-sm md:text-base overflow-x-hidden;
 }
 
 body {
-  @apply bg-body text-base dark:bg-darkmode-body font-primary font-normal leading-relaxed text-text dark:text-darkmode-text;
+  @apply bg-body text-base dark:bg-darkmode-body font-primary font-normal leading-relaxed text-text dark:text-darkmode-text overflow-x-hidden;
 }
 
 h1,
