@@ -4,6 +4,7 @@ description: "Подключение и настройка автоматиче�
 meta_title: "Передача показаний счетчиков воды в Минскводоканал автоматически"
 date: 2026-05-23
 image: "/images/blog/minskvodokanal-priemka.png"
+icon: FaCertificate
 draft: false
 faq:
   - question: "В каком формате передаются показания в Минскводоканал?"

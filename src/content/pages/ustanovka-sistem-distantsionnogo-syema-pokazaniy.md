@@ -4,6 +4,7 @@ description: Профессиональная установка и настро
 meta_title: Система дистанционного съема показаний счетчиков воды в Минске «под ключ»
 date: 2026-05-23
 image: "/images/hero_iot_device.png"
+icon: FaBroadcastTower
 draft: false
 faq:
   - question: Обязательно ли устанавливать систему дистанционного съема?

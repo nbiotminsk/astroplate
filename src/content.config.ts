@@ -15,6 +15,7 @@ const commonFields = {
   // Empty or missing dates fall back to the build timestamp.
   date: safeDate,
   image: z.string().optional(),
+  icon: z.string().optional(),
   draft: z.boolean().default(false),
   faq: z
     .array(

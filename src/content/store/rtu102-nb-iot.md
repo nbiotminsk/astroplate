@@ -42,7 +42,7 @@ faq:
       в зависимости от частоты передачи данных.
 draft: false
 date: 2026-05-05T00:00:00.000Z
-condition: новый
+condition: https://schema.org/NewCondition
 ---
 
 ## Описание модуля TELEOFIS RTU102 NB-IoT

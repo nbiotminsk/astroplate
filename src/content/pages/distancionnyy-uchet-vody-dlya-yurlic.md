@@ -4,6 +4,7 @@ description: Профессиональная организация диста�
 meta_title: Дистанционный учет воды для юрлиц в Минске | Установка СДСП
 date: 2026-05-23
 image: "/images/nbiot_monitoring_system.png"
+icon: FaWater
 draft: false
 faq:
   - question: Для каких категорий юридических лиц установка СДСП обязательна?

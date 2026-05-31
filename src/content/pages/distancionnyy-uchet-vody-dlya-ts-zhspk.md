@@ -4,6 +4,7 @@ description: Профессиональное внедрение систем д
 meta_title: Дистанционный съем воды для ТС и ЖСПК в Минске | АСКУЭ под ключ
 date: 2026-05-23
 image: "/images/blog/dispetcherizatsiya-ts.png"
+icon: FaBuilding
 draft: false
 faq:
   - question: Как АСКУЭ помогает бороться с небалансами расхода воды?

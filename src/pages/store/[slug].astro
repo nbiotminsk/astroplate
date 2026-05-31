@@ -132,6 +132,17 @@ const mpn =
     ? (rawMpn as any).value || (rawMpn as any).id || product.id
     : rawMpn || product.id;
 
+// Normalize condition for schema.org rich results (Russian translations fallback to schema URLs)
+const rawCondition = product.data.condition;
+const itemCondition =
+  !rawCondition || rawCondition === "новый"
+    ? "https://schema.org/NewCondition"
+    : rawCondition === "б/у"
+      ? "https://schema.org/UsedCondition"
+      : rawCondition === "восстановленный"
+        ? "https://schema.org/RefurbishedCondition"
+        : rawCondition;
+
 // Google Rich Results - Merchant Center requirements
 const productSchema = {
   "@id": `${productUrl}#product`,
@@ -152,7 +163,7 @@ const productSchema = {
     "@type": "Brand",
     name: String(brand).slice(0, 70),
   },
-  itemCondition: product.data.condition || "https://schema.org/NewCondition",
+  itemCondition,
   ...(product.data.aggregateRating &&
   product.data.aggregateRating.reviewCount > 0
     ? {
@@ -192,7 +203,7 @@ const productSchema = {
     price: price.toFixed(2),
     priceCurrency: "BYN",
     availability: availabilitySchema,
-    itemCondition: product.data.condition || "https://schema.org/NewCondition",
+    itemCondition,
     priceValidUntil: "2027-12-31",
     seller: {
       "@type": "Organization",
