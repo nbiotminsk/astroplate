@@ -667,9 +667,7 @@ const productSchema = {
                 )
               }
 
-              {
-                /* Service 4: SIM Card Option - Shown for kits and NBIoT */
-              }
+              {/* Service 4: SIM Card Option - Shown for kits and NBIoT */}
               {
                 (isKit || !isMeter || isNbiot) && (
                   <div class="flex flex-wrap items-center justify-between gap-3">
@@ -704,11 +702,36 @@ const productSchema = {
                         class="rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-all focus:border-primary dark:border-darkmode-border dark:bg-darkmode-body text-text-dark dark:text-darkmode-text-dark disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled
                       >
-                        <option value="21" data-title="СИМ-карта МТС NB-IoT (1 год)">1 год (21 руб)</option>
-                        <option value="42" data-title="СИМ-карта МТС NB-IoT (2 года)">2 года (42 руб)</option>
-                        <option value="63" data-title="СИМ-карта МТС NB-IoT (3 года)">3 года (63 руб)</option>
-                        <option value="84" data-title="СИМ-карта МТС NB-IoT (4 года)">4 года (84 руб)</option>
-                        <option value="105" data-title="СИМ-карта МТС NB-IoT (5 лет)">5 лет (105 руб)</option>
+                        <option
+                          value="21"
+                          data-title="СИМ-карта МТС NB-IoT (1 год)"
+                        >
+                          1 год (21 руб)
+                        </option>
+                        <option
+                          value="42"
+                          data-title="СИМ-карта МТС NB-IoT (2 года)"
+                        >
+                          2 года (42 руб)
+                        </option>
+                        <option
+                          value="63"
+                          data-title="СИМ-карта МТС NB-IoT (3 года)"
+                        >
+                          3 года (63 руб)
+                        </option>
+                        <option
+                          value="84"
+                          data-title="СИМ-карта МТС NB-IoT (4 года)"
+                        >
+                          4 года (84 руб)
+                        </option>
+                        <option
+                          value="105"
+                          data-title="СИМ-карта МТС NB-IoT (5 лет)"
+                        >
+                          5 лет (105 руб)
+                        </option>
                       </select>
                     </div>
                     <div class="flex items-center gap-2 ml-auto">
@@ -765,11 +788,36 @@ const productSchema = {
                         class="rounded border border-border bg-body px-2.5 py-1 text-sm outline-none transition-all focus:border-primary dark:border-darkmode-border dark:bg-darkmode-body text-text-dark dark:text-darkmode-text-dark disabled:opacity-50 disabled:cursor-not-allowed"
                         disabled
                       >
-                        <option value="44" data-title="Лицензия ПО «Мой Клиент: Ресурсы» (1 год)">1 год (44 руб)</option>
-                        <option value="80" data-title="Лицензия ПО «Мой Клиент: Ресурсы» (2 года)">2 года (80 руб)</option>
-                        <option value="108" data-title="Лицензия ПО «Мой Клиент: Ресурсы» (3 года)">3 года (108 руб)</option>
-                        <option value="136" data-title="Лицензия ПО «Мой Клиент: Ресурсы» (4 года)">4 года (136 руб)</option>
-                        <option value="160" data-title="Лицензия ПО «Мой Клиент: Ресурсы» (5 лет)">5 лет (160 - хит!)</option>
+                        <option
+                          value="44"
+                          data-title="Лицензия ПО «Мой Клиент: Ресурсы» (1 год)"
+                        >
+                          1 год (44 руб)
+                        </option>
+                        <option
+                          value="80"
+                          data-title="Лицензия ПО «Мой Клиент: Ресурсы» (2 года)"
+                        >
+                          2 года (80 руб)
+                        </option>
+                        <option
+                          value="108"
+                          data-title="Лицензия ПО «Мой Клиент: Ресурсы» (3 года)"
+                        >
+                          3 года (108 руб)
+                        </option>
+                        <option
+                          value="136"
+                          data-title="Лицензия ПО «Мой Клиент: Ресурсы» (4 года)"
+                        >
+                          4 года (136 руб)
+                        </option>
+                        <option
+                          value="160"
+                          data-title="Лицензия ПО «Мой Клиент: Ресурсы» (5 лет)"
+                        >
+                          5 лет (160 - хит!)
+                        </option>
                       </select>
                     </div>
                     <div class="flex items-center gap-2 ml-auto">
@@ -1162,16 +1210,24 @@ const productSchema = {
     });
 
     // Handle select element states for dynamic services
-    const simCheckbox = document.getElementById("service-sim_card") as HTMLInputElement | null;
-    const simSelect = document.getElementById("select-sim_card") as HTMLSelectElement | null;
+    const simCheckbox = document.getElementById(
+      "service-sim_card",
+    ) as HTMLInputElement | null;
+    const simSelect = document.getElementById(
+      "select-sim_card",
+    ) as HTMLSelectElement | null;
     if (simCheckbox && simSelect) {
       simCheckbox.addEventListener("change", () => {
         simSelect.disabled = !simCheckbox.checked;
       });
     }
 
-    const licenseCheckbox = document.getElementById("service-software_license") as HTMLInputElement | null;
-    const licenseSelect = document.getElementById("select-software_license") as HTMLSelectElement | null;
+    const licenseCheckbox = document.getElementById(
+      "service-software_license",
+    ) as HTMLInputElement | null;
+    const licenseSelect = document.getElementById(
+      "select-software_license",
+    ) as HTMLSelectElement | null;
     if (licenseCheckbox && licenseSelect) {
       licenseCheckbox.addEventListener("change", () => {
         licenseSelect.disabled = !licenseCheckbox.checked;
@@ -1275,7 +1331,7 @@ const productSchema = {
 
         if (checkbox?.checked) {
           const serviceQty = Math.max(1, Number(qty?.value || 1));
-          
+
           let servicePrice = service.price;
           let serviceTitle = service.title;
 

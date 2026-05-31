@@ -32,7 +32,7 @@ const serviceArticles = pages.sort((a, b) =>
                       <article class="group relative flex h-full flex-col justify-between overflow-hidden rounded-2xl border border-border/40 bg-white/40 dark:bg-darkmode-light/10 backdrop-blur-md p-6 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 ease-out before:absolute before:inset-0 before:rounded-2xl before:border before:border-white/10 before:pointer-events-none">
                         {/* Subtle top glow border */}
                         <div class="absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r from-primary/20 via-primary to-primary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                        
+
                         {/* Soft background blob */}
                         <div class="absolute -right-8 -top-8 h-28 w-28 rounded-full bg-primary/5 blur-2xl group-hover:bg-primary/10 transition-all duration-300" />
 
@@ -45,10 +45,15 @@ const serviceArticles = pages.sort((a, b) =>
                           {/* Premium Icon Container */}
                           <div class="relative mb-5 inline-flex items-center justify-center rounded-2xl bg-gradient-to-br from-primary/10 via-primary/5 to-blue-500/5 dark:from-primary/20 dark:via-primary/10 dark:to-blue-500/10 p-4 w-14 h-14 border border-primary/10 group-hover:border-primary/30 transition-all duration-300 ease-out">
                             {/* Icon micro-glow on hover */}
-                            <div class="absolute -inset-1 rounded-2xl bg-primary/15 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            
-                            <svg class="relative h-7 w-7 text-primary group-hover:scale-110 transition-transform duration-300" aria-hidden="true">
-                              <use xlink:href={`#icon-${article.data.icon || 'FaTools'}`} />
+                            <div class="absolute -inset-1 rounded-2xl bg-primary/15 blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+
+                            <svg
+                              class="relative h-7 w-7 text-primary group-hover:scale-110 transition-transform duration-300"
+                              aria-hidden="true"
+                            >
+                              <use
+                                xlink:href={`#icon-${article.data.icon || "FaTools"}`}
+                              />
                             </svg>
                           </div>
 
