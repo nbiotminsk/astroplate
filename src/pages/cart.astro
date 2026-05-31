@@ -101,6 +101,50 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
               <span>Всего товаров:</span>
               <span id="cart-page-count" class="font-bold">0</span>
             </div>
+
+            <!-- Delivery Options -->
+            <div class="mb-6 border-b border-border pb-4 dark:border-darkmode-border">
+              <p class="mb-3 text-sm font-bold uppercase tracking-wider text-text-light dark:text-darkmode-text-light">Способ доставки:</p>
+              <div class="flex flex-col gap-3">
+                <label class="flex items-start gap-2.5 cursor-pointer text-sm">
+                  <input type="radio" name="delivery-option" value="pickup" checked class="mt-1 accent-primary" />
+                  <div>
+                    <span class="font-semibold text-text-dark dark:text-darkmode-text-dark">Самовывоз</span>
+                    <span class="block text-xs text-text-light dark:text-darkmode-text-light">Бесплатно</span>
+                  </div>
+                </label>
+                <label class="flex items-start gap-2.5 cursor-pointer text-sm">
+                  <input type="radio" name="delivery-option" value="minsk" class="mt-1 accent-primary" />
+                  <div>
+                    <span class="font-semibold text-text-dark dark:text-darkmode-text-dark">Доставка по Минску</span>
+                    <span class="block text-xs text-text-light dark:text-darkmode-text-light">30 руб.</span>
+                  </div>
+                </label>
+                <label class="flex items-start gap-2.5 cursor-pointer text-sm">
+                  <input type="radio" name="delivery-option" value="suburb" class="mt-1 accent-primary" />
+                  <div class="w-full">
+                    <span class="font-semibold text-text-dark dark:text-darkmode-text-dark">Доставка за МКАД</span>
+                    <span class="block text-xs text-text-light dark:text-darkmode-text-light mb-1.5">30 руб. + 2 руб. за км</span>
+                    <div id="km-selector-wrapper" class="hidden mt-2 items-center gap-2">
+                      <span class="text-xs text-text-light dark:text-darkmode-text-light">Расстояние:</span>
+                      <div class="qty-control" style="height: 28px !important;">
+                        <button type="button" class="qty-btn" id="km-btn-dec" style="width: 24px; height: 28px; font-size: 14px; font-weight: bold;">-</button>
+                        <input type="number" id="delivery-km" value="5" min="1" class="qty-input" style="width: 28px !important; min-width: 28px !important; max-width: 28px !important; font-size: 13px !important; text-align: center; border: none !important; font-weight: bold; background: transparent; padding: 0 !important; margin: 0 !important;" readonly />
+                        <button type="button" class="qty-btn" id="km-btn-inc" style="width: 24px; height: 28px; font-size: 14px; font-weight: bold;">+</button>
+                      </div>
+                      <span class="text-xs font-semibold text-text-dark dark:text-darkmode-text-dark">км</span>
+                    </div>
+                  </div>
+                </label>
+                <label class="flex items-start gap-2.5 cursor-pointer text-sm">
+                  <input type="radio" name="delivery-option" value="europochta" class="mt-1 accent-primary" />
+                  <div>
+                    <span class="font-semibold text-text-dark dark:text-darkmode-text-dark">Доставка Европочтой</span>
+                    <span class="block text-xs text-text-light dark:text-darkmode-text-light">60 руб.</span>
+                  </div>
+                </label>
+              </div>
+            </div>
             <div class="mb-8 flex justify-between text-xl">
               <span>Сумма:</span>
               <span id="cart-page-total" class="font-bold text-emerald-600"
@@ -145,67 +189,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     removeFromCart,
     updateQuantity,
     clearCart,
-    addToCart,
   } from "@/lib/cart";
-
-  const AVAILABLE_SERVICES = [
-    {
-      id: "replacement",
-      price: 80,
-      title: "Услуга: Замена счетчика на объекте",
-    },
-    {
-      id: "warranty",
-      price: 100,
-      title: "Услуга: Расширенная гарантия 24 мес",
-    },
-    { id: "battery", price: 40, title: "Дополнительная батарейка" },
-    {
-      id: "sim_card",
-      price: 21,
-      title: "СИМ-карта МТС NB-IoT (1 год)",
-    },
-    {
-      id: "software_license",
-      price: 44,
-      title: "Лицензия ПО «Мой Клиент: Ресурсы» (1 год)",
-    },
-    {
-      id: "module_config",
-      price: 40,
-      title: "Настройка и конфигурирование модуля",
-    },
-    {
-      id: "platform_integration",
-      price: 44,
-      title: "Добавление модуля на платформу УП «Минскводоканал»",
-    },
-    {
-      id: "standard_install",
-      price: 106,
-      title: "Подключение и монтаж «под ключ» (Стандарт)",
-    },
-    {
-      id: "well_install",
-      price: 176,
-      title: "Подключение и монтаж в колодце",
-    },
-    {
-      id: "urgent_install",
-      price: 60,
-      title: "Срочный монтаж (в течение 48 часов)",
-    },
-    {
-      id: "delivery_minsk",
-      price: 30,
-      title: "Доставка по Минску (в пределах МКАД)",
-    },
-    {
-      id: "delivery_suburb",
-      price: 30,
-      title: "Доставка за МКАД (пригород, +2 руб/км)",
-    },
-  ];
 
   const renderCartPage = () => {
     const itemsWrap = document.getElementById("cart-page-items");
@@ -218,8 +202,31 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     const count = getCartCount();
     const total = getCartTotal();
 
+    // Delivery calculation
+    let deliveryPrice = 0;
+    const deliveryRadio = document.querySelector('input[name="delivery-option"]:checked') as HTMLInputElement;
+    if (deliveryRadio) {
+      const type = deliveryRadio.value;
+      if (type === 'minsk') {
+        deliveryPrice = 30;
+        localStorage.setItem('cart-delivery', JSON.stringify({ type, title: 'Доставка по Минску', price: 30, km: 0 }));
+      } else if (type === 'suburb') {
+        const kmEl = document.getElementById('delivery-km') as HTMLInputElement;
+        const km = kmEl ? parseInt(kmEl.value) || 5 : 5;
+        deliveryPrice = 30 + 2 * km;
+        localStorage.setItem('cart-delivery', JSON.stringify({ type, title: `Доставка за МКАД (${km} км)`, price: deliveryPrice, km }));
+      } else if (type === 'europochta') {
+        deliveryPrice = 60;
+        localStorage.setItem('cart-delivery', JSON.stringify({ type, title: 'Доставка Европочтой', price: 60, km: 0 }));
+      } else {
+        localStorage.removeItem('cart-delivery');
+      }
+    } else {
+      localStorage.removeItem('cart-delivery');
+    }
+
     if (countEl) countEl.textContent = count.toString();
-    if (totalEl) totalEl.textContent = `${total} BYN`;
+    if (totalEl) totalEl.textContent = `${total + deliveryPrice} BYN`;
 
     if (cart.length === 0) {
       itemsWrap.innerHTML = `
@@ -235,121 +242,6 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
       .map((item) => {
         const isService =
           item.id.startsWith("service-") || item.id.includes("usluga");
-        let servicesHtml = "";
-
-        if (!isService) {
-          const availableForThis = AVAILABLE_SERVICES.filter((service) => {
-            const serviceId = `service-${service.id}-${item.id}`;
-            const alreadyInCart = cart.some((i) => i.id === serviceId);
-            if (alreadyInCart) return false;
-
-            const category = item.category || "";
-            const isNbiot = category.includes("модуль NBIoT");
-            const isMeter = category.includes("Счетчики воды");
-            const isKit = category.includes("комплекты");
-
-            const installationSlugs = [
-              "modul-sim-programm",
-              "radiomodem-2576-ver-2",
-              "komplekt-nbiot-2-schetchika-vody-15-mm",
-              "komplekt-nbiot-schetchik-vody-du-20-mm",
-              "rtu102-nb-iot",
-              "vega-nb11",
-            ];
-            const hasInstallation = installationSlugs.includes(item.id);
-
-            if (
-              service.id === "standard_install" ||
-              service.id === "well_install" ||
-              service.id === "urgent_install"
-            ) {
-              if (service.id === "standard_install") {
-                const wellInCart = cart.some(
-                  (i) => i.id === `service-well_install-${item.id}`,
-                );
-                if (wellInCart) return false;
-              }
-              if (service.id === "well_install") {
-                const standardInCart = cart.some(
-                  (i) => i.id === `service-standard_install-${item.id}`,
-                );
-                if (standardInCart) return false;
-              }
-              return hasInstallation;
-            }
-
-            if (
-              service.id === "delivery_minsk" ||
-              service.id === "delivery_suburb"
-            ) {
-              if (service.id === "delivery_minsk") {
-                const suburbInCart = cart.some(
-                  (i) => i.id === `service-delivery_suburb-${item.id}`,
-                );
-                if (suburbInCart) return false;
-              }
-              if (service.id === "delivery_suburb") {
-                const minskInCart = cart.some(
-                  (i) => i.id === `service-delivery_minsk-${item.id}`,
-                );
-                if (minskInCart) return false;
-              }
-              return true; // Available for all products
-            }
-
-            const titleLower = item.title.toLowerCase();
-            const idLower = item.id.toLowerCase();
-            const fallbackNbiot =
-              titleLower.includes("nbiot") || idLower.includes("nbiot");
-            const fallbackMeter =
-              titleLower.includes("счетчик") ||
-              titleLower.includes("счётчик") ||
-              idLower.includes("schetchik");
-            const fallbackKit = titleLower.includes("комплект");
-
-            const finalIsNbiot = isNbiot || fallbackNbiot;
-            const finalIsMeter = isMeter || fallbackMeter;
-            const finalIsKit = isKit || fallbackKit;
-
-            // Kits show everything (replacement, warranty, battery)
-            if (finalIsKit) return true;
-
-            // NBIoT excludes replacement
-            if (finalIsNbiot) {
-              return service.id !== "replacement";
-            }
-
-            // Simple meters only show replacement
-            if (finalIsMeter) {
-              return service.id === "replacement";
-            }
-
-            return true;
-          });
-
-          if (availableForThis.length > 0) {
-            servicesHtml = `
-              <div class="mt-4 border-t border-dashed border-border pt-3 dark:border-darkmode-border">
-                <p class="mb-2 text-xs font-bold uppercase tracking-wider text-text-light dark:text-darkmode-text-light">Добавить услуги для этого товара:</p>
-                <div class="flex flex-wrap gap-2">
-                  ${availableForThis
-                    .map(
-                      (service) => `
-                      <button 
-                        class="btn btn-outline-primary btn-sm px-3 py-1 text-sm font-medium" 
-                        data-add-service="${service.id}" 
-                        data-parent-id="${item.id}"
-                      >
-                        + ${service.title} (${service.price} р.)
-                      </button>
-                    `,
-                    )
-                    .join("")}
-                </div>
-              </div>
-            `;
-          }
-        }
 
         return `
         <div class="mb-6 flex flex-col border-b border-border pb-6 last:mb-0 last:border-0 last:pb-0 dark:border-darkmode-border">
@@ -380,36 +272,16 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
               </button>
             </div>
           </div>
-          ${servicesHtml}
         </div>
       `;
       })
       .join("");
 
-    // Add listners
+    // Add listeners
     itemsWrap.querySelectorAll("[data-remove]").forEach((btn) => {
       btn.addEventListener("click", () => {
         removeFromCart((btn as HTMLElement).dataset.remove || "");
         renderCartPage();
-      });
-    });
-
-    itemsWrap.querySelectorAll("[data-add-service]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const serviceId = (btn as HTMLElement).dataset.addService || "";
-        const parentId = (btn as HTMLElement).dataset.parentId || "";
-        const parentItem = getCart().find((i) => i.id === parentId);
-        const service = AVAILABLE_SERVICES.find((s) => s.id === serviceId);
-
-        if (parentItem && service) {
-          addToCart({
-            id: `service-${service.id}-${parentId}`,
-            title: service.title,
-            price: service.price,
-            quantity: parentItem.quantity,
-          });
-          renderCartPage();
-        }
       });
     });
 
@@ -440,6 +312,7 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
       });
     });
   };
+
   const init = () => {
     if ((window as any)._cartInitialized) return;
     (window as any)._cartInitialized = true;
@@ -448,6 +321,11 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
     if (clearBtn) {
       clearBtn.addEventListener("click", () => {
         clearCart();
+        localStorage.removeItem("cart-delivery");
+        const pickupRadio = document.querySelector('input[name="delivery-option"][value="pickup"]') as HTMLInputElement;
+        if (pickupRadio) pickupRadio.checked = true;
+        const kmWrapper = document.getElementById('km-selector-wrapper');
+        if (kmWrapper) kmWrapper.classList.add('hidden');
         renderCartPage();
       });
     }
@@ -458,6 +336,69 @@ import Breadcrumbs from "@/components/Breadcrumbs.astro";
         document.dispatchEvent(new CustomEvent("checkout:open"));
       });
     }
+
+    // Set up delivery option listeners
+    const deliveryRadios = document.querySelectorAll('input[name="delivery-option"]');
+    const kmWrapper = document.getElementById('km-selector-wrapper');
+
+    deliveryRadios.forEach((radio) => {
+      radio.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.value === 'suburb') {
+          if (kmWrapper) kmWrapper.classList.remove('hidden');
+        } else {
+          if (kmWrapper) kmWrapper.classList.add('hidden');
+        }
+        renderCartPage();
+      });
+    });
+
+    const kmEl = document.getElementById('delivery-km') as HTMLInputElement;
+    const kmDec = document.getElementById('km-btn-dec');
+    const kmInc = document.getElementById('km-btn-inc');
+
+    if (kmDec && kmEl) {
+      kmDec.addEventListener('click', () => {
+        const val = parseInt(kmEl.value) || 5;
+        if (val > 1) {
+          kmEl.value = (val - 1).toString();
+          renderCartPage();
+        }
+      });
+    }
+
+    if (kmInc && kmEl) {
+      kmInc.addEventListener('click', () => {
+        const val = parseInt(kmEl.value) || 5;
+        kmEl.value = (val + 1).toString();
+        renderCartPage();
+      });
+    }
+
+    // Restore delivery option from localStorage on init
+    const savedDelivery = localStorage.getItem('cart-delivery');
+    if (savedDelivery) {
+      try {
+        const delivery = JSON.parse(savedDelivery);
+        const radio = document.querySelector(`input[name="delivery-option"][value="${delivery.type}"]`) as HTMLInputElement;
+        if (radio) {
+          radio.checked = true;
+          if (delivery.type === 'suburb') {
+            if (kmEl && delivery.km) {
+              kmEl.value = delivery.km.toString();
+            }
+            if (kmWrapper) kmWrapper.classList.remove('hidden');
+          }
+        }
+      } catch (e) {
+        console.error('Error restoring delivery selection', e);
+      }
+    } else {
+      // Set default to pickup
+      const pickupRadio = document.querySelector('input[name="delivery-option"][value="pickup"]') as HTMLInputElement;
+      if (pickupRadio) pickupRadio.checked = true;
+    }
+
     renderCartPage();
 
     // Listen for cart updates from other components

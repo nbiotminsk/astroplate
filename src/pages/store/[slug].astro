@@ -104,6 +104,7 @@ const productFaqs = [...(product.data.faq || []), ...defaultProductFaqs];
 const cat = (product.data.category || "другое").toLowerCase().trim();
 
 const isKitCategory = cat === "комплекты";
+const isNbiotSetupService = product.id === "ustanovka-i-nastrojka-nb-iot-modulya";
 const isNbiotModuleCategory = cat === "модуль nbiot";
 const isGprsModuleCategory = cat === "модуль gprs";
 const isWaterMeterCategory = cat === "счетчики воды" || cat === "счётчики воды";
@@ -334,6 +335,7 @@ const productSchema = {
           </div>
           <h1 class="mb-3">{title}</h1>
           <p
+            id="product-price"
             class={`mb-4 text-3xl font-bold ${
               customLabel === "premium"
                 ? "text-amber-700 dark:text-amber-300"
@@ -501,9 +503,9 @@ const productSchema = {
                             for="service-standard_install"
                             class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
                           >
-                            Подключение и монтаж «под ключ» (Стандарт){" "}
+                            Подключение и монтаж{" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (106 руб)
+                              (280 руб)
                             </span>
                           </label>
                         </div>
@@ -550,7 +552,7 @@ const productSchema = {
                           >
                             Подключение и монтаж в колодце{" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (176 руб)
+                              (350 руб)
                             </span>
                           </label>
                         </div>
@@ -597,7 +599,7 @@ const productSchema = {
                           >
                             Срочный монтаж (в течение 48 часов){" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (+60 руб)
+                              +60 рублей
                             </span>
                           </label>
                         </div>
@@ -1013,6 +1015,83 @@ const productSchema = {
             )
           }
 
+          {isNbiotSetupService && (
+            <div class="mb-6 space-y-4 rounded-xl border border-border bg-light/50 p-5 dark:border-darkmode-border dark:bg-darkmode-light/30">
+              <h4 class="mb-3 text-base font-bold text-text-dark dark:text-darkmode-text-dark">
+                Выберите вариант установки:
+              </h4>
+              
+              <div class="flex flex-col gap-3">
+                {/* Variant 1: Standard */}
+                <label class="relative flex cursor-pointer items-center justify-between rounded-lg border border-border bg-body p-3 transition hover:border-primary dark:border-darkmode-border dark:bg-darkmode-body">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="nbiot-setup-variant"
+                      value="standard"
+                      checked
+                      class="h-4 w-4 cursor-pointer text-primary focus:ring-primary"
+                    />
+                    <span class="text-sm font-medium text-text-dark dark:text-darkmode-text-dark">
+                      Установка и наладка (стандартная)
+                    </span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-600">280 руб</span>
+                </label>
+
+                {/* Variant 2: Well */}
+                <label class="relative flex cursor-pointer items-center justify-between rounded-lg border border-border bg-body p-3 transition hover:border-primary dark:border-darkmode-border dark:bg-darkmode-body">
+                  <div class="flex items-center gap-3">
+                    <input
+                      type="radio"
+                      name="nbiot-setup-variant"
+                      value="well"
+                      class="h-4 w-4 cursor-pointer text-primary focus:ring-primary"
+                    />
+                    <span class="text-sm font-medium text-text-dark dark:text-darkmode-text-dark">
+                      Установка и наладка в колодце
+                    </span>
+                  </div>
+                  <span class="text-sm font-bold text-emerald-600">350 руб</span>
+                </label>
+              </div>
+
+              {/* Option: Urgent Install */}
+              <div class="border-t border-border pt-3 dark:border-darkmode-border mt-3">
+                <div class="flex items-center gap-3">
+                  <div class="relative flex items-center">
+                    <input
+                      type="checkbox"
+                      id="nbiot-setup-urgent"
+                      class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                    />
+                    <svg
+                      class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="4"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                  </div>
+                  <label
+                    for="nbiot-setup-urgent"
+                    class="cursor-pointer text-sm font-medium text-text-dark dark:text-darkmode-text-dark"
+                  >
+                    Срочная установка (в течение 48 часов){" "}
+                    <span class="ml-1 text-emerald-600 font-bold">
+                      +60 рублей
+                    </span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div class="mb-4 flex items-center gap-4">
             <div class="flex items-center gap-2">
               <label
@@ -1101,6 +1180,30 @@ const productSchema = {
       return;
     addToCartButton.dataset.initialized = "true";
 
+    const isSetupPage = addToCartButton.dataset.id === "ustanovka-i-nastrojka-nb-iot-modulya";
+    if (isSetupPage) {
+      const radios = document.querySelectorAll('input[name="nbiot-setup-variant"]') as NodeListOf<HTMLInputElement>;
+      const urgentCheckbox = document.getElementById("nbiot-setup-urgent") as HTMLInputElement | null;
+      const priceEl = document.getElementById("product-price");
+
+      const updateSetupPrice = () => {
+        if (!priceEl) return;
+        const selectedRadio = document.querySelector('input[name="nbiot-setup-variant"]:checked') as HTMLInputElement | null;
+        let basePrice = selectedRadio?.value === "well" ? 350 : 280;
+        let extra = urgentCheckbox?.checked ? 60 : 0;
+        let total = basePrice + extra;
+        priceEl.textContent = `${total} BYN`;
+      };
+
+      radios.forEach((radio) => {
+        radio.addEventListener("change", updateSetupPrice);
+      });
+      urgentCheckbox?.addEventListener("change", updateSetupPrice);
+
+      // Initial update
+      updateSetupPrice();
+    }
+
     // Services logic
     const services = [
       {
@@ -1130,12 +1233,12 @@ const productSchema = {
       },
       {
         id: "standard_install",
-        price: 106,
-        title: "Подключение и монтаж «под ключ» (Стандарт)",
+        price: 280,
+        title: "Подключение и монтаж",
       },
       {
         id: "well_install",
-        price: 176,
+        price: 350,
         title: "Подключение и монтаж в колодце",
       },
       {
@@ -1303,13 +1406,37 @@ const productSchema = {
     addToCartButton.addEventListener("click", () => {
       const id = addToCartButton.dataset.id;
       if (!id) return;
-      const title = addToCartButton.dataset.title || "";
-      const price = Number(addToCartButton.dataset.price || 0);
+      let title = addToCartButton.dataset.title || "";
+      let price = Number(addToCartButton.dataset.price || 0);
       const category = addToCartButton.dataset.cartCategory || "";
       const quantity = Math.max(1, Number(qtyInput?.value || 1));
 
+      const isSetupPage = id === "ustanovka-i-nastrojka-nb-iot-modulya";
+      if (isSetupPage) {
+        const selectedRadio = document.querySelector('input[name="nbiot-setup-variant"]:checked') as HTMLInputElement | null;
+        if (selectedRadio?.value === "well") {
+          title = "Установка и наладка в колодце";
+          price = 350;
+        } else {
+          title = "Установка и наладка";
+          price = 280;
+        }
+      }
+
       // Add main product
       addToCart({ id, title, price, category, quantity });
+
+      if (isSetupPage) {
+        const urgentCheckbox = document.getElementById("nbiot-setup-urgent") as HTMLInputElement | null;
+        if (urgentCheckbox?.checked) {
+          addToCart({
+            id: `service-urgent_install-${id}`,
+            title: "Срочный монтаж (в течение 48 часов)",
+            price: 60,
+            quantity: quantity,
+          });
+        }
+      }
 
       // Add services
       services.forEach((service) => {

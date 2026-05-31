@@ -85,8 +85,26 @@ const CheckoutModal = () => {
     setIsSubmitting(true);
     setError(null);
 
-    const cart = getCart();
-    const total = getCartTotal();
+    const cart = [...getCart()];
+    let total = getCartTotal();
+
+    const savedDelivery = localStorage.getItem("cart-delivery");
+    if (savedDelivery) {
+      try {
+        const delivery = JSON.parse(savedDelivery);
+        if (delivery && delivery.type !== "pickup" && delivery.price > 0) {
+          cart.push({
+            id: `delivery-${delivery.type}`,
+            title: delivery.title,
+            price: delivery.price,
+            quantity: 1,
+          });
+          total += delivery.price;
+        }
+      } catch (err) {
+        console.error("Error parsing delivery selection in checkout", err);
+      }
+    }
 
     if (cart.length === 0) {
       setError("Ваша корзина пуста");
@@ -123,6 +141,7 @@ const CheckoutModal = () => {
       if (data.success) {
         setStep("success");
         clearCart();
+        localStorage.removeItem("cart-delivery");
         // Trigger cart update event to refresh UI
         window.dispatchEvent(new CustomEvent("cart:update", { detail: [] }));
       } else {

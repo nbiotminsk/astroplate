@@ -17,10 +17,10 @@ const catalogEntries = await getNormalizedCollection(
 );
 
 const categoryPriority: Record<string, number> = {
-  "модуль NBIoT": 0,
-  "модуль GPRS": 1,
-  "Базовая станция": 2,
-  комплекты: 3,
+  комплекты: 0,
+  "модуль NBIoT": 1,
+  "модуль GPRS": 2,
+  "Базовая станция": 3,
   "Счетчики воды": 4,
   комплектующие: 5,
   услуги: 6,
@@ -706,10 +706,10 @@ const tagIcons: Record<string, string> = {
         const titleA = (a.dataset.title || "").toLowerCase();
         const titleB = (b.dataset.title || "").toLowerCase();
         const categoryPriorityMap: Record<string, number> = {
-          "модуль NBIoT": 0,
-          "модуль GPRS": 1,
-          "Базовая станция": 2,
-          комплекты: 3,
+          комплекты: 0,
+          "модуль NBIoT": 1,
+          "модуль GPRS": 2,
+          "Базовая станция": 3,
           "Счетчики воды": 4,
           комплектующие: 5,
           услуги: 6,
