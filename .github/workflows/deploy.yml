@@ -65,6 +65,3 @@ jobs:
           force_orphan: true
           commit_message: "Deploy: ${{ github.sha }} [skip ci]"
 
-      - name: Trigger Webhook on Hosting
-        run: |
-          curl -s -X POST "https://by4010.hb.by:8443/modules/git/public/web-hook.php?uuid=545844a5-6f56-2a7d-37aa-0a92eb58d127"
