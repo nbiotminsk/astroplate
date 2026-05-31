@@ -3,7 +3,7 @@ title: "Автоматизация учета ресурсов под ключ: 
 meta_title: "Автоматизация учета воды и тепла в Минске: АСКУЭ под ключ"
 description: "Как запустить автоматический сбор показаний приборов учета (АСКУЭ) без рутины. Подробный разбор счетчиков, модемов, базовых станций и услуг пусконаладки."
 date: 2026-05-31
-image: "/images/blog/dispetcherizatsiya-ts.png"
+image: "/images/blog/avtomatizatsiya-ucheta-resursov.png"
 author: "Николай Викторович"
 categories:
   - Решения
