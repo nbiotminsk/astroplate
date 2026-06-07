@@ -1,10 +1,10 @@
 ---
-title: Модуль NBIoT + Sim + лицензия ПО
+title: Счетчик импульсов NBIOT "под ключ"
 meta_title: Модуль дистанционного съема показаний счетчиков воды (NB-IoT модем)
 meta_description: "Готовый к работе NB-IoT модуль с сим-картой и настроенным ПО.
   Автоматическая передача показаний счетчиков воды в систему Минскводоканал."
 category: "комплекты"
-price: "514"
+price: "498"
 price_currency: "BYN"
 img: "/images/module_nb.jpg"
 brand: "Teleofis"
