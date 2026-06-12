@@ -80,10 +80,12 @@ const paginationSuffix = pageNum ? ` - Страница ${pageNum}` : "";
 const breadcrumbs = getBreadcrumbs(Astro.url.pathname, title);
 const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
-const finalTitle = plainify(
-  (meta_title ? meta_title : title ? title : config.site.title) +
-    paginationSuffix,
-);
+const rawTitle = meta_title ? meta_title : title ? title : config.site.title;
+const titleWithSuffix =
+  rawTitle.includes("teleofis24.by") || rawTitle === config.site.title
+    ? rawTitle
+    : `${rawTitle} — teleofis24.by`;
+const finalTitle = plainify(titleWithSuffix + paginationSuffix);
 const finalDescription = plainify(
   (description ? description : config.metadata.meta_description) +
     paginationSuffix,
