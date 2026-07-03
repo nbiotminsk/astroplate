@@ -39,6 +39,7 @@ export interface Props {
   prevUrl?: string;
   nextUrl?: string;
   hideBreadcrumbs?: boolean;
+  keywords?: string | string[];
 }
 
 // destructure frontmatter
@@ -55,6 +56,7 @@ const {
   prevUrl,
   nextUrl,
   hideBreadcrumbs,
+  keywords,
 } = Astro.props;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
@@ -81,15 +83,35 @@ const breadcrumbs = getBreadcrumbs(Astro.url.pathname, title);
 const breadcrumbSchema = getBreadcrumbSchema(breadcrumbs);
 
 const rawTitle = meta_title ? meta_title : title ? title : config.site.title;
-const titleWithSuffix =
-  rawTitle.includes("teleofis24.by") || rawTitle === config.site.title
-    ? rawTitle
-    : `${rawTitle} — teleofis24.by`;
+// Title length control: keep final title <= ~60 chars for SERP
+const SUFFIX = " — teleofis24.by";
+const MAX_TITLE = 60;
+const hasBrand =
+  rawTitle.includes("teleofis24.by") || rawTitle === config.site.title;
+let titleWithSuffix;
+if (hasBrand) {
+  titleWithSuffix = rawTitle;
+} else if (rawTitle.length + SUFFIX.length <= MAX_TITLE) {
+  titleWithSuffix = `${rawTitle}${SUFFIX}`;
+} else {
+  // rawTitle too long for suffix — use without, truncate if exceeds limit
+  titleWithSuffix =
+    rawTitle.length > MAX_TITLE
+      ? `${rawTitle.slice(0, MAX_TITLE - 1)}…`
+      : rawTitle;
+}
 const finalTitle = plainify(titleWithSuffix + paginationSuffix);
 const finalDescription = plainify(
   (description ? description : config.metadata.meta_description) +
     paginationSuffix,
 );
+
+// Normalize keywords to a comma-separated string (Yandex still reads this)
+const keywordsStr = keywords
+  ? Array.isArray(keywords)
+    ? keywords.filter(Boolean).join(", ")
+    : keywords
+  : undefined;
 ---
 
 <!doctype html>
@@ -116,10 +138,6 @@ const finalDescription = plainify(
         {
           href: autoCanonical,
           hrefLang: "ru-RU",
-        },
-        {
-          href: autoCanonical,
-          hrefLang: "ru-BY",
         },
       ]}
       openGraph={{
@@ -152,6 +170,9 @@ const finalDescription = plainify(
       extend={{
         meta: [
           { name: "author", content: config.metadata.meta_author },
+          ...(keywordsStr
+            ? [{ name: "keywords", content: keywordsStr }]
+            : []),
           { name: "theme-name", content: "astroplate" },
           { name: "geo.region", content: "BY-HM" },
           { name: "geo.placename", content: "Минск" },

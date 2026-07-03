@@ -18,7 +18,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { title, meta_title, description, image, date, author, categories } =
+const { title, meta_title, description, image, date, author, categories, tags } =
   post.data;
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
@@ -36,6 +36,7 @@ const publishedISO = new Date(date).toISOString();
   description={description}
   image={image}
   ogType="article"
+  keywords={tags}
 >
   <Fragment slot="head">
     <meta property="article:published_time" content={publishedISO} />

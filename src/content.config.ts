@@ -66,8 +66,18 @@ const infoCollection = defineCollection({
   schema: z.object({
     img: z.string().optional(),
     title: z.string(),
+    meta_title: z.string().optional(),
+    meta_description: z.string().optional(),
     description: z.string().optional(),
     draft: z.boolean().optional(),
+    faq: z
+      .array(
+        z.object({
+          question: z.string(),
+          answer: z.string(),
+        }),
+      )
+      .optional(),
   }),
 });
 

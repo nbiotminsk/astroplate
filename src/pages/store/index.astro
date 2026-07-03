@@ -198,7 +198,7 @@ const tagIcons: Record<string, string> = {
         {
           products
             .filter((product) => !product.isService)
-            .map((product) => (
+            .map((product, productIndex) => (
               <article
                 class="mb-8 md:col-6 xl:col-3"
                 data-category={product.category}
@@ -236,10 +236,12 @@ const tagIcons: Record<string, string> = {
                       <ImageMod
                         class="h-full w-full object-contain"
                         src={product.image}
-                        alt={product.title}
+                        alt={`${product.title} — ${product.category}`}
                         width={760}
                         height={440}
                         format="webp"
+                        loading={productIndex === 0 ? "eager" : "lazy"}
+                        fetchpriority={productIndex === 0 ? "high" : undefined}
                       />
                     </div>
                   </a>
@@ -418,6 +420,52 @@ const tagIcons: Record<string, string> = {
                 </div>
               </article>
             ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section-sm pt-4" aria-label="Категории товаров">
+    <div class="container">
+      <h2 class="mb-6 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        Категории оборудования
+      </h2>
+      <div class="row gap-y-4">
+        {
+          tags
+            .filter((t) => t !== "Все")
+            .map((tag) => {
+              const catProducts = products.filter(
+                (p) => p.category === tag && !p.isService,
+              );
+              if (catProducts.length === 0) return null;
+              return (
+                <div class="md:col-6 lg:col-4">
+                  <article class="rounded-lg border border-border p-4 dark:border-darkmode-border">
+                    <h3 class="mb-2 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
+                      {tag}
+                    </h3>
+                    <ul class="space-y-1.5">
+                      {catProducts.slice(0, 4).map((p) => (
+                        <li>
+                          <a
+                            href={`/store/${p.id}/`}
+                            class="text-sm text-text hover:text-primary dark:text-darkmode-text dark:hover:text-primary"
+                          >
+                            {p.title}
+                          </a>
+                        </li>
+                      ))}
+                    </ul>
+                    {catProducts.length > 4 && (
+                      <span class="mt-2 block text-xs text-text-light dark:text-darkmode-text-light">
+                        и ещё {catProducts.length - 4} товаров
+                      </span>
+                    )}
+                  </article>
+                </div>
+              );
+            })
         }
       </div>
     </div>

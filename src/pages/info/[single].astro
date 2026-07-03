@@ -22,7 +22,8 @@ export async function getStaticPaths() {
 }
 
 const { entry } = Astro.props;
-const { title, description, img } = entry.data;
+const { title, meta_title, meta_description, description, img, faq } =
+  entry.data;
 const { Content } = await render(entry);
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
@@ -30,7 +31,7 @@ const pageUrl = `${siteUrl}/info/${entry.id}/`;
 const webPageSchema = {
   "@id": `${pageUrl}#webpage`,
   name: title,
-  description: description || "",
+  description: description || meta_description || "",
   url: pageUrl,
   inLanguage: "ru-RU",
   isPartOf: { "@id": `${siteUrl}/#website` },
@@ -43,11 +44,31 @@ const webPageSchema = {
       }
     : {}),
 };
+
+const faqSchema =
+  faq && faq.length > 0
+    ? {
+        mainEntity: faq.map((item: any) => ({
+          "@type": "Question",
+          name: item.question,
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: item.answer,
+          },
+        })),
+      }
+    : null;
 ---
 
-<Base title={title} meta_title={title} description={description} image={img}>
+<Base
+  title={title}
+  meta_title={meta_title}
+  description={meta_description || description}
+  image={img}
+>
   <Fragment slot="head">
     <JsonLd type="WebPage" data={webPageSchema} />
+    {faqSchema && <JsonLd type="FAQPage" data={faqSchema} />}
   </Fragment>
   <PageHeader title={title} compact={true} />
 
