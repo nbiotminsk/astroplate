@@ -207,6 +207,12 @@ const finalDescription = plainify(
             href: "/images/favicon-512x512.png",
           },
           { rel: "shortcut icon", href: config.site.favicon },
+          {
+            rel: "alternate",
+            type: "application/rss+xml",
+            title: "teleofis24.by — Блог",
+            href: "/rss.xml",
+          },
           ...(prevUrl ? [{ rel: "prev", href: prevUrl }] : []),
           ...(nextUrl ? [{ rel: "next", href: nextUrl }] : []),
         ],
@@ -243,11 +249,16 @@ const finalDescription = plainify(
     <JsonLd
       type="Organization"
       data={{
+        "@id": `${siteUrl}/#organization`,
         name: "ЧАСТНОЕ ПРЕДПРИЯТИЕ «ТЕЛЕОФИС»",
         url: config.site.base_url,
-        logo: `${config.site.base_url}${config.site.favicon}`,
+        logo: {
+          "@type": "ImageObject",
+          url: `${config.site.base_url}${config.site.favicon}`,
+        },
         image: `${config.site.base_url}/images/og-image.png`,
         email: "info@teleofis24.by",
+        telephone: "+375298462462",
         address: {
           "@type": "PostalAddress",
           streetAddress: "ул. Макаёнка, 12г, пом. 257",
@@ -259,6 +270,8 @@ const finalDescription = plainify(
           "@type": "ContactPoint",
           telephone: "+375298462462",
           contactType: "customer service",
+          areaServed: "BY",
+          availableLanguage: ["ru", "be"],
         },
         sameAs: ["https://t.me/teleofis24"],
       }}

@@ -54,8 +54,6 @@ export const getBreadcrumbSchema = (
 ) => {
   const siteUrl = config.site.base_url.replace(/\/$/, "");
   return {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
     itemListElement: parts.map((part, index) => ({
       "@type": "ListItem",
       position: index + 1,

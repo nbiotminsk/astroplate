@@ -36,7 +36,7 @@ const filterByCategories = taxonomyFilter(posts, "categories", category!);
 const sortedPosts = sortByDate(filterByCategories);
 ---
 
-<Base title={title} description={description}>
+<Base title={title} description={description} noindex={true}>
   <PageHeader title={humanize(category!)} />
   <div class="section-sm pb-0">
     <div class="container">

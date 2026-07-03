@@ -5,6 +5,7 @@ import PageHeader from "@/partials/PageHeader.astro";
 import { render } from "astro:content";
 import ImageMod from "@/components/ImageMod.astro";
 import JsonLd from "@/components/JsonLd.astro";
+import config from "@/config/config.json";
 
 // get static paths for all pages
 export async function getStaticPaths() {
@@ -24,6 +25,25 @@ export async function getStaticPaths() {
 const { page } = Astro.props;
 const { title, meta_title, description, image, faq } = page.data;
 const { Content } = await render(page);
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const pageUrl = `${siteUrl}/${page.id}/`;
+const webPageSchema = {
+  "@id": `${pageUrl}#webpage`,
+  name: title,
+  description: description || "",
+  url: pageUrl,
+  inLanguage: "ru-RU",
+  isPartOf: { "@id": `${siteUrl}/#website` },
+  ...(image
+    ? {
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: /^https?:\/\//.test(image) ? image : `${siteUrl}${image}`,
+        },
+      }
+    : {}),
+};
 
 const faqSchema =
   faq && faq.length > 0
@@ -46,7 +66,10 @@ const faqSchema =
   description={description}
   image={image}
 >
-  {faqSchema && <JsonLd slot="head" type="FAQPage" data={faqSchema} />}
+  <Fragment slot="head">
+    <JsonLd type="WebPage" data={webPageSchema} />
+    {faqSchema && <JsonLd type="FAQPage" data={faqSchema} />}
+  </Fragment>
   <PageHeader title={title} />
   <section class="section-sm">
     <div class="container">

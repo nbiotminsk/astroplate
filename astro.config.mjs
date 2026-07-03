@@ -96,6 +96,33 @@ function remarkResolvePrices() {
   };
 }
 
+// Build blog image cache for image-sitemap (slug -> frontmatter image)
+const blogDir = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  "src/content/blog",
+);
+const blogImageCache = {};
+if (fs.existsSync(blogDir)) {
+  for (const file of fs.readdirSync(blogDir)) {
+    if (!file.endsWith(".md") && !file.endsWith(".mdx")) continue;
+    if (file.startsWith("-")) continue; // skip index page
+    const slug = file.replace(/\.(md|mdx)$/, "");
+    try {
+      const parsed = matter(fs.readFileSync(path.join(blogDir, file), "utf-8"));
+      if (parsed.data.image && !parsed.data.draft) {
+        blogImageCache[slug] = {
+          image: parsed.data.image,
+          title: parsed.data.title || slug,
+        };
+      }
+    } catch (e) {
+      console.error(`Error parsing blog image for ${file}:`, e);
+    }
+  }
+}
+
+const siteBaseUrl = config.site.base_url.replace(/\/$/, "");
+
 // https://astro.build/config
 export default defineConfig({
   site: config.site.base_url ? config.site.base_url : "http://examplesite.com",
@@ -135,15 +162,54 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
+      filter: (page) => {
+        const exclude = ["/404", "/cart", "/404.html"];
+        return !exclude.some((p) => page.includes(p));
+      },
+      changefreq: "weekly",
+      priority: 0.6,
       serialize(item) {
+        // Декодирование кириллицы в URL
         if (/%[0-9A-F]{2}/i.test(item.url)) {
           item.url = decodeURIComponent(item.url);
         }
+
+        const path = item.url.replace(siteBaseUrl, "");
+
+        // Приоритеты по типам страниц
+        if (path === "/" || path === "") {
+          item.priority = 1.0;
+          item.changefreq = "daily";
+        } else if (path === "/store/" || path === "/store") {
+          item.priority = 0.9;
+          item.changefreq = "weekly";
+        } else if (path.startsWith("/store/")) {
+          item.priority = 0.8;
+          item.changefreq = "weekly";
+        } else if (path === "/blog/" || path === "/blog") {
+          item.priority = 0.8;
+          item.changefreq = "daily";
+        } else if (path.startsWith("/blog/page/")) {
+          item.priority = 0.3;
+          item.changefreq = "weekly";
+        } else if (path.startsWith("/blog/")) {
+          item.priority = 0.7;
+          item.changefreq = "monthly";
+        } else if (
+          path === "/services" ||
+          path === "/contact" ||
+          path === "/solutions" ||
+          path.startsWith("/info/")
+        ) {
+          item.priority = 0.6;
+          item.changefreq = "monthly";
+        }
+
         return item;
       },
     }),
     {
-      name: "decode-sitemap",
+      name: "postprocess-sitemap",
       hooks: {
         "astro:build:done": async ({ dir }) => {
           const distDir = fileURLToPath(dir);
@@ -152,13 +218,38 @@ export default defineConfig({
             if (file.startsWith("sitemap") && file.endsWith(".xml")) {
               const filePath = path.join(distDir, file);
               let content = fs.readFileSync(filePath, "utf-8");
+              let modified = false;
+
+              // 1. Декодирование кириллицы в URL
               if (/%D[01]%[0-9A-F]{2}/i.test(content)) {
                 content = content.replace(
                   /(%D0%[0-9A-F]{2}|%D1%[0-9A-F]{2})/gi,
                   (match) => decodeURIComponent(match),
                 );
-                fs.writeFileSync(filePath, content);
+                modified = true;
               }
+
+              // 2. Image-sitemap: инжекция <image:image> для blog-постов
+              //    (serialize API @astrojs/sitemap не поддерживает images)
+              content = content.replace(
+                /(<url><loc>https:\/\/[^/]+\/blog\/([^/]+)\/<\/loc>.*?)(<\/url>)/g,
+                (match, prefix, slug, closing) => {
+                  const entry = blogImageCache[slug];
+                  if (!entry) return match;
+                  const escXml = (s) =>
+                    s
+                      .replace(/&/g, "&amp;")
+                      .replace(/</g, "&lt;")
+                      .replace(/>/g, "&gt;")
+                      .replace(/"/g, "&quot;");
+                  const imgUrl = escXml(`${siteBaseUrl}${entry.image}`);
+                  const imgTitle = escXml(entry.title);
+                  modified = true;
+                  return `${prefix}<image:image><image:loc>${imgUrl}</image:loc><image:title>${imgTitle}</image:title></image:image>${closing}`;
+                },
+              );
+
+              if (modified) fs.writeFileSync(filePath, content);
             }
           }
         },

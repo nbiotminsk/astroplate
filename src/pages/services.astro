@@ -1,13 +1,44 @@
 ---
 import Base from "@/layouts/Base.astro";
 import CallToAction from "@/components/CallToAction.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
+import config from "@/config/config.json";
 
 const pages = await getSinglePage("pages");
 const serviceArticles = pages.sort((a, b) =>
   a.data.title.localeCompare(b.data.title),
 );
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+
+const webPageSchema = {
+  "@id": `${siteUrl}/services/#webpage`,
+  name: "Услуги",
+  description:
+    "Каталог услуг компании Телеофис: установка и настройка систем дистанционного сбора показаний, ремонт модулей Zeta, замена счетчиков воды и техническая поддержка в Беларуси.",
+  url: `${siteUrl}/services/`,
+  inLanguage: "ru-RU",
+  isPartOf: { "@id": `${siteUrl}/#website` },
+};
+
+const servicesSchema = {
+  "@type": "ItemList",
+  itemListElement: serviceArticles.map((article, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "Service",
+      name: article.data.title,
+      description: article.data.description || "",
+      url: `${siteUrl}/${article.id}/`,
+      provider: { "@id": `${siteUrl}/#organization` },
+      areaServed: { "@type": "Country", name: "Беларусь" },
+      serviceType: "Установка и обслуживание систем учёта",
+    },
+  })),
+};
 ---
 
 <Base
@@ -15,6 +46,10 @@ const serviceArticles = pages.sort((a, b) =>
   meta_title="Услуги"
   description="Каталог услуг компании Телеофис: установка и настройка систем дистанционного сбора показаний, ремонт модулей Zeta, замена счетчиков воды и техническая поддержка в Беларуси."
 >
+  <Fragment slot="head">
+    <JsonLd type="WebPage" data={webPageSchema} />
+    <JsonLd type="ItemList" data={servicesSchema} />
+  </Fragment>
   <PageHeader title="Услуги" compact={true} />
 
   <section

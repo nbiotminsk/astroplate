@@ -78,9 +78,16 @@ const tags = [
 ];
 
 const siteUrl = config.site.base_url.replace(/\/$/, "");
+const collectionPageSchema = {
+  "@id": `${siteUrl}/store/#collectionpage`,
+  name: "Магазин NBIoT модулей и счетчиков воды",
+  description:
+    "Широкий выбор оборудования для дистанционного учета воды и тепла: модули NBIoT, счетчики с импульсным выходом, комплекты и запчасти.",
+  url: `${siteUrl}/store/`,
+  inLanguage: "ru-RU",
+  isPartOf: { "@id": `${siteUrl}/#website` },
+};
 const itemListSchema = {
-  "@context": "https://schema.org",
-  "@type": "ItemList",
   numberOfItems: products.length,
   itemListElement: products.map((product, index) => ({
     "@type": "ListItem",
@@ -111,6 +118,7 @@ const tagIcons: Record<string, string> = {
   hideBreadcrumbs={true}
 >
   <Fragment slot="head">
+    <JsonLd type="CollectionPage" data={collectionPageSchema} />
     <JsonLd type="ItemList" data={itemListSchema} />
   </Fragment>
   <section class="section pb-4 pt-4">

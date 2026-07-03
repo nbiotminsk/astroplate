@@ -1,7 +1,9 @@
 ---
 import Base from "@/layouts/Base.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import PageHeader from "@/partials/PageHeader.astro";
+import config from "@/config/config.json";
 import { render } from "astro:content";
 
 const contactIndex = await getListPage("contact", "-index");
@@ -11,6 +13,20 @@ const { Content } = await render(contactIndex);
 if (contactIndex.data.draft) {
   return Astro.redirect("/404");
 }
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const contactPageSchema = {
+  "@id": `${siteUrl}/contact/#webpage`,
+  name: title,
+  description: description || "",
+  url: `${siteUrl}/contact/`,
+  inLanguage: "ru-RU",
+  isPartOf: { "@id": `${siteUrl}/#website` },
+  mainEntity: {
+    "@type": "Organization",
+    "@id": `${siteUrl}/#organization`,
+  },
+};
 ---
 
 <Base
@@ -19,6 +35,9 @@ if (contactIndex.data.draft) {
   description={description}
   image={image}
 >
+  <Fragment slot="head">
+    <JsonLd type="ContactPage" data={contactPageSchema} />
+  </Fragment>
   <PageHeader title={title} compact={true} />
   <section class="py-8 xl:py-10">
     <div class="container">

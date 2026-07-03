@@ -1,8 +1,10 @@
 ---
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
+import JsonLd from "@/components/JsonLd.astro";
 import { getNormalizedCollection } from "@/lib/contentCollections";
 import PageHeader from "@/partials/PageHeader.astro";
+import config from "@/config/config.json";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -22,9 +24,31 @@ export async function getStaticPaths() {
 const { entry } = Astro.props;
 const { title, description, img } = entry.data;
 const { Content } = await render(entry);
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const pageUrl = `${siteUrl}/info/${entry.id}/`;
+const webPageSchema = {
+  "@id": `${pageUrl}#webpage`,
+  name: title,
+  description: description || "",
+  url: pageUrl,
+  inLanguage: "ru-RU",
+  isPartOf: { "@id": `${siteUrl}/#website` },
+  ...(img
+    ? {
+        primaryImageOfPage: {
+          "@type": "ImageObject",
+          url: /^https?:\/\//.test(img) ? img : `${siteUrl}${img}`,
+        },
+      }
+    : {}),
+};
 ---
 
 <Base title={title} meta_title={title} description={description} image={img}>
+  <Fragment slot="head">
+    <JsonLd type="WebPage" data={webPageSchema} />
+  </Fragment>
   <PageHeader title={title} compact={true} />
 
   <section class="py-8 xl:py-10">

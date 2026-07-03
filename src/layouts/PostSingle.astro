@@ -23,6 +23,7 @@ const { post } = Astro.props;
 const siteUrl = config.site.base_url.replace(/\/$/, "");
 const postUrl = `${siteUrl}/${COLLECTION_FOLDER}/${post.id}/`;
 const articleSchema = {
+  "@id": `${postUrl}#article`,
   headline: post.data.title,
   description: post.data.description,
   image: post.data.image
@@ -35,7 +36,11 @@ const articleSchema = {
         },
       ]
     : [],
-  datePublished: post.data.date,
+  datePublished: new Date(post.data.date).toISOString(),
+  dateModified: new Date(post.data.date).toISOString(),
+  inLanguage: "ru-RU",
+  isAccessibleForFree: true,
+  keywords: (post.data.tags || []).join(", "),
   author: {
     "@type": "Person",
     name: post.data.author,

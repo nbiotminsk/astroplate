@@ -2,6 +2,7 @@
 import Base from "@/layouts/Base.astro";
 import PostSingle from "@/layouts/PostSingle.astro";
 import { getSinglePage } from "@/lib/contentParser.astro";
+import config from "@/config/config.json";
 
 export async function getStaticPaths() {
   const BLOG_FOLDER = "blog";
@@ -17,7 +18,16 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { title, meta_title, description, image } = post.data;
+const { title, meta_title, description, image, date, author, categories } =
+  post.data;
+
+const siteUrl = config.site.base_url.replace(/\/$/, "");
+const articleImage = image
+  ? /^https?:\/\//.test(image)
+    ? image
+    : `${siteUrl}${image.startsWith("/") ? image : `/${image}`}`
+  : undefined;
+const publishedISO = new Date(date).toISOString();
 ---
 
 <Base
@@ -25,6 +35,19 @@ const { title, meta_title, description, image } = post.data;
   meta_title={meta_title}
   description={description}
   image={image}
+  ogType="article"
 >
+  <Fragment slot="head">
+    <meta property="article:published_time" content={publishedISO} />
+    {author && <meta property="article:author" content={author} />}
+    {categories &&
+      categories.map((cat: string) => (
+        <meta property="article:section" content={cat} />
+      ))}
+    {articleImage && (
+      <meta property="og:image:url" content={articleImage} />
+    )}
+    <meta property="og:image:alt" content={title} />
+  </Fragment>
   <PostSingle post={post} />
 </Base>

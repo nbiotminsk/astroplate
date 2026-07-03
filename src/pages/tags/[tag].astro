@@ -30,6 +30,7 @@ const sortedPosts = sortByDate(filterByTags);
 <Base
   title={`Тег: ${tag}`}
   description={`Все статьи, помеченные тегом "${tag}", в нашем блоге.`}
+  noindex={true}
 >
   <PageHeader title={tag} />
   <div class="section-sm pb-0">
