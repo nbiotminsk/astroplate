@@ -17,6 +17,7 @@ import CheckoutModal from "./helpers/CheckoutModal";
 import JsonLd from "@/components/JsonLd.astro";
 import IconSprite from "@/components/IconSprite.astro";
 import MobileMessengers from "@/components/MobileMessengers.astro";
+import PromoBadge from "@/components/PromoBadge";
 import { getBreadcrumbs, getBreadcrumbSchema } from "@/lib/utils/breadcrumb";
 import { SEO } from "astro-seo";
 
@@ -350,5 +351,6 @@ const keywordsStr = keywords
     <TwSizeIndicator />
     <IconSprite />
     <MobileMessengers />
+    <PromoBadge client:idle />
   </body>
 </html>
