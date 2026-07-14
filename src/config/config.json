@@ -5,8 +5,8 @@
     "base_path": "/",
     "trailing_slash": true,
     "favicon": "/images/favicon.png",
-    "logo": "",
-    "logo_darkmode": "",
+    "logo": "/images/logo.png",
+    "logo_darkmode": "/images/logo-darkmode.png",
     "logo_width": "150",
     "logo_height": "30",
     "logo_text": "Teleofis24.by"
@@ -44,7 +44,7 @@
     "settings": {}
   },
   "metadata": {
-    "meta_author": "teleofi24.by",
+    "meta_author": "teleofis24.by",
     "twitter_site": "@teleofis24",
     "twitter_creator": "@teleofis24",
     "meta_image": "/images/og-image.png",

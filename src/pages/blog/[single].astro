@@ -28,6 +28,9 @@ const articleImage = image
     : `${siteUrl}${image.startsWith("/") ? image : `/${image}`}`
   : undefined;
 const publishedISO = new Date(date).toISOString();
+const updatedISO = post.data.updated
+  ? new Date(post.data.updated).toISOString()
+  : publishedISO;
 ---
 
 <Base
@@ -40,6 +43,7 @@ const publishedISO = new Date(date).toISOString();
 >
   <Fragment slot="head">
     <meta property="article:published_time" content={publishedISO} />
+    <meta property="article:modified_time" content={updatedISO} />
     {author && <meta property="article:author" content={author} />}
     {categories &&
       categories.map((cat: string) => (

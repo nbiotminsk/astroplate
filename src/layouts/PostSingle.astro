@@ -37,7 +37,7 @@ const articleSchema = {
       ]
     : [],
   datePublished: new Date(post.data.date).toISOString(),
-  dateModified: new Date(post.data.date).toISOString(),
+  dateModified: new Date(post.data.updated || post.data.date).toISOString(),
   inLanguage: "ru-RU",
   isAccessibleForFree: true,
   keywords: (post.data.tags || []).join(", "),

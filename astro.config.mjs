@@ -123,6 +123,40 @@ if (fs.existsSync(blogDir)) {
 
 const siteBaseUrl = config.site.base_url.replace(/\/$/, "");
 
+const buildDateISO = new Date().toISOString();
+const lastmodMap = {};
+
+const contentDirs = {
+  blog: path.join(path.dirname(fileURLToPath(import.meta.url)), "src/content/blog"),
+  store: path.join(path.dirname(fileURLToPath(import.meta.url)), "src/content/store"),
+  pages: path.join(path.dirname(fileURLToPath(import.meta.url)), "src/content/pages"),
+};
+
+for (const [type, dir] of Object.entries(contentDirs)) {
+  if (!fs.existsSync(dir)) continue;
+  const prefix = type === "pages" ? "" : `/${type}`;
+  for (const file of fs.readdirSync(dir)) {
+    if (!file.endsWith(".md") && !file.endsWith(".mdx")) continue;
+    if (file.startsWith("-")) continue;
+    const slug = file.replace(/\.(md|mdx)$/, "");
+    try {
+      const parsed = matter(fs.readFileSync(path.join(dir, file), "utf-8"));
+      if (parsed.data.draft) continue;
+      const d = parsed.data.updated || parsed.data.date;
+      if (d) {
+        lastmodMap[`${prefix}/${slug}/`] = new Date(d).toISOString();
+      }
+    } catch (e) {}
+  }
+}
+
+lastmodMap["/"] = buildDateISO;
+lastmodMap["/blog/"] = buildDateISO;
+lastmodMap["/store/"] = buildDateISO;
+lastmodMap["/services/"] = buildDateISO;
+lastmodMap["/contact/"] = buildDateISO;
+lastmodMap["/solutions/"] = buildDateISO;
+
 // https://astro.build/config
 export default defineConfig({
   site: config.site.base_url ? config.site.base_url : "http://examplesite.com",
@@ -172,12 +206,19 @@ export default defineConfig({
       changefreq: "weekly",
       priority: 0.6,
       serialize(item) {
-        // Декодирование кириллицы в URL
         if (/%[0-9A-F]{2}/i.test(item.url)) {
           item.url = decodeURIComponent(item.url);
         }
 
         const path = item.url.replace(siteBaseUrl, "");
+
+        const lastmod =
+          lastmodMap[path] ||
+          lastmodMap[path.replace(/\/$/, "") + "/"] ||
+          lastmodMap[path + "/"];
+        if (lastmod) {
+          item.lastmod = lastmod;
+        }
 
         // Приоритеты по типам страниц
         if (path === "/" || path === "") {

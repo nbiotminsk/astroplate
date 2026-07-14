@@ -35,6 +35,10 @@ const blogCollection = defineCollection({
     meta_title: z.string().optional(),
     description: z.string().optional(),
     date: safeDate,
+    updated: z.preprocess(
+      (value) => (value === "" || value == null ? undefined : value),
+      z.coerce.date().optional(),
+    ),
     image: z.string().optional(),
     author: z.string().default("Admin"),
     // Use factory functions for mutable array defaults (Zod 4 best practice)
