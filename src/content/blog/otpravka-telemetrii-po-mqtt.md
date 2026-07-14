@@ -3,7 +3,7 @@ title: "Отправка телеметрии по MQTT: практически�
 meta_title: "MQTT для телеметрии: как IoT-устройство отправляет данные | Teleofis"
 description: "Пошаговый разбор отправки телеметрии с NB-IoT устройства через протокол MQTT. TCP-соединение, аутентификация, структура JSON-пакета, QoS и нюансы работы в Kubernetes."
 date: 2026-07-04
-image: "/images/blog/mqtt-telemetriya.png"
+image: "/images/blog/mqtt-telemetriya.jpg"
 categories:
   - Технологии
   - Инструкции

@@ -5,7 +5,7 @@ meta_description: "Аренда готового NB-IoT модуля с ежем
 category: "услуги"
 price: "40"
 price_currency: "BYN"
-img: "/images/store/module-rental.png"
+img: "/images/store/module-rental.jpg"
 brand: "Teleofis"
 availability: true
 short_description: "Аренда настроенного NB-IoT модуля для дистанционного съёма. От 40 BYN/мес. Всё включено: модуль, SIM, монтаж, платформа. Залог 100 BYN. Можно сдать в любой момент."

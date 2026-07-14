@@ -3,7 +3,7 @@ title: "Самый дешевый модуль NB-IoT в Минске: арен�
 meta_title: "Самый дешевый NB-IoT модуль для дистанционного съёма: аренда 40 BYN/мес | Teleofis"
 description: "Ищете самый дешевый NB-IoT модуль для дистанционного съёма? Аренда от 40 BYN в месяц — готовое решение с монтажом, SIM-картой и документами. Никаких крупных вложений."
 date: 2026-07-04
-image: "/images/blog/samy-deshevyi-module-nbiot.png"
+image: "/images/blog/samy-deshevyi-module-nbiot.jpg"
 categories:
   - Цены
   - Услуги

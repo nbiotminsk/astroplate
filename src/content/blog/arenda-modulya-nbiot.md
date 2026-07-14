@@ -3,7 +3,7 @@ title: "Аренда модуля NB-IoT: как платить за диста�
 meta_title: "Аренда NB-IoT модуля для дистанционного съёма: 40 BYN/мес | Teleofis"
 description: "Не хотите покупать модуль за 400+ BYN? Аренда NB-IoT модуля — от 40 BYN в месяц. Всё включено: оборудование, SIM-карта, монтаж, настройка и документы для Минскводоканала. Залог 100 BYN. Можно сдать в любой момент."
 date: 2026-07-04
-image: "/images/blog/arenda-module-nbiot.png"
+image: "/images/blog/arenda-module-nbiot.jpg"
 categories:
   - Услуги
   - Цены
