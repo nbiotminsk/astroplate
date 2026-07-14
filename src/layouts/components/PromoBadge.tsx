@@ -24,7 +24,7 @@ export default function PromoBadge() {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-600/30 transition-all hover:scale-110 hover:bg-red-700 hover:shadow-xl active:scale-95 ${
+        className={`fixed bottom-6 left-6 md:right-6 md:left-auto z-50 flex items-center gap-2 rounded-full bg-red-600 px-5 py-3 text-sm font-bold text-white shadow-lg shadow-red-600/30 transition-all hover:scale-110 hover:bg-red-700 hover:shadow-xl active:scale-95 ${
           isBouncing ? "animate-bounce" : ""
         }`}
         aria-label="Открыть акцию"
