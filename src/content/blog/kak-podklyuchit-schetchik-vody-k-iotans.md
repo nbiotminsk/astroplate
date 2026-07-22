@@ -3,7 +3,7 @@ title: "Как подключить счетчик воды к Иотанс (IOT
 meta_title: "Как подключить счетчик воды к IOTANS: цены, этапы, альтернативы"
 description: "Пошаговая инструкция: как подключить счетчик воды к платформе IOTANS (Иотанс). Стоимость оборудования, платформы, выезда специалиста. Сравнение с Teleofis и экономия."
 date: 2026-07-22T00:00:00Z
-image: "/images/water-meter-remote-reading.png"
+image: "/images/blog/iotans-connection.jpg"
 alt_img: "Подключение счетчика воды к платформе IOTANS"
 author: "Николай Викторович"
 categories:
