@@ -1,11 +1,11 @@
 ---
-title: "Юпитер 2576 NB-IoT"
+title: "Nero 2576 NB-IoT"
 meta_title: "Купить Юпитер 2576 NB-IoT в Минске | Модуль для счетчиков воды"
 meta_description: "Юпитер 2576 NB-IoT для дистанционного сбора информации от
   приборов учета. Поддержка NB-IoT (LTE band 8), 2 импульсных входа, IP65.
   Доставка по Беларуси."
 category: "модуль NBIoT"
-price: "356"
+price: "455"
 price_currency: "BYN"
 img: "/images/store/radiomodem-2576.jpg"
 image: "/images/store/radiomodem-2576.jpg"
