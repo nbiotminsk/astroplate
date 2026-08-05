@@ -5,7 +5,7 @@ meta_description: "Профессиональный NB-IoT счетчик имп
   Вега NB-11. 6 цифровых входов, встроенный датчик температуры, степень защиты
   IP67. Доставка по Беларуси."
 category: "модуль NBIoT"
-price: "432"
+price: "492"
 price_currency: "BYN"
 img: "/images/store/vega-nb11.jpg"
 image: "/images/store/vega-nb11.jpg"
