@@ -5,7 +5,7 @@ meta_description: "Купить промышленный 4G/GPRS модем iRZ 
   блоком питания ~220В за 500 BYN в Минске. Официальная гарантия, быстрая
   доставка."
 category: "модуль GPRS"
-price: "500"
+price: "565"
 price_currency: "BYN"
 img: "/images/store/irz-atm42-b.png"
 image: "/images/store/irz-atm42-b.png"
