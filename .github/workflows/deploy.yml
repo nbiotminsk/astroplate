@@ -22,18 +22,19 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+          cache: npm
 
       - name: Install dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
       - name: Run Check (Lint & Types)
         run: |
           node scripts/themeGenerator.js
           node scripts/jsonGenerator.js
-          yarn run check
+          npm run check
 
       - name: Build Project
-        run: yarn run build
+        run: npm run build
 
       - name: Prepare for Deployment
         run: |
