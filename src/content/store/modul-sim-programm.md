@@ -112,5 +112,6 @@ draft: false
 * [**Паспорт радиомодема 2576 (ПС 1)**](/docs/passport-radiomodem-2576.pdf) (PDF)
 * [**Декларация соответствия ЕАЭС**](/docs/deklaraciya-eaes-radiomodem-2576.pdf) (PDF)
 * [**Протокол обмена SMP-M**](/docs/protokol-smp-m.pdf) (PDF, 7.4 МБ)
+* [**Брошюра (Datasheet Radiomodem NB-IoT)**](/docs/datasheet-radiomodem-2576.pdf) (PDF, 2.2 МБ)
 
 Для юридических лиц, ТС и ЖСПК (до 4 счётчиков на модуль) действуют условия: 560 BYN без монтажа, 593.62 BYN с монтажом в Минске. Уточняйте условия в Telegram [@teleofis_by](https://t.me/teleofis_by).
