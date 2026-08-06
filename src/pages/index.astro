@@ -2,39 +2,11 @@
 import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
-import { getNormalizedCollection } from "@/lib/contentCollections";
-import {
-  getStoreLabelPriority,
-  normalizeStoreLabel,
-} from "@/lib/utils/storeLabels";
 import JsonLd from "@/components/JsonLd.astro";
 const siteUrl = "https://teleofis24.by";
 
 const homepageEntry = await getListPage("homepage", "-index");
 const homepage = homepageEntry.data as any;
-
-const catalogEntries = await getNormalizedCollection(
-  "store",
-  ({ data }) => !data.draft,
-);
-
-const topProducts = catalogEntries
-  .map((entry) => {
-    const priceNumber = Number(entry.data.price ?? 0);
-    const label = normalizeStoreLabel(entry.data.custom_label_0);
-    return {
-      id: entry.id,
-      title: entry.data.title,
-      category: entry.data.category ?? "Без категории",
-      price: Number.isNaN(priceNumber) ? 0 : priceNumber,
-      image:
-        entry.data.img || entry.data.image || "/images/image-placeholder.png",
-      customLabel: label,
-      labelPriority: getStoreLabelPriority(label),
-    };
-  })
-  .sort((a, b) => a.labelPriority - b.labelPriority || b.price - a.price)
-  .slice(0, 4);
 ---
 
 <Base
@@ -44,6 +16,32 @@ const topProducts = catalogEntries
   hideBreadcrumbs={true}
 >
   <Fragment slot="head">
+    <JsonLd
+      type="Product"
+      data={{
+        name: "Радиомодем 2576 NB-IoT",
+        image: `${siteUrl}/images/radiomodem-2576-photo.png`,
+        description:
+          "Радиомодем 2576 NB-IoT для дистанционной передачи показаний счётчиков воды на платформу UNICBOARD и УП «Минскводоканал». 2 импульсных входа, IP65/IP68, батарея 3,6 В, протокол SMP-M.",
+        brand: { "@type": "Brand", name: "Nero Electronics" },
+        mpn: "45.03.0001.222.00",
+        sku: "radiomodem-2576",
+        offers: {
+          "@type": "Offer",
+          url: `${siteUrl}/store/radiomodem-2576-ver-2/`,
+          priceCurrency: "BYN",
+          price: "455",
+          priceValidUntil: "2027-12-31",
+          availability: "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
+          seller: {
+            "@type": "Organization",
+            name: "Частное предприятие «Телеофис»",
+          },
+        },
+      }}
+    />
+
     <JsonLd
       type="FAQPage"
       data={{
@@ -95,37 +93,38 @@ const topProducts = catalogEntries
           opens: "13:30",
           closes: "15:30",
         },
-        sameAs: ["https://t.me/teleofis24"],
+        sameAs: ["https://t.me/teleofis_by"],
       }}
     />
   </Fragment>
+
   <!-- Hero -->
   <section class="section pb-16 pt-12">
     <div class="container">
       <div class="row items-center gap-y-10">
         <div class="md:col-6">
-          <span class="hero-badge mb-5 inline-flex">{homepage.hero.badge}</span>
+          <span class="hero-badge mb-5 inline-flex">
+            {homepage.hero.badge}
+          </span>
           <h1 class="mb-5 text-h4 leading-tight md:text-h3">
             {homepage.hero.title}
           </h1>
           <p class="mb-8 text-lg">{homepage.hero.subtitle}</p>
-          <div class="mb-8 flex flex-col sm:flex-row flex-wrap gap-4">
+          <div class="mb-8 flex flex-col gap-4 sm:flex-row sm:flex-wrap">
             <a
-              class="btn btn-primary w-full sm:w-auto text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
+              class="btn btn-primary w-full text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95 sm:w-auto"
               href={homepage.hero.primaryCta.link}
             >
               {homepage.hero.primaryCta.label}
             </a>
             <a
-              class="btn btn-outline-primary w-full sm:w-auto text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:text-black dark:hover:text-black hover:shadow-lg active:scale-95"
+              class="btn btn-outline-primary w-full text-center transition-all duration-300 hover:-translate-y-1 hover:bg-primary/5 hover:text-black hover:shadow-lg active:scale-95 dark:hover:text-black sm:w-auto"
               href={homepage.hero.secondaryCta.link}
             >
               {homepage.hero.secondaryCta.label}
             </a>
           </div>
-          <ul
-            class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2"
-          >
+          <ul class="grid grid-cols-1 gap-2 text-sm font-semibold sm:grid-cols-2">
             {
               homepage.hero.trustItems.map((item: string) => (
                 <li class="flex items-center gap-2">
@@ -138,456 +137,412 @@ const topProducts = catalogEntries
             }
           </ul>
         </div>
-        <div class="md:col-6 hidden md:block">
+        <div class="md:col-6">
           <div class="hero-visual">
-            <ImageMod
-              src="/images/water_meter_blueprint.png"
-              width={1200}
-              height={1200}
-              alt="Чертеж телеметрического счетчика воды"
-              class="w-full max-w-[600px] h-auto object-cover mix-blend-multiply dark:mix-blend-screen mask-[radial-gradient(ellipse_at_center,black_50%,transparent_95%)]"
-              format="webp"
-              loading="eager"
-              decoding="sync"
-              fetchpriority="high"
-            />
+            <div class="hero-device-single p-4">
+              <ImageMod
+                src={homepage.hero.image}
+                width={1200}
+                height={1200}
+                alt="Радиомодем 2576 NB-IoT"
+                class="w-full max-w-[520px] h-auto object-contain rounded-xl"
+                format="webp"
+                loading="eager"
+                decoding="sync"
+                fetchpriority="high"
+              />
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- Path cards -->
+      <div class="row mt-14 gap-y-6">
+        {
+          homepage.hero.paths.map((path: any) => (
+            <div class="md:col-4">
+              <a
+                href={path.link}
+                class="path-card group flex h-full flex-col rounded-3xl border border-border bg-body p-6 shadow-[0_6px_20px_rgba(18,18,18,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:border-primary/40 hover:shadow-[0_18px_40px_rgba(18,18,18,0.10)] dark:border-darkmode-border dark:bg-darkmode-light dark:hover:border-darkmode-primary/50"
+              >
+                <span class="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-primary/15 to-primary/5 text-xl text-primary transition-transform duration-300 group-hover:scale-110 dark:from-darkmode-primary/25 dark:to-darkmode-primary/10 dark:text-darkmode-primary">
+                  <svg class="h-[1em] w-[1em] fill-current">
+                    <use xlink:href={`#icon-${path.icon}`} />
+                  </svg>
+                </span>
+                <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
+                  {path.title}
+                </h3>
+                <p class="mt-2 flex-1 text-sm leading-relaxed">{path.text}</p>
+                <p class="mt-5 inline-flex items-center gap-2 text-xl font-bold text-primary dark:text-darkmode-primary">
+                  <span>{path.price}</span>
+                  <svg
+                    class="h-[0.9em] w-[0.9em] transition-transform duration-300 group-hover:translate-x-1"
+                  >
+                    <use xlink:href="#icon-FaArrowRight" />
+                  </svg>
+                </p>
+              </a>
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
   <!-- /Hero -->
 
-  <!-- Popular Products -->
+  <!-- Stats -->
   <section class="section-sm pt-0">
     <div class="container">
       <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.popularProducts.title}
+        {homepage.stats.title}
       </h2>
       <div class="row gap-y-6">
         {
-          topProducts.map((product) => (
-            <div class="sm:col-6 lg:col-3">
-              <article
-                class={`catalog-card relative flex h-full flex-col ${
-                  product.customLabel === "premium"
-                    ? "border-transparent bg-linear-to-br from-amber-200 via-amber-100 to-amber-300 p-px shadow-[0_18px_36px_rgba(217,119,6,0.16)] dark:from-amber-500/40 dark:via-amber-400/20 dark:to-amber-600/40"
-                    : product.customLabel === "discount"
-                      ? "border-emerald-300 shadow-[0_14px_28px_rgba(16,185,129,0.10)] dark:border-emerald-500/50"
-                      : ""
-                }`}
-              >
-                <div
-                  class={`relative flex h-full flex-col ${
-                    product.customLabel === "premium"
-                      ? "rounded-[calc(1rem-1px)] bg-linear-to-b from-amber-50 via-body to-body p-5 dark:from-amber-500/10 dark:via-darkmode-light dark:to-darkmode-light"
-                      : ""
-                  }`}
-                >
-                  {product.customLabel === "premium" ? (
-                    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-amber-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-amber-800 shadow-sm backdrop-blur dark:border-amber-500/40 dark:bg-darkmode-light/90 dark:text-amber-200">
-                      <svg class="h-[1em] w-[1em] text-amber-500 dark:text-amber-300">
-                        <use xlink:href="#icon-FaCrown" />
-                      </svg>
-                      <span>TOP</span>
-                    </div>
-                  ) : product.customLabel === "discount" ? (
-                    <div class="absolute right-4 top-4 z-10 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-white/90 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-800 shadow-sm backdrop-blur dark:border-emerald-500/40 dark:bg-darkmode-light/90 dark:text-emerald-200">
-                      <svg class="h-[1em] w-[1em] text-emerald-500 dark:text-emerald-300">
-                        <use xlink:href="#icon-FaShoppingBasket" />
-                      </svg>
-                      <span>SALE</span>
-                    </div>
-                  ) : null}
-                  <ImageMod
-                    src={product.image}
-                    width={840}
-                    height={480}
-                    alt={product.title}
-                    class="catalog-card-image"
-                    format="webp"
-                  />
-                  <h3 class="card-title mt-4 min-h-12 text-text-dark dark:text-darkmode-text-dark">
-                    {product.title}
-                  </h3>
-                  <p
-                    class={`mt-3 min-h-8 flex items-center gap-2 text-lg font-semibold ${
-                      product.customLabel === "premium"
-                        ? "text-amber-700 dark:text-amber-300"
-                        : product.customLabel === "discount"
-                          ? "text-emerald-600 dark:text-emerald-300"
-                          : "text-text-dark dark:text-darkmode-text-dark"
-                    }`}
-                  >
-                    {product.customLabel === "premium" ? (
-                      <svg class="h-[1em] w-[1em] text-amber-500 dark:text-amber-300">
-                        <use xlink:href="#icon-FaCrown" />
-                      </svg>
-                    ) : null}
-                    <span>{product.price} BYN</span>
-                  </p>
-                  <div class="mt-auto flex flex-col gap-2 pt-4 sm:flex-row">
-                    <a
-                      class="btn btn-primary w-full text-center py-2.5 text-base bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] sm:w-auto sm:py-1.5 sm:text-sm hover:from-emerald-600 hover:to-emerald-700 hover:shadow-[0_12px_24px_rgba(16,185,129,0.24)]"
-                      href={`/store/${product.id}/`}
-                    >
-                      Купить
-                    </a>
-                    <a
-                      class="btn btn-outline-primary w-full text-center py-2.5 text-base sm:w-auto sm:py-1.5 sm:text-sm"
-                      href={`/store/${product.id}/`}
-                    >
-                      Подробнее
-                    </a>
-                  </div>
-                </div>
-              </article>
+          homepage.stats.items.map((item: any) => (
+            <div class="sm:col-6 lg:col-4 xl:col-2">
+              <div class="stat-card h-full rounded-2xl border border-border bg-body p-5 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light">
+                <p class="bg-linear-to-r from-primary to-blue-700 bg-clip-text text-3xl font-extrabold text-transparent">
+                  {item.value}
+                </p>
+                <p class="mt-2 text-sm leading-snug">{item.label}</p>
+              </div>
             </div>
           ))
         }
       </div>
-      <div class="mt-8 text-center">
-        <a
-          class="btn btn-outline-primary"
-          href={homepage.popularProducts.viewAll.link}
-        >
-          {homepage.popularProducts.viewAll.label}
-        </a>
+    </div>
+  </section>
+  <!-- /Stats -->
+
+  <!-- How it works -->
+  <section class="section-sm bg-gradient" id="flow">
+    <div class="container">
+      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.flow.title}
+      </h2>
+      <p class="mb-8 max-w-2xl text-lg">{homepage.flow.subtitle}</p>
+      <div class="buy-timeline-panel">
+        <ol class="buy-timeline">
+          {
+            homepage.flow.steps.map((step: any, idx: number) => (
+              <li class="buy-timeline-item">
+                <span class="buy-step-index">{idx + 1}</span>
+                <div class="flex-1">
+                  <p class="buy-step-text flex items-center gap-2">
+                    <svg class="h-[1em] w-[1em] fill-current text-primary dark:text-darkmode-primary">
+                      <use xlink:href={`#icon-${step.icon}`} />
+                    </svg>
+                    <span>{step.title}</span>
+                  </p>
+                  <p class="buy-step-description">{step.text}</p>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
       </div>
     </div>
   </section>
+  <!-- /How it works -->
 
-  <!-- Solutions -->
-  <section class="section-sm bg-gradient">
+  <!-- Modem -->
+  <section class="section-sm" id="modem">
     <div class="container">
-      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.solutions.title}
+      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.modem.title}
       </h2>
+      <p class="mb-8 max-w-3xl text-lg">{homepage.modem.subtitle}</p>
+      <div class="row items-start gap-y-8">
+        <div class="lg:col-5">
+          <div class="rounded-3xl border border-border bg-body p-4 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
+            <ImageMod
+              src={homepage.modem.image}
+              width={1000}
+              height={1000}
+              alt={homepage.modem.imageAlt}
+              class="w-full h-auto object-contain rounded-2xl"
+              format="webp"
+            />
+          </div>
+          <div class="mt-6 rounded-3xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
+            <p class="text-sm font-semibold uppercase tracking-wide text-text-light dark:text-darkmode-text-light">
+              Цена модуля
+            </p>
+            <p class="mt-2 text-4xl font-extrabold text-text-dark dark:text-darkmode-text-dark">
+              {homepage.modem.price}
+            </p>
+            <p class="mt-2 text-sm">{homepage.modem.priceNote}</p>
+            <a
+              class="btn btn-primary mt-5 w-full text-center bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(16,185,129,0.26)] active:scale-95"
+              href={homepage.modem.buy.link}
+            >
+              {homepage.modem.buy.label}
+            </a>
+            <div class="mt-5 grid grid-cols-2 gap-2">
+              {
+                homepage.modem.docs.map((doc: any) => (
+                  <a
+                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-light px-3 py-2 text-center text-xs font-semibold transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md dark:border-darkmode-border dark:bg-darkmode-body dark:hover:border-darkmode-primary/50"
+                    href={doc.href}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    <svg class="h-[1em] w-[1em] text-primary dark:text-darkmode-primary">
+                      <use xlink:href="#icon-FaFilePdf" />
+                    </svg>
+                    <span>{doc.label}</span>
+                  </a>
+                ))
+              }
+            </div>
+          </div>
+        </div>
+        <div class="lg:col-7">
+          <div class="rounded-3xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light md:p-8">
+            <h3 class="mb-4 text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
+              Возможности модуля
+            </h3>
+            <ul class="grid gap-3 sm:grid-cols-2">
+              {
+                homepage.modem.features.map((feature: string) => (
+                  <li class="flex items-start gap-2 text-sm leading-relaxed">
+                    <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <use xlink:href="#icon-FaCheck" />
+                    </svg>
+                    <span>{feature}</span>
+                  </li>
+                ))
+              }
+            </ul>
+            <h3 class="mb-4 mt-8 text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
+              Характеристики
+            </h3>
+            <div class="overflow-hidden rounded-2xl border border-border dark:border-darkmode-border">
+              <table class="w-full text-sm">
+                <tbody>
+                  {
+                    homepage.modem.specs.map((spec: any, idx: number) => (
+                      <tr
+                        class={`${idx % 2 === 0 ? "bg-light dark:bg-darkmode-body" : "bg-body dark:bg-darkmode-light"} border-t border-border dark:border-darkmode-border`}
+                      >
+                        <th class="w-2/5 px-4 py-3 text-left font-semibold text-text-dark dark:text-darkmode-text-dark">
+                          {spec.name}
+                        </th>
+                        <td class="px-4 py-3">{spec.value}</td>
+                      </tr>
+                    ))
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- /Modem -->
+
+  <!-- Platform -->
+  <section class="section-sm bg-gradient" id="platform">
+    <div class="container">
+      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.platform.title}
+      </h2>
+      <p class="mb-8 max-w-3xl text-lg">{homepage.platform.subtitle}</p>
+      <div class="row items-start gap-y-8">
+        <div class="lg:col-6">
+          <div class="overflow-hidden rounded-3xl border border-border bg-body p-2 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
+            <ImageMod
+              src={homepage.platform.image}
+              width={1200}
+              height={800}
+              alt={homepage.platform.imageAlt}
+              class="w-full h-auto object-contain rounded-2xl"
+              format="webp"
+            />
+          </div>
+          <ul class="mt-6 grid gap-3 sm:grid-cols-2">
+            {
+              homepage.platform.points.map((point: string) => (
+                <li class="flex items-start gap-2 text-sm leading-relaxed">
+                  <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                    <use xlink:href="#icon-FaCheck" />
+                  </svg>
+                  <span>{point}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <div class="lg:col-6">
+          <div class="faq-list">
+            {
+              homepage.platform.accordions.map((acc: any, idx: number) => (
+                <details class="faq-item" open={idx === 0}>
+                  <summary class="faq-question">{acc.title}</summary>
+                  <ul class="mt-3 space-y-2">
+                    {
+                      acc.items.map((item: string) => (
+                        <li class="faq-answer flex items-start gap-2">
+                          <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                            <use xlink:href="#icon-FaCheck" />
+                          </svg>
+                          <span>{item}</span>
+                        </li>
+                      ))
+                    }
+                  </ul>
+                </details>
+              ))
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+  <!-- /Platform -->
+
+  <!-- Pricing -->
+  <section class="section-sm">
+    <div class="container">
+      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.pricing.title}
+      </h2>
+      <p class="mb-8 max-w-2xl text-lg">{homepage.pricing.subtitle}</p>
       <div class="row gap-y-6">
         {
-          homepage.solutions.items.map((item: any) => (
-            <div class="sm:col-6 lg:col-4">
-              <article class="info-card h-full">
-                <svg class="info-card-icon">
-                  <use xlink:href={`#icon-${item.icon}`} />
-                </svg>
-                <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
+          homepage.pricing.groups.map((group: any) => (
+            <div class="md:col-4" id={group.id}>
+              <article class="price-card relative flex h-full flex-col rounded-3xl border border-border bg-body p-6 shadow-[0_6px_20px_rgba(18,18,18,0.05)] transition-all duration-300 hover:-translate-y-1.5 hover:shadow-[0_18px_40px_rgba(18,18,18,0.10)] dark:border-darkmode-border dark:bg-darkmode-light">
+                <span class="mb-4 inline-flex w-fit rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.14em] text-primary dark:border-darkmode-primary/40 dark:bg-darkmode-primary/15 dark:text-darkmode-primary">
+                  {group.badge}
+                </span>
+                <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
+                  {group.title}
                 </h3>
-                <p class="mt-2">{item.text}</p>
+                <p class="mt-4 text-3xl font-extrabold text-text-dark dark:text-darkmode-text-dark">
+                  {group.price}
+                </p>
+                <p class="mt-1 text-xs font-semibold text-text-light dark:text-darkmode-text-light">
+                  {group.priceNote}
+                </p>
+                <ul class="mt-5 flex-1 space-y-2.5">
+                  {
+                    group.features.map((feature: string) => (
+                      <li class="flex items-start gap-2 text-sm leading-relaxed">
+                        <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                          <use xlink:href="#icon-FaCheck" />
+                        </svg>
+                        <span>{feature}</span>
+                      </li>
+                    ))
+                  }
+                </ul>
                 <a
-                  class="mt-4 inline-block font-semibold hover:underline"
-                  href={homepage.solutions.moreLink}
+                  class="btn btn-primary mt-6 w-full text-center bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(16,185,129,0.26)] active:scale-95"
+                  href={group.cta.link}
                 >
-                  {homepage.solutions.moreLabel}
+                  {group.cta.label}
                 </a>
               </article>
             </div>
           ))
         }
       </div>
-    </div>
-  </section>
 
-  <!-- Why Us -->
-  <section class="section-sm">
-    <div class="container">
-      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.whyUs.title}
-      </h2>
-      <div class="row gap-y-6">
-        {
-          homepage.whyUs.items.map((item: any) => (
-            <div class="sm:col-6 lg:col-4">
-              <article class="trust-card h-full">
-                <svg class="trust-card-icon">
-                  <use xlink:href={`#icon-${item.icon}`} />
-                </svg>
-                <h3 class="card-title mt-4 text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
-                </h3>
-              </article>
-            </div>
-          ))
-        }
-      </div>
-    </div>
-  </section>
-
-  <!-- How To Buy -->
-  <section class="section-sm bg-gradient">
-    <div class="container">
-      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.howToBuy.title}
-      </h2>
-      <div class="row gap-y-6 items-stretch">
+      <div class="row mt-10 gap-y-6">
         <div class="lg:col-7">
-          <div class="buy-timeline-panel h-full">
-            <ol class="buy-timeline">
+          <div class="rounded-3xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
+            <h3 class="mb-4 text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
+              {homepage.pricing.conditionsTitle}
+            </h3>
+            <ul class="grid gap-3 sm:grid-cols-2">
               {
-                homepage.howToBuy.steps.map((step: any, idx: number) => (
-                  <li class="buy-timeline-item">
-                    <span class="buy-step-index">{idx + 1}</span>
-                    <div>
-                      <p class="buy-step-text">{step.title}</p>
-                      <p class="buy-step-description">{step.description}</p>
-                    </div>
-                  </li>
-                ))
-              }
-            </ol>
-          </div>
-        </div>
-        <div class="lg:col-5">
-          <aside class="buy-help-card">
-            <div class="flex items-center gap-2">
-              <svg class="buy-help-icon">
-                <use xlink:href="#icon-FaCamera"></use>
-              </svg>
-              <h3
-                class="text-lg font-semibold text-text-dark dark:text-darkmode-text-dark"
-              >
-                {homepage.howToBuy.helpCard.title}
-              </h3>
-            </div>
-            <p class="mt-3 text-sm">{homepage.howToBuy.helpCard.text}</p>
-            <form
-              id="meter-photo-form"
-              class="mt-4 space-y-3"
-              enctype="multipart/form-data"
-            >
-              <label class="block">
-                <span
-                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
-                >
-                  Ваше имя
-                </span>
-                <input
-                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
-                  id="meter-name"
-                  name="name"
-                  type="text"
-                  placeholder="Иван"
-                  required
-                />
-              </label>
-              <label class="block">
-                <span
-                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
-                >
-                  Телефон
-                </span>
-                <input
-                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
-                  id="meter-phone"
-                  name="phone"
-                  type="tel"
-                  placeholder="+375XXXXXXXXX"
-                  inputmode="tel"
-                  autocomplete="tel"
-                  required
-                />
-                <span
-                  class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light"
-                >
-                  Формат: +375XXXXXXXXX
-                </span>
-              </label>
-              <label class="block">
-                <span
-                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
-                >
-                  Адрес установки
-                </span>
-                <input
-                  class="block w-full rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark placeholder:text-text-light dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
-                  id="meter-address"
-                  name="address"
-                  type="text"
-                  placeholder="Минск, ул. ..."
-                  required
-                />
-              </label>
-              <label class="block">
-                <span
-                  class="mb-2 block text-sm font-semibold text-text-dark dark:text-darkmode-text-dark"
-                >
-                  Прикрепите фото
-                </span>
-                <input
-                  class="block w-full cursor-pointer rounded-md border border-border bg-white px-3 py-2 text-sm text-text-dark file:mr-4 file:rounded-md file:border-0 file:bg-primary file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-primary/90 dark:border-darkmode-border dark:bg-darkmode-body dark:text-darkmode-text-dark"
-                  id="meter-photo"
-                  name="photo"
-                  type="file"
-                  accept="image/*"
-                  data-max-size="5242880"
-                  required
-                />
-                <span
-                  class="mt-1 block text-xs text-text-light dark:text-darkmode-text-light"
-                >
-                  До 5 МБ
-                </span>
-              </label>
-              <button class="btn btn-primary w-full text-center" type="submit">
-                {homepage.howToBuy.helpCard.button.label}
-              </button>
-              <p
-                id="meter-photo-status"
-                class="text-sm text-text-light dark:text-darkmode-text-light"
-              >
-              </p>
-            </form>
-            <ul class="mt-4 space-y-2 text-sm">
-              {
-                homepage.howToBuy.helpCard.highlights.map((item: string) => (
-                  <li class="flex items-start gap-2">
-                    <svg class="mt-1 h-[1em] w-[1em] text-primary">
+                homepage.pricing.conditions.map((condition: string) => (
+                  <li class="flex items-start gap-2 text-sm leading-relaxed">
+                    <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                       <use xlink:href="#icon-FaCheck" />
                     </svg>
-                    <span>{item}</span>
+                    <span>{condition}</span>
                   </li>
                 ))
               }
             </ul>
-          </aside>
+          </div>
+        </div>
+        <div class="lg:col-5">
+          <div class="h-full rounded-3xl border border-emerald-300 bg-linear-to-br from-emerald-50 to-white p-6 shadow-sm dark:border-emerald-500/40 dark:from-darkmode-light dark:to-darkmode-body">
+            <h3 class="mb-4 flex items-center gap-2 text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
+              <svg class="h-[1em] w-[1em] fill-current text-emerald-500">
+                <use xlink:href="#icon-FaMoneyBillWave" />
+              </svg>
+              <span>{homepage.pricing.erip.title}</span>
+            </h3>
+            <dl class="space-y-3">
+              {
+                homepage.pricing.erip.items.map((item: any) => (
+                  <div class="flex items-start justify-between gap-4 border-b border-border/70 pb-2 text-sm dark:border-darkmode-border/70">
+                    <dt class="font-semibold text-text-dark dark:text-darkmode-text-dark">
+                      {item.name}
+                    </dt>
+                    <dd class="text-right">{item.value}</dd>
+                  </div>
+                ))
+              }
+            </dl>
+            <p class="mt-4 text-xs text-text-light dark:text-darkmode-text-light">
+              Оплата 100% предоплата. Для юрлиц — счёт по безналу.
+            </p>
+          </div>
         </div>
       </div>
     </div>
   </section>
+  <!-- /Pricing -->
 
-  <script is:inline>
-    (() => {
-      const form = document.getElementById("meter-photo-form");
-      const status = document.getElementById("meter-photo-status");
-      const photoInput = document.getElementById("meter-photo");
-      const nameInput = document.getElementById("meter-name");
-      const phoneInput = document.getElementById("meter-phone");
-      const addressInput = document.getElementById("meter-address");
-      const phoneError = document.createElement("p");
-
-      if (
-        !form ||
-        !status ||
-        !photoInput ||
-        !nameInput ||
-        !phoneInput ||
-        !addressInput
-      )
-        return;
-      phoneError.className = "mt-1 text-xs text-red-500";
-      phoneError.setAttribute("aria-live", "polite");
-      phoneInput.insertAdjacentElement("afterend", phoneError);
-
-      const formatPhone = (value) => {
-        const digits = value.replace(/\D/g, "");
-        const normalized = digits.startsWith("375")
-          ? digits.slice(3)
-          : digits.startsWith("80")
-            ? digits.slice(1)
-            : digits;
-        const phoneDigits = normalized.slice(0, 9);
-        return phoneDigits ? `+375${phoneDigits}` : "+375";
-      };
-
-      phoneInput.addEventListener("input", () => {
-        phoneInput.value = formatPhone(phoneInput.value);
-        phoneError.textContent = "";
-      });
-
-      phoneInput.addEventListener("focus", () => {
-        if (!phoneInput.value.trim()) {
-          phoneInput.value = "+375";
-        }
-      });
-
-      phoneInput.addEventListener("paste", () => {
-        window.setTimeout(() => {
-          phoneInput.value = formatPhone(phoneInput.value);
-        }, 0);
-      });
-
-      form.addEventListener("submit", async (event) => {
-        event.preventDefault();
-        const file = photoInput.files && photoInput.files[0];
-
-        if (!file) {
-          status.textContent = "Выберите фото счётчика перед отправкой.";
-          return;
-        }
-
-        const maxSize = Number(photoInput.dataset.maxSize || 5242880);
-        if (file.size > maxSize) {
-          status.textContent = "Размер фото не должен превышать 5 МБ.";
-          return;
-        }
-
-        const normalizedPhone = formatPhone(phoneInput.value.trim());
-        if (!/^\+375\d{9}$/.test(normalizedPhone)) {
-          phoneError.textContent = "Введите номер в формате +375XXXXXXXXX";
-          phoneInput.focus();
-          return;
-        }
-        phoneInput.value = normalizedPhone;
-
-        const formData = new FormData();
-        formData.append("requestType", "meter_photo");
-        formData.append("name", nameInput.value.trim());
-        formData.append("phone", normalizedPhone);
-        formData.append("address", addressInput.value.trim());
-        formData.append("photo", file);
-
-        status.textContent = "Отправка...";
-
-        try {
-          const response = await fetch("/api/send-callback.php", {
-            method: "POST",
-            body: formData,
-          });
-
-          const payload = await response.json();
-
-          if (!response.ok || !payload.success) {
-            throw new Error(payload.error || "Не удалось отправить фото");
-          }
-
-          form.reset();
-          phoneError.textContent = "";
-          status.textContent =
-            "Фото отправлено. Мы свяжемся с вами после обработки.";
-        } catch (error) {
-          status.textContent =
-            error instanceof Error ? error.message : "Ошибка отправки фото.";
-        }
-      });
-    })();
-  </script>
-
-  <!-- Integrations -->
-  <section class="section-sm pt-0">
+  <!-- Meters -->
+  <section class="section-sm bg-gradient" id="meters">
     <div class="container">
-      <h2 class="mb-8 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.integrations.title}
+      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
+        {homepage.meters.title}
       </h2>
+      <p class="mb-8 max-w-3xl text-lg">{homepage.meters.subtitle}</p>
       <div class="row gap-y-6">
         {
-          homepage.integrations.items.map((item: any) => (
-            <div class="sm:col-6 lg:col-3">
-              <article class="integration-card h-full">
-                <svg class="integration-card-icon">
-                  <use xlink:href={`#icon-${item.icon}`} />
-                </svg>
-                <h3 class="mt-4 text-lg font-semibold text-text-dark dark:text-darkmode-text-dark">
-                  {item.title}
-                </h3>
-                <p class="mt-2 text-sm">{item.text}</p>
+          homepage.meters.items.map((meter: any) => (
+            <div class="md:col-6">
+              <article class="info-card flex h-full flex-col !p-0 text-left">
+                <div class="overflow-hidden rounded-t-2xl border-b border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-body">
+                  <ImageMod
+                    src={meter.image}
+                    width={840}
+                    height={560}
+                    alt={meter.title}
+                    class="mx-auto w-full max-w-sm h-auto object-contain"
+                    format="webp"
+                  />
+                </div>
+                <div class="p-6">
+                  <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
+                    {meter.title}
+                  </h3>
+                  <p class="mt-2 text-sm leading-relaxed">{meter.text}</p>
+                </div>
               </article>
             </div>
           ))
         }
       </div>
+      <p class="mt-8 flex items-start gap-2 rounded-2xl border border-border bg-body p-4 text-sm leading-relaxed dark:border-darkmode-border dark:bg-darkmode-light">
+        <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+          <use xlink:href="#icon-FaCheck" />
+        </svg>
+        <span>{homepage.meters.note}</span>
+      </p>
     </div>
   </section>
+  <!-- /Meters -->
 
   <!-- For Business -->
   <section class="section-sm" id="business">
@@ -595,6 +550,18 @@ const topProducts = catalogEntries
       <div class="business-block">
         <h2 class="text-h3 text-white">{homepage.business.title}</h2>
         <p class="mt-4 max-w-3xl text-white/90">{homepage.business.text}</p>
+        <ul class="mt-6 grid gap-2 sm:grid-cols-2">
+          {
+            homepage.business.bulletpoints.map((point: string) => (
+              <li class="flex items-start gap-2 text-sm text-white/90">
+                <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-emerald-400">
+                  <use xlink:href="#icon-FaCheck" />
+                </svg>
+                <span>{point}</span>
+              </li>
+            ))
+          }
+        </ul>
         <div class="mt-6 flex flex-wrap gap-3">
           <a class="btn btn-primary" href={homepage.business.primaryCta.link}>
             {homepage.business.primaryCta.label}
@@ -603,6 +570,9 @@ const topProducts = catalogEntries
             class="btn border-white text-white hover:bg-white hover:text-dark"
             href={homepage.business.secondaryCta.link}
           >
+            <svg class="mr-2 inline h-[1em] w-[1em]">
+              <use xlink:href="#icon-FaPhoneAlt"></use>
+            </svg>
             {homepage.business.secondaryCta.label}
           </a>
         </div>
@@ -625,7 +595,7 @@ const topProducts = catalogEntries
                   {item.object}
                 </h3>
                 <p class="mt-3 text-sm">
-                  <strong>Проблема:</strong> {item.problem}
+                  <strong>Ситуация:</strong> {item.problem}
                 </p>
                 <p class="mt-3 text-sm">
                   <strong>Результат:</strong> {item.result}
@@ -634,6 +604,50 @@ const topProducts = catalogEntries
             </div>
           ))
         }
+      </div>
+    </div>
+  </section>
+
+  <!-- Help -->
+  <section class="section-sm pt-0" id="help">
+    <div class="container">
+      <div class="mx-auto max-w-3xl">
+        <aside class="buy-help-card text-center">
+          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/15 to-primary/5 text-2xl text-primary dark:from-darkmode-primary/25 dark:to-darkmode-primary/10 dark:text-darkmode-primary">
+            <svg class="buy-help-icon">
+              <use xlink:href="#icon-FaCamera"></use>
+            </svg>
+          </div>
+          <h3
+            class="text-2xl font-bold text-text-dark dark:text-darkmode-text-dark"
+          >
+            {homepage.help.title}
+          </h3>
+          <p class="mx-auto mt-3 max-w-xl text-sm">{homepage.help.text}</p>
+          <a
+            class="btn btn-primary mt-6 w-full text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95 sm:w-auto"
+            href={homepage.help.button.link}
+            target="_blank"
+            rel="noopener"
+          >
+            <svg class="mr-2 inline h-[1em] w-[1em]">
+              <use xlink:href="#icon-FaTelegramPlane"></use>
+            </svg>
+            {homepage.help.button.label}
+          </a>
+          <ul class="mt-6 space-y-2 text-left text-sm">
+            {
+              homepage.help.highlights.map((item: string) => (
+                <li class="flex items-start gap-2">
+                  <svg class="mt-1 h-[1em] w-[1em] text-primary">
+                    <use xlink:href="#icon-FaCheck" />
+                  </svg>
+                  <span>{item}</span>
+                </li>
+              ))
+            }
+          </ul>
+        </aside>
       </div>
     </div>
   </section>

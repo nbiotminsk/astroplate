@@ -85,29 +85,33 @@ const infoCollection = defineCollection({
 const homepageCollection = defineCollection({
   loader: glob({ pattern: "**/-*.{md,mdx}", base: "src/content/homepage" }),
   schema: z.looseObject({
-    banner: z.object({
-      title: z.string(),
-      content: z.string(),
-      image: z.string(),
-      button: z.object({
-        enable: z.boolean(),
-        label: z.string(),
-        link: z.string(),
-      }),
-    }),
-    features: z.array(
-      z.object({
+    banner: z
+      .object({
         title: z.string(),
-        image: z.string(),
         content: z.string(),
-        bulletpoints: z.array(z.string()),
+        image: z.string(),
         button: z.object({
           enable: z.boolean(),
           label: z.string(),
           link: z.string(),
         }),
-      }),
-    ),
+      })
+      .optional(),
+    features: z
+      .array(
+        z.object({
+          title: z.string(),
+          image: z.string(),
+          content: z.string(),
+          bulletpoints: z.array(z.string()),
+          button: z.object({
+            enable: z.boolean(),
+            label: z.string(),
+            link: z.string(),
+          }),
+        }),
+      )
+      .optional(),
   }),
 });
 

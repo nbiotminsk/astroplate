@@ -201,6 +201,19 @@
   @apply text-lg font-semibold leading-tight;
 }
 
+/* homepage hero path cards */
+.path-card {
+  @apply rounded-3xl border border-border bg-body p-6 shadow-[0_6px_20px_rgba(18,18,18,0.05)] dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.stat-card {
+  @apply rounded-2xl border border-border bg-body p-5 text-center shadow-sm dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
+.price-card {
+  @apply rounded-3xl border border-border bg-body p-6 shadow-[0_6px_20px_rgba(18,18,18,0.05)] dark:border-darkmode-border dark:bg-darkmode-light;
+}
+
 .info-card {
   @apply rounded-2xl border border-border bg-body p-6 text-center shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-darkmode-border dark:bg-darkmode-light;
 }
