@@ -255,7 +255,7 @@ const homepage = homepageEntry.data as any;
       <p class="mb-8 max-w-3xl text-lg">{homepage.modem.subtitle}</p>
       <div class="row items-start gap-y-8">
         <div class="lg:col-5">
-          <div class="rounded-3xl border border-border bg-body p-4 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
+          <div class="overflow-hidden rounded-3xl border border-border bg-body p-4 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
             <ImageMod
               src={homepage.modem.image}
               width={1000}
@@ -264,37 +264,37 @@ const homepage = homepageEntry.data as any;
               class="w-full h-auto object-contain rounded-2xl"
               format="webp"
             />
-          </div>
-          <div class="mt-6 rounded-3xl border border-border bg-body p-6 shadow-sm dark:border-darkmode-border dark:bg-darkmode-light">
-            <p class="text-sm font-semibold uppercase tracking-wide text-text-light dark:text-darkmode-text-light">
-              Цена модуля
-            </p>
-            <p class="mt-2 text-4xl font-extrabold text-text-dark dark:text-darkmode-text-dark">
-              {homepage.modem.price}
-            </p>
-            <p class="mt-2 text-sm">{homepage.modem.priceNote}</p>
-            <a
-              class="btn btn-primary mt-5 w-full text-center bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(16,185,129,0.26)] active:scale-95"
-              href={homepage.modem.buy.link}
-            >
-              {homepage.modem.buy.label}
-            </a>
-            <div class="mt-5 grid grid-cols-2 gap-2">
-              {
-                homepage.modem.docs.map((doc: any) => (
-                  <a
-                    class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-light px-3 py-2 text-center text-xs font-semibold transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md dark:border-darkmode-border dark:bg-darkmode-body dark:hover:border-darkmode-primary/50"
-                    href={doc.href}
-                    target="_blank"
-                    rel="noopener"
-                  >
-                    <svg class="h-[1em] w-[1em] text-primary dark:text-darkmode-primary">
-                      <use xlink:href="#icon-FaFilePdf" />
-                    </svg>
-                    <span>{doc.label}</span>
-                  </a>
-                ))
-              }
+            <div class="mt-4 rounded-2xl border-t border-border pt-5 dark:border-darkmode-border">
+              <p class="text-sm font-semibold uppercase tracking-wide text-text-light dark:text-darkmode-text-light">
+                Цена модуля
+              </p>
+              <p class="mt-2 text-3xl font-extrabold text-text-dark dark:text-darkmode-text-dark">
+                {homepage.modem.price}
+              </p>
+              <p class="mt-2 text-sm">{homepage.modem.priceNote}</p>
+              <a
+                class="btn btn-primary mt-5 w-full text-center bg-linear-to-r from-emerald-500 to-emerald-600 border-emerald-500 text-white shadow-[0_10px_20px_rgba(16,185,129,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(16,185,129,0.26)] active:scale-95"
+                href={homepage.modem.buy.link}
+              >
+                {homepage.modem.buy.label}
+              </a>
+              <div class="mt-5 grid grid-cols-2 gap-2">
+                {
+                  homepage.modem.docs.map((doc: any) => (
+                    <a
+                      class="inline-flex items-center justify-center gap-2 rounded-xl border border-border bg-light px-3 py-2 text-center text-xs font-semibold transition hover:-translate-y-0.5 hover:border-primary/40 hover:shadow-md dark:border-darkmode-border dark:bg-darkmode-body dark:hover:border-darkmode-primary/50"
+                      href={doc.href}
+                      target="_blank"
+                      rel="noopener"
+                    >
+                      <svg class="h-[1em] w-[1em] text-primary dark:text-darkmode-primary">
+                        <use xlink:href="#icon-FaFilePdf" />
+                      </svg>
+                      <span>{doc.label}</span>
+                    </a>
+                  ))
+                }
+              </div>
             </div>
           </div>
         </div>
@@ -406,11 +406,16 @@ const homepage = homepageEntry.data as any;
   <!-- Pricing -->
   <section class="section-sm">
     <div class="container">
-      <h2 class="mb-3 text-h3 text-text-dark dark:text-darkmode-text-dark">
-        {homepage.pricing.title}
-      </h2>
-      <p class="mb-8 max-w-2xl text-lg">{homepage.pricing.subtitle}</p>
-      <div class="row gap-y-6">
+      <div
+        class="relative overflow-hidden rounded-3xl border border-border bg-linear-to-br from-light via-white to-white p-8 shadow-[0_24px_54px_rgba(18,18,18,0.10)] dark:border-darkmode-border dark:from-darkmode-light dark:via-darkmode-body dark:to-darkmode-body md:p-12"
+      >
+        <span class="hero-badge mb-6 inline-flex">Цены</span>
+        <h2 class="text-h3 text-text-dark dark:text-darkmode-text-dark">
+          {homepage.pricing.title}
+        </h2>
+        <p class="mt-4 max-w-2xl text-lg">{homepage.pricing.subtitle}</p>
+      </div>
+      <div class="mt-10 row gap-y-6">
         {
           homepage.pricing.groups.map((group: any) => (
             <div class="md:col-4" id={group.id}>
@@ -511,7 +516,7 @@ const homepage = homepageEntry.data as any;
       <div class="row gap-y-6">
         {
           homepage.meters.items.map((meter: any) => (
-            <div class="md:col-6">
+            <div class="md:col-6 lg:col-4">
               <article class="info-card flex h-full flex-col !p-0 text-left">
                 <div class="overflow-hidden rounded-t-2xl border-b border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-body">
                   <ImageMod
@@ -608,51 +613,6 @@ const homepage = homepageEntry.data as any;
     </div>
   </section>
 
-  <!-- Help -->
-  <section class="section-sm pt-0" id="help">
-    <div class="container">
-      <div class="mx-auto max-w-3xl">
-        <aside class="buy-help-card text-center">
-          <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-linear-to-br from-primary/15 to-primary/5 text-2xl text-primary dark:from-darkmode-primary/25 dark:to-darkmode-primary/10 dark:text-darkmode-primary">
-            <svg class="buy-help-icon">
-              <use xlink:href="#icon-FaCamera"></use>
-            </svg>
-          </div>
-          <h3
-            class="text-2xl font-bold text-text-dark dark:text-darkmode-text-dark"
-          >
-            {homepage.help.title}
-          </h3>
-          <p class="mx-auto mt-3 max-w-xl text-sm">{homepage.help.text}</p>
-          <a
-            class="btn btn-primary mt-6 w-full text-center bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95 sm:w-auto"
-            href={homepage.help.button.link}
-            target="_blank"
-            rel="noopener"
-          >
-            <svg class="mr-2 inline h-[1em] w-[1em]">
-              <use xlink:href="#icon-FaTelegramPlane"></use>
-            </svg>
-            {homepage.help.button.label}
-          </a>
-          <ul class="mt-6 space-y-2 text-left text-sm">
-            {
-              homepage.help.highlights.map((item: string) => (
-                <li class="flex items-start gap-2">
-                  <svg class="mt-1 h-[1em] w-[1em] text-primary">
-                    <use xlink:href="#icon-FaCheck" />
-                  </svg>
-                  <span>{item}</span>
-                </li>
-              ))
-            }
-          </ul>
-        </aside>
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA -->
   <section class="section-sm">
     <div class="container">
       <div class="final-cta-block text-center">

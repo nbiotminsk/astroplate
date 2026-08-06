@@ -34,7 +34,7 @@ hero:
     link: "#price-physical"
   secondaryCta:
     label: Скиньте фото счётчика
-    link: "#help"
+    link: "https://t.me/teleofis_by"
 
 stats:
   title: Радиомодем в цифрах
@@ -59,22 +59,22 @@ flow:
     - title: Счётчик с импульсным выходом
       text: ЕТК-м-N-I (ХВС) или ЕТW-м-N-I (ГВС) — провод подключается на два контакта модуля.
       icon: FaTint
-    - title: Радиомодем 2576 NB-IoT
+    - title: Модуль передачи данных NB-IoT
       text: Собирает, хранит и отправляет показания с двух счётчиков раз в сутки.
       icon: FaBroadcastTower
     - title: Сеть NB-IoT
       text: SIM-карта МТС «IoT-сеть» — выделенная сеть, улучшенное проникновение, 0,96 руб./мес.
       icon: FaMobileAlt
-    - title: Платформа UNICBOARD
+    - title: Платформа
       text: Хранит архив показаний и передаёт данные на серверы ресурсоснабжающей организации.
       icon: FaLayerGroup
     - title: УП «Минскводоканал»
-      text: Показания приняты — предписание выполнено, счёт формируется по факту потребления.
+      text: Выдаётся Акт ввода в эксплуатацию, и вы исполняете предписание.
       icon: FaBuilding
 
 modem:
   title: Радиомодем 2576 NB-IoT
-  subtitle: Разработка и производство ООО «Неро Электроникс», СЭЗ «Минск», Республика Беларусь
+  subtitle: Разработка и производство Республика Беларусь
   price: 455 BYN
   priceNote: Модуль без SIM-карты и платформы — для монтажных и строительных организаций
   image: /images/radiomodem-2576-photo.png
@@ -117,8 +117,8 @@ modem:
       href: /docs/datasheet-radiomodem-2576.pdf
 
 platform:
-  title: Платформа UNICBOARD
-  subtitle: Разработка ООО «Юник Лаб» (unic-lab.ru) — хранит данные и передаёт их в Минскводоканал
+  title: Платформа
+  subtitle: — хранит данные и передаёт их в Водоканал вашего города
   image: /images/unicboard-screenshot.webp
   imageAlt: Интерфейс платформы UNICBOARD
   points:
@@ -131,15 +131,15 @@ platform:
   accordions:
     - title: Технологический стек
       items:
-        - Backend: Python, Flask, SQLAlchemy, RabbitMQ, MessagePack/JSON, Nginx
-        - Базы данных: Postgres 14 (Patroni cluster, Master-Slave), Redis, etcd
-        - Инфраструктура: Kubernetes, Sentry, Prometheus, Loki, Grafana
-        - Frontend: JavaScript, VueJS 2.5
+        - Backend — Python, Flask, SQLAlchemy, RabbitMQ, MessagePack/JSON, Nginx
+        - Базы данных — Postgres 14 (Patroni cluster, Master-Slave), Redis, etcd
+        - Инфраструктура — Kubernetes, Sentry, Prometheus, Loki, Grafana
+        - Frontend — JavaScript, VueJS 2.5
     - title: Архитектура решения
       items:
         - DataGateway Service — получение и парсинг сырых данных, интеграция с внешними системами
         - DataAggregator Service — агрегация потребления, интерполяция, REST API для внешних систем
-        - DataLogger — регистратор данных: внутренняя память, внешнее хранилище, облако
+        - DataLogger — регистратор данных (внутренняя память, внешнее хранилище, облако)
         - Notification — система уведомлений; Translation — переводы интерфейса
         - Pii/Auth Service — управление доступом и настройками пользователей
         - Frontend Application — личный кабинет; Reporting — система отчётности
@@ -196,7 +196,7 @@ pricing:
   conditions:
     - Оплата 100% предоплата — ЕРИП E-POS или безнал для юрлиц
     - Срок выполнения работ — до 5 рабочих дней
-    - Монтаж специалистом — только Минск (входит в 656 / 593.62 BYN)
+    - Монтаж специалистом — только Минск (для юрлиц — 593.62 BYN, для физлиц — 656.00 BYN)
     - Доставка по Минску при покупке модуля без монтажа — 12 BYN
     - Самовывоз не предусмотрен
     - Минск и Минский район — фиксированные цены, Минская область — по запросу
@@ -221,11 +221,14 @@ meters:
     - image: /images/schetchik-mtk-20-s-impulsom.jpg
       title: МТК-20 и старше
       text: Групповые счётчики для подъездов и домов — до 4 приборов на один модуль для юрлиц.
+    - image: /images/schetchik-vskm-15-dg2.webp
+      title: ВСКМ-15 ДГ2
+      text: Квартирный счётчик с импульсным выходом — популярный вариант для установки на один модуль.
   note: К одному модулю подключаются до 2 счётчиков для физлиц и до 4 — для юрлиц, включая сопряжённые 80/20 и 50/20.
 
 business:
   title: Для ТС, ЖСПК и организаций
-  text: "Собираем показания по всему дому одним решением: до 4 счётчиков на модуль, монтаж, счета, договоры и безналичный расчёт. Данные передаются на УП «Минскводоканал» автоматически."
+  text: "Собираем показания по всему дому одним решением: до 4 счётчиков на модуль и безналичный расчёт. Данные передаются на УП «Минскводоканал» автоматически."
   bulletpoints:
     - До 4 счётчиков на один модуль
     - Счета и договоры, безналичный расчёт
