@@ -100,6 +100,18 @@ const homepage = homepageEntry.data as any;
           {homepage.pricing.title}
         </h1>
         <p class="text-lg">{homepage.pricing.subtitle}</p>
+        <nav class="mt-6 flex flex-wrap justify-center gap-2">
+          {
+            homepage.pricing.quicklinks.map((item: any) => (
+              <a
+                href={item.link}
+                class="rounded-full px-4 py-1.5 text-sm font-semibold text-emerald-600 underline decoration-emerald-400/60 underline-offset-4 transition-colors hover:text-emerald-500 dark:text-emerald-400 dark:decoration-emerald-400/50 dark:hover:text-emerald-300"
+              >
+                {item.label}
+              </a>
+            ))
+          }
+        </nav>
       </div>
       <div class="row mt-10 items-stretch gap-y-6">
         {
@@ -110,60 +122,96 @@ const homepage = homepageEntry.data as any;
               }`}
             >
               <article
-                class={`info-card flex h-full flex-col p-6 text-left ${
+                class={`info-card flex h-full flex-col text-left ${
                   card.featured
-                    ? "border-2 border-primary bg-primary/5 shadow-xl md:p-8"
-                    : ""
+                    ? "featured-price-card relative overflow-hidden border-0 p-8 shadow-2xl md:scale-[1.04] lg:scale-[1.06]"
+                    : "price-card relative overflow-hidden border-0 p-6 shadow-md"
                 }`}
               >
-                <div class="flex items-start justify-between gap-3">
-                  <h2
-                    class="text-xl font-bold text-text-dark dark:text-darkmode-text-dark"
-                  >
-                    {card.name}
-                  </h2>
-                  {card.tag && (
-                    <span class="inline-flex shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-primary dark:border-darkmode-primary/40 dark:bg-darkmode-primary/15 dark:text-darkmode-primary">
-                      {card.tag}
-                    </span>
-                  )}
-                </div>
-                <div class="mt-4">
-                  <p class="text-3xl font-extrabold text-text dark:text-darkmode-text">
-                    {card.price}
-                  </p>
-                  {card.priceNote && (
-                    <p class="mt-1 text-sm text-text-light dark:text-darkmode-text-light">
-                      {card.priceNote}
+                <div class="relative z-10 flex h-full flex-col">
+                  <div class="flex items-start justify-between gap-3">
+                    <h2
+                      class="text-xl font-bold text-text-dark dark:text-darkmode-text-dark"
+                    >
+                      {card.name}
+                    </h2>
+                    {card.tag && (
+                      <span
+                        class={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] ${
+                          card.featured
+                            ? "border border-white/30 bg-white/15 text-white"
+                            : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
+                        }`}
+                      >
+                        {card.tag}
+                      </span>
+                    )}
+                  </div>
+                  <div class="mt-4">
+                    <p
+                      class={`text-3xl font-extrabold ${
+                        card.featured
+                          ? "text-white"
+                          : "text-text-dark dark:text-darkmode-text-dark"
+                      }`}
+                    >
+                      {card.price}
                     </p>
-                  )}
-                </div>
-                <ul class="mt-5 flex-1 space-y-2.5">
-                  {card.features.map((feature: any) => {
-                    const isLink = typeof feature === "object" && feature?.link;
-                    const text = isLink ? feature.text : feature;
-                    return (
-                      <li class="flex items-start gap-2 text-sm leading-relaxed">
-                        <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
-                          <use xlink:href="#icon-FaCheck" />
-                        </svg>
-                        {isLink ? (
-                          <a href={feature.link} class="font-semibold text-primary underline-offset-2 hover:underline">
-                            {text}
-                          </a>
-                        ) : (
-                          <span>{text}</span>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
-                <div class="mt-6">
+                    {card.priceNote && (
+                      <p
+                        class={`mt-1 text-sm ${
+                          card.featured
+                            ? "text-white/80"
+                            : "text-text-light dark:text-darkmode-text-light"
+                        }`}
+                      >
+                        {card.priceNote}
+                      </p>
+                    )}
+                  </div>
+                  <ul class="mt-5 flex-1 space-y-2.5">
+                    {card.features.map((feature: any) => {
+                      const isLink = typeof feature === "object" && feature?.link;
+                      const text = isLink ? feature.text : feature;
+                      return (
+                        <li
+                          class={`flex items-start gap-2 text-sm leading-relaxed ${
+                            card.featured ? "text-white/95" : ""
+                          }`}
+                        >
+                          <svg
+                            class={`mt-1 h-[1em] w-[1em] shrink-0 ${
+                              card.featured
+                                ? "text-white"
+                                : "text-emerald-600 dark:text-emerald-400"
+                            }`}
+                          >
+                            <use xlink:href="#icon-FaCheck" />
+                          </svg>
+                          {isLink ? (
+                            <a
+                              href={feature.link}
+                              class={`font-semibold underline-offset-2 hover:underline ${
+                                card.featured
+                                  ? "text-white"
+                                  : "text-emerald-600 dark:text-emerald-400"
+                              }`}
+                            >
+                              {text}
+                            </a>
+                          ) : (
+                            <span>{text}</span>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                  <div class="mt-6">
                   <a
                     class={`btn w-full justify-center ${
                       card.featured
-                        ? "btn-primary bg-linear-to-r from-primary to-blue-700 shadow-lg shadow-primary/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-primary/40 active:scale-95"
-                        : "btn-outline-primary transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                        ? "price-btn-featured shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                        : "price-btn-outline transition-all duration-300 hover:-translate-y-1 active:scale-95"
                     }`}
                     href={card.cta.link}
                     {...(card.cta.link.startsWith("http")
@@ -172,6 +220,7 @@ const homepage = homepageEntry.data as any;
                   >
                     {card.cta.label}
                   </a>
+                </div>
                 </div>
               </article>
             </div>
@@ -265,6 +314,33 @@ const homepage = homepageEntry.data as any;
             </div>
           ))
         }
+      </div>
+      <div
+        class="mt-8 rounded-2xl border border-border bg-body p-6 dark:border-darkmode-border dark:bg-darkmode-light md:p-8"
+      >
+        <h3
+          class="flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
+        >
+          <svg class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
+            <use xlink:href="#icon-FaCogs" />
+          </svg>
+          {homepage.flow.instruction.title}
+        </h3>
+        <p class="mt-1 text-sm text-text-light dark:text-darkmode-text-light">
+          {homepage.flow.instruction.text}
+        </p>
+        <ol class="mt-5 space-y-3">
+          {
+            homepage.flow.instruction.steps.map((item: string, idx: number) => (
+              <li class="flex items-start gap-3 text-sm leading-relaxed">
+                <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-primary bg-primary text-[11px] font-semibold text-white dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark">
+                  {idx + 1}
+                </span>
+                <span set:html={item} />
+              </li>
+            ))
+          }
+        </ol>
       </div>
     </div>
   </section>
@@ -562,14 +638,6 @@ const homepage = homepageEntry.data as any;
           ))
         }
       </div>
-      <p
-        class="mt-8 flex items-start gap-2 rounded-2xl border border-border bg-body p-4 text-sm leading-relaxed dark:border-darkmode-border dark:bg-darkmode-light"
-      >
-        <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
-          <use xlink:href="#icon-FaCheck"></use>
-        </svg>
-        <span>{homepage.meters.note}</span>
-      </p>
     </div>
   </section>
   <!-- /Meters -->
@@ -624,5 +692,57 @@ const homepage = homepageEntry.data as any;
     background: color-mix(in srgb, var(--card-color) 14%, transparent);
     border-color: var(--card-color);
     color: var(--card-color);
+  }
+
+  .price-card {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.08),
+      rgba(99, 102, 241, 0.06),
+      rgba(16, 185, 129, 0.08)
+    );
+    border: 1px solid rgba(16, 185, 129, 0.18);
+  }
+
+  .featured-price-card {
+    background: linear-gradient(
+      135deg,
+      #059669 0%,
+      #10b981 40%,
+      #3b82f6 100%
+    );
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .price-btn-featured {
+    background: #ffffff;
+    border: none;
+    color: #047857;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.18);
+  }
+
+  .price-btn-featured:hover {
+    background: #ecfdf5;
+    color: #065f46;
+  }
+
+  .price-btn-outline {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.1),
+      rgba(99, 102, 241, 0.1)
+    );
+    border: 1px solid rgba(16, 185, 129, 0.35);
+    color: #059669;
+  }
+
+  .price-btn-outline:hover {
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.2),
+      rgba(99, 102, 241, 0.2)
+    );
+    border-color: rgba(16, 185, 129, 0.6);
+    color: #047857;
   }
 </style>
