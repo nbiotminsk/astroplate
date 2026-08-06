@@ -125,7 +125,9 @@ const homepage = homepageEntry.data as any;
                 class={`info-card flex h-full flex-col text-left ${
                   card.featured
                     ? "featured-price-card relative overflow-hidden border-0 p-8 shadow-2xl md:scale-[1.04] lg:scale-[1.06]"
-                    : "price-card relative overflow-hidden border-0 p-6 shadow-md"
+                    : idx === 2
+                      ? "price-card price-card-gold relative overflow-hidden border-0 p-6 shadow-md"
+                      : "price-card relative overflow-hidden border-0 p-6 shadow-md"
                 }`}
               >
                 <div class="relative z-10 flex h-full flex-col">
@@ -138,10 +140,10 @@ const homepage = homepageEntry.data as any;
                     {card.tag && (
                       <span
                         class={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] ${
-                          card.featured
-                            ? "border border-white/30 bg-white/15 text-white"
-                            : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
-                        }`}
+                  card.featured
+                    ? "border border-white/30 bg-white/15 text-white"
+                    : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
+                }`}
                       >
                         {card.tag}
                       </span>
@@ -211,7 +213,9 @@ const homepage = homepageEntry.data as any;
                     class={`btn w-full justify-center ${
                       card.featured
                         ? "price-btn-featured shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95"
-                        : "price-btn-outline transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                        : idx === 2
+                          ? "price-btn-gold transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                          : "price-btn-outline transition-all duration-300 hover:-translate-y-1 active:scale-95"
                     }`}
                     href={card.cta.link}
                     {...(card.cta.link.startsWith("http")
@@ -695,13 +699,73 @@ const homepage = homepageEntry.data as any;
   }
 
   .price-card {
+    position: relative;
     background: linear-gradient(
       135deg,
       rgba(16, 185, 129, 0.08),
       rgba(99, 102, 241, 0.06),
       rgba(16, 185, 129, 0.08)
     );
-    border: 1px solid rgba(16, 185, 129, 0.18);
+    border: 1px solid transparent;
+    background-clip: padding-box;
+  }
+
+  .price-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      135deg,
+      rgba(16, 185, 129, 0.55),
+      rgba(99, 102, 241, 0.35),
+      rgba(16, 185, 129, 0.55)
+    );
+    pointer-events: none;
+    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+      linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    padding: 1px;
+  }
+
+.price-card-gold {
+    background: linear-gradient(
+      145deg,
+      rgba(245, 197, 66, 0.18),
+      rgba(251, 191, 36, 0.07),
+      rgba(255, 240, 190, 0.5),
+      rgba(245, 197, 66, 0.08),
+      rgba(245, 158, 11, 0.18)
+    );
+    background-size: 200% 200%;
+    animation: price-gold-shimmer 8s ease-in-out infinite;
+  }
+
+  @keyframes price-gold-shimmer {
+    0% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+    100% {
+      background-position: 0% 50%;
+    }
+  }
+
+  .price-card-gold::before {
+    background: linear-gradient(
+      145deg,
+      rgba(245, 197, 66, 0.8),
+      rgba(251, 191, 36, 0.4),
+      rgba(255, 240, 190, 0.9),
+      rgba(245, 197, 66, 0.5),
+      rgba(245, 158, 11, 0.8)
+    );
+    background-size: 220% 220%;
+    animation: price-gold-shimmer 9s ease-in-out infinite;
   }
 
   .featured-price-card {
@@ -734,6 +798,7 @@ const homepage = homepageEntry.data as any;
     );
     border: 1px solid rgba(16, 185, 129, 0.35);
     color: #059669;
+    text-decoration: none;
   }
 
   .price-btn-outline:hover {
@@ -744,5 +809,21 @@ const homepage = homepageEntry.data as any;
     );
     border-color: rgba(16, 185, 129, 0.6);
     color: #047857;
+    text-decoration: none;
+  }
+
+  .price-btn-gold {
+    background: linear-gradient(135deg, #f3d98b, #ecc864);
+    border: 1px solid rgba(120, 129, 30, 0.2);
+    color: #000000;
+    box-shadow: none;
+    text-decoration: none;
+  }
+
+  .price-btn-gold:hover {
+    background: linear-gradient(135deg, #efd077, #e2b652);
+    border-color: rgba(120, 129, 30, 0.35);
+    color: #000000;
+    text-decoration: none;
   }
 </style>
