@@ -3,6 +3,7 @@ import ImageMod from "@/components/ImageMod.astro";
 import Base from "@/layouts/Base.astro";
 import { getListPage } from "@/lib/contentParser.astro";
 import JsonLd from "@/components/JsonLd.astro";
+import { marked } from "marked";
 const siteUrl = "https://teleofis24.by";
 
 const homepageEntry = await getListPage("homepage", "-index");
@@ -439,7 +440,7 @@ const homepage = homepageEntry.data as any;
                         <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                           <use xlink:href="#icon-FaCheck" />
                         </svg>
-                        <span>{feature}</span>
+<span class="min-w-0" set:html={marked.parse(feature, { breaks: true })} />
                       </li>
                     ))
                   }

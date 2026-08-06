@@ -183,15 +183,15 @@ pricing:
       price: 455 BYN
       priceNote: Вега NB-11 — 492 BYN
       features:
-        - Радиомодем Nero 2576 — 455 BYN
-        - Радиомодем Вега NB-11 — 492 BYN
+        - "[Радиомодем Nero 2576 — 455 BYN](/store/radiomodem-2576-ver-2/)"
+        - "[Модуль Вега NB-11 — 492 BYN](/store/vega-nb11/)"
         - Без SIM-карты и платформы
         - Для монтажных и строительных организаций
         - Гарантия 12 месяцев
         - Работаем по УСН — НДС отдельно не выделяем, цены без НДС
       cta:
         label: Купить в магазине
-        link: /store/radiomodem-2576-ver-2/
+        link: /store/
   conditionsTitle: Условия работы
   conditions:
     - Оплата 100% предоплата — ЕРИП E-POS или безнал для юрлиц
