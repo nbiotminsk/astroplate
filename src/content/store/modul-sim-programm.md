@@ -5,7 +5,7 @@ meta_description: "Готовый к работе NB-IoT модуль с сим-
   настроенным ПО. Автоматическая передача показаний счетчиков воды в систему
   Минскводоканал."
 category: "комплекты"
-price: "498"
+price: "593.62"
 price_currency: "BYN"
 img: "/images/module_nb.jpg"
 brand: "Teleofis"
