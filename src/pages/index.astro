@@ -139,7 +139,7 @@ const homepage = homepageEntry.data as any;
                     </h2>
                     {card.tag && (
                       <span
-                        class={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] ${
+                        class={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${
                   card.featured
                     ? "border border-white/30 bg-white/15 text-white"
                     : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
@@ -362,7 +362,7 @@ const homepage = homepageEntry.data as any;
           homepage.modules.items.map((module: any) => (
             <div class="md:col-4">
 <article
-                  class="info-card module-card flex h-full flex-col !p-0 text-left"
+                  class="info-card module-card flex h-full flex-col p-0! text-left"
                   style={`border-color: ${module.borderColor}; --card-color: ${module.borderColor}`}
                 >
                   <a
@@ -384,7 +384,7 @@ const homepage = homepageEntry.data as any;
                     <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
                       {module.title}
                     </h3>
-                    <span class="inline-flex shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] text-primary dark:border-darkmode-primary/40 dark:bg-darkmode-primary/15 dark:text-darkmode-primary">
+                    <span class="inline-flex shrink-0 rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-bold uppercase tracking-widest text-primary dark:border-darkmode-primary/40 dark:bg-darkmode-primary/15 dark:text-darkmode-primary">
                       {module.tag}
                     </span>
                   </div>
@@ -620,7 +620,7 @@ const homepage = homepageEntry.data as any;
         {
           homepage.meters.items.map((meter: any) => (
             <div class="md:col-6 lg:col-4">
-              <article class="info-card flex h-full flex-col !p-0 text-left">
+              <article class="info-card flex h-full flex-col p-0! text-left">
                 <div class="flex h-[275px] items-center justify-center overflow-hidden bg-white dark:bg-darkmode-body">
                   <ImageMod
                     src={meter.image}
