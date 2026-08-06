@@ -178,6 +178,61 @@ const homepage = homepageEntry.data as any;
           ))
         }
       </div>
+      <div class="row mt-10 gap-y-6">
+        <div class="lg:col-7">
+          <div
+            class="h-full rounded-2xl border border-border bg-body p-6 dark:border-darkmode-border dark:bg-darkmode-light md:p-8"
+          >
+            <h2
+              class="mb-4 text-xl font-bold text-text-dark dark:text-darkmode-text-dark"
+            >
+              Условия работы
+            </h2>
+            <ul
+              class="grid gap-2.5 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2"
+            >
+              {
+                homepage.pricing.terms.map((item: string) => (
+                  <li class="flex items-start gap-2 text-sm leading-relaxed">
+                    <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <use xlink:href="#icon-FaCheck" />
+                    </svg>
+                    <span>{item}</span>
+                  </li>
+                ))
+              }
+            </ul>
+          </div>
+        </div>
+        <div class="lg:col-5">
+          <div
+            class="h-full rounded-2xl border border-emerald-300 bg-linear-to-br from-emerald-50 to-white p-6 dark:border-emerald-500/40 dark:from-darkmode-light dark:to-darkmode-body md:p-8"
+          >
+            <h2
+              class="mb-4 flex items-center gap-2 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark"
+            >
+              <svg class="h-[1em] w-[1em] shrink-0" style="fill: #6ee7b7">
+                <use xlink:href="#icon-FaMoneyBillWave" />
+              </svg>
+              {homepage.pricing.payment.title}
+            </h2>
+            <dl class="space-y-0 text-sm leading-relaxed">
+              <div class="flex justify-between gap-4 border-b border-border/60 py-2.5 first:pt-0 dark:border-darkmode-border/60">
+                <dt>Счёт</dt>
+                <dd class="text-right font-semibold">{homepage.pricing.payment.tabnum}</dd>
+              </div>
+              <div class="flex justify-between gap-4 border-b border-border/60 py-2.5 dark:border-darkmode-border/60">
+                <dt>Сумма</dt>
+                <dd class="text-right font-semibold">{homepage.pricing.payment.amount}</dd>
+              </div>
+              <div class="flex justify-between gap-4 py-2.5 last:py-0">
+                <dt>Назначение</dt>
+                <dd class="text-right font-semibold">{homepage.pricing.payment.purpose}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
   <!-- /Pricing -->
