@@ -22,7 +22,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: yarn
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
@@ -31,10 +30,10 @@ jobs:
         run: |
           node scripts/themeGenerator.js
           node scripts/jsonGenerator.js
-          npm run check
+          yarn run check
 
       - name: Build Project
-        run: npm run build
+        run: yarn run build
 
       - name: Prepare for Deployment
         run: |
@@ -42,18 +41,6 @@ jobs:
           if [ -f dist/htaccess.txt ]; then
             cp dist/htaccess.txt dist/.htaccess
             chmod 644 dist/.htaccess
-          fi
-
-      - name: Preserve old assets for cached users
-        run: |
-          git fetch origin deploy || echo "No deploy branch yet"
-          # Извлекаем старую папку _astro из ветки deploy, если она есть
-          git checkout origin/deploy -- _astro || echo "No _astro folder in previous deploy"
-          if [ -d "_astro" ]; then
-            echo "Merging old assets into new build..."
-            # Копируем старые ассеты в dist (не перезаписывая новые)
-            cp -n -r _astro/* dist/_astro/ || true
-            rm -rf _astro
           fi
 
       - name: Deploy to Deploy Branch
