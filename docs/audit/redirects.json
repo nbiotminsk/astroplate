@@ -1,0 +1,8 @@
+{
+  "sources": {
+    "netlify.toml": "[build]\npublish = \"dist\"\ncommand = \"yarn build\"\n\n# HTML и extensionless маршруты: revalidate, не no-store (разрешает 304)\n[[headers]]\n  for = \"/*\"\n  [headers.values]\n    Cache-Control = \"max-age=0, must-revalidate\"\n    Strict-Transport-Security = \"max-age=31536000; includeSubDomains\"\n    X-Content-Type-Options = \"nosniff\"\n    Referrer-Policy = \"strict-origin-when-cross-origin\"\n    X-Frame-Options = \"SAMEORIGIN\"\n    Permissions-Policy = \"camera=(), microphone=(), geolocation=(self), interest-cohort=()\"\n    Vary = \"Accept-Encoding\"\n\n# Astro hashed assets: 1 год immutable\n[[headers]]\n  for = \"/_astro/*\"\n  [headers.values]\n    Cache-Control = \"public, max-age=31536000, immutable\"\n\n# Изображения/шрифты/иконки: 1 месяц\n[[headers]]\n  for = \"/images/*\"\n  [headers.values]\n    Cache-Control = \"public, max-age=2592000\"\n\n[[headers]]\n  for = \"/fonts/*\"\n  [headers.values]\n    Cache-Control = \"public, max-age=2592000\"\n",
+    "wrangler.jsonc": "{\n  // Cloudflare Workers — Static Assets deployment\n  // Deploy:  npm run deploy:cf-workers\n  // Preview: npm run preview:cf-workers\n  \"name\": \"astroplate\",\n  \"compatibility_date\": \"2026-03-02\",\n  \"assets\": {\n    \"directory\": \"./dist\",\n    \"not_found_handling\": \"404-page\",\n  },\n}\n",
+    ".vercel": "[README.txt], [project.json]"
+  },
+  "entries": []
+}
