@@ -103,40 +103,24 @@ const productFaqs = [...(product.data.faq || []), ...defaultProductFaqs];
 
 const cat = (product.data.category || "другое").toLowerCase().trim();
 
-const isKitCategory = cat === "комплекты";
 const isNbiotSetupService = product.id === "ustanovka-i-nastrojka-nb-iot-modulya";
-const isNbiotModuleCategory = cat === "модуль nbiot";
-const isGprsModuleCategory = cat === "модуль gprs";
-const isWaterMeterCategory = cat === "счетчики воды" || cat === "счётчики воды";
 const isServiceOrLicense =
   cat === "услуги" ||
   cat === "другое" ||
   cat === "others" ||
   product.id.includes("licenziya");
 
-const showBatteryReplacementService = product.id === "battery-3-6v";
-const showSensorInstallationService =
-  product.id === "datchik-impulsov-dlya-schetchika-voltmana-tipa-w";
-
-const showInstallation =
-  !isServiceOrLicense && (isKitCategory || isNbiotModuleCategory);
-const showReplacement =
-  !isServiceOrLicense && (isKitCategory || isWaterMeterCategory);
-const showSimCard =
-  !isServiceOrLicense &&
-  (isKitCategory || isNbiotModuleCategory || isGprsModuleCategory);
-const showSoftwareLicense =
-  !isServiceOrLicense && (isKitCategory || isNbiotModuleCategory);
+const showUrgentInstall = !isServiceOrLicense;
 const showDelivery = !isServiceOrLicense;
 
+const extraServices = (product.data.extra_services || []) as Array<{
+  id: string;
+  title: string;
+  price: number;
+}>;
+
 const hasAnyServices =
-  showInstallation ||
-  showReplacement ||
-  showSimCard ||
-  showSoftwareLicense ||
-  showDelivery ||
-  showBatteryReplacementService ||
-  showSensorInstallationService;
+  showUrgentInstall || showDelivery || extraServices.length > 0;
 
 // Extract SKU and MPN safely (handle objects from Sitepins)
 const rawSku = product.data.sku;
@@ -380,13 +364,13 @@ const productSchema = {
                 </h4>
 
                 <div class="flex flex-col gap-4">
-                  {showBatteryReplacementService && (
+                  {showUrgentInstall && (
                     <div class="flex flex-wrap items-center justify-between gap-3">
                       <div class="flex items-center gap-3">
                         <div class="relative flex items-center">
                           <input
                             type="checkbox"
-                            id="service-battery_replacement"
+                            id="service-urgent_install"
                             class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
                           />
                           <svg
@@ -403,12 +387,12 @@ const productSchema = {
                           </svg>
                         </div>
                         <label
-                          for="service-battery_replacement"
+                          for="service-urgent_install"
                           class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
                         >
-                          Услуга по замене батарейки в модуле NB-IoT{" "}
+                          Срочный монтаж (в течение 48 часов){" "}
                           <span class="ml-1 text-emerald-600 font-bold">
-                            (40 руб)
+                            +70 рублей
                           </span>
                         </label>
                       </div>
@@ -418,474 +402,7 @@ const productSchema = {
                         </span>
                         <input
                           type="number"
-                          id="qty-battery_replacement"
-                          min="1"
-                          value="1"
-                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {showSensorInstallationService && (
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="flex items-center gap-3">
-                        <div class="relative flex items-center">
-                          <input
-                            type="checkbox"
-                            id="service-sensor_installation"
-                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                          />
-                          <svg
-                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="4"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </div>
-                        <label
-                          for="service-sensor_installation"
-                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
-                        >
-                          Установка датчика импульсов{" "}
-                          <span class="ml-1 text-emerald-600 font-bold">
-                            (59 руб)
-                          </span>
-                        </label>
-                      </div>
-                      <div class="flex items-center gap-2 ml-auto">
-                        <span class="text-xs text-text-light uppercase tracking-wider">
-                          Кол-во:
-                        </span>
-                        <input
-                          type="number"
-                          id="qty-sensor_installation"
-                          min="1"
-                          value="1"
-                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {showInstallation && (
-                    <>
-                      {/* Service: Standard Install */}
-                      <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <div class="relative flex items-center">
-                            <input
-                              type="checkbox"
-                              id="service-standard_install"
-                              class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                            />
-                            <svg
-                              class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="4"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </div>
-                          <label
-                            for="service-standard_install"
-                            class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
-                          >
-                            Подключение и монтаж{" "}
-                            <span class="ml-1 text-emerald-600 font-bold">
-                              ({isKitCategory ? 112 : 280} руб)
-                            </span>
-                          </label>
-                        </div>
-                        <div class="flex items-center gap-2 ml-auto">
-                          <span class="text-xs text-text-light uppercase tracking-wider">
-                            Кол-во:
-                          </span>
-                          <input
-                            type="number"
-                            id="qty-standard_install"
-                            min="1"
-                            value="1"
-                            class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                            disabled
-                          />
-                        </div>
-                      </div>
-
-                      {/* Service: Well Install */}
-                      <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <div class="relative flex items-center">
-                            <input
-                              type="checkbox"
-                              id="service-well_install"
-                              class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                            />
-                            <svg
-                              class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="4"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </div>
-                          <label
-                            for="service-well_install"
-                            class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
-                          >
-                            Подключение и монтаж в колодце{" "}
-                            <span class="ml-1 text-emerald-600 font-bold">
-                              ({isKitCategory ? 182 : 350} руб)
-                            </span>
-                          </label>
-                        </div>
-                        <div class="flex items-center gap-2 ml-auto">
-                          <span class="text-xs text-text-light uppercase tracking-wider">
-                            Кол-во:
-                          </span>
-                          <input
-                            type="number"
-                            id="qty-well_install"
-                            min="1"
-                            value="1"
-                            class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                            disabled
-                          />
-                        </div>
-                      </div>
-
-                      {/* Service: Urgent Install */}
-                      <div class="flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                          <div class="relative flex items-center">
-                            <input
-                              type="checkbox"
-                              id="service-urgent_install"
-                              class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                            />
-                            <svg
-                              class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              stroke-width="4"
-                              stroke-linecap="round"
-                              stroke-linejoin="round"
-                            >
-                              <polyline points="20 6 9 17 4 12" />
-                            </svg>
-                          </div>
-                          <label
-                            for="service-urgent_install"
-                            class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
-                          >
-                            Срочный монтаж (в течение 48 часов){" "}
-                            <span class="ml-1 text-emerald-600 font-bold">
-                              +60 рублей
-                            </span>
-                          </label>
-                        </div>
-                        <div class="flex items-center gap-2 ml-auto">
-                          <span class="text-xs text-text-light uppercase tracking-wider">
-                            Кол-во:
-                          </span>
-                          <input
-                            type="number"
-                            id="qty-urgent_install"
-                            min="1"
-                            value="1"
-                            class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                            disabled
-                          />
-                        </div>
-                      </div>
-                    </>
-                  )}
-
-                  {showReplacement && (
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="flex items-center gap-3">
-                        <div class="relative flex items-center">
-                          <input
-                            type="checkbox"
-                            id="service-replacement"
-                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                          />
-                          <svg
-                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="4"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </div>
-                        <label
-                          for="service-replacement"
-                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
-                        >
-                          Замена счетчика на объекте{" "}
-                          <span class="ml-1 text-emerald-600 font-bold">
-                            (80 руб)
-                          </span>
-                        </label>
-                      </div>
-                      <div class="flex items-center gap-2 ml-auto">
-                        <span class="text-xs text-text-light uppercase tracking-wider">
-                          Кол-во:
-                        </span>
-                        <input
-                          type="number"
-                          id="qty-replacement"
-                          min="1"
-                          value="1"
-                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* SIM Card Option */}
-                  {showSimCard && (
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="flex items-center gap-3">
-                        <div class="relative flex items-center">
-                          <input
-                            type="checkbox"
-                            id="service-sim_card"
-                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                          />
-                          <svg
-                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="4"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </div>
-                        <label
-                          for="service-sim_card"
-                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark mr-1"
-                        >
-                          СИМ-карта МТС NB-IoT:
-                        </label>
-                        <select
-                          id="select-sim_card"
-                          class="rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-all focus:border-primary dark:border-darkmode-border dark:bg-darkmode-body text-text-dark dark:text-darkmode-text-dark disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled
-                        >
-                          {isKitCategory ? (
-                            <>
-                              <option
-                                value="21"
-                                data-title="СИМ-карта МТС NB-IoT (продление до 2 лет)"
-                              >
-                                продление до 2 лет (+21 руб)
-                              </option>
-                              <option
-                                value="42"
-                                data-title="СИМ-карта МТС NB-IoT (продление до 3 лет)"
-                              >
-                                продление до 3 лет (+42 руб)
-                              </option>
-                              <option
-                                value="63"
-                                data-title="СИМ-карта МТС NB-IoT (продление до 4 лет)"
-                              >
-                                продление до 4 лет (+63 руб)
-                              </option>
-                              <option
-                                value="84"
-                                data-title="СИМ-карта МТС NB-IoT (продление до 5 лет)"
-                              >
-                                продление до 5 лет (+84 руб)
-                              </option>
-                            </>
-                          ) : (
-                            <>
-                              <option
-                                value="21"
-                                data-title="СИМ-карта МТС NB-IoT (1 год)"
-                              >
-                                1 год (21 руб)
-                              </option>
-                              <option
-                                value="42"
-                                data-title="СИМ-карта МТС NB-IoT (2 года)"
-                              >
-                                2 года (42 руб)
-                              </option>
-                              <option
-                                value="63"
-                                data-title="СИМ-карта МТС NB-IoT (3 года)"
-                              >
-                                3 года (63 руб)
-                              </option>
-                              <option
-                                value="84"
-                                data-title="СИМ-карта МТС NB-IoT (4 года)"
-                              >
-                                4 года (84 руб)
-                              </option>
-                              <option
-                                value="105"
-                                data-title="СИМ-карта МТС NB-IoT (5 лет)"
-                              >
-                                5 лет (105 руб)
-                              </option>
-                            </>
-                          )}
-                        </select>
-                      </div>
-                      <div class="flex items-center gap-2 ml-auto">
-                        <span class="text-xs text-text-light uppercase tracking-wider">
-                          Кол-во:
-                        </span>
-                        <input
-                          type="number"
-                          id="qty-sim_card"
-                          min="1"
-                          value="1"
-                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
-                          disabled
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Software License Option */}
-                  {showSoftwareLicense && (
-                    <div class="flex flex-wrap items-center justify-between gap-3">
-                      <div class="flex items-center gap-3">
-                        <div class="relative flex items-center">
-                          <input
-                            type="checkbox"
-                            id="service-software_license"
-                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
-                          />
-                          <svg
-                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            stroke-width="4"
-                            stroke-linecap="round"
-                            stroke-linejoin="round"
-                          >
-                            <polyline points="20 6 9 17 4 12" />
-                          </svg>
-                        </div>
-                        <label
-                          for="service-software_license"
-                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark mr-1"
-                        >
-                          Лицензия ПО «Мой Клиент: Ресурсы»:
-                        </label>
-                        <select
-                          id="select-software_license"
-                          class="rounded border border-border bg-body px-2.5 py-1 text-sm outline-none transition-all focus:border-primary dark:border-darkmode-border dark:bg-darkmode-body text-text-dark dark:text-darkmode-text-dark disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled
-                        >
-                          {isKitCategory ? (
-                            <>
-                              <option
-                                value="36"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (продление до 2 лет)"
-                              >
-                                продление до 2 лет (+36 руб)
-                              </option>
-                              <option
-                                value="64"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (продление до 3 лет)"
-                              >
-                                продление до 3 лет (+64 руб)
-                              </option>
-                              <option
-                                value="92"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (продление до 4 лет)"
-                              >
-                                продление до 4 лет (+92 руб)
-                              </option>
-                              <option
-                                value="116"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (продление до 5 лет)"
-                              >
-                                продление до 5 лет (+116 руб)
-                              </option>
-                            </>
-                          ) : (
-                            <>
-                              <option
-                                value="44"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (1 год)"
-                              >
-                                1 год (44 руб)
-                              </option>
-                              <option
-                                value="80"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (2 года)"
-                              >
-                                2 года (80 руб)
-                              </option>
-                              <option
-                                value="108"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (3 года)"
-                              >
-                                3 года (108 руб)
-                              </option>
-                              <option
-                                value="136"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (4 года)"
-                              >
-                                4 года (136 руб)
-                              </option>
-                              <option
-                                value="160"
-                                data-title="Лицензия ПО «Мой Клиент: Ресурсы» (5 лет)"
-                              >
-                                5 лет (160 - хит!)
-                              </option>
-                            </>
-                          )}
-                        </select>
-                      </div>
-                      <div class="flex items-center gap-2 ml-auto">
-                        <span class="text-xs text-text-light uppercase tracking-wider">
-                          Кол-во:
-                        </span>
-                        <input
-                          type="number"
-                          id="qty-software_license"
+                          id="qty-urgent_install"
                           min="1"
                           value="1"
                           class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
@@ -925,7 +442,7 @@ const productSchema = {
                           >
                             Доставка по Минску (в пределах МКАД){" "}
                             <span class="ml-1 text-emerald-600 font-bold">
-                              (30 руб)
+                              (12 руб)
                             </span>
                           </label>
                         </div>
@@ -991,7 +508,7 @@ const productSchema = {
                               id="price-delivery_suburb"
                               class="ml-1 text-emerald-600 font-bold"
                             >
-                              (40 руб)
+                              (22 руб)
                             </span>
                           </div>
                         </div>
@@ -1004,13 +521,61 @@ const productSchema = {
                             id="qty-delivery_suburb"
                             min="1"
                             value="1"
-                            class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                            class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-body"
                             disabled
                           />
                         </div>
                       </div>
                     </>
                   )}
+
+                  {extraServices.map((extra) => (
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                      <div class="flex items-center gap-3">
+                        <div class="relative flex items-center">
+                          <input
+                            type="checkbox"
+                            id={`service-${extra.id}`}
+                            class="peer h-5 w-5 cursor-pointer appearance-none rounded border-2 border-border transition-all checked:bg-primary checked:border-primary dark:border-darkmode-border"
+                          />
+                          <svg
+                            class="pointer-events-none absolute left-1 hidden h-3 w-3 text-white peer-checked:block"
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            stroke-width="4"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                          >
+                            <polyline points="20 6 9 17 4 12" />
+                          </svg>
+                        </div>
+                        <label
+                          for={`service-${extra.id}`}
+                          class="cursor-pointer text-base font-medium text-text-dark dark:text-darkmode-text-dark"
+                        >
+                          {extra.title}{" "}
+                          <span class="ml-1 text-emerald-600 font-bold">
+                            ({Number.isInteger(extra.price) ? extra.price : extra.price.toFixed(2)} руб)
+                          </span>
+                        </label>
+                      </div>
+                      <div class="flex items-center gap-2 ml-auto">
+                        <span class="text-xs text-text-light uppercase tracking-wider">
+                          Кол-во:
+                        </span>
+                        <input
+                          type="number"
+                          id={`qty-${extra.id}`}
+                          min="1"
+                          value="1"
+                          class="w-14 rounded border border-border bg-body px-2 py-1 text-sm outline-none transition-opacity focus:border-primary disabled:opacity-30 dark:border-darkmode-border dark:bg-darkmode-body"
+                          disabled
+                        />
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )
@@ -1085,7 +650,7 @@ const productSchema = {
                   >
                     Срочная установка (в течение 48 часов){" "}
                     <span class="ml-1 text-emerald-600 font-bold">
-                      +60 рублей
+                      +70 рублей
                     </span>
                   </label>
                 </div>
@@ -1117,6 +682,7 @@ const productSchema = {
               data-title={title}
               data-price={price}
               data-cart-category={category}
+              data-extra-services={JSON.stringify(extraServices)}
               disabled={!isInStock}
             >
               Добавить в корзину
@@ -1191,7 +757,7 @@ const productSchema = {
         if (!priceEl) return;
         const selectedRadio = document.querySelector('input[name="nbiot-setup-variant"]:checked') as HTMLInputElement | null;
         let basePrice = selectedRadio?.value === "well" ? 350 : 280;
-        let extra = urgentCheckbox?.checked ? 60 : 0;
+        let extra = urgentCheckbox?.checked ? 70 : 0;
         let total = basePrice + extra;
         priceEl.textContent = `${total} BYN`;
       };
@@ -1206,61 +772,34 @@ const productSchema = {
     }
 
     // Services logic
-    const category = addToCartButton.dataset.cartCategory || "";
-    const isKit = category.toLowerCase().trim() === "комплекты";
-
     const services = [
       {
-        id: "battery_replacement",
-        price: 40,
-        title: "Услуга по замене батарейки в модуле NB-IoT",
-      },
-      {
-        id: "sensor_installation",
-        price: 59,
-        title: "Установка датчика импульсов",
-      },
-      {
-        id: "replacement",
-        price: 80,
-        title: "Услуга: Замена счетчика на объекте",
-      },
-      {
-        id: "sim_card",
-        price: 21,
-        title: "СИМ-карта МТС NB-IoT (1 год)",
-      },
-      {
-        id: "software_license",
-        price: 44,
-        title: "Лицензия ПО «Мой Клиент: Ресурсы» (1 год)",
-      },
-      {
-        id: "standard_install",
-        price: isKit ? 112 : 280,
-        title: "Подключение и монтаж",
-      },
-      {
-        id: "well_install",
-        price: isKit ? 182 : 350,
-        title: "Подключение и монтаж в колодце",
-      },
-      {
         id: "urgent_install",
-        price: 60,
+        price: 70,
         title: "Срочный монтаж (в течение 48 часов)",
       },
       {
         id: "delivery_minsk",
-        price: 30,
+        price: 12,
         title: "Доставка по Минску (в пределах МКАД)",
       },
       {
         id: "delivery_suburb",
-        price: 30,
+        price: 12,
         title: "Доставка за МКАД",
       },
     ];
+
+    const extraServicesData = JSON.parse(
+      addToCartButton.dataset.extraServices || "[]",
+    ) as Array<{ id: string; title: string; price: number }>;
+    extraServicesData.forEach((extra) => {
+      services.push({
+        id: extra.id,
+        price: extra.price,
+        title: extra.title,
+      });
+    });
 
     services.forEach((service) => {
       const checkbox = document.getElementById(
@@ -1280,31 +819,6 @@ const productSchema = {
       }
     });
 
-    // Handle select element states for dynamic services
-    const simCheckbox = document.getElementById(
-      "service-sim_card",
-    ) as HTMLInputElement | null;
-    const simSelect = document.getElementById(
-      "select-sim_card",
-    ) as HTMLSelectElement | null;
-    if (simCheckbox && simSelect) {
-      simCheckbox.addEventListener("change", () => {
-        simSelect.disabled = !simCheckbox.checked;
-      });
-    }
-
-    const licenseCheckbox = document.getElementById(
-      "service-software_license",
-    ) as HTMLInputElement | null;
-    const licenseSelect = document.getElementById(
-      "select-software_license",
-    ) as HTMLSelectElement | null;
-    if (licenseCheckbox && licenseSelect) {
-      licenseCheckbox.addEventListener("change", () => {
-        licenseSelect.disabled = !licenseCheckbox.checked;
-      });
-    }
-
     // Interactive suburb delivery kilometers calculation
     const suburbCheckbox = document.getElementById(
       "service-delivery_suburb",
@@ -1319,7 +833,7 @@ const productSchema = {
     const updateSuburbPrice = () => {
       if (suburbKmInput && suburbPriceLabel) {
         const km = Math.max(1, Number(suburbKmInput.value || 5));
-        const price = 30 + 2 * km;
+        const price = 12 + 2 * km;
         suburbPriceLabel.textContent = `(${price} руб)`;
       }
     };
@@ -1332,36 +846,6 @@ const productSchema = {
 
       suburbKmInput.addEventListener("input", updateSuburbPrice);
       suburbKmInput.addEventListener("change", updateSuburbPrice);
-    }
-
-    // Mutual exclusivity for Standard and Well installation
-    const standardCheckbox = document.getElementById(
-      "service-standard_install",
-    ) as HTMLInputElement | null;
-    const wellCheckbox = document.getElementById(
-      "service-well_install",
-    ) as HTMLInputElement | null;
-
-    if (standardCheckbox && wellCheckbox) {
-      standardCheckbox.addEventListener("change", () => {
-        if (standardCheckbox.checked) {
-          wellCheckbox.checked = false;
-          const wellQty = document.getElementById(
-            "qty-well_install",
-          ) as HTMLInputElement | null;
-          if (wellQty) wellQty.disabled = true;
-        }
-      });
-
-      wellCheckbox.addEventListener("change", () => {
-        if (wellCheckbox.checked) {
-          standardCheckbox.checked = false;
-          const standardQty = document.getElementById(
-            "qty-standard_install",
-          ) as HTMLInputElement | null;
-          if (standardQty) standardQty.disabled = true;
-        }
-      });
     }
 
     // Mutual exclusivity for Delivery Minsk and Suburb
@@ -1436,7 +920,7 @@ const productSchema = {
           addToCart({
             id: `service-urgent_install-${id}`,
             title: "Срочный монтаж (в течение 48 часов)",
-            price: 60,
+            price: 70,
             quantity: quantity,
           });
         }
@@ -1457,17 +941,9 @@ const productSchema = {
           let servicePrice = service.price;
           let serviceTitle = service.title;
 
-          if (service.id === "sim_card" && simSelect) {
-            servicePrice = Number(simSelect.value);
-            const opt = simSelect.options[simSelect.selectedIndex];
-            serviceTitle = opt.getAttribute("data-title") || service.title;
-          } else if (service.id === "software_license" && licenseSelect) {
-            servicePrice = Number(licenseSelect.value);
-            const opt = licenseSelect.options[licenseSelect.selectedIndex];
-            serviceTitle = opt.getAttribute("data-title") || service.title;
-          } else if (service.id === "delivery_suburb" && suburbKmInput) {
+          if (service.id === "delivery_suburb" && suburbKmInput) {
             const km = Math.max(1, Number(suburbKmInput.value || 5));
-            servicePrice = 30 + 2 * km;
+            servicePrice = 12 + 2 * km;
             serviceTitle = `Доставка за МКАД (${km} км)`;
           }
 

@@ -12,6 +12,10 @@ img: "/images/store/rtu102-nb-iot.png"
 image: "/images/store/rtu102-nb-iot.png"
 brand: "Teleofis"
 availability: true
+extra_services:
+  - id: "installation_minsk"
+    title: "Монтаж в Минске"
+    price: 33.62
 short_description: "Готовое решение для организаций и ТС на базе модуля RTU102.
   От 560 BYN без монтажа, 593.62 BYN с монтажом в Минске."
 description: "Комплект для юридических лиц, товариществ собственников (ТС) и

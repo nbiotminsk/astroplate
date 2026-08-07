@@ -11,6 +11,10 @@ img: "/images/radiomodem-2576-photo.png"
 image: "/images/module_nb.jpg"
 brand: "Nero"
 availability: true
+extra_services:
+  - id: "installation_minsk"
+    title: "Монтаж в Минске"
+    price: 30
 short_description: "Готовое решение под ключ для квартир и частных домов на базе
   радиомодема Nero 2576. 626 BYN без монтажа, 656 BYN с монтажом в Минске."
 description: "Решение «под ключ» для квартиры или частного дома на базе
