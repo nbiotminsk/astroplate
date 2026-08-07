@@ -3,7 +3,7 @@ title: Teleofis24.by
 meta_title: Дистанционный съем и передача показаний счётчиков воды в УП
   «Минскводоканал» | teleofis24.by
 description: Автоматическая передача показаний счётчиков воды в УП
-  «Минскводоканал». Для физлиц от 626 BYN, для юрлиц от 560 BYN, модуль 455 BYN.
+  «Минскводоканал». Для физлиц от 626 BYN, для юрлиц от 560 BYN, модуль 396 BYN.
   Монтаж в Минске.
 
 pricing:
@@ -24,8 +24,7 @@ pricing:
       price: от 396 BYN
       priceNote: Вега NB-11 — 492 BYN
       features:
-        - text: Радиомодем Nero 2576 — 455 BYN
-          link: /store/radiomodem-2576-ver-2/
+        - Радиомодем Nero 2576 — 396 BYN
         - text: Модуль Вега NB-11 — 492 BYN
           link: /store/vega-nb11/
         - Без SIM-карты и платформы
