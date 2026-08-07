@@ -113,7 +113,7 @@ modules:
         - NB-IoT Cat NB2 — автономность до 10 лет
         - 4 импульсных входа, 2 слота SIM (МТС + А1)
         - IP65 (IP68 опционально), настройка по RS-232
-      link: /store/rtu102-nb-iot/
+      link: https://teleofis24.by/store/komplekt-yurlits-rtu102/
     - title: Nero 2576
       tag: Физлица и юрлица
       subtitle: Радиомодем ООО «Неро Электроникс» — для 2 счётчиков

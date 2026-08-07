@@ -61,3 +61,10 @@ blockquote > p {
 button {
   @apply cursor-pointer;
 }
+
+a:focus-visible,
+button:focus-visible,
+summary:focus-visible {
+  outline: 3px solid currentColor;
+  outline-offset: 3px;
+}

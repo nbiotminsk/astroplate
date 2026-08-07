@@ -96,9 +96,12 @@ const homepage = homepageEntry.data as any;
   <section class="section pb-16 pt-12">
     <div class="container">
       <div class="mx-auto max-w-2xl text-center">
-        <h1 class="mb-5 text-h4 leading-tight md:text-h3">
-          {homepage.pricing.title}
+        <h1 class="mb-5 text-h3 leading-tight md:text-h2">
+          Автоматическая передача показаний счётчиков воды в Минскводоканал
         </h1>
+        <h2 class="mb-5 text-h4 leading-tight md:text-h3">
+          {homepage.pricing.title}
+        </h2>
         <p class="text-lg">{homepage.pricing.subtitle}</p>
         <nav class="mt-6 flex flex-wrap justify-center gap-2">
           {
@@ -182,6 +185,7 @@ const homepage = homepageEntry.data as any;
                           }`}
                         >
                           <svg
+                            aria-hidden="true"
                             class={`mt-1 h-[1em] w-[1em] shrink-0 ${
                               card.featured
                                 ? "text-white"
@@ -223,6 +227,9 @@ const homepage = homepageEntry.data as any;
                       : {})}
                   >
                     {card.cta.label}
+                    {card.cta.link.startsWith("http") && (
+                      <span class="sr-only"> (открывается в новой вкладке)</span>
+                    )}
                   </a>
                 </div>
                 </div>
@@ -247,7 +254,7 @@ const homepage = homepageEntry.data as any;
               {
                 homepage.pricing.terms.map((item: string) => (
                   <li class="flex items-start gap-2 text-sm leading-relaxed">
-                    <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                    <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                       <use xlink:href="#icon-FaCheck" />
                     </svg>
                     <span>{item}</span>
@@ -264,7 +271,7 @@ const homepage = homepageEntry.data as any;
             <h2
               class="mb-4 flex items-center gap-2 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark"
             >
-              <svg class="h-[1em] w-[1em] shrink-0" style="fill: #6ee7b7">
+              <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0" style="fill: #6ee7b7">
                 <use xlink:href="#icon-FaMoneyBillWave" />
               </svg>
               {homepage.pricing.payment.title}
@@ -307,7 +314,7 @@ const homepage = homepageEntry.data as any;
                 </span>
                 <div class="min-w-0">
                   <p class="flex items-center gap-2 text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
-                    <svg class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
+                    <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
                       <use xlink:href={`#icon-${step.icon}`} />
                     </svg>
                     <span>{step.title}</span>
@@ -325,7 +332,7 @@ const homepage = homepageEntry.data as any;
         <h3
           class="flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
         >
-          <svg class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
+          <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
             <use xlink:href="#icon-FaCogs" />
           </svg>
           {homepage.flow.instruction.title}
@@ -335,12 +342,20 @@ const homepage = homepageEntry.data as any;
         </p>
         <ol class="mt-5 space-y-3">
           {
-            homepage.flow.instruction.steps.map((item: string, idx: number) => (
+            homepage.flow.instruction.steps.map((item: any, idx: number) => (
               <li class="flex items-start gap-3 text-sm leading-relaxed">
                 <span class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-primary bg-primary text-[11px] font-semibold text-white dark:border-darkmode-primary dark:bg-darkmode-primary dark:text-text-dark">
                   {idx + 1}
                 </span>
-                <span set:html={item} />
+                <span>
+                  {typeof item === "string"
+                    ? item.replace(/<[^>]*>/g, "")
+                    : item.before}
+                  {typeof item !== "string" && item.link && (
+                    <a href={item.link}>{item.linkText}</a>
+                  )}
+                  {typeof item !== "string" && item.after}
+                </span>
               </li>
             ))
           }
@@ -392,7 +407,7 @@ const homepage = homepageEntry.data as any;
                   <ul class="mt-4 flex-1 space-y-2.5">
                     {module.features.map((feature: string) => (
                       <li class="flex items-start gap-2 text-sm leading-relaxed">
-                        <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                        <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                           <use xlink:href="#icon-FaCheck" />
                         </svg>
                         <span>{feature}</span>
@@ -408,7 +423,10 @@ const homepage = homepageEntry.data as any;
                       href={module.link}
                     >
                       Подробнее
-                      <svg class="h-[0.9em] w-[0.9em] shrink-0">
+                      <svg
+                        aria-hidden="true"
+                        class="h-[0.9em] w-[0.9em] shrink-0"
+                      >
                         <use xlink:href="#icon-FaArrowRight" />
                       </svg>
                     </a>
@@ -455,7 +473,7 @@ const homepage = homepageEntry.data as any;
             {
               homepage.platform.points.map((point: string) => (
                 <li class="flex items-start gap-2 text-sm leading-relaxed">
-                  <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                  <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                     <use xlink:href="#icon-FaCheck" />
                   </svg>
                   <span>{point}</span>
@@ -515,7 +533,7 @@ const homepage = homepageEntry.data as any;
               <h3
                 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
               >
-                <svg class="h-[1em] w-[1em] fill-current text-primary">
+                <svg aria-hidden="true" class="h-[1em] w-[1em] fill-current text-primary">
                   <use xlink:href="#icon-FaBroadcastTower"></use>
                 </svg>
                 <span>{homepage.sim.vsLoraWan.title}</span>
@@ -524,7 +542,7 @@ const homepage = homepageEntry.data as any;
                 {
                   homepage.sim.vsLoraWan.points.map((point: string) => (
                     <li class="flex items-start gap-2 text-sm leading-relaxed">
-                      <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                         <use xlink:href="#icon-FaCheck" />
                       </svg>
                       <span>{point}</span>
@@ -558,7 +576,7 @@ const homepage = homepageEntry.data as any;
               {
                 homepage.sim.tariff.features.map((feature: string) => (
                   <li class="flex items-start gap-2 text-sm leading-relaxed">
-                    <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-emerald-500">
+                    <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-emerald-500">
                       <use xlink:href="#icon-FaCheck" />
                     </svg>
                     <span>{feature}</span>
@@ -573,6 +591,7 @@ const homepage = homepageEntry.data as any;
               rel="noopener"
             >
               {homepage.sim.tariff.cta.label}
+              <span class="sr-only"> (открывается в новой вкладке)</span>
             </a>
           </div>
         </div>
@@ -584,7 +603,7 @@ const homepage = homepageEntry.data as any;
               <h3
                 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
               >
-                <svg class="h-[1em] w-[1em] fill-current text-primary">
+                <svg aria-hidden="true" class="h-[1em] w-[1em] fill-current text-primary">
                   <use xlink:href="#icon-FaMobileAlt"></use>
                 </svg>
                 <span>{homepage.sim.vsGsm.title}</span>
@@ -593,7 +612,7 @@ const homepage = homepageEntry.data as any;
                 {
                   homepage.sim.vsGsm.points.map((point: string) => (
                     <li class="flex items-start gap-2 text-sm leading-relaxed">
-                      <svg class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
                         <use xlink:href="#icon-FaCheck" />
                       </svg>
                       <span>{point}</span>
@@ -656,12 +675,13 @@ const homepage = homepageEntry.data as any;
         <div class="mt-6 flex flex-wrap justify-center gap-3">
           <a class="btn btn-primary" href={homepage.finalCta.primary.link}>
             {homepage.finalCta.primary.label}
+            <span class="sr-only"> (открывается в новой вкладке)</span>
           </a>
           <a
             class="btn btn-outline-primary"
             href={homepage.finalCta.secondary.link}
           >
-            <svg class="mr-2 inline h-[1em] w-[1em]">
+            <svg aria-hidden="true" class="mr-2 inline h-[1em] w-[1em]">
               <use xlink:href="#icon-FaPhoneAlt"></use>
             </svg>
             {homepage.finalCta.secondary.label}
