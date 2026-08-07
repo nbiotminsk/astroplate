@@ -99,9 +99,11 @@ const homepage = homepageEntry.data as any;
         <h1 class="mb-5 text-h3 leading-tight md:text-h2">
           Автоматическая передача показаний счётчиков воды в Минскводоканал
         </h1>
-        <h2 class="mb-5 text-h4 leading-tight md:text-h3">
-          {homepage.pricing.title}
-        </h2>
+        {homepage.pricing.title && (
+          <h2 class="mb-5 text-h4 leading-tight md:text-h3">
+            {homepage.pricing.title}
+          </h2>
+        )}
         <p class="text-lg">{homepage.pricing.subtitle}</p>
         <nav class="mt-6 flex flex-wrap justify-center gap-2">
           {
