@@ -99,11 +99,13 @@ const homepage = homepageEntry.data as any;
         <h1 class="mb-5 text-h3 leading-tight md:text-h2">
           Автоматическая передача показаний счётчиков воды в Минскводоканал
         </h1>
-        {homepage.pricing.title && (
-          <h2 class="mb-5 text-h4 leading-tight md:text-h3">
-            {homepage.pricing.title}
-          </h2>
-        )}
+        {
+          homepage.pricing.title && (
+            <h2 class="mb-5 text-h4 leading-tight md:text-h3">
+              {homepage.pricing.title}
+            </h2>
+          )
+        }
         <p class="text-lg">{homepage.pricing.subtitle}</p>
         <nav class="mt-6 flex flex-wrap justify-center gap-2">
           {
@@ -137,18 +139,16 @@ const homepage = homepageEntry.data as any;
               >
                 <div class="relative z-10 flex h-full flex-col">
                   <div class="flex items-start justify-between gap-3">
-                    <h2
-                      class="text-xl font-bold text-text-dark dark:text-darkmode-text-dark"
-                    >
+                    <h2 class="text-xl font-bold text-text-dark dark:text-darkmode-text-dark">
                       {card.name}
                     </h2>
                     {card.tag && (
                       <span
                         class={`inline-flex shrink-0 rounded-full px-3 py-1 text-[11px] font-bold uppercase tracking-widest ${
-                  card.featured
-                    ? "border border-white/30 bg-white/15 text-white"
-                    : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
-                }`}
+                          card.featured
+                            ? "border border-white/30 bg-white/15 text-white"
+                            : "border border-emerald-600/30 bg-emerald-600/10 text-emerald-700 dark:border-emerald-400/30 dark:bg-emerald-400/10 dark:text-emerald-300"
+                        }`}
                       >
                         {card.tag}
                       </span>
@@ -178,7 +178,8 @@ const homepage = homepageEntry.data as any;
                   </div>
                   <ul class="mt-5 flex-1 space-y-2.5">
                     {card.features.map((feature: any) => {
-                      const isLink = typeof feature === "object" && feature?.link;
+                      const isLink =
+                        typeof feature === "object" && feature?.link;
                       const text = isLink ? feature.text : feature;
                       return (
                         <li
@@ -215,25 +216,28 @@ const homepage = homepageEntry.data as any;
                     })}
                   </ul>
                   <div class="mt-6">
-                  <a
-                    class={`btn w-full justify-center ${
-                      card.featured
-                        ? "price-btn-featured shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95"
-                        : idx === 2
-                          ? "price-btn-gold transition-all duration-300 hover:-translate-y-1 active:scale-95"
-                          : "price-btn-outline transition-all duration-300 hover:-translate-y-1 active:scale-95"
-                    }`}
-                    href={card.cta.link}
-                    {...(card.cta.link.startsWith("http")
-                      ? { target: "_blank", rel: "noopener" }
-                      : {})}
-                  >
-                    {card.cta.label}
-                    {card.cta.link.startsWith("http") && (
-                      <span class="sr-only"> (открывается в новой вкладке)</span>
-                    )}
-                  </a>
-                </div>
+                    <a
+                      class={`btn w-full justify-center ${
+                        card.featured
+                          ? "price-btn-featured shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-xl active:scale-95"
+                          : idx === 2
+                            ? "price-btn-gold transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                            : "price-btn-outline transition-all duration-300 hover:-translate-y-1 active:scale-95"
+                      }`}
+                      href={card.cta.link}
+                      {...(card.cta.link.startsWith("http")
+                        ? { target: "_blank", rel: "noopener" }
+                        : {})}
+                    >
+                      {card.cta.label}
+                      {card.cta.link.startsWith("http") && (
+                        <span class="sr-only">
+                          {" "}
+                          (открывается в новой вкладке)
+                        </span>
+                      )}
+                    </a>
+                  </div>
                 </div>
               </article>
             </div>
@@ -256,7 +260,10 @@ const homepage = homepageEntry.data as any;
               {
                 homepage.pricing.terms.map((item: string) => (
                   <li class="flex items-start gap-2 text-sm leading-relaxed">
-                    <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                    <svg
+                      aria-hidden="true"
+                      class="mt-1 h-[1em] w-[1em] shrink-0 text-primary"
+                    >
                       <use xlink:href="#icon-FaCheck" />
                     </svg>
                     <span>{item}</span>
@@ -273,23 +280,37 @@ const homepage = homepageEntry.data as any;
             <h2
               class="mb-4 flex items-center gap-2 text-xl font-semibold text-text-dark dark:text-darkmode-text-dark"
             >
-              <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0" style="fill: #6ee7b7">
-                <use xlink:href="#icon-FaMoneyBillWave" />
+              <svg
+                aria-hidden="true"
+                class="h-[1em] w-[1em] shrink-0"
+                style="fill: #6ee7b7"
+              >
+                <use xlink:href="#icon-FaMoneyBillWave"></use>
               </svg>
               {homepage.pricing.payment.title}
             </h2>
             <dl class="space-y-0 text-sm leading-relaxed">
-              <div class="flex justify-between gap-4 border-b border-border/60 py-2.5 first:pt-0 dark:border-darkmode-border/60">
+              <div
+                class="flex justify-between gap-4 border-b border-border/60 py-2.5 first:pt-0 dark:border-darkmode-border/60"
+              >
                 <dt>Счёт</dt>
-                <dd class="text-right font-semibold">{homepage.pricing.payment.tabnum}</dd>
+                <dd class="text-right font-semibold">
+                  {homepage.pricing.payment.tabnum}
+                </dd>
               </div>
-              <div class="flex justify-between gap-4 border-b border-border/60 py-2.5 dark:border-darkmode-border/60">
+              <div
+                class="flex justify-between gap-4 border-b border-border/60 py-2.5 dark:border-darkmode-border/60"
+              >
                 <dt>Сумма</dt>
-                <dd class="text-right font-semibold">{homepage.pricing.payment.amount}</dd>
+                <dd class="text-right font-semibold">
+                  {homepage.pricing.payment.amount}
+                </dd>
               </div>
               <div class="flex justify-between gap-4 py-2.5 last:py-0">
                 <dt>Назначение</dt>
-                <dd class="text-right font-semibold">{homepage.pricing.payment.purpose}</dd>
+                <dd class="text-right font-semibold">
+                  {homepage.pricing.payment.purpose}
+                </dd>
               </div>
             </dl>
           </div>
@@ -316,7 +337,10 @@ const homepage = homepageEntry.data as any;
                 </span>
                 <div class="min-w-0">
                   <p class="flex items-center gap-2 text-sm font-semibold text-text-dark dark:text-darkmode-text-dark">
-                    <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
+                    <svg
+                      aria-hidden="true"
+                      class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary"
+                    >
                       <use xlink:href={`#icon-${step.icon}`} />
                     </svg>
                     <span>{step.title}</span>
@@ -334,8 +358,11 @@ const homepage = homepageEntry.data as any;
         <h3
           class="flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
         >
-          <svg aria-hidden="true" class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary">
-            <use xlink:href="#icon-FaCogs" />
+          <svg
+            aria-hidden="true"
+            class="h-[1em] w-[1em] shrink-0 fill-current text-primary dark:text-darkmode-primary"
+          >
+            <use xlink:href="#icon-FaCogs"></use>
           </svg>
           {homepage.flow.instruction.title}
         </h3>
@@ -378,24 +405,24 @@ const homepage = homepageEntry.data as any;
         {
           homepage.modules.items.map((module: any) => (
             <div class="md:col-4">
-<article
-                  class="info-card module-card flex h-full flex-col p-0! text-left"
-                  style={`border-color: ${module.borderColor}; --card-color: ${module.borderColor}`}
+              <article
+                class="info-card module-card flex h-full flex-col p-0! text-left"
+                style={`border-color: ${module.borderColor}; --card-color: ${module.borderColor}`}
+              >
+                <a
+                  href={module.link}
+                  class="group block h-50 overflow-hidden rounded-t-2xl bg-white dark:bg-darkmode-body"
+                  aria-label={module.title}
                 >
-                  <a
-                    href={module.link}
-                    class="group block h-[200px] overflow-hidden rounded-t-2xl bg-white dark:bg-darkmode-body"
-                    aria-label={module.title}
-                  >
-                    <ImageMod
-                      src={module.image}
-                      width={640}
-                      height={480}
-                      alt={module.title}
-                      class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
-                      format="webp"
-                    />
-                  </a>
+                  <ImageMod
+                    src={module.image}
+                    width={640}
+                    height={480}
+                    alt={module.title}
+                    class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-110"
+                    format="webp"
+                  />
+                </a>
                 <div class="flex flex-1 flex-col p-6">
                   <div class="flex items-center justify-between gap-3">
                     <h3 class="card-title text-text-dark dark:text-darkmode-text-dark">
@@ -409,7 +436,10 @@ const homepage = homepageEntry.data as any;
                   <ul class="mt-4 flex-1 space-y-2.5">
                     {module.features.map((feature: string) => (
                       <li class="flex items-start gap-2 text-sm leading-relaxed">
-                        <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                        <svg
+                          aria-hidden="true"
+                          class="mt-1 h-[1em] w-[1em] shrink-0 text-primary"
+                        >
                           <use xlink:href="#icon-FaCheck" />
                         </svg>
                         <span>{feature}</span>
@@ -475,7 +505,10 @@ const homepage = homepageEntry.data as any;
             {
               homepage.platform.points.map((point: string) => (
                 <li class="flex items-start gap-2 text-sm leading-relaxed">
-                  <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                  <svg
+                    aria-hidden="true"
+                    class="mt-1 h-[1em] w-[1em] shrink-0 text-primary"
+                  >
                     <use xlink:href="#icon-FaCheck" />
                   </svg>
                   <span>{point}</span>
@@ -483,7 +516,9 @@ const homepage = homepageEntry.data as any;
               ))
             }
           </ul>
-          <div class="mt-6 border-t border-border pt-5 dark:border-darkmode-border">
+          <div
+            class="mt-6 border-t border-border pt-5 dark:border-darkmode-border"
+          >
             <h4
               class="mb-3 text-sm font-bold uppercase tracking-wide text-text-dark dark:text-darkmode-text-dark"
             >
@@ -491,7 +526,9 @@ const homepage = homepageEntry.data as any;
             </h4>
             <div class="grid gap-x-8 gap-y-2 sm:grid-cols-2">
               <dl class="space-y-1.5">
-                <dt class="text-xs font-bold uppercase tracking-wide text-text-light dark:text-darkmode-text-light">
+                <dt
+                  class="text-xs font-bold uppercase tracking-wide text-text-light dark:text-darkmode-text-light"
+                >
                   Back-end
                 </dt>
                 <dd class="text-sm">Язык: Python</dd>
@@ -499,13 +536,19 @@ const homepage = homepageEntry.data as any;
                 <dd class="text-sm">Веб-сервер: Nginx</dd>
                 <dd class="text-sm">Фреймворки: SqlAlchemy, Flask</dd>
                 <dd class="text-sm">Форматы: MessagePack, JSON</dd>
-                <dd class="text-sm">Основная БД: Postgres 14 (Patroni cluster)</dd>
+                <dd class="text-sm">
+                  Основная БД: Postgres 14 (Patroni cluster)
+                </dd>
                 <dd class="text-sm">Вспомогательная БД: Redis, etcd</dd>
                 <dd class="text-sm">Оркестрация: Kubernetes</dd>
-                <dd class="text-sm">Мониторинг: Sentry, Prometheus, Loki, Grafana</dd>
+                <dd class="text-sm">
+                  Мониторинг: Sentry, Prometheus, Loki, Grafana
+                </dd>
               </dl>
               <dl class="space-y-1.5">
-                <dt class="text-xs font-bold uppercase tracking-wide text-text-light dark:text-darkmode-text-light">
+                <dt
+                  class="text-xs font-bold uppercase tracking-wide text-text-light dark:text-darkmode-text-light"
+                >
                   Frontend
                 </dt>
                 <dd class="text-sm">Язык: JavaScript</dd>
@@ -535,7 +578,10 @@ const homepage = homepageEntry.data as any;
               <h3
                 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
               >
-                <svg aria-hidden="true" class="h-[1em] w-[1em] fill-current text-primary">
+                <svg
+                  aria-hidden="true"
+                  class="h-[1em] w-[1em] fill-current text-primary"
+                >
                   <use xlink:href="#icon-FaBroadcastTower"></use>
                 </svg>
                 <span>{homepage.sim.vsLoraWan.title}</span>
@@ -544,7 +590,10 @@ const homepage = homepageEntry.data as any;
                 {
                   homepage.sim.vsLoraWan.points.map((point: string) => (
                     <li class="flex items-start gap-2 text-sm leading-relaxed">
-                      <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <svg
+                        aria-hidden="true"
+                        class="mt-1 h-[1em] w-[1em] shrink-0 text-primary"
+                      >
                         <use xlink:href="#icon-FaCheck" />
                       </svg>
                       <span>{point}</span>
@@ -578,7 +627,10 @@ const homepage = homepageEntry.data as any;
               {
                 homepage.sim.tariff.features.map((feature: string) => (
                   <li class="flex items-start gap-2 text-sm leading-relaxed">
-                    <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-emerald-500">
+                    <svg
+                      aria-hidden="true"
+                      class="mt-1 h-[1em] w-[1em] shrink-0 text-emerald-500"
+                    >
                       <use xlink:href="#icon-FaCheck" />
                     </svg>
                     <span>{feature}</span>
@@ -605,7 +657,10 @@ const homepage = homepageEntry.data as any;
               <h3
                 class="mb-4 flex items-center gap-2 text-lg font-bold text-text-dark dark:text-darkmode-text-dark"
               >
-                <svg aria-hidden="true" class="h-[1em] w-[1em] fill-current text-primary">
+                <svg
+                  aria-hidden="true"
+                  class="h-[1em] w-[1em] fill-current text-primary"
+                >
                   <use xlink:href="#icon-FaMobileAlt"></use>
                 </svg>
                 <span>{homepage.sim.vsGsm.title}</span>
@@ -614,7 +669,10 @@ const homepage = homepageEntry.data as any;
                 {
                   homepage.sim.vsGsm.points.map((point: string) => (
                     <li class="flex items-start gap-2 text-sm leading-relaxed">
-                      <svg aria-hidden="true" class="mt-1 h-[1em] w-[1em] shrink-0 text-primary">
+                      <svg
+                        aria-hidden="true"
+                        class="mt-1 h-[1em] w-[1em] shrink-0 text-primary"
+                      >
                         <use xlink:href="#icon-FaCheck" />
                       </svg>
                       <span>{point}</span>
@@ -642,7 +700,7 @@ const homepage = homepageEntry.data as any;
           homepage.meters.items.map((meter: any) => (
             <div class="md:col-6 lg:col-4">
               <article class="info-card flex h-full flex-col p-0! text-left">
-                <div class="flex h-[275px] items-center justify-center overflow-hidden bg-white dark:bg-darkmode-body">
+                <div class="flex h-68.75 items-center justify-center overflow-hidden bg-white dark:bg-darkmode-body">
                   <ImageMod
                     src={meter.image}
                     width={640}
@@ -745,14 +803,15 @@ const homepage = homepageEntry.data as any;
       rgba(16, 185, 129, 0.55)
     );
     pointer-events: none;
-    -webkit-mask: linear-gradient(#fff 0 0) content-box,
+    -webkit-mask:
+      linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     padding: 1px;
   }
 
-.price-card-gold {
+  .price-card-gold {
     background: linear-gradient(
       145deg,
       rgba(245, 197, 66, 0.18),
@@ -791,12 +850,7 @@ const homepage = homepageEntry.data as any;
   }
 
   .featured-price-card {
-    background: linear-gradient(
-      135deg,
-      #059669 0%,
-      #10b981 40%,
-      #3b82f6 100%
-    );
+    background: linear-gradient(135deg, #059669 0%, #10b981 40%, #3b82f6 100%);
     border: 1px solid rgba(255, 255, 255, 0.2);
   }
 

@@ -230,9 +230,9 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10): 
         }
     }
 
-    // 3. Fallback: GET /api/v1/devices/{id}
+    // 3. Fallback: GET /api/v1/devices/{id}/info
     if (empty($payload)) {
-        $devUrl = $apiBase . '/api/v1/devices/' . $deviceUuid;
+        $devUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/info';
         [$dCode, $dResp] = http_get($devUrl, $headers);
         if ($dCode === 200 && !empty($dResp['payload'])) {
             $payload = [$dResp['payload']];
@@ -373,7 +373,7 @@ function device_lookup(array $config, string $input): ?array
  */
 function get_device_channels_serials(array $config, string $deviceId): array
 {
-    $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId;
+    $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
     [$code, $resp] = http_get($url, unicboard_headers($config));
     if ($code !== 200 || !isset($resp['payload']['device_channel'])) {
         return [];
@@ -396,12 +396,14 @@ function extract_record_value(array $rec): ?float
             return (float) $rec[$key];
         }
     }
-    if (isset($rec['channels']) && is_array($rec['channels'])) {
-        foreach ($rec['channels'] as $c) {
-            if (is_array($c)) {
-                $val = extract_record_value($c);
-                if ($val !== null) {
-                    return $val;
+    foreach (['channels', 'device_channel', 'device_meter'] as $arrKey) {
+        if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
+            foreach ($rec[$arrKey] as $c) {
+                if (is_array($c)) {
+                    $val = extract_record_value($c);
+                    if ($val !== null) {
+                        return $val;
+                    }
                 }
             }
         }
@@ -414,6 +416,18 @@ function extract_record_date(array $rec): ?string
     foreach (['last_value_date', 'date', 'created_at', 'timestamp', 'time'] as $key) {
         if (!empty($rec[$key]) && is_string($rec[$key])) {
             return $rec[$key];
+        }
+    }
+    foreach (['channels', 'device_channel', 'device_meter'] as $arrKey) {
+        if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
+            foreach ($rec[$arrKey] as $c) {
+                if (is_array($c)) {
+                    $val = extract_record_date($c);
+                    if ($val !== null) {
+                        return $val;
+                    }
+                }
+            }
         }
     }
     return null;
@@ -436,8 +450,15 @@ function build_report(array $config, array $device): string
 
     if (!empty($values['payload'])) {
         foreach ($values['payload'] as $v) {
-            if (isset($v['channels']) && is_array($v['channels'])) {
-                foreach ($v['channels'] as $idx => $chData) {
+            $channelsList = [];
+            if (isset($v['device_channel']) && is_array($v['device_channel'])) {
+                $channelsList = $v['device_channel'];
+            } elseif (isset($v['channels']) && is_array($v['channels'])) {
+                $channelsList = $v['channels'];
+            }
+            
+            if (!empty($channelsList)) {
+                foreach ($channelsList as $idx => $chData) {
                     $chNum = $chData['channel_number'] ?? ($idx + 1);
                     $channelsHistory[$chNum][] = is_array($chData) ? array_merge($v, $chData) : $v;
                 }
@@ -815,7 +836,7 @@ function run_polling(array $config): void
     }
 }
 
-if (PHP_SAPI === 'cli') {
+if (PHP_SAPI === 'cli' && basename(__FILE__) === basename($_SERVER['PHP_SELF'])) {
     // Режим командной строки: php bot.php
     if (isset($argv[1]) && $argv[1] === 'webhook') {
         run_webhook($config);
