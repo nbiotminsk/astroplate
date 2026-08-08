@@ -553,12 +553,13 @@ function build_month_report(array $config, array $device): string
 
     if (!empty($values['payload'])) {
         foreach ($values['payload'] as $v) {
-            $ch = $v['channel_number'] ?? 1;
-            $valDate = $v['last_value_date'] ?? $v['date'] ?? null;
+            $chData = $v['device_meter'] ?? $v;
+            $ch = $chData['channel_number'] ?? 1;
+            $valDate = extract_record_date($chData);
             if ($valDate) {
                 $ts = strtotime($valDate);
                 if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
-                    $channelsMonthData[$ch][] = $v;
+                    $channelsMonthData[$ch][] = $chData;
                 }
             }
         }
@@ -571,11 +572,13 @@ function build_month_report(array $config, array $device): string
             $latestInMonth = reset($records);
             $earliestInMonth = end($records);
 
-            $valEnd = $latestInMonth['last_value'] ?? $latestInMonth['value'] ?? null;
-            $dateEnd = isset($latestInMonth['last_value_date']) ? date('d.m.Y H:i', strtotime($latestInMonth['last_value_date'])) : '—';
+            $valEnd = extract_record_value($latestInMonth);
+            $dateEnd = extract_record_date($latestInMonth);
+            $dateEndStr = $dateEnd ? date('d.m.Y H:i', strtotime($dateEnd)) : '—';
 
-            $valStart = $earliestInMonth['last_value'] ?? $earliestInMonth['value'] ?? null;
-            $dateStart = isset($earliestInMonth['last_value_date']) ? date('d.m.Y H:i', strtotime($earliestInMonth['last_value_date'])) : '—';
+            $valStart = extract_record_value($earliestInMonth);
+            $dateStart = extract_record_date($earliestInMonth);
+            $dateStartStr = $dateStart ? date('d.m.Y H:i', strtotime($dateStart)) : '—';
 
             $meterSerial = $channelSerials[$chNum] ?? null;
             $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
@@ -585,8 +588,8 @@ function build_month_report(array $config, array $device): string
             $valEndStr = $valEnd !== null ? "{$valEnd} m³" : '—';
 
             $lines[] = "<b>{$prefix}{$meterLabel}:</b>";
-            $lines[] = "  • Нач. месяца ({$dateStart}): <b>{$valStartStr}</b>";
-            $lines[] = "  • Кон. периода ({$dateEnd}): <b>{$valEndStr}</b>";
+            $lines[] = "  • Нач. месяца ({$dateStartStr}): <b>{$valStartStr}</b>";
+            $lines[] = "  • Кон. периода ({$dateEndStr}): <b>{$valEndStr}</b>";
 
             if ($valEnd !== null && $valStart !== null && is_numeric($valEnd) && is_numeric($valStart)) {
                 $monthConsumption = (float) $valEnd - (float) $valStart;
