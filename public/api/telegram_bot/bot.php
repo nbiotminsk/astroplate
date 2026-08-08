@@ -262,7 +262,7 @@ function get_temperature(array $config, string $deviceId, int $limit = 1): ?arra
 /** Уровень батареи прибора */
 function get_battery(array $config, string $deviceId, int $limit = 1): ?array
 {
-    $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/battery-level?limit=' . $limit;
+    $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/battery-level?limit=' . ($limit === 1 ? 10 : $limit);
     [$code, $resp] = http_get($url, unicboard_headers($config));
     if ($code !== 200 || !isset($resp['payload'][0])) {
         return null;
