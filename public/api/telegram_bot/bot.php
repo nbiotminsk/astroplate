@@ -200,13 +200,17 @@ function unicboard_headers(array $config): array
 /**
  * Полные показания по одному device_id через POST /api/v1/devices/values
  */
-function get_device_values(array $config, string $deviceUuid, int $limit = 10): array
+function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?string $periodFrom = null): array
 {
     $headers = unicboard_headers($config);
     $apiBase = $config['unicboard_api_base'];
 
     // 1. Пробуем POST /api/v1/devices/values с вариациями названий параметров
     $url = $apiBase . '/api/v1/devices/values?limit=' . $limit;
+    if ($periodFrom !== null) {
+        $url .= '&period_from=' . urlencode($periodFrom);
+    }
+    
     [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers);
     $payload = $resp['payload'] ?? [];
 
@@ -548,20 +552,55 @@ function build_month_report(array $config, array $device): string
     $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
     $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
 
-    $values = get_device_values($config, $deviceId, 100);
+    $values = get_device_values($config, $deviceId, 5000, date('Y-m-d', strtotime('-1 year')));
     $channelsMonthData = [];
+    $channelsLastConsumption = []; // track per channel
 
     if (!empty($values['payload'])) {
+        // Group all historical records by channel first
+        $allRecords = [];
         foreach ($values['payload'] as $v) {
             $chData = $v['device_meter'] ?? $v;
             $ch = $chData['channel_number'] ?? 1;
             $valDate = extract_record_date($chData);
             if ($valDate) {
-                $ts = strtotime($valDate);
+                $allRecords[$ch][] = $chData;
+            }
+        }
+        
+        foreach ($allRecords as $ch => $records) {
+            $lastVal = null;
+            $changeDate = null;
+            $changeDiff = null;
+            $firstDate = null;
+            
+            // Iterate records in historical order (assuming chronological)
+            foreach ($records as $chData) {
+                $val = extract_record_value($chData);
+                $date = extract_record_date($chData);
+                
+                if ($firstDate === null) $firstDate = $date;
+                
+                if ($lastVal === null) {
+                    $lastVal = $val;
+                } elseif ($val != $lastVal && is_numeric($val) && is_numeric($lastVal)) {
+                    $changeDate = $date;
+                    $changeDiff = abs($val - $lastVal);
+                    $lastVal = $val;
+                }
+                
+                // Filter for current month
+                $ts = strtotime($date);
                 if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
                     $channelsMonthData[$ch][] = $chData;
                 }
             }
+            
+            $channelsLastConsumption[$ch] = [
+                'date' => $changeDate,
+                'diff' => $changeDiff,
+                'first_date' => $firstDate
+            ];
         }
         ksort($channelsMonthData);
     }
@@ -569,6 +608,18 @@ function build_month_report(array $config, array $device): string
     if (!empty($channelsMonthData)) {
         $totalChannels = count($channelsMonthData);
         foreach ($channelsMonthData as $chNum => $records) {
+            $latestInMonth = reset($records); // Or maybe we should use end/reset based on order
+            $earliestInMonth = end($records);
+            // wait, if $records is historical order, earliest is reset, latest is end.
+            // Let's make sure it's consistent. Earlier we used reset() for latest and end() for earliest.
+            // That assumes DESC order. But the API might return DESC or ASC.
+            // Our test_bot_output2 array_slice showed 2026-06-30 and then 2026-07-02 so it's ASC.
+            // So latest is end(), earliest is reset(). Let's fix this just in case.
+            // I'll sort the month records by date to be safe.
+            usort($records, function($a, $b) {
+                return strtotime(extract_record_date($b)) - strtotime(extract_record_date($a));
+            });
+            // Now $records is DESC. $latestInMonth is reset, $earliestInMonth is end.
             $latestInMonth = reset($records);
             $earliestInMonth = end($records);
 
@@ -596,6 +647,17 @@ function build_month_report(array $config, array $device): string
                 $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . round($monthConsumption, 4);
                 $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
             }
+            
+            $lastCons = $channelsLastConsumption[$chNum] ?? null;
+            if ($lastCons && $lastCons['date']) {
+                $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['date'])) . " (на " . round($lastCons['diff'], 4) . " m³)";
+            } else {
+                $lines[] = "\n  ℹ️ Последний расход не обнаружен.";
+                if ($lastCons && $lastCons['first_date']) {
+                    $lines[] = "  Первые доступные показания в системе: " . date('d.m.Y', strtotime($lastCons['first_date'])) . " (значение не менялось).";
+                }
+            }
+            
             $lines[] = "";
         }
     } else {
