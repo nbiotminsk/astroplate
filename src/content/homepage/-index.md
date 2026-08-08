@@ -128,7 +128,7 @@ modules:
       tag: Только для юрлиц
       subtitle: УСПД для АСКУЭ — 4 входа, 2 SIM-слота, батарея на 10 лет
       image: /images/store/rtu102-nb-iot.png
-      price: 260 BYN
+      price: 406 BYN
       borderColor: "#7360F2"
       features:
         - NB-IoT Cat NB2 — автономность до 10 лет
