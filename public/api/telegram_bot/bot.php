@@ -355,6 +355,36 @@ function get_device_channels_serials(array $config, string $deviceId): array
     return $serials;
 }
 
+function extract_record_value(array $rec): ?float
+{
+    foreach (['last_value', 'value', 'meter_reading', 'meter_value', 'pulse', 'counter'] as $key) {
+        if (isset($rec[$key]) && is_numeric($rec[$key])) {
+            return (float)$rec[$key];
+        }
+    }
+    if (isset($rec['channels']) && is_array($rec['channels'])) {
+        foreach ($rec['channels'] as $c) {
+            if (is_array($c)) {
+                $val = extract_record_value($c);
+                if ($val !== null) {
+                    return $val;
+                }
+            }
+        }
+    }
+    return null;
+}
+
+function extract_record_date(array $rec): ?string
+{
+    foreach (['last_value_date', 'date', 'created_at', 'timestamp', 'time'] as $key) {
+        if (!empty($rec[$key]) && is_string($rec[$key])) {
+            return $rec[$key];
+        }
+    }
+    return null;
+}
+
 function build_report(array $config, array $device): string
 {
     $name     = $device['name'];
@@ -372,8 +402,15 @@ function build_report(array $config, array $device): string
 
     if (!empty($values['payload'])) {
         foreach ($values['payload'] as $v) {
-            $ch = $v['channel_number'] ?? 1;
-            $channelsHistory[$ch][] = $v;
+            if (isset($v['channels']) && is_array($v['channels'])) {
+                foreach ($v['channels'] as $idx => $chData) {
+                    $chNum = $chData['channel_number'] ?? ($idx + 1);
+                    $channelsHistory[$chNum][] = is_array($chData) ? array_merge($v, $chData) : $v;
+                }
+            } else {
+                $ch = $v['channel_number'] ?? 1;
+                $channelsHistory[$ch][] = $v;
+            }
         }
         ksort($channelsHistory);
     }
@@ -386,19 +423,19 @@ function build_report(array $config, array $device): string
             $latest = $history[0] ?? null;
             $prev   = $history[1] ?? null;
 
-            $lastVal     = $latest['last_value'] ?? $latest['value'] ?? null;
-            $lastValDate = $latest['last_value_date'] ?? $latest['date'] ?? null;
-            $dateStr     = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
-            $valStr      = $lastVal !== null ? (string)$lastVal : '—';
+            $lastVal = $latest ? extract_record_value($latest) : null;
+            $lastValDate = $latest ? extract_record_date($latest) : null;
+            $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
+            $valStr  = $lastVal !== null ? (string)$lastVal : '—';
 
             $meterSerial = $channelSerials[$chNum] ?? null;
             $meterLabel  = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
 
             $diffStr = '';
             if ($latest !== null && $prev !== null) {
-                $prevVal = $prev['last_value'] ?? $prev['value'] ?? null;
-                if ($lastVal !== null && $prevVal !== null && is_numeric($lastVal) && is_numeric($prevVal)) {
-                    $diff = (float)$lastVal - (float)$prevVal;
+                $prevVal = extract_record_value($prev);
+                if ($lastVal !== null && $prevVal !== null) {
+                    $diff = $lastVal - $prevVal;
                     $formattedDiff = ($diff > 0 ? '+' : '') . round($diff, 4);
                     $diffStr = " (<b>{$formattedDiff} m³</b>)";
                 }
@@ -415,7 +452,7 @@ function build_report(array $config, array $device): string
     // Температура
     $temp = get_temperature($config, $deviceId, 1);
     if ($temp !== null) {
-        $t = $temp['value'] ?? null;
+        $t = extract_record_value($temp) ?? $temp['value'] ?? null;
         $lines[] = "\xF0\x9F\x92\xA8 Температура: <b>" . ($t !== null ? $t : '—') . " °C</b>";
     } else {
         $lines[] = "\xF0\x9F\x92\xA8 Температура: нет данных";
@@ -424,7 +461,7 @@ function build_report(array $config, array $device): string
     // Батарея
     $bat = get_battery($config, $deviceId, 1);
     if ($bat !== null) {
-        $b = $bat['value'] ?? null;
+        $b = extract_record_value($bat) ?? $bat['value'] ?? null;
         $lines[] = "\xF0\x9F\x94\x8B Батарея: <b>" . ($b !== null ? $b : '—') . " V</b>";
     } else {
         $lines[] = "\xF0\x9F\x94\x8B Батарея: нет данных";
