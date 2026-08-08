@@ -54,7 +54,7 @@ function load_json_with_lock(string $filePath): array
     flock($fp, LOCK_UN);
     fclose($fp);
 
-    return json_decode((string)$content, true) ?: [];
+    return json_decode((string) $content, true) ?: [];
 }
 
 function load_registered_devices(): array
@@ -65,8 +65,8 @@ function load_registered_devices(): array
 function register_custom_device(string $serial, string $uuid, string $name): void
 {
     $devices = load_registered_devices();
-    $devices[(int)$serial] = [
-        'name'      => $name,
+    $devices[(int) $serial] = [
+        'name' => $name,
         'device_id' => $uuid,
     ];
     atomic_write_json(custom_devices_file(), $devices);
@@ -135,8 +135,8 @@ function build_main_reply_keyboard(string $chatId): array
     ];
 
     return [
-        'keyboard'          => $keyboard,
-        'resize_keyboard'   => true,
+        'keyboard' => $keyboard,
+        'resize_keyboard' => true,
         'one_time_keyboard' => false,
     ];
 }
@@ -149,8 +149,8 @@ function http_get(string $url, array $headers = []): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CONNECTTIMEOUT => 5,
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_HTTPHEADER     => $headers,
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_HTTPHEADER => $headers,
     ]);
     $body = curl_exec($ch);
     if ($body === false) {
@@ -161,7 +161,7 @@ function http_get(string $url, array $headers = []): array
     $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     curl_close($ch);
 
-    return [$code, json_decode((string)$body, true)];
+    return [$code, json_decode((string) $body, true)];
 }
 
 function http_post_json(string $url, array $payload, array $headers = []): array
@@ -170,10 +170,10 @@ function http_post_json(string $url, array $payload, array $headers = []): array
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_CONNECTTIMEOUT => 5,
-        CURLOPT_TIMEOUT        => 30,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => json_encode($payload, JSON_UNESCAPED_UNICODE),
-        CURLOPT_HTTPHEADER     => array_merge(
+        CURLOPT_TIMEOUT => 30,
+        CURLOPT_POST => true,
+        CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
+        CURLOPT_HTTPHEADER => array_merge(
             ['Content-Type: application/json'],
             $headers
         ),
@@ -187,7 +187,7 @@ function http_post_json(string $url, array $payload, array $headers = []): array
     $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
     curl_close($ch);
 
-    return [$code, json_decode((string)$data, true)];
+    return [$code, json_decode((string) $data, true)];
 }
 
 /* ==================== UnicBoard API ==================== */
@@ -206,11 +206,22 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10): 
     $body = ['devices_id' => [$deviceUuid]];
     [$code, $resp] = http_post_json($url, $body, unicboard_headers($config));
 
+    $payload = $resp['payload'] ?? [];
+    if (empty($payload)) {
+        // Fallback: запрашиваем прямой GET-эндпоинт устройства
+        $fallbackUrl = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceUuid . '/values?limit=' . $limit;
+        [$fbCode, $fbResp] = http_get($fallbackUrl, unicboard_headers($config));
+        if ($fbCode === 200 && !empty($fbResp['payload'])) {
+            $payload = $fbResp['payload'];
+            $code = $fbCode;
+        }
+    }
+
     return [
         'http_code' => $code,
-        'payload'   => $resp['payload'] ?? [],
-        'errors'    => $resp['errors'] ?? [],
-        'ok'        => $resp['ok'] ?? false,
+        'payload' => $payload,
+        'errors' => $resp['errors'] ?? [],
+        'ok' => $resp['ok'] ?? false,
     ];
 }
 
@@ -248,8 +259,8 @@ function tg_api(string $method, array $params, string $token): array
 function send_message(string $chatId, string $text, string $token, ?array $replyMarkup = null): void
 {
     $params = [
-        'chat_id'    => $chatId,
-        'text'       => $text,
+        'chat_id' => $chatId,
+        'text' => $text,
         'parse_mode' => 'HTML',
     ];
     if ($replyMarkup !== null) {
@@ -262,7 +273,7 @@ function answer_callback_query(string $callbackQueryId, string $token, string $t
 {
     tg_api('answerCallbackQuery', [
         'callback_query_id' => $callbackQueryId,
-        'text'              => $text,
+        'text' => $text,
     ], $token);
 }
 
@@ -287,30 +298,30 @@ function device_lookup(array $config, string $input): ?array
     }
 
     // 1. Проверяем локальный конфиг config.php
-    if (isset($config['devices'][(int)$input])) {
-        $dev = $config['devices'][(int)$input];
-        $dev['serial_number'] = (string)$input;
+    if (isset($config['devices'][(int) $input])) {
+        $dev = $config['devices'][(int) $input];
+        $dev['serial_number'] = (string) $input;
         return $dev;
     }
 
     foreach ($config['devices'] as $id => $info) {
         if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-            $info['serial_number'] = (string)$id;
+            $info['serial_number'] = (string) $id;
             return $info;
         }
     }
 
     // 2. Проверяем пользовательское динамическое хранилище registered_devices.json
     $customDevices = load_registered_devices();
-    if (isset($customDevices[(int)$input])) {
-        $dev = $customDevices[(int)$input];
-        $dev['serial_number'] = (string)$input;
+    if (isset($customDevices[(int) $input])) {
+        $dev = $customDevices[(int) $input];
+        $dev['serial_number'] = (string) $input;
         return $dev;
     }
 
     foreach ($customDevices as $id => $info) {
         if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-            $info['serial_number'] = (string)$id;
+            $info['serial_number'] = (string) $id;
             return $info;
         }
     }
@@ -318,14 +329,14 @@ function device_lookup(array $config, string $input): ?array
     // 3. Если не найден — пробуем динамически запросить список приборов через API
     $apiDevices = get_all_devices($config);
     foreach ($apiDevices as $item) {
-        $serial = (string)($item['manufacturer_serial_number'] ?? '');
-        $devId  = $item['id'] ?? '';
-        $name   = $item['device_modification']['name'] ?? $item['device_manufacturer']['name'] ?? "Устройство {$serial}";
+        $serial = (string) ($item['manufacturer_serial_number'] ?? '');
+        $devId = $item['id'] ?? '';
+        $name = $item['device_modification']['name'] ?? $item['device_manufacturer']['name'] ?? "Устройство {$serial}";
 
         if ($serial === $input || mb_strtolower($name, 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
             return [
-                'name'          => $name,
-                'device_id'     => $devId,
+                'name' => $name,
+                'device_id' => $devId,
                 'serial_number' => $serial,
             ];
         }
@@ -349,7 +360,7 @@ function get_device_channels_serials(array $config, string $deviceId): array
     foreach ($resp['payload']['device_channel'] as $idx => $ch) {
         $chNum = $idx + 1;
         if (isset($ch['serial_number'])) {
-            $serials[$chNum] = (string)$ch['serial_number'];
+            $serials[$chNum] = (string) $ch['serial_number'];
         }
     }
     return $serials;
@@ -359,7 +370,7 @@ function extract_record_value(array $rec): ?float
 {
     foreach (['last_value', 'value', 'meter_reading', 'meter_value', 'pulse', 'counter'] as $key) {
         if (isset($rec[$key]) && is_numeric($rec[$key])) {
-            return (float)$rec[$key];
+            return (float) $rec[$key];
         }
     }
     if (isset($rec['channels']) && is_array($rec['channels'])) {
@@ -387,10 +398,10 @@ function extract_record_date(array $rec): ?string
 
 function build_report(array $config, array $device): string
 {
-    $name     = $device['name'];
+    $name = $device['name'];
     $deviceId = $device['device_id'];
 
-    $lines   = [];
+    $lines = [];
     $lines[] = "\xF0\x9F\x93\xB1 <b>{$name}</b>";
 
     // Серийные номера счетчиков воды по каналам
@@ -421,15 +432,15 @@ function build_report(array $config, array $device): string
 
         foreach ($channelsHistory as $chNum => $history) {
             $latest = $history[0] ?? null;
-            $prev   = $history[1] ?? null;
+            $prev = $history[1] ?? null;
 
             $lastVal = $latest ? extract_record_value($latest) : null;
             $lastValDate = $latest ? extract_record_date($latest) : null;
             $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
-            $valStr  = $lastVal !== null ? (string)$lastVal : '—';
+            $valStr = $lastVal !== null ? (string) $lastVal : '—';
 
             $meterSerial = $channelSerials[$chNum] ?? null;
-            $meterLabel  = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
+            $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
 
             $diffStr = '';
             if ($latest !== null && $prev !== null) {
@@ -477,13 +488,13 @@ function build_report(array $config, array $device): string
 /** Архив за текущий месяц (от 1 числа до конца месяца) */
 function build_month_report(array $config, array $device): string
 {
-    $name     = $device['name'];
+    $name = $device['name'];
     $deviceId = $device['device_id'];
 
     $firstDay = date('01.m.Y 00:00');
-    $lastDay  = date('t.m.Y 23:59');
+    $lastDay = date('t.m.Y 23:59');
 
-    $lines   = [];
+    $lines = [];
     $lines[] = "\xF0\x9F\x93\x85 <b>Архив за текущий месяц ({$name})</b>";
     $lines[] = "Период: <b>{$firstDay}</b> — <b>{$lastDay}</b>\n";
 
@@ -491,7 +502,7 @@ function build_month_report(array $config, array $device): string
 
     // Фильтруем за текущий месяц
     $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
-    $endMonthTs   = strtotime(date('Y-m-t 23:59:59'));
+    $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
 
     $values = get_device_values($config, $deviceId, 100);
     $channelsMonthData = [];
@@ -513,28 +524,28 @@ function build_month_report(array $config, array $device): string
     if (!empty($channelsMonthData)) {
         $totalChannels = count($channelsMonthData);
         foreach ($channelsMonthData as $chNum => $records) {
-            $latestInMonth   = reset($records);
+            $latestInMonth = reset($records);
             $earliestInMonth = end($records);
 
-            $valEnd   = $latestInMonth['last_value'] ?? $latestInMonth['value'] ?? null;
-            $dateEnd  = isset($latestInMonth['last_value_date']) ? date('d.m.Y H:i', strtotime($latestInMonth['last_value_date'])) : '—';
+            $valEnd = $latestInMonth['last_value'] ?? $latestInMonth['value'] ?? null;
+            $dateEnd = isset($latestInMonth['last_value_date']) ? date('d.m.Y H:i', strtotime($latestInMonth['last_value_date'])) : '—';
 
-            $valStart  = $earliestInMonth['last_value'] ?? $earliestInMonth['value'] ?? null;
+            $valStart = $earliestInMonth['last_value'] ?? $earliestInMonth['value'] ?? null;
             $dateStart = isset($earliestInMonth['last_value_date']) ? date('d.m.Y H:i', strtotime($earliestInMonth['last_value_date'])) : '—';
 
             $meterSerial = $channelSerials[$chNum] ?? null;
-            $meterLabel  = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
-            $prefix      = $totalChannels > 1 ? "{$chNum}. " : "";
+            $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
+            $prefix = $totalChannels > 1 ? "{$chNum}. " : "";
 
             $valStartStr = $valStart !== null ? "{$valStart} m³" : '—';
-            $valEndStr   = $valEnd !== null ? "{$valEnd} m³" : '—';
+            $valEndStr = $valEnd !== null ? "{$valEnd} m³" : '—';
 
             $lines[] = "<b>{$prefix}{$meterLabel}:</b>";
             $lines[] = "  • Нач. месяца ({$dateStart}): <b>{$valStartStr}</b>";
             $lines[] = "  • Кон. периода ({$dateEnd}): <b>{$valEndStr}</b>";
 
             if ($valEnd !== null && $valStart !== null && is_numeric($valEnd) && is_numeric($valStart)) {
-                $monthConsumption = (float)$valEnd - (float)$valStart;
+                $monthConsumption = (float) $valEnd - (float) $valStart;
                 $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . round($monthConsumption, 4);
                 $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
             }
@@ -572,7 +583,7 @@ function user_meters_list(array $config, string $chatId): string
         return "У вас пока нет сохраненных счетчиков.\n\nВведите серийный номер прибора или команду:\n<code>/add 8527038</code>";
     }
 
-    $lines   = [];
+    $lines = [];
     $lines[] = "📋 <b>Ваши сохраненные счетчики:</b>\n";
     foreach ($meters as $serial => $name) {
         $lines[] = "• <b>{$name}</b> (серийный №: <code>{$serial}</code>)";
@@ -598,11 +609,11 @@ function handle_update(array $update, array $config): void
 {
     // Обработка Callback Query (нажатие инлайн-кнопок)
     if (isset($update['callback_query'])) {
-        $cb        = $update['callback_query'];
-        $cbId      = $cb['id'];
-        $chatId    = (string)$cb['message']['chat']['id'];
-        $token     = $config['telegram_token'];
-        $data      = $cb['data'] ?? '';
+        $cb = $update['callback_query'];
+        $cbId = $cb['id'];
+        $chatId = (string) $cb['message']['chat']['id'];
+        $token = $config['telegram_token'];
+        $data = $cb['data'] ?? '';
 
         if (str_starts_with($data, 'month_')) {
             $serial = str_replace('month_', '', $data);
@@ -646,9 +657,9 @@ function handle_update(array $update, array $config): void
         return;
     }
 
-    $chatId  = (string)$message['chat']['id'];
-    $token   = $config['telegram_token'];
-    $text    = trim($message['text']);
+    $chatId = (string) $message['chat']['id'];
+    $token = $config['telegram_token'];
+    $text = trim($message['text']);
     $mainKey = build_main_reply_keyboard($chatId);
 
     if ($text === '/start' || $text === '/help') {
@@ -672,8 +683,8 @@ function handle_update(array $update, array $config): void
         // $parts[0] = '/add', $parts[1] = serial/id, $parts[2] = uuid
         if (count($parts) >= 3) {
             $serial = $parts[1];
-            $uuid   = $parts[2];
-            $name   = count($parts) >= 4 ? implode(' ', array_slice($parts, 3)) : "Счетчик {$serial}";
+            $uuid = $parts[2];
+            $name = count($parts) >= 4 ? implode(' ', array_slice($parts, 3)) : "Счетчик {$serial}";
 
             if (!preg_match('/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i', $uuid)) {
                 send_message($chatId, "❌ Неверный формат UUID. Укажите корректный UUID прибора.", $token, $mainKey);
@@ -710,11 +721,11 @@ function handle_update(array $update, array $config): void
         return;
     }
 
-    $serial     = $device['serial_number'] ?? $text;
+    $serial = $device['serial_number'] ?? $text;
     $userMeters = get_user_meters($chatId);
-    $isAdded    = isset($userMeters[$serial]);
+    $isAdded = isset($userMeters[$serial]);
 
-    $report   = build_report($config, $device);
+    $report = build_report($config, $device);
     $keyboard = build_device_keyboard($serial, $isAdded);
 
     send_message($chatId, $report, $token, $keyboard);
@@ -747,8 +758,8 @@ function run_webhook(array $config): void
         exit;
     }
 
-    $raw    = file_get_contents('php://input');
-    $update = json_decode((string)$raw, true);
+    $raw = file_get_contents('php://input');
+    $update = json_decode((string) $raw, true);
     if (is_array($update)) {
         handle_update($update, $config);
     }
