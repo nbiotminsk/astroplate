@@ -62,6 +62,12 @@ if ($requestType === 'meter_photo') {
         http_response_code(400);
         exit();
     }
+} elseif ($requestType === 'callback') {
+    if (empty($phone)) {
+        echo json_encode(['error' => 'Missing required field (phone)']);
+        http_response_code(400);
+        exit();
+    }
 } else {
     if (empty($name) || empty($phone)) {
         echo json_encode(['error' => 'Missing required fields (name, phone)']);
@@ -129,6 +135,12 @@ if ($requestType === 'checkout') {
     $messageText .= "<b>Имя:</b> {$name}\n";
     $messageText .= "<b>Телефон:</b> {$phone}\n";
     $messageText .= "<b>Адрес установки:</b> {$address}\n";
+    $messageText .= "📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
+} elseif ($requestType === 'callback') {
+    $typeLabel = ($checkoutType === 'yur') ? "🏢 Юрлицо" : "👤 Физлицо";
+    $messageText = "📞 <b>Заявка на обратный звонок (Teleofis24)</b>\n\n";
+    $messageText .= "<b>Тип клиента:</b> {$typeLabel}\n";
+    $messageText .= "<b>Телефон:</b> {$phone}\n";
     $messageText .= "📅 Дата: " . $currentTime->format('d.m.Y H:i:s');
 } else {
     echo json_encode(['error' => 'Unknown request type']);

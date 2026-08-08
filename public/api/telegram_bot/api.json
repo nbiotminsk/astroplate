@@ -1,0 +1,3456 @@
+{
+    "components": {
+        "requestBodies": {
+            "da_get_api_user_device_list_request_body": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_device_list_request_body_schema"
+                        }
+                    }
+                },
+                "description": "None",
+                "required": true
+            },
+            "da_get_api_user_devices_values_request_body": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_devices_values_request_body_schema"
+                        }
+                    }
+                },
+                "description": "None",
+                "required": true
+            }
+        },
+        "responses": {
+            "da_get_api_device_battery_level_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_battery_level_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_battery_level response"
+            },
+            "da_get_api_device_clock_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_clock_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_clock response"
+            },
+            "da_get_api_device_event_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_event_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_event response"
+            },
+            "da_get_api_device_profile_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_profile_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_profile response"
+            },
+            "da_get_api_device_temperature_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_temperature_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_temperature response"
+            },
+            "da_get_api_device_uptime_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_device_uptime_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_device_uptime response"
+            },
+            "da_get_api_user_all_devices_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_all_devices_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_user_all_devices response"
+            },
+            "da_get_api_user_device_list_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_device_list_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_user_device_list response"
+            },
+            "da_get_api_user_devices_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_devices_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_user_devices response"
+            },
+            "da_get_api_user_devices_values_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/da_get_api_user_devices_values_response_schema"
+                        }
+                    }
+                },
+                "description": "da_get_api_user_devices_values response"
+            },
+            "permissions_response": {
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": "#/components/schemas/permissions_response_schema"
+                        }
+                    }
+                },
+                "description": "permissions response"
+            }
+        },
+        "schemas": {
+            "da_get_api_device_battery_level_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "date": {
+                                    "description": "device battery level date",
+                                    "format": "date-time",
+                                    "title": "Date",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "sensor_id": {
+                                    "description": "device battery identifier",
+                                    "title": "Battery ID",
+                                    "type": "integer"
+                                },
+                                "value": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device battery level value",
+                                    "title": "Value"
+                                }
+                            },
+                            "required": [
+                                "device_id",
+                                "sensor_id",
+                                "date"
+                            ],
+                            "title": "ApiDeviceBatteryLevelResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_device_clock_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "clock_id": {
+                                    "description": "clock identifier",
+                                    "title": "Clock ID",
+                                    "type": "integer"
+                                },
+                                "date": {
+                                    "description": "device clock date",
+                                    "format": "date-time",
+                                    "title": "Date",
+                                    "type": "string"
+                                },
+                                "device_clock": {
+                                    "description": "device clock",
+                                    "format": "date-time",
+                                    "title": "Device clock",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "device_tz": {
+                                    "description": "device time zone",
+                                    "title": "Device TimeZone",
+                                    "type": "string"
+                                },
+                                "out_of_sync_s": {
+                                    "description": "device clock out of sync in seconds",
+                                    "title": "Out of sync",
+                                    "type": "number"
+                                },
+                                "out_of_sync_type": {
+                                    "description": "Enumeration of clock sync states",
+                                    "enum": [
+                                        "synced",
+                                        "out_of_sync_warning",
+                                        "out_of_sync_critical",
+                                        "unsynchronized"
+                                    ],
+                                    "title": "DeviceClockOutOfSyncType",
+                                    "type": "string"
+                                },
+                                "tz_offset_s": {
+                                    "description": "time zone offset in seconds",
+                                    "title": "TimeZone offset",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "device_id",
+                                "clock_id",
+                                "device_clock",
+                                "date",
+                                "device_tz",
+                                "tz_offset_s",
+                                "out_of_sync_s",
+                                "out_of_sync_type"
+                            ],
+                            "title": "ApiDeviceClockResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_device_event_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "data": {
+                                    "anyOf": [
+                                        {
+                                            "additionalProperties": true,
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "message event data",
+                                    "title": "Event data"
+                                },
+                                "date": {
+                                    "description": "message event date",
+                                    "format": "date-time",
+                                    "title": "Event date",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "type": {
+                                    "description": "Enumeration of events for devices",
+                                    "enum": [
+                                        "SYS_NO_DATA",
+                                        "ABNORMAL_CONSUMPTION_DETECTED",
+                                        "BATTERY_IS_LOW",
+                                        "BATTERY_IS_LOW_2",
+                                        "BATTERY_CASE_WAS_OPENED",
+                                        "MAGNET_WAS_DETECTED",
+                                        "CASE_WAS_OPENED",
+                                        "FLOW_REVERSE",
+                                        "FLOW_SPEED_OVER_LIMIT",
+                                        "FLOW_SPEED_LOWER_LIMIT",
+                                        "CONTINUES_CONSUMPTION",
+                                        "NO_WATER",
+                                        "NO_RESOURCE",
+                                        "BATTERY_WARNING",
+                                        "BATTERY_OR_TEMPERATURE_LIMITS",
+                                        "TEMPERATURE_LIMIT",
+                                        "LOW_AMBIENT_TEMPERATURE",
+                                        "PRESSURE_LIMIT",
+                                        "LOW_SIGNAL_NBIOT",
+                                        "VALVE_FAILURE",
+                                        "VALVE_LEAKAGE",
+                                        "GAS_CONCENTRATION_LIMIT",
+                                        "RESET",
+                                        "RESET_POWER_ON",
+                                        "RESET_PIN",
+                                        "RESET_LOW_VOLTAGE",
+                                        "RESET_SOFTWARE",
+                                        "RESET_WATCHDOG",
+                                        "RESET_HARD_FAULT",
+                                        "ERROR",
+                                        "ERROR_SENSOR",
+                                        "ERROR_SYSTEM",
+                                        "ERROR_SENSOR_MEASUREMENT",
+                                        "ERROR_SENSOR_TEMPERATURE",
+                                        "ERROR_SENSOR_AMBIENT_TEMPERATURE",
+                                        "ERROR_SENSOR_PRESSURE",
+                                        "ERROR_SENSOR_FLOW",
+                                        "ERROR_MEASUREMENT",
+                                        "ERROR_LOW_VOLTAGE",
+                                        "ERROR_INTERNAL_CLOCK",
+                                        "ERROR_FLASH",
+                                        "ERROR_EEPROM",
+                                        "ERROR_RADIO",
+                                        "ERROR_DISPLAY",
+                                        "ERROR_PLC",
+                                        "ERROR_RESET",
+                                        "IMPACT_POWER_LOST",
+                                        "IMPACT_MAGNET",
+                                        "IMPACT_CLEAT_TAMPER",
+                                        "IMPACT_RADIO",
+                                        "OTHER",
+                                        "ERROR_METER_SYNC",
+                                        "NONE",
+                                        "SUCCESSFUL_AUTO_DIAGNOSTIC",
+                                        "SETUP_UPDATE",
+                                        "SWITCH_WINTER_DAYLIGHT",
+                                        "SWITCH_SUMMER_DAYLIGHT",
+                                        "RECORD_DATETIME",
+                                        "CHANGE_OFFSET_DAILY_CLOCK",
+                                        "PERMISSION_SWITCH_DAYLIGHT_ON",
+                                        "PERMISSION_SWITCH_DAYLIGHT_OFF",
+                                        "CHANGE_DATE_TIME_SWITCH_DAYLIGHT",
+                                        "ERASE_EEPROM",
+                                        "NULLIFY_TARIFF_ACCUMULATION",
+                                        "NULLIFY_INTERVAL_ACCUMULATION",
+                                        "RESET_PASSWORD",
+                                        "RESET_POWER_LOST_TIME_COUNTER",
+                                        "RESET_MAGNET_IMPACT_TIME_COUNTER",
+                                        "RESET_POWER_INCREASE_TIME_COUNTER",
+                                        "RESET_POWER_DECREASE_TIME_COUNTER",
+                                        "RESET_MAINTS_FREQ_DIVERGENCE_TIME_COUNTER",
+                                        "RESET_POWER_OVER_LIMIT_TIME_COUNTER",
+                                        "CHANGE_CAPACITY_DATA_LCD",
+                                        "CHANGE_TARIFF_METHODS",
+                                        "CHANGE_TARIFF_PROGRAMS",
+                                        "CHANGE_ACTUAL_SEASON_SCHEDULES",
+                                        "CHANGE_CONSUMPTION_LIMIT",
+                                        "CHANGE_LOW_THRESHOLD_VOLTAGE",
+                                        "CHANGE_HIGH_THRESHOLD_VOLTAGE",
+                                        "CHANGE_MAINTS_FREQ_THRESHOLD",
+                                        "CHANGE_THRESHOLD_LOW_CONSUMPTION",
+                                        "RECHARGE_ENERGY_PAYMENT",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_INTERNAL_CLOCK",
+                                        "ABNORMAL_COUNTER_AUTOSTART",
+                                        "EXTERNAL_POWER_LOST",
+                                        "EXTERNAL_POWER_DETECTED",
+                                        "START_POWER_OVER_LIMIT",
+                                        "STOP_POWER_OVER_LIMIT",
+                                        "ENERGY_OVER_LIMIT_1",
+                                        "ENERGY_OVER_LIMIT_2",
+                                        "ENERGY_OVER_LIMIT_3",
+                                        "WRONG_PASSWORD_BLOCK",
+                                        "WRONG_PASSWORD_APPEAL",
+                                        "EXHAUST_DAILY_BATTERY_LIFE_LIMIT",
+                                        "START_MAGNET_IMPACT",
+                                        "STOP_MAGNET_IMPACT",
+                                        "VIOLATION_TERMINAL_BLOCK_SEAL",
+                                        "RECOVERY_TERMINAL_BLOCK_SEAL",
+                                        "VIOLATION_CASE_SEAL",
+                                        "RECOVERY_CASE_SEAL",
+                                        "TIME_OUT_SYNC_LIMIT",
+                                        "CRITICAL_DIVERGENCE_TIME",
+                                        "OVERHEAT_COUNTER_START",
+                                        "OVERHEAT_COUNTER_STOP",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_MEMORY",
+                                        "LOW_BATTERY_CAPACITY",
+                                        "RECOVERY_BATTERY_WORKING_VOLTAGE",
+                                        "LOW_CONSUMPTION",
+                                        "RESET_FLAG_LOW_CONSUMPTION",
+                                        "CHANGE_VALIDATION_SETTINGS",
+                                        "CHANGE_TARIFFICATION_PARAMETERS",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_MEASUREMENT_BLOCK",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_CALCULATION_BLOCK",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_POWER_BLOCK",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_SCREEN",
+                                        "UNSUCCESSFUL_AUTO_DIAGNOSTIC_RADIO",
+                                        "MAINS_VOLTAGE_LOST_PHASE_A_START",
+                                        "MAINS_VOLTAGE_LOST_PHASE_A_STOP",
+                                        "MAINS_VOLTAGE_LOST_PHASE_B_START",
+                                        "MAINS_VOLTAGE_LOST_PHASE_B_STOP",
+                                        "MAINS_VOLTAGE_LOST_PHASE_C_START",
+                                        "MAINS_VOLTAGE_LOST_PHASE_C_STOP",
+                                        "VOLTAGE_LAYDOWN_PHASE_A_START",
+                                        "VOLTAGE_LAYDOWN_PHASE_A_STOP",
+                                        "VOLTAGE_LAYDOWN_PHASE_B_START",
+                                        "VOLTAGE_LAYDOWN_PHASE_B_STOP",
+                                        "VOLTAGE_LAYDOWN_PHASE_C_START",
+                                        "VOLTAGE_LAYDOWN_PHASE_C_STOP",
+                                        "OVERVOLTAGE_PHASE_A_START",
+                                        "OVERVOLTAGE_PHASE_A_STOP",
+                                        "OVERVOLTAGE_PHASE_B_START",
+                                        "OVERVOLTAGE_PHASE_B_STOP",
+                                        "OVERVOLTAGE_PHASE_C_START",
+                                        "OVERVOLTAGE_PHASE_C_STOP",
+                                        "OVERCURRENT_PHASE_A_START",
+                                        "OVERCURRENT_PHASE_A_STOP",
+                                        "OVERCURRENT_PHASE_B_START",
+                                        "OVERCURRENT_PHASE_B_STOP",
+                                        "OVERCURRENT_PHASE_C_START",
+                                        "OVERCURRENT_PHASE_C_STOP",
+                                        "CURRENT_SUM_THRESHOLD_LOW_START",
+                                        "CURRENT_SUM_THRESHOLD_LOW_STOP",
+                                        "FREQ_OUT_PHASE_A_START",
+                                        "FREQ_OUT_PHASE_A_STOP",
+                                        "FREQ_OUT_PHASE_B_START",
+                                        "FREQ_OUT_PHASE_B_STOP",
+                                        "FREQ_OUT_PHASE_C_START",
+                                        "FREQ_OUT_PHASE_C_STOP",
+                                        "PHASE_ORDER_DISTURBANCE_START",
+                                        "PHASE_ORDER_DISTURBANCE_STOP",
+                                        "RADIO_IMPACT_START",
+                                        "RADIO_IMPACT_STOP",
+                                        "DAYLIGHT_TIME_SWITCH",
+                                        "DAYLIGHT_TIME_MODE_DATES_CHANGE",
+                                        "INTERNAL_CLOCK_SYNC",
+                                        "METROLOGY_CHANGE",
+                                        "PROFILE_CONF_CHANGE",
+                                        "TARIFFICATION_METHOD_CHANGE",
+                                        "PERMISSION_CHANGE_SETTINGS_POWER_CONTROL",
+                                        "CONTROL_LEVEL_MAINS_CHANGE",
+                                        "PERMISSION_CHANGE_SETTINGS_CONSUMPTION_CONTROL",
+                                        "LOAD_RELAY_CONDITION_SETTINGS_CHANGE",
+                                        "SIGNALIZATION_RELAY_CONDITION_SETTINGS_CHANGE",
+                                        "INTERFACE_SIGNALIZATION_CONDITION_SETTINGS_CHANGE",
+                                        "INDICATION_SETTINGS_CHANGE",
+                                        "SOUND_SIGNAL_CONDITION_SETTINGS_CHANGE",
+                                        "LOAD_RELAY_STATE_CHANGE",
+                                        "SIGNALIZATION_RELAY_STATE_CHANGE",
+                                        "START_ALTERNATING_MAGNET_IMPACT",
+                                        "STOP_ALTERNATING_MAGNET_IMPACT",
+                                        "SYSTEM__CIRCUIT_BREAK_T_SENSOR_1",
+                                        "SYSTEM__CIRCUIT_BREAK_T_SENSOR_2",
+                                        "SYSTEM__CIRCUIT_BREAK_T_SENSOR_3",
+                                        "SYSTEM__ERROR_DELTA_T",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MIN_CHANNEL_RATE_1",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MIN_CHANNEL_RATE_2",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MIN_CHANNEL_RATE_3",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MAX_CHANNEL_RATE_1",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MAX_CHANNEL_RATE_2",
+                                        "SYSTEM__CONSUMPTION_LOWER_G_MAX_CHANNEL_RATE_3",
+                                        "SYSTEM__NO_COOLANT_CHANNEL_RATE_1",
+                                        "SYSTEM__NO_COOLANT_CHANNEL_RATE_2",
+                                        "SYSTEM__NO_COOLANT_CHANNEL_RATE_3",
+                                        "SYSTEM__CIRCUIT_BREAK_STIMULATION_CHANNEL_RATE_1",
+                                        "SYSTEM__CIRCUIT_BREAK_STIMULATION_CHANNEL_RATE_2",
+                                        "SYSTEM__CIRCUIT_BREAK_PRESSURE_SENSOR_1",
+                                        "SYSTEM__CIRCUIT_BREAK_PRESSURE_SENSOR_2",
+                                        "SYSTEM__CIRCUIT_BREAK_PRESSURE_SENSOR_3",
+                                        "SYSTEM__REVERSE",
+                                        "DEVICE__POWER_SUPPLY_LOST",
+                                        "DEVICE__POWER_SUPPLY_ENABLED",
+                                        "DEVICE__COMMON_SETTINGS_CHANGED",
+                                        "DEVICE__ALARM_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_OVERRATE_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_OVERRATE_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_UNDERRATE_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_UNDERRATE_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_T_HIGH_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_T_HIGH_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_T_LOW_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_T_LOW_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_DELTA_T_HIGH_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_DELTA_T_HIGH_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_DELTA_T_LOW_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_DELTA_T_LOW_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_POWER_HIGH_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_POWER_HIGH_DIGITAL_INPUT_2",
+                                        "DEVICE__ALARM_POWER_LOW_DIGITAL_INPUT_1",
+                                        "DEVICE__ALARM_POWER_LOW_DIGITAL_INPUT_2",
+                                        "DEVICE__MEASURE_CHANNELS_SETTINGS_CHANGED",
+                                        "DEVICE__SYSTEM_SETTINGS_CHANGED_1",
+                                        "DEVICE__SYSTEM_SETTINGS_CHANGED_2",
+                                        "DEVICE__SYSTEM_SETTINGS_CHANGED_3",
+                                        "DEVICE__SYSTEM_SETTINGS_CHANGED_4",
+                                        "DEVICE__DIGITAL_I_O_SETTINGS_CHANGED",
+                                        "DEVICE__DATETIME_CHANGED",
+                                        "DEVICE__ETHERNET_SETTINGS_CHANGED",
+                                        "INCORRECT_PHASE_SEQUENCE_START",
+                                        "INCORRECT_PHASE_SEQUENCE_STOP",
+                                        "EXPORT_PHASE_A_START",
+                                        "EXPORT_PHASE_A_STOP",
+                                        "EXPORT_PHASE_B_START",
+                                        "EXPORT_PHASE_B_STOP",
+                                        "EXPORT_PHASE_C_START",
+                                        "EXPORT_PHASE_C_STOP",
+                                        "POWER_OFF",
+                                        "POWER_ON",
+                                        "POWER_OFF_REMOTE",
+                                        "POWER_ON_REMOTE",
+                                        "PERMISSION_TURN_ON_CLIENT",
+                                        "LOCAL_POWER_OFF_POWER_OVER_LIMIT",
+                                        "LOCAL_POWER_OFF_VOLTAGE_OVER_LIMIT",
+                                        "LOCAL_POWER_ON_VOLTAGE_NORMAL_LEVEL_RETURN",
+                                        "LOCAL_POWER_OFF_TEMPERATURE_OVER_LIMIT",
+                                        "BACKUP_POWER_ON",
+                                        "BACKUP_POWER_OFF",
+                                        "SET_DATETIME",
+                                        "CLEAN_MONTH_JOURNAL",
+                                        "CLEAN_DAY_JOURNAL",
+                                        "CLEAN_VOLTAGE_JOURNAL",
+                                        "CLEAN_CURRENT_JOURNAL",
+                                        "CLEAN_ON_OFF_JOURNAL",
+                                        "CLEAN_EXTERNAL_IMPACT_JOURNAL",
+                                        "MONTHLY_JOURNAL_RECORD_VALUES",
+                                        "CHANGE_AUTHENTICATION_KEY_LOW_PRIVACY",
+                                        "CHANGE_AUTHENTICATION_KEY_HIGH_PRIVACY",
+                                        "UPDATE_SOFTWARE",
+                                        "TIME_CORRECTION",
+                                        "CHANGE_CONNECTION_SCHEME",
+                                        "MAGNETIC_FIELD_START",
+                                        "MAGNETIC_FIELD_STOP",
+                                        "ACTIVATE_TERMINAL_BLOCK_SEAL",
+                                        "ACTIVATE_CASE_SEAL",
+                                        "INTERFACE_DISCONNECT",
+                                        "INTERFACE_CONNECT",
+                                        "INTERFACE_UNAUTHORIZED_ACCESS_ATTEMPT",
+                                        "PROTOCOL_VIOLATION",
+                                        "DEVICE_INITIALIZATION",
+                                        "MEASUREMENT_BLOCK_ERROR",
+                                        "MEASUREMENT_BLOCK_NORMAL",
+                                        "CALCULATION_BLOCK_ERROR",
+                                        "CALCULATION_BLOCK_NORMAL",
+                                        "REAL_TIME_CLOCK_ERROR",
+                                        "REAL_TIME_CLOCK_NORMAL",
+                                        "POWER_BLOCK_ERROR",
+                                        "POWER_BLOCK_NORMAL",
+                                        "MEMORY_BLOCK_ERROR",
+                                        "MEMORY_BLOCK_NORMAL"
+                                    ],
+                                    "title": "IntegrationV0MessageEvent",
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "message event value",
+                                    "title": "Event value"
+                                }
+                            },
+                            "required": [
+                                "device_id",
+                                "type",
+                                "date"
+                            ],
+                            "title": "ApiDeviceEventResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_device_profile_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "date_end": {
+                                    "description": "device profile date end",
+                                    "format": "date-time",
+                                    "title": "Date end",
+                                    "type": "string"
+                                },
+                                "date_start": {
+                                    "description": "device profile date start",
+                                    "format": "date-time",
+                                    "title": "Date start",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "granularity_s": {
+                                    "description": "Enumeration of time granulations for profile packets",
+                                    "enum": [
+                                        "MINUTE_01",
+                                        "MINUTE_02",
+                                        "MINUTE_03",
+                                        "MINUTE_04",
+                                        "MINUTE_05",
+                                        "MINUTE_06",
+                                        "MINUTE_10",
+                                        "MINUTE_12",
+                                        "MINUTE_15",
+                                        "MINUTE_20",
+                                        "MINUTE_30",
+                                        "MINUTE_60",
+                                        "SECOND_01",
+                                        "SECOND_02",
+                                        "SECOND_03",
+                                        "SECOND_04",
+                                        "SECOND_05",
+                                        "SECOND_06",
+                                        "SECOND_10",
+                                        "SECOND_12",
+                                        "SECOND_15",
+                                        "SECOND_20",
+                                        "SECOND_30",
+                                        "DAY_1",
+                                        "MONTH_1"
+                                    ],
+                                    "title": "ProfileGranulation",
+                                    "type": "string"
+                                },
+                                "profile_kind": {
+                                    "description": "Enumeration of profile types:\n    energy A-, A+, R-, R+\n    full power S\n    active power P\n    reactive power Q\n    voltage U\n    current I\n    frequency F\n    point factor K",
+                                    "enum": [
+                                        "VOLUME_CONSUMPTION",
+                                        "VOLUME_CONSUMPTION_DELTA",
+                                        "VOLUME_CONSUMPTION_MAX",
+                                        "VOLUME_CONSUMPTION_MIN",
+                                        "VOLUME_CONSUMPTION_AVG",
+                                        "VOLUME_GENERATION",
+                                        "VOLUME_GENERATION_DELTA",
+                                        "VOLUME_GENERATION_MAX",
+                                        "VOLUME_GENERATION_MIN",
+                                        "VOLUME_GENERATION_AVG",
+                                        "ENERGY_A_N",
+                                        "ENERGY_A_N_A",
+                                        "ENERGY_A_N_B",
+                                        "ENERGY_A_N_C",
+                                        "ENERGY_A_N_DELTA",
+                                        "ENERGY_A_N_A_DELTA",
+                                        "ENERGY_A_N_B_DELTA",
+                                        "ENERGY_A_N_C_DELTA",
+                                        "ENERGY_A_N_MAX",
+                                        "ENERGY_A_N_A_MAX",
+                                        "ENERGY_A_N_B_MAX",
+                                        "ENERGY_A_N_C_MAX",
+                                        "ENERGY_A_N_MIN",
+                                        "ENERGY_A_N_A_MIN",
+                                        "ENERGY_A_N_B_MIN",
+                                        "ENERGY_A_N_C_MIN",
+                                        "ENERGY_A_N_AVG",
+                                        "ENERGY_A_N_A_AVG",
+                                        "ENERGY_A_N_B_AVG",
+                                        "ENERGY_A_N_C_AVG",
+                                        "ENERGY_A_P",
+                                        "ENERGY_A_P_A",
+                                        "ENERGY_A_P_B",
+                                        "ENERGY_A_P_C",
+                                        "ENERGY_A_P_DELTA",
+                                        "ENERGY_A_P_A_DELTA",
+                                        "ENERGY_A_P_B_DELTA",
+                                        "ENERGY_A_P_C_DELTA",
+                                        "ENERGY_A_P_MAX",
+                                        "ENERGY_A_P_A_MAX",
+                                        "ENERGY_A_P_B_MAX",
+                                        "ENERGY_A_P_C_MAX",
+                                        "ENERGY_A_P_MIN",
+                                        "ENERGY_A_P_A_MIN",
+                                        "ENERGY_A_P_B_MIN",
+                                        "ENERGY_A_P_C_MIN",
+                                        "ENERGY_A_P_AVG",
+                                        "ENERGY_A_P_A_AVG",
+                                        "ENERGY_A_P_B_AVG",
+                                        "ENERGY_A_P_C_AVG",
+                                        "ENERGY_R_N",
+                                        "ENERGY_R_N_A",
+                                        "ENERGY_R_N_B",
+                                        "ENERGY_R_N_C",
+                                        "ENERGY_R_N_DELTA",
+                                        "ENERGY_R_N_A_DELTA",
+                                        "ENERGY_R_N_B_DELTA",
+                                        "ENERGY_R_N_C_DELTA",
+                                        "ENERGY_R_N_MAX",
+                                        "ENERGY_R_N_A_MAX",
+                                        "ENERGY_R_N_B_MAX",
+                                        "ENERGY_R_N_C_MAX",
+                                        "ENERGY_R_N_MIN",
+                                        "ENERGY_R_N_A_MIN",
+                                        "ENERGY_R_N_B_MIN",
+                                        "ENERGY_R_N_C_MIN",
+                                        "ENERGY_R_N_AVG",
+                                        "ENERGY_R_N_A_AVG",
+                                        "ENERGY_R_N_B_AVG",
+                                        "ENERGY_R_N_C_AVG",
+                                        "ENERGY_R_P",
+                                        "ENERGY_R_P_A",
+                                        "ENERGY_R_P_B",
+                                        "ENERGY_R_P_C",
+                                        "ENERGY_R_P_DELTA",
+                                        "ENERGY_R_P_A_DELTA",
+                                        "ENERGY_R_P_B_DELTA",
+                                        "ENERGY_R_P_C_DELTA",
+                                        "ENERGY_R_P_MAX",
+                                        "ENERGY_R_P_A_MAX",
+                                        "ENERGY_R_P_B_MAX",
+                                        "ENERGY_R_P_C_MAX",
+                                        "ENERGY_R_P_MIN",
+                                        "ENERGY_R_P_A_MIN",
+                                        "ENERGY_R_P_B_MIN",
+                                        "ENERGY_R_P_C_MIN",
+                                        "ENERGY_R_P_AVG",
+                                        "ENERGY_R_P_A_AVG",
+                                        "ENERGY_R_P_B_AVG",
+                                        "ENERGY_R_P_C_AVG",
+                                        "FULL_POWER_ABC",
+                                        "FULL_POWER_A",
+                                        "FULL_POWER_B",
+                                        "FULL_POWER_C",
+                                        "FULL_POWER_DELTA_ABC",
+                                        "FULL_POWER_DELTA_A",
+                                        "FULL_POWER_DELTA_B",
+                                        "FULL_POWER_DELTA_C",
+                                        "FULL_POWER_MAX_ABC",
+                                        "FULL_POWER_MAX_A",
+                                        "FULL_POWER_MAX_B",
+                                        "FULL_POWER_MAX_C",
+                                        "FULL_POWER_MIN_ABC",
+                                        "FULL_POWER_MIN_A",
+                                        "FULL_POWER_MIN_B",
+                                        "FULL_POWER_MIN_C",
+                                        "FULL_POWER_AVG_ABC",
+                                        "FULL_POWER_AVG_A",
+                                        "FULL_POWER_AVG_B",
+                                        "FULL_POWER_AVG_C",
+                                        "ACTIVE_POWER_ABC",
+                                        "ACTIVE_POWER_A",
+                                        "ACTIVE_POWER_B",
+                                        "ACTIVE_POWER_C",
+                                        "ACTIVE_POWER_DELTA_ABC",
+                                        "ACTIVE_POWER_DELTA_A",
+                                        "ACTIVE_POWER_DELTA_B",
+                                        "ACTIVE_POWER_DELTA_C",
+                                        "ACTIVE_POWER_MAX_ABC",
+                                        "ACTIVE_POWER_MAX_A",
+                                        "ACTIVE_POWER_MAX_B",
+                                        "ACTIVE_POWER_MAX_C",
+                                        "ACTIVE_POWER_MIN_ABC",
+                                        "ACTIVE_POWER_MIN_A",
+                                        "ACTIVE_POWER_MIN_B",
+                                        "ACTIVE_POWER_MIN_C",
+                                        "ACTIVE_POWER_AVG_ABC",
+                                        "ACTIVE_POWER_AVG_A",
+                                        "ACTIVE_POWER_AVG_B",
+                                        "ACTIVE_POWER_AVG_C",
+                                        "REACTIVE_POWER_ABC",
+                                        "REACTIVE_POWER_A",
+                                        "REACTIVE_POWER_B",
+                                        "REACTIVE_POWER_C",
+                                        "REACTIVE_POWER_DELTA_ABC",
+                                        "REACTIVE_POWER_DELTA_A",
+                                        "REACTIVE_POWER_DELTA_B",
+                                        "REACTIVE_POWER_DELTA_C",
+                                        "REACTIVE_POWER_MAX_ABC",
+                                        "REACTIVE_POWER_MAX_A",
+                                        "REACTIVE_POWER_MAX_B",
+                                        "REACTIVE_POWER_MAX_C",
+                                        "REACTIVE_POWER_MIN_ABC",
+                                        "REACTIVE_POWER_MIN_A",
+                                        "REACTIVE_POWER_MIN_B",
+                                        "REACTIVE_POWER_MIN_C",
+                                        "REACTIVE_POWER_AVG_ABC",
+                                        "REACTIVE_POWER_AVG_A",
+                                        "REACTIVE_POWER_AVG_B",
+                                        "REACTIVE_POWER_AVG_C",
+                                        "VOLTAGE_ABC",
+                                        "VOLTAGE_A",
+                                        "VOLTAGE_B",
+                                        "VOLTAGE_C",
+                                        "VOLTAGE_DELTA_ABC",
+                                        "VOLTAGE_DELTA_A",
+                                        "VOLTAGE_DELTA_B",
+                                        "VOLTAGE_DELTA_C",
+                                        "VOLTAGE_MAX_ABC",
+                                        "VOLTAGE_MAX_A",
+                                        "VOLTAGE_MAX_B",
+                                        "VOLTAGE_MAX_C",
+                                        "VOLTAGE_MIN_ABC",
+                                        "VOLTAGE_MIN_A",
+                                        "VOLTAGE_MIN_B",
+                                        "VOLTAGE_MIN_C",
+                                        "VOLTAGE_AVG_ABC",
+                                        "VOLTAGE_AVG_A",
+                                        "VOLTAGE_AVG_B",
+                                        "VOLTAGE_AVG_C",
+                                        "CURRENT_ABC",
+                                        "CURRENT_A",
+                                        "CURRENT_B",
+                                        "CURRENT_C",
+                                        "CURRENT_DELTA_ABC",
+                                        "CURRENT_DELTA_A",
+                                        "CURRENT_DELTA_B",
+                                        "CURRENT_DELTA_C",
+                                        "CURRENT_MAX_ABC",
+                                        "CURRENT_MAX_A",
+                                        "CURRENT_MAX_B",
+                                        "CURRENT_MAX_C",
+                                        "CURRENT_MIN_ABC",
+                                        "CURRENT_MIN_A",
+                                        "CURRENT_MIN_B",
+                                        "CURRENT_MIN_C",
+                                        "CURRENT_AVG_ABC",
+                                        "CURRENT_AVG_A",
+                                        "CURRENT_AVG_B",
+                                        "CURRENT_AVG_C",
+                                        "FREQUENCY_ABC",
+                                        "FREQUENCY_A",
+                                        "FREQUENCY_B",
+                                        "FREQUENCY_C",
+                                        "FREQUENCY_DELTA_ABC",
+                                        "FREQUENCY_DELTA_A",
+                                        "FREQUENCY_DELTA_B",
+                                        "FREQUENCY_DELTA_C",
+                                        "FREQUENCY_MAX_ABC",
+                                        "FREQUENCY_MAX_A",
+                                        "FREQUENCY_MAX_B",
+                                        "FREQUENCY_MAX_C",
+                                        "FREQUENCY_MIN_ABC",
+                                        "FREQUENCY_MIN_A",
+                                        "FREQUENCY_MIN_B",
+                                        "FREQUENCY_MIN_C",
+                                        "FREQUENCY_AVG_ABC",
+                                        "FREQUENCY_AVG_A",
+                                        "FREQUENCY_AVG_B",
+                                        "FREQUENCY_AVG_C",
+                                        "POWER_FACTOR_ABC",
+                                        "POWER_FACTOR_A",
+                                        "POWER_FACTOR_B",
+                                        "POWER_FACTOR_C",
+                                        "POWER_FACTOR_DELTA_ABC",
+                                        "POWER_FACTOR_DELTA_A",
+                                        "POWER_FACTOR_DELTA_B",
+                                        "POWER_FACTOR_DELTA_C",
+                                        "POWER_FACTOR_MAX_ABC",
+                                        "POWER_FACTOR_MAX_A",
+                                        "POWER_FACTOR_MAX_B",
+                                        "POWER_FACTOR_MAX_C",
+                                        "POWER_FACTOR_MIN_ABC",
+                                        "POWER_FACTOR_MIN_A",
+                                        "POWER_FACTOR_MIN_B",
+                                        "POWER_FACTOR_MIN_C",
+                                        "POWER_FACTOR_AVG_ABC",
+                                        "POWER_FACTOR_AVG_A",
+                                        "POWER_FACTOR_AVG_B",
+                                        "POWER_FACTOR_AVG_C"
+                                    ],
+                                    "title": "ProfileKind",
+                                    "type": "string"
+                                },
+                                "values": {
+                                    "description": "device profile values",
+                                    "items": {
+                                        "type": "number"
+                                    },
+                                    "title": "Values",
+                                    "type": "array"
+                                },
+                                "values_count": {
+                                    "description": "device profile values count",
+                                    "title": "Values count",
+                                    "type": "integer"
+                                }
+                            },
+                            "required": [
+                                "date_start",
+                                "date_end",
+                                "device_id",
+                                "profile_kind",
+                                "granularity_s",
+                                "values_count",
+                                "values"
+                            ],
+                            "title": "ApiDeviceProfileResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_device_temperature_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "date": {
+                                    "description": "device temperature date",
+                                    "format": "date-time",
+                                    "title": "Date",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "value": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device temperature value",
+                                    "title": "Value"
+                                }
+                            },
+                            "required": [
+                                "device_id",
+                                "date"
+                            ],
+                            "title": "ApiDeviceTemperatureResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_device_uptime_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "channel_id": {
+                                    "anyOf": [
+                                        {
+                                            "format": "uuid4",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "title": "Channel Id"
+                                },
+                                "channel_serial_number": {
+                                    "title": "Channel Serial Number",
+                                    "type": "integer"
+                                },
+                                "date": {
+                                    "format": "date-time",
+                                    "title": "Date",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "format": "uuid4",
+                                    "title": "Device Id",
+                                    "type": "string"
+                                },
+                                "uptime_s": {
+                                    "title": "Uptime S",
+                                    "type": "number"
+                                }
+                            },
+                            "required": [
+                                "device_id",
+                                "channel_serial_number",
+                                "date",
+                                "uptime_s"
+                            ],
+                            "title": "ApiDeviceUptimeResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_all_devices_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "data_gateway_network_device": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "mac": {
+                                                    "description": "data gateway network device mac",
+                                                    "title": "MAC",
+                                                    "type": "integer"
+                                                },
+                                                "network": {
+                                                    "anyOf": [
+                                                        {
+                                                            "properties": {
+                                                                "data_gateway": {
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "description": "data gateway name",
+                                                                            "title": "Name",
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name"
+                                                                    ],
+                                                                    "title": "ApiDataGatewayResponse",
+                                                                    "type": "object"
+                                                                },
+                                                                "name": {
+                                                                    "description": "data gateway networks name",
+                                                                    "title": "Name",
+                                                                    "type": "string"
+                                                                },
+                                                                "type_network": {
+                                                                    "description": "Enumeration of network types",
+                                                                    "enum": [
+                                                                        "input",
+                                                                        "output"
+                                                                    ],
+                                                                    "title": "NetworkTypeEnum",
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name",
+                                                                "type_network",
+                                                                "data_gateway"
+                                                            ],
+                                                            "title": "ApiDataGatewaysNetworkResponse",
+                                                            "type": "object"
+                                                        },
+                                                        {
+                                                            "type": "null"
+                                                        }
+                                                    ],
+                                                    "default": null,
+                                                    "description": "network of data gateway network device",
+                                                    "title": "Network"
+                                                },
+                                                "protocol": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "description": "protocol name",
+                                                            "title": "Name",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name"
+                                                    ],
+                                                    "title": "ApiProtocolResponse",
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "required": [
+                                                "mac",
+                                                "protocol"
+                                            ],
+                                            "title": "ApiDataGatewayNetworkDevicePayloadResponse",
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "data gateway network device of device",
+                                    "title": "Data gateway network device"
+                                },
+                                "date_produced": {
+                                    "anyOf": [
+                                        {
+                                            "format": "date-time",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device date produced",
+                                    "title": "Date produced"
+                                },
+                                "device_channel": {
+                                    "description": "device channel",
+                                    "items": {
+                                        "properties": {
+                                            "device_meter": {
+                                                "description": "device meter of device channel",
+                                                "items": {
+                                                    "properties": {
+                                                        "last_value": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "number"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ],
+                                                            "default": null,
+                                                            "description": "device meter billing last value",
+                                                            "title": "Last value"
+                                                        },
+                                                        "last_value_date": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "format": "date-time",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ],
+                                                            "default": null,
+                                                            "description": "device meter billing last value date",
+                                                            "title": "Last value date"
+                                                        },
+                                                        "unit_multiplier": {
+                                                            "description": "device meter billing unit multiplier",
+                                                            "title": "Unit multiplier",
+                                                            "type": "number"
+                                                        },
+                                                        "value_multiplier": {
+                                                            "description": "device meter billing value multiplier",
+                                                            "title": "Value multiplier",
+                                                            "type": "number"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "value_multiplier",
+                                                        "unit_multiplier"
+                                                    ],
+                                                    "title": "ApiDeviceMeterBillingPayloadResponse",
+                                                    "type": "object"
+                                                },
+                                                "title": "Device meter",
+                                                "type": "array"
+                                            },
+                                            "inactivity_limit": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "integer"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ],
+                                                "default": null,
+                                                "description": "device channel inactivity limit",
+                                                "title": "Inactivity limit"
+                                            },
+                                            "last_date_event_no_data": {
+                                                "anyOf": [
+                                                    {
+                                                        "format": "date-time",
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ],
+                                                "default": null,
+                                                "description": "last date event with no data for device channel",
+                                                "title": "Last date event with no data"
+                                            },
+                                            "serial_number": {
+                                                "description": "device channel serial number",
+                                                "title": "Serial number",
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "required": [
+                                            "serial_number",
+                                            "device_meter"
+                                        ],
+                                        "title": "ApiDeviceChannelPayloadResponse",
+                                        "type": "object"
+                                    },
+                                    "title": "Device channel",
+                                    "type": "array"
+                                },
+                                "device_manufacturer": {
+                                    "properties": {
+                                        "name": {
+                                            "description": "manufacturer name",
+                                            "title": "Name",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "name"
+                                    ],
+                                    "title": "ApiDeviceManufacturerResponse",
+                                    "type": "object"
+                                },
+                                "device_modification": {
+                                    "properties": {
+                                        "device_modification_type": {
+                                            "properties": {
+                                                "device_metering_type": {
+                                                    "properties": {
+                                                        "name_en": {
+                                                            "description": "device metering type name in english",
+                                                            "title": "Name in English",
+                                                            "type": "string"
+                                                        },
+                                                        "name_ru": {
+                                                            "description": "device metering type name in russian",
+                                                            "title": "Name in Russian",
+                                                            "type": "string"
+                                                        },
+                                                        "sys_name": {
+                                                            "description": "device metering type system name",
+                                                            "title": "System name",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "sys_name",
+                                                        "name_ru",
+                                                        "name_en"
+                                                    ],
+                                                    "title": "ApiDeviceMeteringTypeResponse",
+                                                    "type": "object"
+                                                },
+                                                "name_en": {
+                                                    "description": "device modification type name in english",
+                                                    "title": "Name in English",
+                                                    "type": "string"
+                                                },
+                                                "name_ru": {
+                                                    "description": "device modification type name in russian",
+                                                    "title": "Name in Russian",
+                                                    "type": "string"
+                                                },
+                                                "sys_name": {
+                                                    "description": "device modification type system name",
+                                                    "title": "System name",
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "description": "Enumeration of modification types for devices",
+                                                    "enum": [
+                                                        "smart_meter",
+                                                        "modem"
+                                                    ],
+                                                    "title": "DeviceModificationTypeEnum",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "sys_name",
+                                                "name_ru",
+                                                "name_en",
+                                                "type",
+                                                "device_metering_type"
+                                            ],
+                                            "title": "ApiDeviceModificationTypeResponse",
+                                            "type": "object"
+                                        },
+                                        "name": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "default": null,
+                                            "description": "device modification name",
+                                            "title": "Name"
+                                        }
+                                    },
+                                    "required": [
+                                        "device_modification_type"
+                                    ],
+                                    "title": "ApiDeviceModificationResponse",
+                                    "type": "object"
+                                },
+                                "firmware_version": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device firmware version",
+                                    "title": "Firmware version"
+                                },
+                                "hardware_version": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device hardware version",
+                                    "title": "Hardware version"
+                                },
+                                "id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "manufacturer_serial_number": {
+                                    "description": "device manufacturer serial number",
+                                    "title": "Manufacturer serial number",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "manufacturer_serial_number",
+                                "device_manufacturer",
+                                "device_modification",
+                                "device_channel"
+                            ],
+                            "title": "ApiDeviceResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_device_list_request_body_schema": {
+                "properties": {
+                    "device_ids": {
+                        "description": "list of device identifiers",
+                        "items": {
+                            "format": "uuid4",
+                            "type": "string"
+                        },
+                        "title": "Device IDs",
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_device_list_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "data_gateway_network_device": {
+                                    "anyOf": [
+                                        {
+                                            "properties": {
+                                                "mac": {
+                                                    "description": "data gateway network device mac",
+                                                    "title": "MAC",
+                                                    "type": "integer"
+                                                },
+                                                "network": {
+                                                    "anyOf": [
+                                                        {
+                                                            "properties": {
+                                                                "data_gateway": {
+                                                                    "properties": {
+                                                                        "name": {
+                                                                            "description": "data gateway name",
+                                                                            "title": "Name",
+                                                                            "type": "string"
+                                                                        }
+                                                                    },
+                                                                    "required": [
+                                                                        "name"
+                                                                    ],
+                                                                    "title": "ApiDataGatewayResponse",
+                                                                    "type": "object"
+                                                                },
+                                                                "name": {
+                                                                    "description": "data gateway networks name",
+                                                                    "title": "Name",
+                                                                    "type": "string"
+                                                                },
+                                                                "type_network": {
+                                                                    "description": "Enumeration of network types",
+                                                                    "enum": [
+                                                                        "input",
+                                                                        "output"
+                                                                    ],
+                                                                    "title": "NetworkTypeEnum",
+                                                                    "type": "string"
+                                                                }
+                                                            },
+                                                            "required": [
+                                                                "name",
+                                                                "type_network",
+                                                                "data_gateway"
+                                                            ],
+                                                            "title": "ApiDataGatewaysNetworkResponse",
+                                                            "type": "object"
+                                                        },
+                                                        {
+                                                            "type": "null"
+                                                        }
+                                                    ],
+                                                    "default": null,
+                                                    "description": "network of data gateway network device",
+                                                    "title": "Network"
+                                                },
+                                                "protocol": {
+                                                    "properties": {
+                                                        "name": {
+                                                            "description": "protocol name",
+                                                            "title": "Name",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "name"
+                                                    ],
+                                                    "title": "ApiProtocolResponse",
+                                                    "type": "object"
+                                                }
+                                            },
+                                            "required": [
+                                                "mac",
+                                                "protocol"
+                                            ],
+                                            "title": "ApiDataGatewayNetworkDevicePayloadResponse",
+                                            "type": "object"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "data gateway network device of device",
+                                    "title": "Data gateway network device"
+                                },
+                                "date_produced": {
+                                    "anyOf": [
+                                        {
+                                            "format": "date-time",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device date produced",
+                                    "title": "Date produced"
+                                },
+                                "device_channel": {
+                                    "description": "device channel",
+                                    "items": {
+                                        "properties": {
+                                            "device_meter": {
+                                                "description": "device meter of device channel",
+                                                "items": {
+                                                    "properties": {
+                                                        "last_value": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "type": "number"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ],
+                                                            "default": null,
+                                                            "description": "device meter billing last value",
+                                                            "title": "Last value"
+                                                        },
+                                                        "last_value_date": {
+                                                            "anyOf": [
+                                                                {
+                                                                    "format": "date-time",
+                                                                    "type": "string"
+                                                                },
+                                                                {
+                                                                    "type": "null"
+                                                                }
+                                                            ],
+                                                            "default": null,
+                                                            "description": "device meter billing last value date",
+                                                            "title": "Last value date"
+                                                        },
+                                                        "unit_multiplier": {
+                                                            "description": "device meter billing unit multiplier",
+                                                            "title": "Unit multiplier",
+                                                            "type": "number"
+                                                        },
+                                                        "value_multiplier": {
+                                                            "description": "device meter billing value multiplier",
+                                                            "title": "Value multiplier",
+                                                            "type": "number"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "value_multiplier",
+                                                        "unit_multiplier"
+                                                    ],
+                                                    "title": "ApiDeviceMeterBillingPayloadResponse",
+                                                    "type": "object"
+                                                },
+                                                "title": "Device meter",
+                                                "type": "array"
+                                            },
+                                            "inactivity_limit": {
+                                                "anyOf": [
+                                                    {
+                                                        "type": "integer"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ],
+                                                "default": null,
+                                                "description": "device channel inactivity limit",
+                                                "title": "Inactivity limit"
+                                            },
+                                            "last_date_event_no_data": {
+                                                "anyOf": [
+                                                    {
+                                                        "format": "date-time",
+                                                        "type": "string"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ],
+                                                "default": null,
+                                                "description": "last date event with no data for device channel",
+                                                "title": "Last date event with no data"
+                                            },
+                                            "serial_number": {
+                                                "description": "device channel serial number",
+                                                "title": "Serial number",
+                                                "type": "integer"
+                                            }
+                                        },
+                                        "required": [
+                                            "serial_number",
+                                            "device_meter"
+                                        ],
+                                        "title": "ApiDeviceChannelPayloadResponse",
+                                        "type": "object"
+                                    },
+                                    "title": "Device channel",
+                                    "type": "array"
+                                },
+                                "device_manufacturer": {
+                                    "properties": {
+                                        "name": {
+                                            "description": "manufacturer name",
+                                            "title": "Name",
+                                            "type": "string"
+                                        }
+                                    },
+                                    "required": [
+                                        "name"
+                                    ],
+                                    "title": "ApiDeviceManufacturerResponse",
+                                    "type": "object"
+                                },
+                                "device_modification": {
+                                    "properties": {
+                                        "device_modification_type": {
+                                            "properties": {
+                                                "device_metering_type": {
+                                                    "properties": {
+                                                        "name_en": {
+                                                            "description": "device metering type name in english",
+                                                            "title": "Name in English",
+                                                            "type": "string"
+                                                        },
+                                                        "name_ru": {
+                                                            "description": "device metering type name in russian",
+                                                            "title": "Name in Russian",
+                                                            "type": "string"
+                                                        },
+                                                        "sys_name": {
+                                                            "description": "device metering type system name",
+                                                            "title": "System name",
+                                                            "type": "string"
+                                                        }
+                                                    },
+                                                    "required": [
+                                                        "sys_name",
+                                                        "name_ru",
+                                                        "name_en"
+                                                    ],
+                                                    "title": "ApiDeviceMeteringTypeResponse",
+                                                    "type": "object"
+                                                },
+                                                "name_en": {
+                                                    "description": "device modification type name in english",
+                                                    "title": "Name in English",
+                                                    "type": "string"
+                                                },
+                                                "name_ru": {
+                                                    "description": "device modification type name in russian",
+                                                    "title": "Name in Russian",
+                                                    "type": "string"
+                                                },
+                                                "sys_name": {
+                                                    "description": "device modification type system name",
+                                                    "title": "System name",
+                                                    "type": "string"
+                                                },
+                                                "type": {
+                                                    "description": "Enumeration of modification types for devices",
+                                                    "enum": [
+                                                        "smart_meter",
+                                                        "modem"
+                                                    ],
+                                                    "title": "DeviceModificationTypeEnum",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "required": [
+                                                "sys_name",
+                                                "name_ru",
+                                                "name_en",
+                                                "type",
+                                                "device_metering_type"
+                                            ],
+                                            "title": "ApiDeviceModificationTypeResponse",
+                                            "type": "object"
+                                        },
+                                        "name": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "default": null,
+                                            "description": "device modification name",
+                                            "title": "Name"
+                                        }
+                                    },
+                                    "required": [
+                                        "device_modification_type"
+                                    ],
+                                    "title": "ApiDeviceModificationResponse",
+                                    "type": "object"
+                                },
+                                "firmware_version": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device firmware version",
+                                    "title": "Firmware version"
+                                },
+                                "hardware_version": {
+                                    "anyOf": [
+                                        {
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device hardware version",
+                                    "title": "Hardware version"
+                                },
+                                "id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "manufacturer_serial_number": {
+                                    "description": "device manufacturer serial number",
+                                    "title": "Manufacturer serial number",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "id",
+                                "manufacturer_serial_number",
+                                "device_manufacturer",
+                                "device_modification",
+                                "device_channel"
+                            ],
+                            "title": "ApiDeviceResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_devices_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "properties": {
+                            "data_gateway_network_device": {
+                                "anyOf": [
+                                    {
+                                        "properties": {
+                                            "mac": {
+                                                "description": "data gateway network device mac",
+                                                "title": "MAC",
+                                                "type": "integer"
+                                            },
+                                            "network": {
+                                                "anyOf": [
+                                                    {
+                                                        "properties": {
+                                                            "data_gateway": {
+                                                                "properties": {
+                                                                    "name": {
+                                                                        "description": "data gateway name",
+                                                                        "title": "Name",
+                                                                        "type": "string"
+                                                                    }
+                                                                },
+                                                                "required": [
+                                                                    "name"
+                                                                ],
+                                                                "title": "ApiDataGatewayResponse",
+                                                                "type": "object"
+                                                            },
+                                                            "name": {
+                                                                "description": "data gateway networks name",
+                                                                "title": "Name",
+                                                                "type": "string"
+                                                            },
+                                                            "type_network": {
+                                                                "description": "Enumeration of network types",
+                                                                "enum": [
+                                                                    "input",
+                                                                    "output"
+                                                                ],
+                                                                "title": "NetworkTypeEnum",
+                                                                "type": "string"
+                                                            }
+                                                        },
+                                                        "required": [
+                                                            "name",
+                                                            "type_network",
+                                                            "data_gateway"
+                                                        ],
+                                                        "title": "ApiDataGatewaysNetworkResponse",
+                                                        "type": "object"
+                                                    },
+                                                    {
+                                                        "type": "null"
+                                                    }
+                                                ],
+                                                "default": null,
+                                                "description": "network of data gateway network device",
+                                                "title": "Network"
+                                            },
+                                            "protocol": {
+                                                "properties": {
+                                                    "name": {
+                                                        "description": "protocol name",
+                                                        "title": "Name",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "name"
+                                                ],
+                                                "title": "ApiProtocolResponse",
+                                                "type": "object"
+                                            }
+                                        },
+                                        "required": [
+                                            "mac",
+                                            "protocol"
+                                        ],
+                                        "title": "ApiDataGatewayNetworkDevicePayloadResponse",
+                                        "type": "object"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "data gateway network device of device",
+                                "title": "Data gateway network device"
+                            },
+                            "date_produced": {
+                                "anyOf": [
+                                    {
+                                        "format": "date-time",
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "device date produced",
+                                "title": "Date produced"
+                            },
+                            "device_channel": {
+                                "description": "device channel",
+                                "items": {
+                                    "properties": {
+                                        "device_meter": {
+                                            "description": "device meter of device channel",
+                                            "items": {
+                                                "properties": {
+                                                    "last_value": {
+                                                        "anyOf": [
+                                                            {
+                                                                "type": "number"
+                                                            },
+                                                            {
+                                                                "type": "null"
+                                                            }
+                                                        ],
+                                                        "default": null,
+                                                        "description": "device meter billing last value",
+                                                        "title": "Last value"
+                                                    },
+                                                    "last_value_date": {
+                                                        "anyOf": [
+                                                            {
+                                                                "format": "date-time",
+                                                                "type": "string"
+                                                            },
+                                                            {
+                                                                "type": "null"
+                                                            }
+                                                        ],
+                                                        "default": null,
+                                                        "description": "device meter billing last value date",
+                                                        "title": "Last value date"
+                                                    },
+                                                    "unit_multiplier": {
+                                                        "description": "device meter billing unit multiplier",
+                                                        "title": "Unit multiplier",
+                                                        "type": "number"
+                                                    },
+                                                    "value_multiplier": {
+                                                        "description": "device meter billing value multiplier",
+                                                        "title": "Value multiplier",
+                                                        "type": "number"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "value_multiplier",
+                                                    "unit_multiplier"
+                                                ],
+                                                "title": "ApiDeviceMeterBillingPayloadResponse",
+                                                "type": "object"
+                                            },
+                                            "title": "Device meter",
+                                            "type": "array"
+                                        },
+                                        "inactivity_limit": {
+                                            "anyOf": [
+                                                {
+                                                    "type": "integer"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "default": null,
+                                            "description": "device channel inactivity limit",
+                                            "title": "Inactivity limit"
+                                        },
+                                        "last_date_event_no_data": {
+                                            "anyOf": [
+                                                {
+                                                    "format": "date-time",
+                                                    "type": "string"
+                                                },
+                                                {
+                                                    "type": "null"
+                                                }
+                                            ],
+                                            "default": null,
+                                            "description": "last date event with no data for device channel",
+                                            "title": "Last date event with no data"
+                                        },
+                                        "serial_number": {
+                                            "description": "device channel serial number",
+                                            "title": "Serial number",
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "required": [
+                                        "serial_number",
+                                        "device_meter"
+                                    ],
+                                    "title": "ApiDeviceChannelPayloadResponse",
+                                    "type": "object"
+                                },
+                                "title": "Device channel",
+                                "type": "array"
+                            },
+                            "device_manufacturer": {
+                                "properties": {
+                                    "name": {
+                                        "description": "manufacturer name",
+                                        "title": "Name",
+                                        "type": "string"
+                                    }
+                                },
+                                "required": [
+                                    "name"
+                                ],
+                                "title": "ApiDeviceManufacturerResponse",
+                                "type": "object"
+                            },
+                            "device_modification": {
+                                "properties": {
+                                    "device_modification_type": {
+                                        "properties": {
+                                            "device_metering_type": {
+                                                "properties": {
+                                                    "name_en": {
+                                                        "description": "device metering type name in english",
+                                                        "title": "Name in English",
+                                                        "type": "string"
+                                                    },
+                                                    "name_ru": {
+                                                        "description": "device metering type name in russian",
+                                                        "title": "Name in Russian",
+                                                        "type": "string"
+                                                    },
+                                                    "sys_name": {
+                                                        "description": "device metering type system name",
+                                                        "title": "System name",
+                                                        "type": "string"
+                                                    }
+                                                },
+                                                "required": [
+                                                    "sys_name",
+                                                    "name_ru",
+                                                    "name_en"
+                                                ],
+                                                "title": "ApiDeviceMeteringTypeResponse",
+                                                "type": "object"
+                                            },
+                                            "name_en": {
+                                                "description": "device modification type name in english",
+                                                "title": "Name in English",
+                                                "type": "string"
+                                            },
+                                            "name_ru": {
+                                                "description": "device modification type name in russian",
+                                                "title": "Name in Russian",
+                                                "type": "string"
+                                            },
+                                            "sys_name": {
+                                                "description": "device modification type system name",
+                                                "title": "System name",
+                                                "type": "string"
+                                            },
+                                            "type": {
+                                                "description": "Enumeration of modification types for devices",
+                                                "enum": [
+                                                    "smart_meter",
+                                                    "modem"
+                                                ],
+                                                "title": "DeviceModificationTypeEnum",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "required": [
+                                            "sys_name",
+                                            "name_ru",
+                                            "name_en",
+                                            "type",
+                                            "device_metering_type"
+                                        ],
+                                        "title": "ApiDeviceModificationTypeResponse",
+                                        "type": "object"
+                                    },
+                                    "name": {
+                                        "anyOf": [
+                                            {
+                                                "type": "string"
+                                            },
+                                            {
+                                                "type": "null"
+                                            }
+                                        ],
+                                        "default": null,
+                                        "description": "device modification name",
+                                        "title": "Name"
+                                    }
+                                },
+                                "required": [
+                                    "device_modification_type"
+                                ],
+                                "title": "ApiDeviceModificationResponse",
+                                "type": "object"
+                            },
+                            "firmware_version": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "device firmware version",
+                                "title": "Firmware version"
+                            },
+                            "hardware_version": {
+                                "anyOf": [
+                                    {
+                                        "type": "string"
+                                    },
+                                    {
+                                        "type": "null"
+                                    }
+                                ],
+                                "default": null,
+                                "description": "device hardware version",
+                                "title": "Hardware version"
+                            },
+                            "id": {
+                                "description": "device identifier",
+                                "format": "uuid4",
+                                "title": "Device ID",
+                                "type": "string"
+                            },
+                            "manufacturer_serial_number": {
+                                "description": "device manufacturer serial number",
+                                "title": "Manufacturer serial number",
+                                "type": "string"
+                            }
+                        },
+                        "required": [
+                            "id",
+                            "manufacturer_serial_number",
+                            "device_manufacturer",
+                            "device_modification",
+                            "device_channel"
+                        ],
+                        "title": "ApiDeviceResponse",
+                        "type": "object"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_devices_values_request_body_schema": {
+                "properties": {
+                    "devices_id": {
+                        "description": "list of device identifiers",
+                        "items": {
+                            "format": "uuid4",
+                            "type": "string"
+                        },
+                        "title": "Device IDs",
+                        "type": "array"
+                    }
+                },
+                "type": "object"
+            },
+            "da_get_api_user_devices_values_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "channel_number": {
+                                    "description": "device value channel number",
+                                    "title": "Channel number",
+                                    "type": "integer"
+                                },
+                                "date": {
+                                    "description": "device value date",
+                                    "format": "date-time",
+                                    "title": "Date",
+                                    "type": "string"
+                                },
+                                "date_created": {
+                                    "description": "device value date created",
+                                    "format": "date-time",
+                                    "title": "Date created",
+                                    "type": "string"
+                                },
+                                "device_id": {
+                                    "description": "device identifier",
+                                    "format": "uuid4",
+                                    "title": "Device ID",
+                                    "type": "string"
+                                },
+                                "journal_data_type": {
+                                    "description": "Enumeration of journal data types",
+                                    "enum": [
+                                        "END_OF_DAY",
+                                        "END_OF_MONTH",
+                                        "END_OF_YEAR",
+                                        "CURRENT"
+                                    ],
+                                    "title": "JournalDataType",
+                                    "type": "string"
+                                },
+                                "kind": {
+                                    "description": "Enumeration of resource kinds for devices",
+                                    "enum": [
+                                        "COMMON_CONSUMED",
+                                        "COMMON_GENERATED",
+                                        "COMMON_ACTIVE_GENERATED",
+                                        "COMMON_ACTIVE_CONSUMED",
+                                        "COMMON_REACTIVE_GENERATED",
+                                        "COMMON_REACTIVE_CONSUMED",
+                                        "PHASE_A_ACTIVE_CONSUMED",
+                                        "PHASE_A_ACTIVE_GENERATED",
+                                        "PHASE_A_REACTIVE_CONSUMED",
+                                        "PHASE_A_REACTIVE_GENERATED",
+                                        "PHASE_B_ACTIVE_CONSUMED",
+                                        "PHASE_B_ACTIVE_GENERATED",
+                                        "PHASE_B_REACTIVE_CONSUMED",
+                                        "PHASE_B_REACTIVE_GENERATED",
+                                        "PHASE_C_ACTIVE_CONSUMED",
+                                        "PHASE_C_ACTIVE_GENERATED",
+                                        "PHASE_C_REACTIVE_CONSUMED",
+                                        "PHASE_C_REACTIVE_GENERATED"
+                                    ],
+                                    "title": "ResourceKind",
+                                    "type": "string"
+                                },
+                                "last_value": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "last value",
+                                    "title": "Last Value"
+                                },
+                                "last_value_date": {
+                                    "anyOf": [
+                                        {
+                                            "format": "date-time",
+                                            "type": "string"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "last value date",
+                                    "title": "Last Value Date"
+                                },
+                                "meter_id": {
+                                    "description": "meter identifier",
+                                    "format": "uuid4",
+                                    "title": "Meter Id",
+                                    "type": "string"
+                                },
+                                "tariff_number": {
+                                    "description": "device value tariff number",
+                                    "title": "Tariff number",
+                                    "type": "integer"
+                                },
+                                "value": {
+                                    "description": "device value",
+                                    "title": "Value",
+                                    "type": "number"
+                                },
+                                "value_raw": {
+                                    "anyOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "null"
+                                        }
+                                    ],
+                                    "default": null,
+                                    "description": "device value raw (without conversions)",
+                                    "title": "Value raw"
+                                },
+                                "value_type": {
+                                    "enum": [
+                                        "DEVICE_DATA",
+                                        "INTERPOLATED_LINEAR"
+                                    ],
+                                    "title": "BillingLogDataValueTypeEnum",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "date_created",
+                                "device_id",
+                                "channel_number",
+                                "meter_id",
+                                "date",
+                                "value",
+                                "value_type",
+                                "kind",
+                                "tariff_number",
+                                "journal_data_type"
+                            ],
+                            "title": "ApiDeviceValueResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            },
+            "permissions_response_schema": {
+                "properties": {
+                    "count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Count"
+                    },
+                    "errors": {
+                        "items": {
+                            "additionalProperties": true,
+                            "type": "object"
+                        },
+                        "title": "Errors",
+                        "type": "array"
+                    },
+                    "ok": {
+                        "title": "Ok",
+                        "type": "boolean"
+                    },
+                    "payload": {
+                        "items": {
+                            "properties": {
+                                "category": {
+                                    "title": "Category",
+                                    "type": "string"
+                                },
+                                "permissions": {
+                                    "items": {
+                                        "additionalProperties": true,
+                                        "type": "object"
+                                    },
+                                    "title": "Permissions",
+                                    "type": "array"
+                                },
+                                "service": {
+                                    "title": "Service",
+                                    "type": "string"
+                                }
+                            },
+                            "required": [
+                                "category",
+                                "permissions",
+                                "service"
+                            ],
+                            "title": "ApiPermissionsResponse",
+                            "type": "object"
+                        },
+                        "title": "Payload",
+                        "type": "array"
+                    },
+                    "total_count": {
+                        "anyOf": [
+                            {
+                                "type": "integer"
+                            },
+                            {
+                                "type": "null"
+                            }
+                        ],
+                        "default": null,
+                        "title": "Total Count"
+                    }
+                },
+                "type": "object"
+            }
+        },
+        "securitySchemes": {
+            "bearerAuth": {
+                "bearerFormat": "JWT",
+                "scheme": "bearer",
+                "type": "http"
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "Find out more about Swagger",
+        "url": "http://swagger.io"
+    },
+    "info": {
+        "description": "Generated at 01/07/2026 12:46:12. This is the swagger ui based on the open api 3.0 specification of the API",
+        "title": "API",
+        "version": "1.0.0"
+    },
+    "openapi": "3.0.1",
+    "paths": {
+        "/api/v1/devices/info": {
+            "get": {
+                "description": "\nAPI route to get devices info.\nProvide device list which serialized with specific rules\n-date_created\n-date_modified\n-user_created_id\n-user_modified_id\n-is_alive\n-device_tz\n-device_clock_offset_s\n-time_transition\n-hacks\n-device_manufacturer.id\n-device_manufacturer.date_created\n-device_manufacturer.date_modified\n-device_manufacturer.user_created_id\n-device_manufacturer.user_modified_id\n\n-device_channel.id\n-device_channel.device_id\n-device_channel.date_created\n-device_channel.date_modified\n-device_channel.user_created_id\n-device_channel.user_modified_id\n-device_channel.is_alive\n\n-device_meter.id\n-device_meter.device_id\n-device_meter.date_created\n-device_meter.date_modified\n-device_meter.user_created_id\n-device_meter.user_modified_id\n-device_meter.is_alive\n-device_meter.device_channel_id\n-device_meter.kind\n-device_meter.max_daily_consumption\n-device_meter.device_channel\n\n-device_modification.id\n-device_modification.device_modification_type_id\n-device_modification.date_created\n-device_modification.date_modified\n-device_modification.user_created_id\n-device_modification.user_modified_id\n\n-device_modification.device_modification_type.id\n-device_modification.device_modification_type.metering_type_id\n-device_modification.device_modification_type.date_created\n-device_modification.device_modification_type.date_modified\n-device_modification.device_modification_type.user_created_id\n\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n-device_modification.device_modification_type.device_metering_type.id\n-device_modification.device_modification_type.device_metering_type.date_created\n-device_modification.device_modification_type.device_metering_type.date_modified\n-device_modification.device_modification_type.device_metering_type.user_created_id\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n\n-data_gateway_network_device.id\n-data_gateway_network_device.date_created\n-data_gateway_network_device.date_modified\n-data_gateway_network_device.user_created_id\n-data_gateway_network_device.user_modified_id\n\n-data_gateway_network_device.protocol.id\n-data_gateway_network_device.protocol.date_created\n-data_gateway_network_device.protocol.date_modified\n-data_gateway_network_device.protocol.user_created_id\n-data_gateway_network_device.protocol.user_modified_id\n\n-data_gateway_network_device.uplink_encryption_key\n-data_gateway_network_device.downlink_encryption_key\n-data_gateway_network_device.uplink_protocol_id\n-data_gateway_network_device.downlink_protocol_id\n-data_gateway_network_device.device_id\n-data_gateway_network_device.data_gateway_id\n-data_gateway_network_device.data_gateway_network_id\n-data_gateway_network_device.key_id\n\n-data_gateway_network_device.network.id\n-data_gateway_network_device.network.date_created\n-data_gateway_network_device.network.date_modified\n-data_gateway_network_device.network.user_created_id\n-data_gateway_network_device.network.user_modified_id\n-data_gateway_network_device.network.is_alive\n-data_gateway_network_device.network.sys_type\n\n-data_gateway_network_device.network.data_gateway.id\n-data_gateway_network_device.network.data_gateway.date_created\n-data_gateway_network_device.network.data_gateway.date_modified\n-data_gateway_network_device.network.data_gateway.user_created_id\n-data_gateway_network_device.network.data_gateway.user_modified_id\n-data_gateway_network_device.network.data_gateway.is_alive\n",
+                "operationId": "da_get_api_user_all_devices",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_user_all_devices_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_info"
+                ]
+            },
+            "post": {
+                "description": "\nAPI route to get device info by devices IDs from body.\nProvide device list which serialized with specific rules\n-date_created\n-date_modified\n-user_created_id\n-user_modified_id\n-is_alive\n-device_tz\n-device_clock_offset_s\n-time_transition\n-hacks\n-device_manufacturer.id\n-device_manufacturer.date_created\n-device_manufacturer.date_modified\n-device_manufacturer.user_created_id\n-device_manufacturer.user_modified_id\n\n-device_channel.id\n-device_channel.device_id\n-device_channel.date_created\n-device_channel.date_modified\n-device_channel.user_created_id\n-device_channel.user_modified_id\n-device_channel.is_alive\n\n-device_meter.id\n-device_meter.device_id\n-device_meter.date_created\n-device_meter.date_modified\n-device_meter.user_created_id\n-device_meter.user_modified_id\n-device_meter.is_alive\n-device_meter.device_channel_id\n-device_meter.kind\n-device_meter.max_daily_consumption\n-device_meter.device_channel\n\n-device_modification.id\n-device_modification.device_modification_type_id\n-device_modification.date_created\n-device_modification.date_modified\n-device_modification.user_created_id\n-device_modification.user_modified_id\n\n-device_modification.device_modification_type.id\n-device_modification.device_modification_type.metering_type_id\n-device_modification.device_modification_type.date_created\n-device_modification.device_modification_type.date_modified\n-device_modification.device_modification_type.user_created_id\n\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n-device_modification.device_modification_type.device_metering_type.id\n-device_modification.device_modification_type.device_metering_type.date_created\n-device_modification.device_modification_type.device_metering_type.date_modified\n-device_modification.device_modification_type.device_metering_type.user_created_id\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n\n-data_gateway_network_device.id\n-data_gateway_network_device.date_created\n-data_gateway_network_device.date_modified\n-data_gateway_network_device.user_created_id\n-data_gateway_network_device.user_modified_id\n\n-data_gateway_network_device.protocol.id\n-data_gateway_network_device.protocol.date_created\n-data_gateway_network_device.protocol.date_modified\n-data_gateway_network_device.protocol.user_created_id\n-data_gateway_network_device.protocol.user_modified_id\n\n-data_gateway_network_device.uplink_encryption_key\n-data_gateway_network_device.downlink_encryption_key\n-data_gateway_network_device.uplink_protocol_id\n-data_gateway_network_device.downlink_protocol_id\n-data_gateway_network_device.device_id\n-data_gateway_network_device.data_gateway_id\n-data_gateway_network_device.data_gateway_network_id\n-data_gateway_network_device.key_id\n\n-data_gateway_network_device.network.id\n-data_gateway_network_device.network.date_created\n-data_gateway_network_device.network.date_modified\n-data_gateway_network_device.network.user_created_id\n-data_gateway_network_device.network.user_modified_id\n-data_gateway_network_device.network.is_alive\n-data_gateway_network_device.network.sys_type\n\n-data_gateway_network_device.network.data_gateway_id\n-data_gateway_network_device.network.data_gateway.date_created\n-data_gateway_network_device.network.data_gateway.date_modified\n-data_gateway_network_device.network.data_gateway.user_created_id\n-data_gateway_network_device.network.data_gateway.user_modified_id\n-data_gateway_network_device.network.data_gateway.is_alive\n",
+                "operationId": "da_get_api_user_device_list",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/da_get_api_user_device_list_request_body_schema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_user_device_list_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_info"
+                ]
+            }
+        },
+        "/api/v1/devices/values": {
+            "post": {
+                "description": "\nAPI route to get device value info by devices IDs from body.\nProvide device value list.\n",
+                "operationId": "da_get_api_user_devices_values",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "default": true,
+                        "description": "Show values of the end of day",
+                        "in": "query",
+                        "name": "end_of_day",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "Enumeration of intervals",
+                        "in": "query",
+                        "name": "iteration_interval",
+                        "required": false,
+                        "schema": {
+                            "enum": [
+                                "30 minute",
+                                "60 minutes",
+                                "1 day",
+                                "1 week",
+                                "1 month"
+                            ],
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "device value period to",
+                        "in": "query",
+                        "name": "period_to",
+                        "required": false,
+                        "schema": {
+                            "format": "date-time",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "description": "device value period from",
+                        "in": "query",
+                        "name": "period_from",
+                        "required": true,
+                        "schema": {
+                            "format": "date-time",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "journal_data_type",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/da_get_api_user_devices_values_request_body_schema"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_user_devices_values_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_value"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/battery-level": {
+            "get": {
+                "description": "\nAPI route to get device battery levels info by device ID.\nProvide device battery level list.\n",
+                "operationId": "da_get_api_device_battery_level",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_battery_level_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_battery_level"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/clocks": {
+            "get": {
+                "description": "\nAPI route to get device clocks info by device ID.\nProvide device clock list.\n",
+                "operationId": "da_get_api_device_clock",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_clock_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_clock"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/events": {
+            "get": {
+                "description": "\nAPI route to get device events info by device ID.\nProvide device event list.\n",
+                "operationId": "da_get_api_device_event",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_event_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_event"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/info": {
+            "get": {
+                "description": "\nAPI route to get device info by device ID.\nProvide device object which serialized with specific rules\n-date_created\n-date_modified\n-user_created_id\n-user_modified_id\n-is_alive\n-device_tz\n-device_clock_offset_s\n-time_transition\n-hacks\n-device_manufacturer.id\n-device_manufacturer.date_created\n-device_manufacturer.date_modified\n-device_manufacturer.user_created_id\n-device_manufacturer.user_modified_id\n\n-device_channel.id\n-device_channel.device_id\n-device_channel.date_created\n-device_channel.date_modified\n-device_channel.user_created_id\n-device_channel.user_modified_id\n-device_channel.is_alive\n\n-device_meter.id\n-device_meter.device_id\n-device_meter.date_created\n-device_meter.date_modified\n-device_meter.user_created_id\n-device_meter.user_modified_id\n-device_meter.is_alive\n-device_meter.device_channel_id\n-device_meter.kind\n-device_meter.max_daily_consumption\n-device_meter.device_channel\n\n-device_modification.id\n-device_modification.device_modification_type_id\n-device_modification.date_created\n-device_modification.date_modified\n-device_modification.user_created_id\n-device_modification.user_modified_id\n\n-device_modification.device_modification_type.id\n-device_modification.device_modification_type.metering_type_id\n-device_modification.device_modification_type.date_created\n-device_modification.device_modification_type.date_modified\n-device_modification.device_modification_type.user_created_id\n\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n-device_modification.device_modification_type.device_metering_type.id\n-device_modification.device_modification_type.device_metering_type.date_created\n-device_modification.device_modification_type.device_metering_type.date_modified\n-device_modification.device_modification_type.device_metering_type.user_created_id\n-device_modification.device_modification_type.device_metering_type.user_modified_id\n\n-data_gateway_network_device.id\n-data_gateway_network_device.date_created\n-data_gateway_network_device.date_modified\n-data_gateway_network_device.user_created_id\n-data_gateway_network_device.user_modified_id\n\n-data_gateway_network_device.protocol.id\n-data_gateway_network_device.protocol.date_created\n-data_gateway_network_device.protocol.date_modified\n-data_gateway_network_device.protocol.user_created_id\n-data_gateway_network_device.protocol.user_modified_id\n\n-data_gateway_network_device.uplink_encryption_key\n-data_gateway_network_device.downlink_encryption_key\n-data_gateway_network_device.uplink_protocol_id\n-data_gateway_network_device.downlink_protocol_id\n-data_gateway_network_device.device_id\n-data_gateway_network_device.data_gateway_id\n-data_gateway_network_device.data_gateway_network_id\n-data_gateway_network_device.key_id\n\n-data_gateway_network_device.network.id\n-data_gateway_network_device.network.date_created\n-data_gateway_network_device.network.date_modified\n-data_gateway_network_device.network.user_created_id\n-data_gateway_network_device.network.user_modified_id\n-data_gateway_network_device.network.is_alive\n-data_gateway_network_device.network.sys_type\n\n-data_gateway_network_device.network.data_gateway_id\n-data_gateway_network_device.network.data_gateway.id\n-data_gateway_network_device.network.data_gateway.date_created\n-data_gateway_network_device.network.data_gateway.date_modified\n-data_gateway_network_device.network.data_gateway.user_created_id\n-data_gateway_network_device.network.data_gateway.user_modified_id\n-data_gateway_network_device.network.data_gateway.is_alive\n",
+                "operationId": "da_get_api_user_devices",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_user_devices_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_info"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/profiles": {
+            "get": {
+                "description": "\nAPI route to get device profiles info by device ID.\nProvide device profile list which serialized with specific rules\n-date_created\n-user_created_id\n-id\n",
+                "operationId": "da_get_api_device_profile",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_profile_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_profile"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/temperatures": {
+            "get": {
+                "description": "\nAPI route to get device temperatures info by device ID.\nProvide device temperature list which serialized with specific rules\n-date_created\n-user_created_id\n-id\n",
+                "operationId": "da_get_api_device_temperature",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_temperature_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_temperature"
+                ]
+            }
+        },
+        "/api/v1/devices/{device_id}/uptimes": {
+            "get": {
+                "description": "\nAPI route to get device uptimes info by device ID.\nProvide device uptime list which serialized with specific rules\n-date_created\n-user_created_id\n-id\n",
+                "operationId": "da_get_api_device_uptime",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "device_id",
+                        "required": true,
+                        "schema": {
+                            "format": "uuid",
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "limit",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "filter",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "offset",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "sort",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/da_get_api_device_uptime_response"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ],
+                "summary": "permission=PRIVATE_AT(1)",
+                "tags": [
+                    "api_device_uptime"
+                ]
+            }
+        },
+        "/api/v1/permissions": {
+            "get": {
+                "operationId": "permissions",
+                "responses": {
+                    "200": {
+                        "$ref": "#/components/responses/permissions_response"
+                    }
+                },
+                "summary": "permission=PUBLIC(0)",
+                "tags": [
+                    "system"
+                ]
+            }
+        }
+    },
+    "servers": [
+        {
+            "url": "/"
+        }
+    ]
+}
