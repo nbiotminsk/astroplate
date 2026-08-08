@@ -202,18 +202,41 @@ function unicboard_headers(array $config): array
  */
 function get_device_values(array $config, string $deviceUuid, int $limit = 10): array
 {
-    $url  = $config['unicboard_api_base'] . '/api/v1/devices/values?limit=' . $limit;
-    $body = ['devices_id' => [$deviceUuid]];
-    [$code, $resp] = http_post_json($url, $body, unicboard_headers($config));
+    $headers = unicboard_headers($config);
+    $apiBase = $config['unicboard_api_base'];
 
+    // 1. Пробуем POST /api/v1/devices/values с вариациями названий параметров
+    $url = $apiBase . '/api/v1/devices/values?limit=' . $limit;
+    [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers);
     $payload = $resp['payload'] ?? [];
+
     if (empty($payload)) {
-        // Fallback: запрашиваем прямой GET-эндпоинт устройства
-        $fallbackUrl = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceUuid . '/values?limit=' . $limit;
-        [$fbCode, $fbResp] = http_get($fallbackUrl, unicboard_headers($config));
+        [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers);
+        $payload = $resp['payload'] ?? [];
+    }
+
+    if (empty($payload)) {
+        [$code, $resp] = http_post_json($url, ['devices' => [$deviceUuid]], $headers);
+        $payload = $resp['payload'] ?? [];
+    }
+
+    // 2. Fallback: GET /api/v1/devices/{id}/values
+    if (empty($payload)) {
+        $fallbackUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/values?limit=' . $limit;
+        [$fbCode, $fbResp] = http_get($fallbackUrl, $headers);
         if ($fbCode === 200 && !empty($fbResp['payload'])) {
             $payload = $fbResp['payload'];
             $code = $fbCode;
+        }
+    }
+
+    // 3. Fallback: GET /api/v1/devices/{id}
+    if (empty($payload)) {
+        $devUrl = $apiBase . '/api/v1/devices/' . $deviceUuid;
+        [$dCode, $dResp] = http_get($devUrl, $headers);
+        if ($dCode === 200 && !empty($dResp['payload'])) {
+            $payload = [$dResp['payload']];
+            $code = $dCode;
         }
     }
 
@@ -221,7 +244,7 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10): 
         'http_code' => $code,
         'payload' => $payload,
         'errors' => $resp['errors'] ?? [],
-        'ok' => $resp['ok'] ?? false,
+        'ok' => !empty($payload),
     ];
 }
 
