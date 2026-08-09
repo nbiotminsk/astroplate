@@ -68,7 +68,7 @@ const OrderModal: React.FC = () => {
     setError(null);
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SyntheticEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError(null);
 
@@ -116,7 +116,7 @@ const OrderModal: React.FC = () => {
         onClick={closeModal}
       />
       <div className={`modal ${isOpen ? "show" : ""}`}>
-        <div className="modal-content relative max-w-[92%] sm:max-w-[480px] w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 rounded-2xl bg-white dark:bg-darkmode-body border border-border dark:border-darkmode-border shadow-2xl">
+        <div className="modal-content relative max-w-[92%] sm:max-w-120 w-full max-h-[90vh] overflow-y-auto p-5 sm:p-7 rounded-2xl bg-white dark:bg-darkmode-body border border-border dark:border-darkmode-border shadow-2xl">
           <button
             type="button"
             className="modal-close"

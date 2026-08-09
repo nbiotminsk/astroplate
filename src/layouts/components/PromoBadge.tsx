@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 
 export default function PromoBadge() {
   const [isOpen, setIsOpen] = useState(false);
@@ -39,7 +39,7 @@ export default function PromoBadge() {
 
       {isOpen && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          className="fixed inset-0 z-100 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
           onClick={(e) => {
             if (e.target === e.currentTarget) setIsOpen(false);
           }}

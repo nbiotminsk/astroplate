@@ -143,13 +143,13 @@ function build_main_reply_keyboard(string $chatId): array
 
 /* ==================== HTTP helpers ==================== */
 
-function http_get(string $url, array $headers = []): array
+function http_get(string $url, array $headers = [], int $timeout = 15, int $connectTimeout = 5): array
 {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CONNECTTIMEOUT => 5,
-        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+        CURLOPT_TIMEOUT => $timeout,
         CURLOPT_HTTPHEADER => $headers,
     ]);
     $body = curl_exec($ch);
@@ -164,13 +164,13 @@ function http_get(string $url, array $headers = []): array
     return [$code, json_decode((string) $body, true)];
 }
 
-function http_post_json(string $url, array $payload, array $headers = []): array
+function http_post_json(string $url, array $payload, array $headers = [], int $timeout = 15, int $connectTimeout = 5): array
 {
     $ch = curl_init($url);
     curl_setopt_array($ch, [
         CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_CONNECTTIMEOUT => 5,
-        CURLOPT_TIMEOUT => 30,
+        CURLOPT_CONNECTTIMEOUT => $connectTimeout,
+        CURLOPT_TIMEOUT => $timeout,
         CURLOPT_POST => true,
         CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
         CURLOPT_HTTPHEADER => array_merge(
@@ -200,7 +200,7 @@ function unicboard_headers(array $config): array
 /**
  * Полные показания по одному device_id через POST /api/v1/devices/values
  */
-function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?string $periodFrom = null): array
+function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?string $periodFrom = null, int $timeout = 10): array
 {
     $headers = unicboard_headers($config);
     $apiBase = $config['unicboard_api_base'];
@@ -211,23 +211,38 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?
         $url .= '&period_from=' . urlencode($periodFrom);
     }
     
-    [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers);
+    [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers, $timeout);
     $payload = $resp['payload'] ?? [];
 
+    if ($code === 0) {
+        return [
+            'http_code' => 0,
+            'payload' => [],
+            'errors' => ['cURL network timeout or connection failure'],
+            'ok' => false,
+        ];
+    }
+
     if (empty($payload)) {
-        [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers);
+        [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers, min($timeout, 5));
+        if ($code === 0) {
+            return ['http_code' => 0, 'payload' => [], 'errors' => [], 'ok' => false];
+        }
         $payload = $resp['payload'] ?? [];
     }
 
     if (empty($payload)) {
-        [$code, $resp] = http_post_json($url, ['devices' => [$deviceUuid]], $headers);
+        [$code, $resp] = http_post_json($url, ['devices' => [$deviceUuid]], $headers, min($timeout, 5));
+        if ($code === 0) {
+            return ['http_code' => 0, 'payload' => [], 'errors' => [], 'ok' => false];
+        }
         $payload = $resp['payload'] ?? [];
     }
 
     // 2. Fallback: GET /api/v1/devices/{id}/values
     if (empty($payload)) {
         $fallbackUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/values?limit=' . $limit;
-        [$fbCode, $fbResp] = http_get($fallbackUrl, $headers);
+        [$fbCode, $fbResp] = http_get($fallbackUrl, $headers, min($timeout, 5));
         if ($fbCode === 200 && !empty($fbResp['payload'])) {
             $payload = $fbResp['payload'];
             $code = $fbCode;
@@ -237,7 +252,7 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?
     // 3. Fallback: GET /api/v1/devices/{id}/info
     if (empty($payload)) {
         $devUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/info';
-        [$dCode, $dResp] = http_get($devUrl, $headers);
+        [$dCode, $dResp] = http_get($devUrl, $headers, min($timeout, 5));
         if ($dCode === 200 && !empty($dResp['payload'])) {
             $payload = [$dResp['payload']];
             $code = $dCode;
@@ -256,7 +271,7 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?
 function get_temperature(array $config, string $deviceId, int $limit = 1): ?array
 {
     $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/temperatures?limit=' . $limit;
-    [$code, $resp] = http_get($url, unicboard_headers($config));
+    [$code, $resp] = http_get($url, unicboard_headers($config), 5);
     if ($code !== 200 || !isset($resp['payload'][0])) {
         return null;
     }
@@ -267,7 +282,7 @@ function get_temperature(array $config, string $deviceId, int $limit = 1): ?arra
 function get_battery(array $config, string $deviceId, int $limit = 1): ?array
 {
     $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/battery-level?limit=' . ($limit === 1 ? 10 : $limit);
-    [$code, $resp] = http_get($url, unicboard_headers($config));
+    [$code, $resp] = http_get($url, unicboard_headers($config), 5);
     if ($code !== 200 || !isset($resp['payload'][0])) {
         return null;
     }
@@ -552,7 +567,7 @@ function build_month_report(array $config, array $device): string
     $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
     $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
 
-    $values = get_device_values($config, $deviceId, 5000, date('Y-m-d', strtotime('-1 year')));
+    $values = get_device_values($config, $deviceId, 1000, date('Y-m-d', strtotime('-90 days')));
     $channelsMonthData = [];
     $channelsLastConsumption = []; // track per channel
 
@@ -725,6 +740,7 @@ function handle_update(array $update, array $config): void
         $data = $cb['data'] ?? '';
 
         if (str_starts_with($data, 'month_')) {
+            answer_callback_query($cbId, $token);
             $serial = str_replace('month_', '', $data);
             $device = device_lookup($config, $serial);
             if ($device) {
@@ -733,7 +749,6 @@ function handle_update(array $update, array $config): void
             } else {
                 send_message($chatId, "Устройство не найдено.", $token);
             }
-            answer_callback_query($cbId, $token);
             return;
         }
 
@@ -885,7 +900,7 @@ function run_polling(array $config): void
 
     while (true) {
         $url = "https://api.telegram.org/bot{$config['telegram_token']}/getUpdates?timeout=50&offset={$offset}";
-        [$code, $resp] = http_get($url);
+        [$code, $resp] = http_get($url, [], 60, 10);
         if ($code !== 200 || !($resp['ok'] ?? false)) {
             sleep(2);
             continue;

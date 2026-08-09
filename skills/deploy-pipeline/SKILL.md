@@ -238,3 +238,7 @@ curl -X POST --max-time 15 "https://by4010.hb.by:8443/modules/git/public/web-hoo
 - Ветка `deploy` содержит свежий билд.
 - Вебхук был успешно запущен вами вручную и отработал с HTTP 204.
 - Пользователь получил полный отчёт по каждому этапу.
+
+curl -X POST "https://api.telegram.org/bot8714263506:AAHOT8qnZ0SlKIVkSlSNlNrmGR_QQlAUW4g/setWebhook" \
+     -H "Content-Type: application/json" \
+     -d '{"url": "https://teleofis24.by/api/telegram_bot/bot.php"}'
