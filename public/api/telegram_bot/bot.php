@@ -155,11 +155,11 @@ function http_get(string $url, array $headers = [], int $timeout = 15, int $conn
     $body = curl_exec($ch);
     if ($body === false) {
         error_log('cURL Error (GET ' . $url . '): ' . curl_error($ch));
-        curl_close($ch);
+        @curl_close($ch);
         return [0, null];
     }
     $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-    curl_close($ch);
+    @curl_close($ch);
 
     return [$code, json_decode((string) $body, true)];
 }
@@ -181,11 +181,11 @@ function http_post_json(string $url, array $payload, array $headers = [], int $t
     $data = curl_exec($ch);
     if ($data === false) {
         error_log('cURL Error (POST ' . $url . '): ' . curl_error($ch));
-        curl_close($ch);
+        @curl_close($ch);
         return [0, null];
     }
     $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-    curl_close($ch);
+    @curl_close($ch);
 
     return [$code, json_decode((string) $data, true)];
 }
@@ -568,13 +568,16 @@ function build_month_report(array $config, array $device): string
     $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
 
     $values = get_device_values($config, $deviceId, 1000, date('Y-m-d', strtotime('-90 days')));
+    $latestLive = get_device_values($config, $deviceId, 1);
+
+    $allPayloads = array_merge($values['payload'] ?? [], $latestLive['payload'] ?? []);
     $channelsMonthData = [];
     $channelsLastConsumption = []; // track per channel
 
-    if (!empty($values['payload'])) {
+    if (!empty($allPayloads)) {
         // Group all historical records by channel first
         $allRecords = [];
-        foreach ($values['payload'] as $v) {
+        foreach ($allPayloads as $v) {
             $chData = $v['device_meter'] ?? $v;
             $ch = $chData['channel_number'] ?? 1;
             $valDate = extract_record_date($chData);
