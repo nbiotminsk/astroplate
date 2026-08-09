@@ -93,6 +93,104 @@ function get_user_meters(string $chatId): array
     return $all[$chatId] ?? [];
 }
 
+function meter_cache_file(): string
+{
+    return __DIR__ . '/meter_cache.json';
+}
+
+function load_meter_cache(): array
+{
+    return load_json_with_lock(meter_cache_file());
+}
+
+function save_meter_cache(array $data): void
+{
+    atomic_write_json(meter_cache_file(), $data);
+}
+
+/**
+ * Получает или обновляет кэшированные данные о последнем расходе счетчика
+ */
+function get_meter_consumption_info(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate): array
+{
+    $cache = load_meter_cache();
+    $devCache = $cache[$deviceId]['channels'][$chNum] ?? null;
+
+    if ($devCache !== null) {
+        $lastVal = (float) ($devCache['last_value'] ?? 0);
+        
+        // Если значение увеличилось — фиксируем новый расход!
+        if ($currentVal !== null && $currentVal > $lastVal) {
+            $diff = round($currentVal - $lastVal, 4);
+            $cache[$deviceId]['channels'][$chNum] = [
+                'last_value' => $currentVal,
+                'last_change_date' => $currentDate,
+                'last_change_diff' => $diff,
+                'first_date' => $devCache['first_date'] ?? $currentDate,
+            ];
+            save_meter_cache($cache);
+            return $cache[$deviceId]['channels'][$chNum];
+        }
+        
+        return $devCache;
+    }
+
+    // Если кэша для устройства ещё нет — разово опрашиваем историю (-1 год) для инициализации
+    $history = get_device_values($config, $deviceId, 5000, date('Y-m-d', strtotime('-1 year')));
+    $lastVal = null;
+    $changeDate = null;
+    $changeDiff = null;
+    $firstDate = null;
+
+    if (!empty($history['payload'])) {
+        $records = [];
+        foreach ($history['payload'] as $v) {
+            $chData = $v['device_meter'] ?? $v;
+            $ch = $chData['channel_number'] ?? 1;
+            if ((int) $ch === (int) $chNum) {
+                $val = extract_record_value($chData);
+                $date = extract_record_date($chData);
+                if ($val !== null && $date !== null) {
+                    $records[] = ['val' => $val, 'date' => $date];
+                }
+            }
+        }
+
+        // Сортируем хронологически
+        usort($records, function($a, $b) {
+            return strtotime($a['date']) - strtotime($b['date']);
+        });
+
+        foreach ($records as $r) {
+            if ($firstDate === null) {
+                $firstDate = $r['date'];
+            }
+            if ($lastVal === null) {
+                $lastVal = $r['val'];
+            } elseif ($r['val'] != $lastVal && is_numeric($r['val']) && is_numeric($lastVal)) {
+                $changeDate = $r['date'];
+                $changeDiff = abs($r['val'] - $lastVal);
+                $lastVal = $r['val'];
+            }
+        }
+    }
+
+    $info = [
+        'last_value' => $currentVal ?? $lastVal ?? 0.0,
+        'last_change_date' => $changeDate,
+        'last_change_diff' => $changeDiff,
+        'first_date' => $firstDate,
+    ];
+
+    if (!isset($cache[$deviceId])) {
+        $cache[$deviceId] = ['channels' => []];
+    }
+    $cache[$deviceId]['channels'][$chNum] = $info;
+    save_meter_cache($cache);
+
+    return $info;
+}
+
 function add_user_meter(string $chatId, string $serial, string $name): void
 {
     $all = load_user_meters();
@@ -563,62 +661,27 @@ function build_month_report(array $config, array $device): string
 
     $channelSerials = get_device_channels_serials($config, $deviceId);
 
-    // Фильтруем за текущий месяц
     $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
     $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
 
-    $values = get_device_values($config, $deviceId, 1000, date('Y-m-d', strtotime('-90 days')));
+    // Запрашиваем только текущий месяц + свежие онлайн показания
+    $values = get_device_values($config, $deviceId, 100, date('Y-m-01'));
     $latestLive = get_device_values($config, $deviceId, 1);
 
     $allPayloads = array_merge($values['payload'] ?? [], $latestLive['payload'] ?? []);
     $channelsMonthData = [];
-    $channelsLastConsumption = []; // track per channel
 
     if (!empty($allPayloads)) {
-        // Group all historical records by channel first
-        $allRecords = [];
         foreach ($allPayloads as $v) {
             $chData = $v['device_meter'] ?? $v;
             $ch = $chData['channel_number'] ?? 1;
             $valDate = extract_record_date($chData);
             if ($valDate) {
-                $allRecords[$ch][] = $chData;
-            }
-        }
-        
-        foreach ($allRecords as $ch => $records) {
-            $lastVal = null;
-            $changeDate = null;
-            $changeDiff = null;
-            $firstDate = null;
-            
-            // Iterate records in historical order (assuming chronological)
-            foreach ($records as $chData) {
-                $val = extract_record_value($chData);
-                $date = extract_record_date($chData);
-                
-                if ($firstDate === null) $firstDate = $date;
-                
-                if ($lastVal === null) {
-                    $lastVal = $val;
-                } elseif ($val != $lastVal && is_numeric($val) && is_numeric($lastVal)) {
-                    $changeDate = $date;
-                    $changeDiff = abs($val - $lastVal);
-                    $lastVal = $val;
-                }
-                
-                // Filter for current month
-                $ts = strtotime($date);
+                $ts = strtotime($valDate);
                 if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
                     $channelsMonthData[$ch][] = $chData;
                 }
             }
-            
-            $channelsLastConsumption[$ch] = [
-                'date' => $changeDate,
-                'diff' => $changeDiff,
-                'first_date' => $firstDate
-            ];
         }
         ksort($channelsMonthData);
     }
@@ -626,18 +689,10 @@ function build_month_report(array $config, array $device): string
     if (!empty($channelsMonthData)) {
         $totalChannels = count($channelsMonthData);
         foreach ($channelsMonthData as $chNum => $records) {
-            $latestInMonth = reset($records); // Or maybe we should use end/reset based on order
-            $earliestInMonth = end($records);
-            // wait, if $records is historical order, earliest is reset, latest is end.
-            // Let's make sure it's consistent. Earlier we used reset() for latest and end() for earliest.
-            // That assumes DESC order. But the API might return DESC or ASC.
-            // Our test_bot_output2 array_slice showed 2026-06-30 and then 2026-07-02 so it's ASC.
-            // So latest is end(), earliest is reset(). Let's fix this just in case.
-            // I'll sort the month records by date to be safe.
             usort($records, function($a, $b) {
                 return strtotime(extract_record_date($b)) - strtotime(extract_record_date($a));
             });
-            // Now $records is DESC. $latestInMonth is reset, $earliestInMonth is end.
+
             $latestInMonth = reset($records);
             $earliestInMonth = end($records);
 
@@ -666,12 +721,13 @@ function build_month_report(array $config, array $device): string
                 $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
             }
             
-            $lastCons = $channelsLastConsumption[$chNum] ?? null;
-            if ($lastCons && $lastCons['date']) {
-                $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['date'])) . " (на " . round($lastCons['diff'], 4) . " m³)";
+            // Получаем или обновляем данные о последнем расходе из кэша
+            $lastCons = get_meter_consumption_info($config, $deviceId, (int)$chNum, $valEnd, $dateEnd);
+            if ($lastCons && !empty($lastCons['last_change_date'])) {
+                $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['last_change_date'])) . " (на " . round($lastCons['last_change_diff'], 4) . " m³)";
             } else {
                 $lines[] = "\n  ℹ️ Последний расход не обнаружен.";
-                if ($lastCons && $lastCons['first_date']) {
+                if ($lastCons && !empty($lastCons['first_date'])) {
                     $lines[] = "  Первые доступные показания в системе: " . date('d.m.Y', strtotime($lastCons['first_date'])) . " (значение не менялось).";
                 }
             }
