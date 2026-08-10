@@ -62,14 +62,60 @@ function load_registered_devices(): array
     return load_json_with_lock(custom_devices_file());
 }
 
-function register_custom_device(string $serial, string $uuid, string $name): void
+function register_custom_device(string $serial, string $uuid, string $name, array $initialValues = []): void
 {
     $devices = load_registered_devices();
     $devices[(int) $serial] = [
         'name' => $name,
         'device_id' => $uuid,
     ];
+    if (!empty($initialValues)) {
+        $devices[(int) $serial]['initial_values'] = $initialValues;
+    }
     atomic_write_json(custom_devices_file(), $devices);
+}
+
+/**
+ * Автоматически получает первичное/начальное показание с API прибора и сохраняет в registered_devices.json
+ */
+function fetch_and_save_initial_values(array $config, string $serial, string $deviceId, array $explicitInitial = []): array
+{
+    $customDevices = load_registered_devices();
+    $existing = $customDevices[(int) $serial]['initial_values'] ?? [];
+
+    if (!empty($explicitInitial)) {
+        $initialValues = $explicitInitial;
+    } elseif (!empty($existing)) {
+        return $existing;
+    } else {
+        // Опрашиваем API на предмет начальных показаний / стартовых значений
+        $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
+        [$code, $resp] = http_get($url, unicboard_headers($config));
+
+        $initialValues = [];
+        if ($code === 200 && !empty($resp['payload']['device_channel'])) {
+            foreach ($resp['payload']['device_channel'] as $idx => $ch) {
+                $chNum = $ch['serial_number'] ?? ($idx + 1);
+                $meter = $ch['device_meter'][0] ?? null;
+                if ($meter && isset($meter['last_value'])) {
+                    $initialValues[(string) $chNum] = (float) $meter['last_value'];
+                }
+            }
+        }
+    }
+
+    if (!empty($initialValues)) {
+        if (!isset($customDevices[(int) $serial])) {
+            $customDevices[(int) $serial] = [
+                'name' => "Устройство {$serial}",
+                'device_id' => $deviceId,
+            ];
+        }
+        $customDevices[(int) $serial]['initial_values'] = $initialValues;
+        atomic_write_json(custom_devices_file(), $customDevices);
+    }
+
+    return $initialValues;
 }
 
 function user_storage_file(): string
@@ -558,10 +604,12 @@ function device_lookup(array $config, string $input): ?array
         $name = $item['device_modification']['name'] ?? $item['device_manufacturer']['name'] ?? "Устройство {$serial}";
 
         if ($serial === $input || mb_strtolower($name, 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
+            $initialValues = fetch_and_save_initial_values($config, $serial, $devId);
             return [
                 'name' => $name,
                 'device_id' => $devId,
                 'serial_number' => $serial,
+                'initial_values' => $initialValues,
             ];
         }
     }
@@ -991,6 +1039,7 @@ function handle_update(array $update, array $config): void
             }
 
             register_custom_device($serial, $uuid, $name);
+            fetch_and_save_initial_values($config, $serial, $uuid);
             add_user_meter($chatId, $serial, $name);
             $newKey = build_main_reply_keyboard($chatId);
 
