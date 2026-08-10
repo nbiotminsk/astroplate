@@ -1,7 +1,10 @@
 {
     "8527038": {
         "name": "Fluo",
-        "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f"
+        "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f",
+        "initial_values": {
+            "1": 0.12
+        }
     },
     "8524390": {
         "name": "Юпитер",
