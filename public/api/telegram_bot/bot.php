@@ -679,7 +679,11 @@ function build_report(array $config, array $device): string
             $latest = $history[0] ?? null;
             $prev = $history[1] ?? null;
 
-            $lastVal = $latest ? extract_record_value($latest) : null;
+            $initialValues = $device['initial_values'] ?? [];
+            $offset = (float) ($initialValues[$chNum] ?? $initialValues[(string)$chNum] ?? 0);
+
+            $rawVal = $latest ? extract_record_value($latest) : null;
+            $lastVal = $rawVal !== null ? round($rawVal + $offset, 4) : null;
             $lastValDate = $latest ? extract_record_date($latest) : null;
             $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
             $valStr = $lastVal !== null ? (string) $lastVal : '—';
@@ -695,8 +699,8 @@ function build_report(array $config, array $device): string
             $diffStr = '';
             if ($latest !== null && $prev !== null) {
                 $prevVal = extract_record_value($prev);
-                if ($lastVal !== null && $prevVal !== null) {
-                    $diff = $lastVal - $prevVal;
+                if ($rawVal !== null && $prevVal !== null) {
+                    $diff = $rawVal - $prevVal;
                     $formattedDiff = ($diff > 0 ? '+' : '') . round($diff, 4);
                     $diffStr = " (<b>{$formattedDiff} m³</b>)";
                 }
@@ -740,6 +744,7 @@ function build_month_report(array $config, array $device): string
 {
     $name = $device['name'];
     $deviceId = $device['device_id'];
+    $initialValues = $device['initial_values'] ?? [];
 
     $firstDay = date('01.m.Y 00:00');
     $lastDay = date('d.m.Y H:i');
@@ -803,14 +808,18 @@ function build_month_report(array $config, array $device): string
                 return strtotime(extract_record_date($b)) - strtotime(extract_record_date($a));
             });
 
+            $offset = (float) ($initialValues[$chNum] ?? $initialValues[(string)$chNum] ?? 0);
+
             $latestInMonth = reset($records);
             $earliestInMonth = end($records);
 
-            $valEnd = extract_record_value($latestInMonth);
+            $rawValEnd = extract_record_value($latestInMonth);
+            $valEnd = $rawValEnd !== null ? round($rawValEnd + $offset, 4) : null;
             $dateEnd = extract_record_date($latestInMonth);
             $dateEndStr = $dateEnd ? date('d.m.Y H:i', strtotime($dateEnd)) : '—';
 
-            $valStart = extract_record_value($earliestInMonth);
+            $rawValStart = extract_record_value($earliestInMonth);
+            $valStart = $rawValStart !== null ? round($rawValStart + $offset, 4) : null;
             $dateStart = extract_record_date($earliestInMonth);
             $dateStartStr = $dateStart ? date('d.m.Y H:i', strtotime($dateStart)) : '—';
 

@@ -12,15 +12,15 @@
     "420de7d0-5e14-453d-8ad3-5a1dc3729e34": {
         "channels": {
             "1": {
-                "last_value": 0,
-                "last_change_date": null,
-                "last_change_diff": null,
+                "last_value": 0.06,
+                "last_change_date": "2026-08-10T08:16:21",
+                "last_change_diff": 0.06,
                 "first_date": "2026-08-10T08:16:21"
             },
             "2": {
-                "last_value": 0,
-                "last_change_date": null,
-                "last_change_diff": null,
+                "last_value": 0.05,
+                "last_change_date": "2026-08-10T08:16:21",
+                "last_change_diff": 0.05,
                 "first_date": "2026-08-10T08:16:21"
             }
         }
