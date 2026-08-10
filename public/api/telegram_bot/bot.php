@@ -17,6 +17,8 @@ const TO_CMD = <<<TXT
 /start — запустить бота и открыть меню
 /add СЕРИЙНЫЙ_№ UUID НАЗВАНИЕ — добавить новый прибор в систему
 Пример: <code>/add 8527038 2e50bc92-6c87-4b64-b22e-e96e7997476f Fluo</code>
+/init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ — задать/изменить начальное показание счетчика
+Пример: <code>/init 8527038 1 0.12</code>
 /my — список моих сохраненных счетчиков
 TXT;
 
@@ -1055,6 +1057,48 @@ function handle_update(array $update, array $config): void
         remove_user_meter($chatId, $serial);
         $newKey = build_main_reply_keyboard($chatId);
         send_message($chatId, "🗑 Счетчик <code>{$serial}</code> удален из списка ваших сохраненных приборов.", $token, $newKey);
+        return;
+    }
+
+    // Задать/изменить начальные показания: /init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ (например /init 8527038 1 0.12)
+    if (str_starts_with($text, '/init ') || str_starts_with($text, '/set ')) {
+        $parts = preg_split('/\s+/', trim($text));
+        if (count($parts) >= 4) {
+            $serial = $parts[1];
+            $chNum = (int) $parts[2];
+            $val = (float) str_replace(',', '.', $parts[3]);
+
+            $customDevices = load_registered_devices();
+            if (!isset($customDevices[(int) $serial])) {
+                $dev = device_lookup($config, $serial);
+                if ($dev) {
+                    register_custom_device($serial, $dev['device_id'], $dev['name']);
+                    $customDevices = load_registered_devices();
+                }
+            }
+
+            if (isset($customDevices[(int) $serial])) {
+                if (!isset($customDevices[(int) $serial]['initial_values'])) {
+                    $customDevices[(int) $serial]['initial_values'] = [];
+                }
+                $customDevices[(int) $serial]['initial_values'][(string) $chNum] = $val;
+                atomic_write_json(custom_devices_file(), $customDevices);
+
+                // Очищаем локальный кэш расхода, чтобы пересчитать с новым начальным значением
+                $cache = load_meter_cache();
+                $devId = $customDevices[(int) $serial]['device_id'] ?? '';
+                if ($devId && isset($cache[$devId]['channels'][$chNum])) {
+                    unset($cache[$devId]['channels'][$chNum]);
+                    save_meter_cache($cache);
+                }
+
+                send_message($chatId, "✅ Начальное показание для прибора <code>{$serial}</code> (Канал {$chNum}) успешно установлено: <b>{$val} m³</b>.", $token, $mainKey);
+            } else {
+                send_message($chatId, "❌ Прибор с серийным номером <code>{$serial}</code> не найден.", $token, $mainKey);
+            }
+        } else {
+            send_message($chatId, "Использование команды:\n<code>/init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ</code>\n\nПример:\n<code>/init 8527038 1 0.12</code>\n<code>/init 8524390 1 0.06</code>", $token, $mainKey);
+        }
         return;
     }
 
