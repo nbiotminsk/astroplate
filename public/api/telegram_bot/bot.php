@@ -108,46 +108,33 @@ function save_meter_cache(array $data): void
     atomic_write_json(meter_cache_file(), $data);
 }
 
-/**
- * Получает или обновляет кэшированные данные о последнем расходе счетчика
- */
-function get_meter_consumption_info(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate): array
+function extract_channel_records(array $payload, int $chNum): array
 {
-    $cache = load_meter_cache();
-    $devCache = $cache[$deviceId]['channels'][$chNum] ?? null;
-
-    if ($devCache !== null) {
-        $lastVal = (float) ($devCache['last_value'] ?? 0);
-        
-        // Если значение увеличилось — фиксируем новый расход!
-        if ($currentVal !== null && $currentVal > $lastVal) {
-            $diff = round($currentVal - $lastVal, 4);
-            $cache[$deviceId]['channels'][$chNum] = [
-                'last_value' => $currentVal,
-                'last_change_date' => $currentDate,
-                'last_change_diff' => $diff,
-                'first_date' => $devCache['first_date'] ?? $currentDate,
-            ];
-            save_meter_cache($cache);
-            return $cache[$deviceId]['channels'][$chNum];
+    $records = [];
+    foreach ($payload as $v) {
+        $channelsList = [];
+        if (isset($v['device_channel']) && is_array($v['device_channel'])) {
+            $channelsList = $v['device_channel'];
+        } elseif (isset($v['channels']) && is_array($v['channels'])) {
+            $channelsList = $v['channels'];
         }
-        
-        return $devCache;
-    }
 
-    // Если кэша для устройства ещё нет — разово опрашиваем историю (-1 год) для инициализации
-    $history = get_device_values($config, $deviceId, 5000, date('Y-m-d', strtotime('-1 year')));
-    $lastVal = null;
-    $changeDate = null;
-    $changeDiff = null;
-    $firstDate = null;
-
-    if (!empty($history['payload'])) {
-        $records = [];
-        foreach ($history['payload'] as $v) {
+        if (!empty($channelsList)) {
+            foreach ($channelsList as $idx => $chData) {
+                $num = $chData['channel_number'] ?? ($idx + 1);
+                if ((int) $num === (int) $chNum && is_array($chData)) {
+                    $combined = array_merge($v, $chData);
+                    $val = extract_record_value($combined);
+                    $date = extract_record_date($combined);
+                    if ($val !== null && $date !== null) {
+                        $records[] = ['val' => $val, 'date' => $date];
+                    }
+                }
+            }
+        } else {
             $chData = $v['device_meter'] ?? $v;
-            $ch = $chData['channel_number'] ?? 1;
-            if ((int) $ch === (int) $chNum) {
+            $num = $chData['channel_number'] ?? $v['channel_number'] ?? 1;
+            if ((int) $num === (int) $chNum) {
                 $val = extract_record_value($chData);
                 $date = extract_record_date($chData);
                 if ($val !== null && $date !== null) {
@@ -155,22 +142,127 @@ function get_meter_consumption_info(array $config, string $deviceId, int $chNum,
                 }
             }
         }
+    }
+    return $records;
+}
 
-        // Сортируем хронологически
-        usort($records, function($a, $b) {
-            return strtotime($a['date']) - strtotime($b['date']);
-        });
+/**
+ * Получает или обновляет кэшированные данные о последнем расходе счетчика
+ */
+function get_meter_consumption_info(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
+{
+    $cache = load_meter_cache();
+    $devCache = $cache[$deviceId]['channels'][$chNum] ?? null;
 
-        foreach ($records as $r) {
-            if ($firstDate === null) {
-                $firstDate = $r['date'];
+    if ($devCache !== null) {
+        $lastVal = isset($devCache['last_value']) ? (float) $devCache['last_value'] : null;
+
+        // 1. Если передано актуальное показание и оно выросло — обновляем расход в кэше
+        if ($currentVal !== null && $lastVal !== null && round($currentVal, 4) > round($lastVal, 4)) {
+            $diff = round($currentVal - $lastVal, 4);
+            $devCache = [
+                'last_value' => $currentVal,
+                'last_change_date' => $currentDate,
+                'last_change_diff' => $diff,
+                'first_date' => $devCache['first_date'] ?? $currentDate,
+            ];
+            $cache[$deviceId]['channels'][$chNum] = $devCache;
+            save_meter_cache($cache);
+            return $devCache;
+        }
+
+        // 2. Если дата расхода пуста, пробоем заполнить из записей текущего месяца
+        if (empty($devCache['last_change_date']) && !empty($monthRecords)) {
+            $parsed = [];
+            foreach ($monthRecords as $r) {
+                $v = extract_record_value($r);
+                $d = extract_record_date($r);
+                if ($v !== null && $d !== null) {
+                    $parsed[] = ['val' => $v, 'date' => $d];
+                }
+            }
+            usort($parsed, function($a, $b) {
+                return strtotime($a['date']) - strtotime($b['date']);
+            });
+
+            $prevV = null;
+            foreach ($parsed as $p) {
+                if ($prevV === null) {
+                    $prevV = $p['val'];
+                } elseif (round($p['val'], 4) != round($prevV, 4)) {
+                    $devCache['last_change_date'] = $p['date'];
+                    $devCache['last_change_diff'] = round(abs($p['val'] - $prevV), 4);
+                    $prevV = $p['val'];
+                }
+            }
+
+            if (!empty($devCache['last_change_date'])) {
+                $cache[$deviceId]['channels'][$chNum] = $devCache;
+                save_meter_cache($cache);
+            }
+        }
+
+        return $devCache;
+    }
+
+    // Кэш отсутствует — строим историю
+    $records = [];
+    if (!empty($monthRecords)) {
+        foreach ($monthRecords as $r) {
+            $v = extract_record_value($r);
+            $d = extract_record_date($r);
+            if ($v !== null && $d !== null) {
+                $records[] = ['val' => $v, 'date' => $d];
+            }
+        }
+    }
+
+    $lastVal = null;
+    $changeDate = null;
+    $changeDiff = null;
+    $firstDate = null;
+
+    usort($records, function($a, $b) {
+        return strtotime($a['date']) - strtotime($b['date']);
+    });
+
+    foreach ($records as $r) {
+        if ($firstDate === null) {
+            $firstDate = $r['date'];
+        }
+        if ($lastVal === null) {
+            $lastVal = $r['val'];
+        } elseif (round($r['val'], 4) != round($lastVal, 4)) {
+            $changeDate = $r['date'];
+            $changeDiff = round(abs($r['val'] - $lastVal), 4);
+            $lastVal = $r['val'];
+        }
+    }
+
+    // Если в текущем месяце дата смены показаний не найдена — разово опрашиваем историю API (-1 год)
+    if ($changeDate === null) {
+        $history = get_device_values($config, $deviceId, 500, date('Y-m-d', strtotime('-1 year')));
+        if (!empty($history['payload'])) {
+            $hRecords = extract_channel_records($history['payload'], $chNum);
+            usort($hRecords, function($a, $b) {
+                return strtotime($a['date']) - strtotime($b['date']);
+            });
+
+            $hLastVal = null;
+            foreach ($hRecords as $r) {
+                if ($firstDate === null) {
+                    $firstDate = $r['date'];
+                }
+                if ($hLastVal === null) {
+                    $hLastVal = $r['val'];
+                } elseif (round($r['val'], 4) != round($hLastVal, 4)) {
+                    $changeDate = $r['date'];
+                    $changeDiff = round(abs($r['val'] - $hLastVal), 4);
+                    $hLastVal = $r['val'];
+                }
             }
             if ($lastVal === null) {
-                $lastVal = $r['val'];
-            } elseif ($r['val'] != $lastVal && is_numeric($r['val']) && is_numeric($lastVal)) {
-                $changeDate = $r['date'];
-                $changeDiff = abs($r['val'] - $lastVal);
-                $lastVal = $r['val'];
+                $lastVal = $hLastVal;
             }
         }
     }
@@ -298,59 +390,51 @@ function unicboard_headers(array $config): array
 /**
  * Полные показания по одному device_id через POST /api/v1/devices/values
  */
-function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?string $periodFrom = null, int $timeout = 10): array
+function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?string $periodFrom = null, int $timeout = 15): array
 {
     $headers = unicboard_headers($config);
     $apiBase = $config['unicboard_api_base'];
 
-    // 1. Пробуем POST /api/v1/devices/values с вариациями названий параметров
     $url = $apiBase . '/api/v1/devices/values?limit=' . $limit;
     if ($periodFrom !== null) {
         $url .= '&period_from=' . urlencode($periodFrom);
     }
-    
-    [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers, $timeout);
+
+    // 1. Сначала пробуем "devices_id" — официальное имя параметра из OpenAPI спецификации
+    [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers, $timeout);
     $payload = $resp['payload'] ?? [];
 
-    if ($code === 0) {
-        return [
-            'http_code' => 0,
-            'payload' => [],
-            'errors' => ['cURL network timeout or connection failure'],
-            'ok' => false,
-        ];
+    // На холодном старте при cURL таймауте ($code === 0) делаем одну повторную попытку
+    if ($code === 0 && empty($payload)) {
+        [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers, $timeout);
+        $payload = $resp['payload'] ?? [];
     }
 
+    // 2. Вариации параметров в боди, если основной вызов вернул пустой payload
     if (empty($payload)) {
-        [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers, min($timeout, 5));
-        if ($code === 0) {
-            return ['http_code' => 0, 'payload' => [], 'errors' => [], 'ok' => false];
-        }
+        [$code, $resp] = http_post_json($url, ['device_ids' => [$deviceUuid]], $headers, $timeout);
         $payload = $resp['payload'] ?? [];
     }
 
     if (empty($payload)) {
-        [$code, $resp] = http_post_json($url, ['devices' => [$deviceUuid]], $headers, min($timeout, 5));
-        if ($code === 0) {
-            return ['http_code' => 0, 'payload' => [], 'errors' => [], 'ok' => false];
-        }
+        [$code, $resp] = http_post_json($url, ['devices' => [$deviceUuid]], $headers, $timeout);
         $payload = $resp['payload'] ?? [];
     }
 
-    // 2. Fallback: GET /api/v1/devices/{id}/values
+    // 3. Fallback: GET /api/v1/devices/{id}/values
     if (empty($payload)) {
         $fallbackUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/values?limit=' . $limit;
-        [$fbCode, $fbResp] = http_get($fallbackUrl, $headers, min($timeout, 5));
+        [$fbCode, $fbResp] = http_get($fallbackUrl, $headers, $timeout);
         if ($fbCode === 200 && !empty($fbResp['payload'])) {
             $payload = $fbResp['payload'];
             $code = $fbCode;
         }
     }
 
-    // 3. Fallback: GET /api/v1/devices/{id}/info
+    // 4. Fallback: GET /api/v1/devices/{id}/info
     if (empty($payload)) {
         $devUrl = $apiBase . '/api/v1/devices/' . $deviceUuid . '/info';
-        [$dCode, $dResp] = http_get($devUrl, $headers, min($timeout, 5));
+        [$dCode, $dResp] = http_get($devUrl, $headers, $timeout);
         if ($dCode === 200 && !empty($dResp['payload'])) {
             $payload = [$dResp['payload']];
             $code = $dCode;
@@ -600,6 +684,11 @@ function build_report(array $config, array $device): string
             $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
             $valStr = $lastVal !== null ? (string) $lastVal : '—';
 
+            // Обновляем кэш расхода при получении текущих показаний
+            if ($lastVal !== null && $lastValDate !== null) {
+                get_meter_consumption_info($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
+            }
+
             $meterSerial = $channelSerials[$chNum] ?? null;
             $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
 
@@ -646,14 +735,14 @@ function build_report(array $config, array $device): string
     return implode("\n", $lines);
 }
 
-/** Архив за текущий месяц (от 1 числа до конца месяца) */
+/** Архив за текущий месяц (от 1 числа до текущего дня) */
 function build_month_report(array $config, array $device): string
 {
     $name = $device['name'];
     $deviceId = $device['device_id'];
 
     $firstDay = date('01.m.Y 00:00');
-    $lastDay = date('t.m.Y 23:59');
+    $lastDay = date('d.m.Y H:i');
 
     $lines = [];
     $lines[] = "\xF0\x9F\x93\x85 <b>Архив за текущий месяц ({$name})</b>";
@@ -662,7 +751,7 @@ function build_month_report(array $config, array $device): string
     $channelSerials = get_device_channels_serials($config, $deviceId);
 
     $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
-    $endMonthTs = strtotime(date('Y-m-t 23:59:59'));
+    $endMonthTs = time();
 
     // Запрашиваем только текущий месяц + свежие онлайн показания
     $values = get_device_values($config, $deviceId, 100, date('Y-m-01'));
@@ -673,13 +762,34 @@ function build_month_report(array $config, array $device): string
 
     if (!empty($allPayloads)) {
         foreach ($allPayloads as $v) {
-            $chData = $v['device_meter'] ?? $v;
-            $ch = $chData['channel_number'] ?? 1;
-            $valDate = extract_record_date($chData);
-            if ($valDate) {
-                $ts = strtotime($valDate);
-                if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
-                    $channelsMonthData[$ch][] = $chData;
+            $channelsList = [];
+            if (isset($v['device_channel']) && is_array($v['device_channel'])) {
+                $channelsList = $v['device_channel'];
+            } elseif (isset($v['channels']) && is_array($v['channels'])) {
+                $channelsList = $v['channels'];
+            }
+
+            if (!empty($channelsList)) {
+                foreach ($channelsList as $idx => $chData) {
+                    $ch = $chData['channel_number'] ?? ($idx + 1);
+                    $combined = is_array($chData) ? array_merge($v, $chData) : $v;
+                    $valDate = extract_record_date($combined);
+                    if ($valDate) {
+                        $ts = strtotime($valDate);
+                        if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
+                            $channelsMonthData[$ch][] = $combined;
+                        }
+                    }
+                }
+            } else {
+                $chData = $v['device_meter'] ?? $v;
+                $ch = $chData['channel_number'] ?? $v['channel_number'] ?? 1;
+                $valDate = extract_record_date($chData);
+                if ($valDate) {
+                    $ts = strtotime($valDate);
+                    if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
+                        $channelsMonthData[$ch][] = $chData;
+                    }
                 }
             }
         }
@@ -722,14 +832,11 @@ function build_month_report(array $config, array $device): string
             }
             
             // Получаем или обновляем данные о последнем расходе из кэша
-            $lastCons = get_meter_consumption_info($config, $deviceId, (int)$chNum, $valEnd, $dateEnd);
+            $lastCons = get_meter_consumption_info($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records);
             if ($lastCons && !empty($lastCons['last_change_date'])) {
-                $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['last_change_date'])) . " (на " . round($lastCons['last_change_diff'], 4) . " m³)";
+                $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['last_change_date'])) . " (на " . round((float) $lastCons['last_change_diff'], 4) . " m³)";
             } else {
                 $lines[] = "\n  ℹ️ Последний расход не обнаружен.";
-                if ($lastCons && !empty($lastCons['first_date'])) {
-                    $lines[] = "  Первые доступные показания в системе: " . date('d.m.Y', strtotime($lastCons['first_date'])) . " (значение не менялось).";
-                }
             }
             
             $lines[] = "";
