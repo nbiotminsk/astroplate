@@ -6,11 +6,19 @@ namespace TelegramBot\Command;
 
 use TelegramBot\DTO\TelegramUpdateDTO;
 use TelegramBot\MeterService;
-use TelegramBot\Storage;
+use TelegramBot\Repository\DeviceRepositoryInterface;
+use TelegramBot\Repository\MeterCacheRepositoryInterface;
 use TelegramBot\Telegram;
 
 class InitMeterCommand implements CommandInterface
 {
+    public function __construct(
+        private Telegram $telegram,
+        private MeterService $meterService,
+        private DeviceRepositoryInterface $deviceRepo,
+        private MeterCacheRepositoryInterface $cacheRepo
+    ) {}
+
     public function supports(TelegramUpdateDTO $update): bool
     {
         return !$update->isCallbackQuery && (str_starts_with($update->text, '/init ') || str_starts_with($update->text, '/set '));
@@ -21,7 +29,7 @@ class InitMeterCommand implements CommandInterface
         $token = $config['telegram_token'];
         $chatId = $update->chatId;
         $text = $update->text;
-        $mainKey = Telegram::buildMainReplyKeyboard($chatId);
+        $mainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
         $parts = preg_split('/\s+/', trim($text));
         if (count($parts) >= 4) {
@@ -29,12 +37,12 @@ class InitMeterCommand implements CommandInterface
             $chNum = (int) $parts[2];
             $val = (float) str_replace(',', '.', $parts[3]);
 
-            $customDevices = Storage::loadRegisteredDevices();
+            $customDevices = $this->deviceRepo->loadAll();
             if (!isset($customDevices[(int) $serial])) {
-                $dev = MeterService::deviceLookup($config, $serial);
+                $dev = $this->meterService->deviceLookup($config, $serial);
                 if ($dev) {
-                    Storage::registerCustomDevice($serial, $dev->deviceId, $dev->name);
-                    $customDevices = Storage::loadRegisteredDevices();
+                    $this->deviceRepo->registerDevice($serial, $dev->deviceId, $dev->name);
+                    $customDevices = $this->deviceRepo->loadAll();
                 }
             }
 
@@ -43,21 +51,22 @@ class InitMeterCommand implements CommandInterface
                     $customDevices[(int) $serial]['initial_values'] = [];
                 }
                 $customDevices[(int) $serial]['initial_values'][(string) $chNum] = $val;
-                Storage::saveRegisteredDevices($customDevices);
+                $this->deviceRepo->registerDevice(
+                    $serial,
+                    $customDevices[(int) $serial]['device_id'] ?? '',
+                    $customDevices[(int) $serial]['name'] ?? "Устройство {$serial}",
+                    $customDevices[(int) $serial]['initial_values']
+                );
 
-                $cache = Storage::loadMeterCache();
                 $devId = $customDevices[(int) $serial]['device_id'] ?? '';
-                if ($devId && isset($cache[$devId]['channels'][$chNum])) {
-                    unset($cache[$devId]['channels'][$chNum]);
-                    Storage::saveMeterCache($cache);
-                }
+                $this->cacheRepo->clearChannelCache($devId, $chNum);
 
-                Telegram::sendMessage($chatId, "✅ Начальное показание для прибора <code>{$serial}</code> (Канал {$chNum}) успешно установлено: <b>{$val} m³</b>.", $token, $mainKey);
+                $this->telegram->sendMessage($chatId, "✅ Начальное показание для прибора <code>{$serial}</code> (Канал {$chNum}) успешно установлено: <b>{$val} m³</b>.", $token, $mainKey);
             } else {
-                Telegram::sendMessage($chatId, "❌ Прибор с серийным номером <code>{$serial}</code> не найден.", $token, $mainKey);
+                $this->telegram->sendMessage($chatId, "❌ Прибор с серийным номером <code>{$serial}</code> не найден.", $token, $mainKey);
             }
         } else {
-            Telegram::sendMessage($chatId, "Использование команды:\n<code>/init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ</code>\n\nПример:\n<code>/init 8527038 1 0.12</code>\n<code>/init 8524390 1 0.06</code>", $token, $mainKey);
+            $this->telegram->sendMessage($chatId, "Использование команды:\n<code>/init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ</code>\n\nПример:\n<code>/init 8527038 1 0.12</code>\n<code>/init 8524390 1 0.06</code>", $token, $mainKey);
         }
     }
 }

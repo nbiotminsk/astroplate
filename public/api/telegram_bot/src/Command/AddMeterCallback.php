@@ -6,11 +6,17 @@ namespace TelegramBot\Command;
 
 use TelegramBot\DTO\TelegramUpdateDTO;
 use TelegramBot\MeterService;
-use TelegramBot\Storage;
+use TelegramBot\Repository\UserMeterRepositoryInterface;
 use TelegramBot\Telegram;
 
 class AddMeterCallback implements CommandInterface
 {
+    public function __construct(
+        private Telegram $telegram,
+        private MeterService $meterService,
+        private UserMeterRepositoryInterface $userMeterRepo
+    ) {}
+
     public function supports(TelegramUpdateDTO $update): bool
     {
         return $update->isCallbackQuery && str_starts_with($update->callbackData, 'add_');
@@ -23,14 +29,14 @@ class AddMeterCallback implements CommandInterface
         $chatId = $update->chatId;
         $serial = str_replace('add_', '', $update->callbackData);
 
-        $device = MeterService::deviceLookup($config, $serial);
+        $device = $this->meterService->deviceLookup($config, $serial);
         if ($device) {
-            Storage::addUserMeter($chatId, $serial, $device->name);
-            Telegram::answerCallbackQuery($cbId, $token, "Счетчик {$serial} добавлен!");
-            $replyKey = Telegram::buildMainReplyKeyboard($chatId);
-            Telegram::sendMessage($chatId, "✅ Счетчик <b>{$device->name}</b> ({$serial}) добавлен в меню «📋 Мои счетчики».", $token, $replyKey);
+            $this->userMeterRepo->addMeter($chatId, $serial, $device->name);
+            $this->telegram->answerCallbackQuery($cbId, $token, "Счетчик {$serial} добавлен!");
+            $replyKey = $this->telegram->buildMainReplyKeyboard($chatId);
+            $this->telegram->sendMessage($chatId, "✅ Счетчик <b>{$device->name}</b> ({$serial}) добавлен в меню «📋 Мои счетчики».", $token, $replyKey);
         } else {
-            Telegram::answerCallbackQuery($cbId, $token, "Не удалось найти счетчик.");
+            $this->telegram->answerCallbackQuery($cbId, $token, "Не удалось найти счетчик.");
         }
     }
 }

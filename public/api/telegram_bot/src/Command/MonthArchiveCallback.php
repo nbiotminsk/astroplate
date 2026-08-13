@@ -11,6 +11,12 @@ use TelegramBot\Telegram;
 
 class MonthArchiveCallback implements CommandInterface
 {
+    public function __construct(
+        private Telegram $telegram,
+        private MeterService $meterService,
+        private ReportService $reportService
+    ) {}
+
     public function supports(TelegramUpdateDTO $update): bool
     {
         return $update->isCallbackQuery && str_starts_with($update->callbackData, 'month_');
@@ -23,13 +29,13 @@ class MonthArchiveCallback implements CommandInterface
         $chatId = $update->chatId;
         $serial = str_replace('month_', '', $update->callbackData);
 
-        Telegram::answerCallbackQuery($cbId, $token);
-        $device = MeterService::deviceLookup($config, $serial);
+        $this->telegram->answerCallbackQuery($cbId, $token);
+        $device = $this->meterService->deviceLookup($config, $serial);
         if ($device) {
-            $monthReport = ReportService::buildMonthReport($config, $device);
-            Telegram::sendMessage($chatId, $monthReport, $token);
+            $monthReport = $this->reportService->buildMonthReport($config, $device);
+            $this->telegram->sendMessage($chatId, $monthReport, $token);
         } else {
-            Telegram::sendMessage($chatId, "Устройство не найдено.", $token);
+            $this->telegram->sendMessage($chatId, "Устройство не найдено.", $token);
         }
     }
 }

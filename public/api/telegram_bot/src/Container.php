@@ -33,20 +33,58 @@ class Container
 
     private function registerServices(): void
     {
+        $this->set(Telegram::class, static fn() => new Telegram());
+        $this->set(MeterService::class, static fn() => new MeterService());
+        $this->set(ReportService::class, static fn() => new ReportService());
+
         $this->set(DeviceRepositoryInterface::class, static fn() => new JsonDeviceRepository());
         $this->set(UserMeterRepositoryInterface::class, static fn() => new JsonUserMeterRepository());
         $this->set(MeterCacheRepositoryInterface::class, static fn() => new JsonMeterCacheRepository());
 
-        $this->set(CommandDispatcher::class, static fn() => new CommandDispatcher([
-            new MonthArchiveCallback(),
-            new AddMeterCallback(),
-            new DelMeterCallback(),
-            new StartCommand(),
-            new MyMetersCommand(),
-            new AddDeviceCommand(),
-            new DelDeviceCommand(),
-            new InitMeterCommand(),
-            new MeterDetailCommand(),
+        $this->set(CommandDispatcher::class, fn() => new CommandDispatcher([
+            new MonthArchiveCallback(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(ReportService::class)
+            ),
+            new AddMeterCallback(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
+            new DelMeterCallback(
+                $this->get(Telegram::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
+            new StartCommand(
+                $this->get(Telegram::class)
+            ),
+            new MyMetersCommand(
+                $this->get(Telegram::class),
+                $this->get(ReportService::class)
+            ),
+            new AddDeviceCommand(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(DeviceRepositoryInterface::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
+            new DelDeviceCommand(
+                $this->get(Telegram::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
+            new InitMeterCommand(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(DeviceRepositoryInterface::class),
+                $this->get(MeterCacheRepositoryInterface::class)
+            ),
+            new MeterDetailCommand(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(ReportService::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
         ]));
     }
 

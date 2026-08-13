@@ -5,11 +5,16 @@ declare(strict_types=1);
 namespace TelegramBot\Command;
 
 use TelegramBot\DTO\TelegramUpdateDTO;
-use TelegramBot\Storage;
+use TelegramBot\Repository\UserMeterRepositoryInterface;
 use TelegramBot\Telegram;
 
 class DelMeterCallback implements CommandInterface
 {
+    public function __construct(
+        private Telegram $telegram,
+        private UserMeterRepositoryInterface $userMeterRepo
+    ) {}
+
     public function supports(TelegramUpdateDTO $update): bool
     {
         return $update->isCallbackQuery && str_starts_with($update->callbackData, 'del_');
@@ -22,9 +27,9 @@ class DelMeterCallback implements CommandInterface
         $chatId = $update->chatId;
         $serial = str_replace('del_', '', $update->callbackData);
 
-        Storage::removeUserMeter($chatId, $serial);
-        Telegram::answerCallbackQuery($cbId, $token, "Счетчик {$serial} удален!");
-        $replyKey = Telegram::buildMainReplyKeyboard($chatId);
-        Telegram::sendMessage($chatId, "🗑 Счетчик <code>{$serial}</code> удален из ваших приборов.", $token, $replyKey);
+        $this->userMeterRepo->removeMeter($chatId, $serial);
+        $this->telegram->answerCallbackQuery($cbId, $token, "Счетчик {$serial} удален!");
+        $replyKey = $this->telegram->buildMainReplyKeyboard($chatId);
+        $this->telegram->sendMessage($chatId, "🗑 Счетчик <code>{$serial}</code> удален из ваших приборов.", $token, $replyKey);
     }
 }

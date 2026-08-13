@@ -15,22 +15,35 @@ use TelegramBot\Command\MonthArchiveCallback;
 use TelegramBot\Command\MyMetersCommand;
 use TelegramBot\Command\StartCommand;
 use TelegramBot\DTO\TelegramUpdateDTO;
+use TelegramBot\MeterService;
+use TelegramBot\ReportService;
+use TelegramBot\Repository\JsonDeviceRepository;
+use TelegramBot\Repository\JsonMeterCacheRepository;
+use TelegramBot\Repository\JsonUserMeterRepository;
+use TelegramBot\Telegram;
 
 class CommandTest
 {
     public static function run(): void
     {
-        echo "\n🧪 3. Тестирование Паттерна Команда (Command Pattern & Dispatcher)...\n";
+        echo "\n🧪 3. Тестирование Паттерна Команда (Command Pattern & DI)...\n";
 
-        $startCmd = new StartCommand();
-        $myCmd = new MyMetersCommand();
-        $addCmd = new AddDeviceCommand();
-        $delCmd = new DelDeviceCommand();
-        $initCmd = new InitMeterCommand();
-        $monthCb = new MonthArchiveCallback();
-        $addCb = new AddMeterCallback();
-        $delCb = new DelMeterCallback();
-        $detailCmd = new MeterDetailCommand();
+        $telegram = new Telegram();
+        $meterService = new MeterService();
+        $reportService = new ReportService();
+        $deviceRepo = new JsonDeviceRepository();
+        $userMeterRepo = new JsonUserMeterRepository();
+        $cacheRepo = new JsonMeterCacheRepository();
+
+        $startCmd = new StartCommand($telegram);
+        $myCmd = new MyMetersCommand($telegram, $reportService);
+        $addCmd = new AddDeviceCommand($telegram, $meterService, $deviceRepo, $userMeterRepo);
+        $delCmd = new DelDeviceCommand($telegram, $userMeterRepo);
+        $initCmd = new InitMeterCommand($telegram, $meterService, $deviceRepo, $cacheRepo);
+        $monthCb = new MonthArchiveCallback($telegram, $meterService, $reportService);
+        $addCb = new AddMeterCallback($telegram, $meterService, $userMeterRepo);
+        $delCb = new DelMeterCallback($telegram, $userMeterRepo);
+        $detailCmd = new MeterDetailCommand($telegram, $meterService, $reportService, $userMeterRepo);
 
         $dispatcher = new CommandDispatcher([
             $monthCb,
