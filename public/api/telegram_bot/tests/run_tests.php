@@ -22,6 +22,7 @@ require_once __DIR__ . '/DTOTest.php';
 require_once __DIR__ . '/RepositoryTest.php';
 require_once __DIR__ . '/CommandTest.php';
 require_once __DIR__ . '/ContainerTest.php';
+require_once __DIR__ . '/EdgeCasesTest.php';
 
 echo "============================================================\n";
 echo "🚀 ЗАПУСК ТЕХНОЛОГИЧЕСКОГО ТЕСТОВОГО НАБОРА TELEGRAM-БОТА\n";
@@ -31,6 +32,7 @@ DTOTest::run();
 RepositoryTest::run();
 CommandTest::run();
 ContainerTest::run();
+EdgeCasesTest::run();
 
 $exitCode = TestRunner::summarize();
 exit($exitCode);
