@@ -9,6 +9,9 @@ use TelegramBot\DTO\MeterReadingDTO;
 
 class MeterService
 {
+    /** Установи в true для отключения кэша (тестирование) */
+    public static bool $disableCache = false;
+
     /**
      * Автоматически получает первичное/начальное показание с API прибора и сохраняет в registered_devices.json
      */
@@ -143,7 +146,7 @@ class MeterService
     public static function getMeterConsumptionInfo(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
     {
         $cache = Storage::loadMeterCache();
-        $devCache = $cache[$deviceId]['channels'][$chNum] ?? null;
+        $devCache = self::$disableCache ? null : ($cache[$deviceId]['channels'][$chNum] ?? null);
 
         if ($devCache !== null) {
             $lastVal = isset($devCache['last_value']) ? (float) $devCache['last_value'] : null;
@@ -158,7 +161,9 @@ class MeterService
                     'first_date' => $devCache['first_date'] ?? $currentDate,
                 ];
                 $cache[$deviceId]['channels'][$chNum] = $devCache;
-                Storage::saveMeterCache($cache);
+                if (!self::$disableCache) {
+                    Storage::saveMeterCache($cache);
+                }
                 return $devCache;
             }
 
@@ -187,7 +192,7 @@ class MeterService
                     }
                 }
 
-                if (!empty($devCache['last_change_date'])) {
+                if (!empty($devCache['last_change_date']) && !self::$disableCache) {
                     $cache[$deviceId]['channels'][$chNum] = $devCache;
                     Storage::saveMeterCache($cache);
                 }
@@ -265,11 +270,13 @@ class MeterService
             'first_date' => $firstDate,
         ];
 
-        if (!isset($cache[$deviceId])) {
-            $cache[$deviceId] = ['channels' => []];
+        if (!self::$disableCache) {
+            if (!isset($cache[$deviceId])) {
+                $cache[$deviceId] = ['channels' => []];
+            }
+            $cache[$deviceId]['channels'][$chNum] = $info;
+            Storage::saveMeterCache($cache);
         }
-        $cache[$deviceId]['channels'][$chNum] = $info;
-        Storage::saveMeterCache($cache);
 
         return $info;
     }
