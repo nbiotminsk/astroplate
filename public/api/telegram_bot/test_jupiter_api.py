@@ -153,7 +153,31 @@ def main():
         f"🎯 Идентифицировано счетчиков/модемов Юпитер: {len(jupiter_devices)}"
     )
 
-    target_devices = jupiter_devices if jupiter_devices else devices
+    if len(sys.argv) > 1:
+        query = sys.argv[1].strip()
+        filtered = [
+            d
+            for d in devices
+            if query == str(d.get("id"))
+            or query == str(d.get("manufacturer_serial_number"))
+        ]
+        if filtered:
+            target_devices = filtered
+            print(
+                f"🔍 Фильтр по запросу '{query}': найдено устройств: {len(target_devices)}"
+            )
+        else:
+            print(
+                f"⚠️ Устройство '{query}' не найдено в общем списке. Запрос инфо по UUID..."
+            )
+            single_resp = client.get_device_info(query)
+            if single_resp.get("ok") and single_resp.get("payload"):
+                target_devices = [single_resp["payload"]]
+            else:
+                print(f"❌ Устройство '{query}' не найдено.")
+                sys.exit(1)
+    else:
+        target_devices = jupiter_devices if jupiter_devices else devices
 
     for idx, dev in enumerate(target_devices, 1):
         dev_id = dev.get("id")

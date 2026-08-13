@@ -443,10 +443,11 @@ function get_device_values(array $config, string $deviceUuid, int $limit = 10, ?
     $headers = unicboard_headers($config);
     $apiBase = $config['unicboard_api_base'];
 
-    $url = $apiBase . '/api/v1/devices/values?limit=' . $limit;
-    if ($periodFrom !== null) {
-        $url .= '&period_from=' . urlencode($periodFrom);
+    if ($periodFrom === null) {
+        $periodFrom = date('Y-m-d\T00:00:00', strtotime('-30 days'));
     }
+
+    $url = $apiBase . '/api/v1/devices/values?limit=' . $limit . '&period_from=' . urlencode($periodFrom);
 
     // 1. Сначала пробуем "devices_id" — официальное имя параметра из OpenAPI спецификации
     [$code, $resp] = http_post_json($url, ['devices_id' => [$deviceUuid]], $headers, $timeout);
@@ -642,12 +643,12 @@ function get_device_channels_serials(array $config, string $deviceId): array
 
 function extract_record_value(array $rec): ?float
 {
-    foreach (['last_value', 'value', 'meter_reading', 'meter_value', 'pulse', 'counter'] as $key) {
+    foreach (['value', 'meter_reading', 'meter_value', 'last_value', 'pulse', 'counter'] as $key) {
         if (isset($rec[$key]) && is_numeric($rec[$key])) {
             return (float) $rec[$key];
         }
     }
-    foreach (['channels', 'device_channel', 'device_meter'] as $arrKey) {
+    foreach (['device_meter', 'channels', 'device_channel'] as $arrKey) {
         if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
             foreach ($rec[$arrKey] as $c) {
                 if (is_array($c)) {
@@ -664,12 +665,12 @@ function extract_record_value(array $rec): ?float
 
 function extract_record_date(array $rec): ?string
 {
-    foreach (['last_value_date', 'date', 'created_at', 'timestamp', 'time'] as $key) {
+    foreach (['date', 'last_value_date', 'created_at', 'timestamp', 'time'] as $key) {
         if (!empty($rec[$key]) && is_string($rec[$key])) {
             return $rec[$key];
         }
     }
-    foreach (['channels', 'device_channel', 'device_meter'] as $arrKey) {
+    foreach (['device_meter', 'channels', 'device_channel'] as $arrKey) {
         if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
             foreach ($rec[$arrKey] as $c) {
                 if (is_array($c)) {
@@ -692,12 +693,30 @@ function build_report(array $config, array $device): string
     $lines = [];
     $lines[] = "\xF0\x9F\x93\xB1 <b>{$name}</b>";
 
-    // Серийные номера счетчиков воды по каналам
-    $channelSerials = get_device_channels_serials($config, $deviceId);
+    // Серийные номера и свежие показания счетчиков из /info
+    $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
+    [$code, $infoResp] = http_get($url, unicboard_headers($config));
+
+    $channelSerials = [];
+    $liveChannels = [];
+    if ($code === 200 && !empty($infoResp['payload']['device_channel'])) {
+        foreach ($infoResp['payload']['device_channel'] as $idx => $ch) {
+            $chNum = $ch['serial_number'] ?? ($idx + 1);
+            if (isset($ch['serial_number'])) {
+                $channelSerials[$chNum] = (string) $ch['serial_number'];
+            }
+            $liveChannels[$chNum] = $ch;
+        }
+    }
 
     // Показания по каналам (запрашиваем историю с запасом limit=50)
     $values = get_device_values($config, $deviceId, 50);
     $channelsHistory = [];
+
+    // Добавляем текущие (живые) каналы из /info
+    foreach ($liveChannels as $chNum => $chData) {
+        $channelsHistory[$chNum][] = $chData;
+    }
 
     if (!empty($values['payload'])) {
         foreach ($values['payload'] as $v) {
@@ -707,7 +726,7 @@ function build_report(array $config, array $device): string
             } elseif (isset($v['channels']) && is_array($v['channels'])) {
                 $channelsList = $v['channels'];
             }
-            
+
             if (!empty($channelsList)) {
                 foreach ($channelsList as $idx => $chData) {
                     $chNum = $chData['channel_number'] ?? ($idx + 1);
@@ -718,6 +737,14 @@ function build_report(array $config, array $device): string
                 $channelsHistory[$ch][] = $v;
             }
         }
+        foreach ($channelsHistory as $chNum => &$hList) {
+            usort($hList, function ($a, $b) {
+                $tA = strtotime(extract_record_date($a) ?? '');
+                $tB = strtotime(extract_record_date($b) ?? '');
+                return $tB - $tA;
+            });
+        }
+        unset($hList);
         ksort($channelsHistory);
     }
 
