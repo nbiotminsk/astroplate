@@ -65,7 +65,16 @@ class EdgeCasesTest
         TestRunner::assert(!isset($metersAAfter['8527038']), 'Счетчик пользователя A успешно удален');
         TestRunner::assert(isset($metersBAfter['8554760']), 'Счетчик пользователя B не пострадал при удалении у A (Изоляция 100%)');
 
+        // 5. Проверка защиты от дубликатов при повторном добавлении
+        $userRepo->addMeter($userA, '8527038', 'Старое Имя');
+        $userRepo->addMeter($userA, '8527038', 'Новое Имя');
+        $metersDup = $userRepo->getMetersByChatId($userA);
+
+        TestRunner::assertEquals(1, count($metersDup), 'Повторное добавление счетчика не создает дубликатов');
+        TestRunner::assertEquals('Новое Имя', $metersDup['8527038'], 'Повторное добавление обновляет имя прибора');
+
         // Чистим тестовые данные
+        $userRepo->removeMeter($userA, '8527038');
         $userRepo->removeMeter($userB, '8554760');
     }
 }
