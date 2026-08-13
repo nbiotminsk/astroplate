@@ -97,7 +97,8 @@ TXT;
         $keyboard = [];
 
         $buttons = [];
-        foreach ($meters as $serial => $name) {
+        foreach ($meters as $serial => $data) {
+            $name = is_array($data) ? ($data['name'] ?? "Счетчик {$serial}") : (string) $data;
             $buttons[] = ['text' => "💧 {$name} ({$serial})"];
             if (count($buttons) === 2) {
                 $keyboard[] = $buttons;

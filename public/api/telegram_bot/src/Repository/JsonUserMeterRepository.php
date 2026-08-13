@@ -13,9 +13,9 @@ class JsonUserMeterRepository implements UserMeterRepositoryInterface
         return Storage::getUserMeters($chatId);
     }
 
-    public function addMeter(string $chatId, string $serial, string $name): void
+    public function addMeter(string $chatId, string $serial, string $name, string $deviceId = ''): void
     {
-        Storage::addUserMeter($chatId, $serial, $name);
+        Storage::addUserMeter($chatId, $serial, $name, $deviceId);
     }
 
     public function removeMeter(string $chatId, string $serial): void

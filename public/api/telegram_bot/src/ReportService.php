@@ -264,7 +264,8 @@ class ReportService
 
         $lines = [];
         $lines[] = "📋 <b>Ваши сохраненные счетчики:</b>\n";
-        foreach ($meters as $serial => $name) {
+        foreach ($meters as $serial => $data) {
+            $name = is_array($data) ? ($data['name'] ?? "Счетчик {$serial}") : (string) $data;
             $lines[] = "• <b>{$name}</b> (серийный №: <code>{$serial}</code>)";
         }
         $lines[] = "\nНажмите на кнопку с именем счетчика внизу или введите его серийный номер.";

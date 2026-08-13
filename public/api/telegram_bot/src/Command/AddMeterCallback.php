@@ -31,7 +31,7 @@ class AddMeterCallback implements CommandInterface
 
         $device = $this->meterService->deviceLookup($config, $serial);
         if ($device) {
-            $this->userMeterRepo->addMeter($chatId, $serial, $device->name);
+            $this->userMeterRepo->addMeter($chatId, $serial, $device->name, $device->deviceId);
             $this->telegram->answerCallbackQuery($cbId, $token, "Счетчик {$serial} добавлен!");
             $replyKey = $this->telegram->buildMainReplyKeyboard($chatId);
             $this->telegram->sendMessage($chatId, "✅ Счетчик <b>{$device->name}</b> ({$serial}) добавлен в меню «📋 Мои счетчики».", $token, $replyKey);

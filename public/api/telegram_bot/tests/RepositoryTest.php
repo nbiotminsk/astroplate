@@ -28,10 +28,14 @@ class RepositoryTest
         // JsonUserMeterRepository
         $userRepo = new JsonUserMeterRepository();
         $testChatId = 'test_chat_999999';
-        $userRepo->addMeter($testChatId, '8527038', 'Fluo');
+        $userRepo->addMeter($testChatId, '8527038', 'Fluo', '2e50bc92-6c87-4b64-b22e-e96e7997476f');
 
         $meters = $userRepo->getMetersByChatId($testChatId);
-        TestRunner::assertEquals('Fluo', $meters['8527038'] ?? null, 'JsonUserMeterRepository add & get meter');
+        $meterEntry = $meters['8527038'] ?? null;
+        $meterName = is_array($meterEntry) ? ($meterEntry['name'] ?? null) : $meterEntry;
+        $meterUuid = is_array($meterEntry) ? ($meterEntry['device_id'] ?? null) : null;
+        TestRunner::assertEquals('Fluo', $meterName, 'JsonUserMeterRepository add & get meter name');
+        TestRunner::assertEquals('2e50bc92-6c87-4b64-b22e-e96e7997476f', $meterUuid, 'JsonUserMeterRepository add & get meter device_id (UUID)');
 
         $userRepo->removeMeter($testChatId, '8527038');
         $metersAfterRemove = $userRepo->getMetersByChatId($testChatId);

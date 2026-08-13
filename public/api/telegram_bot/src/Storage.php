@@ -90,13 +90,16 @@ class Storage
         return $all[$chatId] ?? [];
     }
 
-    public static function addUserMeter(string $chatId, string $serial, string $name): void
+    public static function addUserMeter(string $chatId, string $serial, string $name, string $deviceId = ''): void
     {
         $all = self::loadUserMeters();
         if (!isset($all[$chatId])) {
             $all[$chatId] = [];
         }
-        $all[$chatId][$serial] = $name;
+        $all[$chatId][$serial] = [
+            'name' => $name,
+            'device_id' => $deviceId,
+        ];
         self::saveUserMeters($all);
     }
 

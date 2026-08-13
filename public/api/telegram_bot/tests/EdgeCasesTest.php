@@ -71,20 +71,23 @@ class EdgeCasesTest
         $metersDup = $userRepo->getMetersByChatId($userA);
 
         TestRunner::assertEquals(1, count($metersDup), 'Повторное добавление счетчика не создает дубликатов');
-        TestRunner::assertEquals('Новое Имя', $metersDup['8527038'], 'Повторное добавление обновляет имя прибора');
+        $dupName = is_array($metersDup['8527038']) ? ($metersDup['8527038']['name'] ?? '') : $metersDup['8527038'];
+        TestRunner::assertEquals('Новое Имя', $dupName, 'Повторное добавление обновляет имя прибора');
 
         // 6. Один и тот же счетчик может одновременно принадлежать разным пользователям
         $sharedSerial = '8527038';
-        $userRepo->addMeter($userA, $sharedSerial, 'Счетчик Fluo у Пользователя A');
-        $userRepo->addMeter($userB, $sharedSerial, 'Счетчик Fluo у Пользователя B');
+        $userRepo->addMeter($userA, $sharedSerial, 'Счетчик Fluo у Пользователя A', '2e50bc92-6c87-4b64-b22e-e96e7997476f');
+        $userRepo->addMeter($userB, $sharedSerial, 'Счетчик Fluo у Пользователя B', '2e50bc92-6c87-4b64-b22e-e96e7997476f');
 
         $sharedMetersA = $userRepo->getMetersByChatId($userA);
         $sharedMetersB = $userRepo->getMetersByChatId($userB);
 
         TestRunner::assert(isset($sharedMetersA[$sharedSerial]), 'Счетчик 8527038 успешно добавлен Пользователю A');
         TestRunner::assert(isset($sharedMetersB[$sharedSerial]), 'Счетчик 8527038 одновременно добавлен Пользователю B');
-        TestRunner::assertEquals('Счетчик Fluo у Пользователя A', $sharedMetersA[$sharedSerial], 'Пользователь A имеет свое имя для прибора');
-        TestRunner::assertEquals('Счетчик Fluo у Пользователя B', $sharedMetersB[$sharedSerial], 'Пользователь B имеет свое имя для прибора');
+        $nameA = is_array($sharedMetersA[$sharedSerial]) ? ($sharedMetersA[$sharedSerial]['name'] ?? '') : $sharedMetersA[$sharedSerial];
+        $nameB = is_array($sharedMetersB[$sharedSerial]) ? ($sharedMetersB[$sharedSerial]['name'] ?? '') : $sharedMetersB[$sharedSerial];
+        TestRunner::assertEquals('Счетчик Fluo у Пользователя A', $nameA, 'Пользователь A имеет свое имя для прибора');
+        TestRunner::assertEquals('Счетчик Fluo у Пользователя B', $nameB, 'Пользователь B имеет свое имя для прибора');
 
         // Чистим тестовые данные
         $userRepo->removeMeter($userA, $sharedSerial);

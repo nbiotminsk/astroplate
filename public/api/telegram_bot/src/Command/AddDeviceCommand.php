@@ -49,7 +49,7 @@ class AddDeviceCommand implements CommandInterface
 
             $this->deviceRepo->registerDevice($serial, $uuid, $name);
             $this->meterService->fetchAndSaveInitialValues($config, $serial, $uuid);
-            $this->userMeterRepo->addMeter($chatId, $serial, $name);
+            $this->userMeterRepo->addMeter($chatId, $serial, $name, $uuid);
 
             $newKey = $this->telegram->buildMainReplyKeyboard($chatId);
             $this->telegram->sendMessage($chatId, "🎉 Новый прибор успешно зарегистрирован!\n\n• <b>ID / Серийный №</b>: <code>{$serial}</code>\n• <b>UUID</b>: <code>{$uuid}</code>\n\nОн также автоматически сохранен в ваше меню «📋 Мои счетчики».", $token, $newKey);
