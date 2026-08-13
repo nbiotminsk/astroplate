@@ -771,7 +771,11 @@ function build_report(array $config, array $device): string
             }
 
             $meterSerial = $channelSerials[$chNum] ?? null;
-            $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
+            if ($meterSerial && strlen((string) $meterSerial) > 4) {
+                $meterLabel = "Счетчик № {$meterSerial}";
+            } else {
+                $meterLabel = "Счетчик {$chNum}";
+            }
 
             $diffStr = '';
             if ($latest !== null && $prev !== null) {
