@@ -79,11 +79,8 @@ class ReportService
                 $latest = $history[0] ?? null;
                 $prev = $history[1] ?? null;
 
-                $initialValues = $device->initialValues;
-                $offset = (float) ($initialValues[$chNum] ?? $initialValues[(string)$chNum] ?? 0);
-
                 $rawVal = $latest ? MeterService::extractRecordValue($latest) : null;
-                $lastVal = $rawVal !== null ? round($rawVal + $offset, 4) : null;
+                $lastVal = $rawVal !== null ? round($rawVal, 4) : null;
                 $lastValDate = $latest ? MeterService::extractRecordDate($latest) : null;
                 $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
                 $valStr = $lastVal !== null ? (string) $lastVal : '—';
@@ -148,7 +145,6 @@ class ReportService
     {
         $name = $device->name;
         $deviceId = $device->deviceId;
-        $initialValues = $device->initialValues;
 
         $firstDay = date('01.m.Y 00:00');
         $lastDay = date('d.m.Y H:i');
@@ -212,18 +208,16 @@ class ReportService
                     return strtotime(MeterService::extractRecordDate($b)) - strtotime(MeterService::extractRecordDate($a));
                 });
 
-                $offset = (float) ($initialValues[$chNum] ?? $initialValues[(string)$chNum] ?? 0);
-
                 $latestInMonth = reset($records);
                 $earliestInMonth = end($records);
 
                 $rawValEnd = MeterService::extractRecordValue($latestInMonth);
-                $valEnd = $rawValEnd !== null ? round($rawValEnd + $offset, 4) : null;
+                $valEnd = $rawValEnd !== null ? round($rawValEnd, 4) : null;
                 $dateEnd = MeterService::extractRecordDate($latestInMonth);
                 $dateEndStr = $dateEnd ? date('d.m.Y H:i', strtotime($dateEnd)) : '—';
 
                 $rawValStart = MeterService::extractRecordValue($earliestInMonth);
-                $valStart = $rawValStart !== null ? round($rawValStart + $offset, 4) : null;
+                $valStart = $rawValStart !== null ? round($rawValStart, 4) : null;
                 $dateStart = MeterService::extractRecordDate($earliestInMonth);
                 $dateStartStr = $dateStart ? date('d.m.Y H:i', strtotime($dateStart)) : '—';
 
