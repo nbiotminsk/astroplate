@@ -25,14 +25,17 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
+$container = new Container($config);
+$handler = new BotHandler($container);
+
 if (PHP_SAPI === 'cli' && basename(__FILE__) === basename($_SERVER['PHP_SELF'])) {
     // Режим командной строки: php bot.php
     if (isset($argv[1]) && $argv[1] === 'webhook') {
-        BotHandler::runWebhook($config);
+        $handler->runWebhook();
     } else {
-        BotHandler::runPolling($config);
+        $handler->runPolling();
     }
 } else {
     // Веб-режим: webhook
-    BotHandler::runWebhook($config);
+    $handler->runWebhook();
 }

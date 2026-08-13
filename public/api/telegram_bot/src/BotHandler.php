@@ -4,52 +4,28 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
-use TelegramBot\Command\AddDeviceCommand;
-use TelegramBot\Command\AddMeterCallback;
 use TelegramBot\Command\CommandDispatcher;
-use TelegramBot\Command\DelDeviceCommand;
-use TelegramBot\Command\DelMeterCallback;
-use TelegramBot\Command\InitMeterCommand;
-use TelegramBot\Command\MeterDetailCommand;
-use TelegramBot\Command\MonthArchiveCallback;
-use TelegramBot\Command\MyMetersCommand;
-use TelegramBot\Command\StartCommand;
 use TelegramBot\DTO\TelegramUpdateDTO;
 
 class BotHandler
 {
-    private static ?CommandDispatcher $dispatcher = null;
+    public function __construct(public readonly Container $container) {}
 
-    public static function getDispatcher(): CommandDispatcher
-    {
-        if (self::$dispatcher === null) {
-            self::$dispatcher = new CommandDispatcher([
-                new MonthArchiveCallback(),
-                new AddMeterCallback(),
-                new DelMeterCallback(),
-                new StartCommand(),
-                new MyMetersCommand(),
-                new AddDeviceCommand(),
-                new DelDeviceCommand(),
-                new InitMeterCommand(),
-                new MeterDetailCommand(),
-            ]);
-        }
-        return self::$dispatcher;
-    }
-
-    public static function handleUpdate(array|TelegramUpdateDTO $update, array $config): void
+    public function handleUpdate(array|TelegramUpdateDTO $update): void
     {
         $dto = $update instanceof TelegramUpdateDTO ? $update : TelegramUpdateDTO::fromArray($update);
         if ($dto === null) {
             return;
         }
 
-        self::getDispatcher()->dispatch($dto, $config);
+        /** @var CommandDispatcher $dispatcher */
+        $dispatcher = $this->container->get(CommandDispatcher::class);
+        $dispatcher->dispatch($dto, $this->container->config);
     }
 
-    public static function checkConfig(array $config): void
+    public function checkConfig(): void
     {
+        $config = $this->container->config;
         $missing = [];
         if (($config['telegram_token'] ?? '') === '') {
             $missing[] = 'TELEGRAM_BOT_TOKEN';
@@ -64,9 +40,10 @@ class BotHandler
     }
 
     /** Режим Webhook. Запуск на веб-сервере. */
-    public static function runWebhook(array $config): void
+    public function runWebhook(): void
     {
-        self::checkConfig($config);
+        $this->checkConfig();
+        $config = $this->container->config;
 
         $secret = $config['webhook_secret'] ?? '';
         if ($secret !== '' && ($_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? '') !== $secret) {
@@ -78,16 +55,17 @@ class BotHandler
         $raw = file_get_contents('php://input');
         $update = json_decode((string) $raw, true);
         if (is_array($update)) {
-            self::handleUpdate($update, $config);
+            $this->handleUpdate($update);
         }
         http_response_code(200);
         echo 'ok';
     }
 
     /** Режим Long-polling. Запуск из CLI. */
-    public static function runPolling(array $config): void
+    public function runPolling(): void
     {
-        self::checkConfig($config);
+        $this->checkConfig();
+        $config = $this->container->config;
         $offset = 0;
         echo "Бот запущен (long-polling). Нажмите Ctrl+C для остановки.\n";
 
@@ -104,7 +82,7 @@ class BotHandler
                 if ($updateId !== null && $updateId >= $offset) {
                     $offset = $updateId + 1;
                 }
-                self::handleUpdate($update, $config);
+                $this->handleUpdate($update);
             }
         }
     }
