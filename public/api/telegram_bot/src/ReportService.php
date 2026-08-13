@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\DTO\DeviceDTO;
+
 class ReportService
 {
-    public static function buildReport(array $config, array $device): string
+    public static function buildReport(array $config, DeviceDTO $device): string
     {
-        $name = $device['name'];
-        $deviceId = $device['device_id'];
+        $name = $device->name;
+        $deviceId = $device->deviceId;
 
         $lines = [];
         $lines[] = "\xF0\x9F\x93\xB1 <b>{$name}</b>";
@@ -77,7 +79,7 @@ class ReportService
                 $latest = $history[0] ?? null;
                 $prev = $history[1] ?? null;
 
-                $initialValues = $device['initial_values'] ?? [];
+                $initialValues = $device->initialValues;
                 $offset = (float) ($initialValues[$chNum] ?? $initialValues[(string)$chNum] ?? 0);
 
                 $rawVal = $latest ? MeterService::extractRecordValue($latest) : null;
@@ -142,11 +144,11 @@ class ReportService
     }
 
     /** Архив за текущий месяц (от 1 числа до текущего дня) */
-    public static function buildMonthReport(array $config, array $device): string
+    public static function buildMonthReport(array $config, DeviceDTO $device): string
     {
-        $name = $device['name'];
-        $deviceId = $device['device_id'];
-        $initialValues = $device['initial_values'] ?? [];
+        $name = $device->name;
+        $deviceId = $device->deviceId;
+        $initialValues = $device->initialValues;
 
         $firstDay = date('01.m.Y 00:00');
         $lastDay = date('d.m.Y H:i');

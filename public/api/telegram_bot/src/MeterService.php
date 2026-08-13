@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\DTO\DeviceDTO;
+use TelegramBot\DTO\MeterReadingDTO;
+
 class MeterService
 {
     /**
@@ -49,6 +52,9 @@ class MeterService
         return $initialValues;
     }
 
+    /**
+     * @return MeterReadingDTO[]
+     */
     public static function extractChannelRecords(array $payload, int $chNum): array
     {
         $records = [];
@@ -68,7 +74,7 @@ class MeterService
                         $val = self::extractRecordValue($combined);
                         $date = self::extractRecordDate($combined);
                         if ($val !== null && $date !== null) {
-                            $records[] = ['val' => $val, 'date' => $date];
+                            $records[] = new MeterReadingDTO($val, $date, $chNum);
                         }
                     }
                 }
@@ -79,7 +85,7 @@ class MeterService
                     $val = self::extractRecordValue($chData);
                     $date = self::extractRecordDate($chData);
                     if ($val !== null && $date !== null) {
-                        $records[] = ['val' => $val, 'date' => $date];
+                        $records[] = new MeterReadingDTO($val, $date, (int) $num);
                     }
                 }
             }
@@ -160,8 +166,8 @@ class MeterService
             if (empty($devCache['last_change_date']) && !empty($monthRecords)) {
                 $parsed = [];
                 foreach ($monthRecords as $r) {
-                    $v = self::extractRecordValue($r);
-                    $d = self::extractRecordDate($r);
+                    $v = is_array($r) ? self::extractRecordValue($r) : ($r instanceof MeterReadingDTO ? $r->val : null);
+                    $d = is_array($r) ? self::extractRecordDate($r) : ($r instanceof MeterReadingDTO ? $r->date : null);
                     if ($v !== null && $d !== null) {
                         $parsed[] = ['val' => $v, 'date' => $d];
                     }
@@ -194,8 +200,8 @@ class MeterService
         $records = [];
         if (!empty($monthRecords)) {
             foreach ($monthRecords as $r) {
-                $v = self::extractRecordValue($r);
-                $d = self::extractRecordDate($r);
+                $v = is_array($r) ? self::extractRecordValue($r) : ($r instanceof MeterReadingDTO ? $r->val : null);
+                $d = is_array($r) ? self::extractRecordDate($r) : ($r instanceof MeterReadingDTO ? $r->date : null);
                 if ($v !== null && $d !== null) {
                     $records[] = ['val' => $v, 'date' => $d];
                 }
@@ -230,20 +236,20 @@ class MeterService
             if (!empty($history['payload'])) {
                 $hRecords = self::extractChannelRecords($history['payload'], $chNum);
                 usort($hRecords, static function($a, $b) {
-                    return strtotime($a['date']) - strtotime($b['date']);
+                    return strtotime($a->date) - strtotime($b->date);
                 });
 
                 $hLastVal = null;
                 foreach ($hRecords as $r) {
                     if ($firstDate === null) {
-                        $firstDate = $r['date'];
+                        $firstDate = $r->date;
                     }
                     if ($hLastVal === null) {
-                        $hLastVal = $r['val'];
-                    } elseif (round($r['val'], 4) != round($hLastVal, 4)) {
-                        $changeDate = $r['date'];
-                        $changeDiff = round(abs($r['val'] - $hLastVal), 4);
-                        $hLastVal = $r['val'];
+                        $hLastVal = $r->val;
+                    } elseif (round($r->val, 4) != round($hLastVal, 4)) {
+                        $changeDate = $r->date;
+                        $changeDiff = round(abs($r->val - $hLastVal), 4);
+                        $hLastVal = $r->val;
                     }
                 }
                 if ($lastVal === null) {
@@ -268,7 +274,7 @@ class MeterService
         return $info;
     }
 
-    public static function deviceLookup(array $config, string $input): ?array
+    public static function deviceLookup(array $config, string $input): ?DeviceDTO
     {
         $input = trim($input);
         if ($input === '') {
@@ -278,14 +284,12 @@ class MeterService
         // 1. Проверяем локальный конфиг config.php
         if (isset($config['devices'][(int) $input])) {
             $dev = $config['devices'][(int) $input];
-            $dev['serial_number'] = (string) $input;
-            return $dev;
+            return DeviceDTO::fromArray($dev, (string) $input);
         }
 
         foreach ($config['devices'] as $id => $info) {
             if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-                $info['serial_number'] = (string) $id;
-                return $info;
+                return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
@@ -293,14 +297,12 @@ class MeterService
         $customDevices = Storage::loadRegisteredDevices();
         if (isset($customDevices[(int) $input])) {
             $dev = $customDevices[(int) $input];
-            $dev['serial_number'] = (string) $input;
-            return $dev;
+            return DeviceDTO::fromArray($dev, (string) $input);
         }
 
         foreach ($customDevices as $id => $info) {
             if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-                $info['serial_number'] = (string) $id;
-                return $info;
+                return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
@@ -313,12 +315,12 @@ class MeterService
 
             if ($serial === $input || mb_strtolower($name, 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
                 $initialValues = self::fetchAndSaveInitialValues($config, $serial, $devId);
-                return [
-                    'name' => $name,
-                    'device_id' => $devId,
-                    'serial_number' => $serial,
-                    'initial_values' => $initialValues,
-                ];
+                return new DeviceDTO(
+                    deviceId: $devId,
+                    serialNumber: $serial,
+                    name: $name,
+                    initialValues: $initialValues
+                );
             }
         }
 

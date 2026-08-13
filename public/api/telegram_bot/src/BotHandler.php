@@ -4,17 +4,24 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\DTO\TelegramUpdateDTO;
+
 class BotHandler
 {
-    public static function handleUpdate(array $update, array $config): void
+    public static function handleUpdate(array|TelegramUpdateDTO $update, array $config): void
     {
+        $dto = $update instanceof TelegramUpdateDTO ? $update : TelegramUpdateDTO::fromArray($update);
+        if ($dto === null) {
+            return;
+        }
+
+        $token = $config['telegram_token'];
+
         // Обработка Callback Query (нажатие инлайн-кнопок)
-        if (isset($update['callback_query'])) {
-            $cb = $update['callback_query'];
-            $cbId = $cb['id'];
-            $chatId = (string) $cb['message']['chat']['id'];
-            $token = $config['telegram_token'];
-            $data = $cb['data'] ?? '';
+        if ($dto->isCallbackQuery) {
+            $cbId = $dto->callbackQueryId;
+            $chatId = $dto->chatId;
+            $data = $dto->callbackData;
 
             if (str_starts_with($data, 'month_')) {
                 Telegram::answerCallbackQuery($cbId, $token);
@@ -33,10 +40,10 @@ class BotHandler
                 $serial = str_replace('add_', '', $data);
                 $device = MeterService::deviceLookup($config, $serial);
                 if ($device) {
-                    Storage::addUserMeter($chatId, $serial, $device['name']);
+                    Storage::addUserMeter($chatId, $serial, $device->name);
                     Telegram::answerCallbackQuery($cbId, $token, "Счетчик {$serial} добавлен!");
                     $replyKey = Telegram::buildMainReplyKeyboard($chatId);
-                    Telegram::sendMessage($chatId, "✅ Счетчик <b>{$device['name']}</b> ({$serial}) добавлен в меню «📋 Мои счетчики».", $token, $replyKey);
+                    Telegram::sendMessage($chatId, "✅ Счетчик <b>{$device->name}</b> ({$serial}) добавлен в меню «📋 Мои счетчики».", $token, $replyKey);
                 } else {
                     Telegram::answerCallbackQuery($cbId, $token, "Не удалось найти счетчик.");
                 }
@@ -51,16 +58,11 @@ class BotHandler
                 Telegram::sendMessage($chatId, "🗑 Счетчик <code>{$serial}</code> удален из ваших приборов.", $token, $replyKey);
                 return;
             }
-        }
-
-        $message = $update['message'] ?? null;
-        if (!$message || empty($message['text'])) {
             return;
         }
 
-        $chatId = (string) $message['chat']['id'];
-        $token = $config['telegram_token'];
-        $text = trim($message['text']);
+        $chatId = $dto->chatId;
+        $text = $dto->text;
         $mainKey = Telegram::buildMainReplyKeyboard($chatId);
 
         if ($text === '/start' || $text === '/help') {
@@ -78,10 +80,9 @@ class BotHandler
             return;
         }
 
-        // Регистрация нового прибора через команду: /add ID UUID (например /add 8527038 2e50bc92-6c87-4b64-b22e-e96e7997476f)
+        // Регистрация нового прибора через команду: /add ID UUID
         if (str_starts_with($text, '/add ')) {
             $parts = preg_split('/\s+/', trim($text));
-            // $parts[0] = '/add', $parts[1] = serial/id, $parts[2] = uuid
             if (count($parts) >= 3) {
                 $serial = $parts[1];
                 $uuid = $parts[2];
@@ -112,7 +113,7 @@ class BotHandler
             return;
         }
 
-        // Задать/изменить начальные показания: /init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ (например /init 8527038 1 0.12)
+        // Задать/изменить начальные показания: /init СЕРИЙНЫЙ_№ КАНАЛ ЗНАЧЕНИЕ
         if (str_starts_with($text, '/init ') || str_starts_with($text, '/set ')) {
             $parts = preg_split('/\s+/', trim($text));
             if (count($parts) >= 4) {
@@ -124,7 +125,7 @@ class BotHandler
                 if (!isset($customDevices[(int) $serial])) {
                     $dev = MeterService::deviceLookup($config, $serial);
                     if ($dev) {
-                        Storage::registerCustomDevice($serial, $dev['device_id'], $dev['name']);
+                        Storage::registerCustomDevice($serial, $dev->deviceId, $dev->name);
                         $customDevices = Storage::loadRegisteredDevices();
                     }
                 }
@@ -165,7 +166,7 @@ class BotHandler
             return;
         }
 
-        $serial = $device['serial_number'] ?? $text;
+        $serial = $device->serialNumber !== '' ? $device->serialNumber : $text;
         $userMeters = Storage::getUserMeters($chatId);
         $isAdded = isset($userMeters[$serial]);
 
