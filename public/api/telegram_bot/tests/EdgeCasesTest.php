@@ -73,8 +73,21 @@ class EdgeCasesTest
         TestRunner::assertEquals(1, count($metersDup), 'Повторное добавление счетчика не создает дубликатов');
         TestRunner::assertEquals('Новое Имя', $metersDup['8527038'], 'Повторное добавление обновляет имя прибора');
 
+        // 6. Один и тот же счетчик может одновременно принадлежать разным пользователям
+        $sharedSerial = '8527038';
+        $userRepo->addMeter($userA, $sharedSerial, 'Счетчик Fluo у Пользователя A');
+        $userRepo->addMeter($userB, $sharedSerial, 'Счетчик Fluo у Пользователя B');
+
+        $sharedMetersA = $userRepo->getMetersByChatId($userA);
+        $sharedMetersB = $userRepo->getMetersByChatId($userB);
+
+        TestRunner::assert(isset($sharedMetersA[$sharedSerial]), 'Счетчик 8527038 успешно добавлен Пользователю A');
+        TestRunner::assert(isset($sharedMetersB[$sharedSerial]), 'Счетчик 8527038 одновременно добавлен Пользователю B');
+        TestRunner::assertEquals('Счетчик Fluo у Пользователя A', $sharedMetersA[$sharedSerial], 'Пользователь A имеет свое имя для прибора');
+        TestRunner::assertEquals('Счетчик Fluo у Пользователя B', $sharedMetersB[$sharedSerial], 'Пользователь B имеет свое имя для прибора');
+
         // Чистим тестовые данные
-        $userRepo->removeMeter($userA, '8527038');
-        $userRepo->removeMeter($userB, '8554760');
+        $userRepo->removeMeter($userA, $sharedSerial);
+        $userRepo->removeMeter($userB, $sharedSerial);
     }
 }
