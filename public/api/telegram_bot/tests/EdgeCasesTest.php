@@ -89,5 +89,6 @@ class EdgeCasesTest
         // Чистим тестовые данные
         $userRepo->removeMeter($userA, $sharedSerial);
         $userRepo->removeMeter($userB, $sharedSerial);
+        $userRepo->removeMeter($userB, '8554760');
     }
 }

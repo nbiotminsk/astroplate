@@ -141,6 +141,47 @@ class MeterService
     }
 
     /**
+     * Парсит дату от API (в UTC) и возвращает unix timestamp.
+     */
+    public static function parseUtcTimestamp(?string $dateStr): int
+    {
+        if (empty($dateStr)) {
+            return 0;
+        }
+        try {
+            if (preg_match('/[Zz]|[\+\-]\d{2}:?\d{2}$/', $dateStr)) {
+                $dt = new \DateTimeImmutable($dateStr);
+            } else {
+                $dt = new \DateTimeImmutable($dateStr, new \DateTimeZone('UTC'));
+            }
+            return $dt->getTimestamp();
+        } catch (\Throwable) {
+            $ts = strtotime($dateStr);
+            return $ts !== false ? $ts : 0;
+        }
+    }
+
+    /**
+     * Форматирует дату от API (в UTC) в целевой часовой пояс (по умолчанию Europe/Minsk, UTC+3).
+     */
+    public static function formatDate(?string $dateStr, string $format = 'd.m.Y H:i', string $targetTimezone = 'Europe/Minsk'): string
+    {
+        if (empty($dateStr)) {
+            return '—';
+        }
+        try {
+            if (preg_match('/[Zz]|[\+\-]\d{2}:?\d{2}$/', $dateStr)) {
+                $dt = new \DateTimeImmutable($dateStr);
+            } else {
+                $dt = new \DateTimeImmutable($dateStr, new \DateTimeZone('UTC'));
+            }
+            return $dt->setTimezone(new \DateTimeZone($targetTimezone))->format($format);
+        } catch (\Throwable) {
+            return '—';
+        }
+    }
+
+    /**
      * Получает или обновляет кэшированные данные о последнем расходе счетчика
      */
     public static function getMeterConsumptionInfo(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
@@ -178,7 +219,7 @@ class MeterService
                     }
                 }
                 usort($parsed, static function($a, $b) {
-                    return strtotime($a['date']) - strtotime($b['date']);
+                    return self::parseUtcTimestamp($a['date']) - self::parseUtcTimestamp($b['date']);
                 });
 
                 $prevV = null;
@@ -219,7 +260,7 @@ class MeterService
         $firstDate = null;
 
         usort($records, static function($a, $b) {
-            return strtotime($a['date']) - strtotime($b['date']);
+            return self::parseUtcTimestamp($a['date']) - self::parseUtcTimestamp($b['date']);
         });
 
         foreach ($records as $r) {
@@ -241,7 +282,7 @@ class MeterService
             if (!empty($history['payload'])) {
                 $hRecords = self::extractChannelRecords($history['payload'], $chNum);
                 usort($hRecords, static function($a, $b) {
-                    return strtotime($a->date) - strtotime($b->date);
+                    return self::parseUtcTimestamp($a->date) - self::parseUtcTimestamp($b->date);
                 });
 
                 $hLastVal = null;

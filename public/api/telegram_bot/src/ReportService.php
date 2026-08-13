@@ -62,8 +62,8 @@ class ReportService
             }
             foreach ($channelsHistory as $chNum => &$hList) {
                 usort($hList, static function ($a, $b) {
-                    $tA = strtotime(MeterService::extractRecordDate($a) ?? '');
-                    $tB = strtotime(MeterService::extractRecordDate($b) ?? '');
+                    $tA = MeterService::parseUtcTimestamp(MeterService::extractRecordDate($a));
+                    $tB = MeterService::parseUtcTimestamp(MeterService::extractRecordDate($b));
                     return $tB - $tA;
                 });
             }
@@ -82,7 +82,7 @@ class ReportService
                 $rawVal = $latest ? MeterService::extractRecordValue($latest) : null;
                 $lastVal = $rawVal !== null ? round($rawVal, 4) : null;
                 $lastValDate = $latest ? MeterService::extractRecordDate($latest) : null;
-                $dateStr = $lastValDate ? date('d.m.Y H:i', strtotime($lastValDate)) : '—';
+                $dateStr = $lastValDate ? MeterService::formatDate($lastValDate, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
                 $valStr = $lastVal !== null ? (string) $lastVal : '—';
 
                 // Обновляем кэш расхода при получении текущих показаний
@@ -180,7 +180,7 @@ class ReportService
                         $combined = is_array($chData) ? array_merge($v, $chData) : $v;
                         $valDate = MeterService::extractRecordDate($combined);
                         if ($valDate) {
-                            $ts = strtotime($valDate);
+                            $ts = MeterService::parseUtcTimestamp($valDate);
                             if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
                                 $channelsMonthData[$ch][] = $combined;
                             }
@@ -191,7 +191,7 @@ class ReportService
                     $ch = $chData['channel_number'] ?? $v['channel_number'] ?? 1;
                     $valDate = MeterService::extractRecordDate($chData);
                     if ($valDate) {
-                        $ts = strtotime($valDate);
+                        $ts = MeterService::parseUtcTimestamp($valDate);
                         if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
                             $channelsMonthData[$ch][] = $chData;
                         }
@@ -205,7 +205,7 @@ class ReportService
             $totalChannels = count($channelsMonthData);
             foreach ($channelsMonthData as $chNum => $records) {
                 usort($records, static function($a, $b) {
-                    return strtotime(MeterService::extractRecordDate($b)) - strtotime(MeterService::extractRecordDate($a));
+                    return MeterService::parseUtcTimestamp(MeterService::extractRecordDate($b)) - MeterService::parseUtcTimestamp(MeterService::extractRecordDate($a));
                 });
 
                 $latestInMonth = reset($records);
@@ -214,12 +214,12 @@ class ReportService
                 $rawValEnd = MeterService::extractRecordValue($latestInMonth);
                 $valEnd = $rawValEnd !== null ? round($rawValEnd, 4) : null;
                 $dateEnd = MeterService::extractRecordDate($latestInMonth);
-                $dateEndStr = $dateEnd ? date('d.m.Y H:i', strtotime($dateEnd)) : '—';
+                $dateEndStr = $dateEnd ? MeterService::formatDate($dateEnd, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
 
                 $rawValStart = MeterService::extractRecordValue($earliestInMonth);
                 $valStart = $rawValStart !== null ? round($rawValStart, 4) : null;
                 $dateStart = MeterService::extractRecordDate($earliestInMonth);
-                $dateStartStr = $dateStart ? date('d.m.Y H:i', strtotime($dateStart)) : '—';
+                $dateStartStr = $dateStart ? MeterService::formatDate($dateStart, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
 
                 $meterSerial = $channelSerials[$chNum] ?? null;
                 $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
@@ -241,7 +241,7 @@ class ReportService
                 // Получаем или обновляем данные о последнем расходе из кэша
                 $lastCons = MeterService::getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records);
                 if ($lastCons && !empty($lastCons['last_change_date'])) {
-                    $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . date('d.m.Y', strtotime($lastCons['last_change_date'])) . " (на " . round((float) $lastCons['last_change_diff'], 4) . " m³)";
+                    $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . MeterService::formatDate($lastCons['last_change_date'], 'd.m.Y', $config['timezone'] ?? 'Europe/Minsk') . " (на " . round((float) $lastCons['last_change_diff'], 4) . " m³)";
                 } else {
                     $lines[] = "\n  ℹ️ Последний расход не обнаружен.";
                 }

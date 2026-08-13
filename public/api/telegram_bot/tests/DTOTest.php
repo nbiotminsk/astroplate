@@ -60,5 +60,17 @@ class DTOTest
         TestRunner::assert($cbDto->isCallbackQuery, 'TelegramUpdateDTO isCallbackQuery');
         TestRunner::assertEquals('month_8554760', $cbDto->callbackData, 'TelegramUpdateDTO callbackData');
         TestRunner::assertEquals('cb_123', $cbDto->callbackQueryId, 'TelegramUpdateDTO callbackQueryId');
+
+        // TimeZone & Date formatting tests (+3 hours / Europe/Minsk)
+        $rawUtcDate = '2026-08-13T14:05:00';
+        $formattedMinsk = \TelegramBot\MeterService::formatDate($rawUtcDate, 'd.m.Y H:i', 'Europe/Minsk');
+        TestRunner::assertEquals('13.08.2026 17:05', $formattedMinsk, 'MeterService::formatDate adds +3 hours for UTC naive ISO');
+
+        $rawUtcDateWithZ = '2026-08-13T14:05:00Z';
+        $formattedWithZ = \TelegramBot\MeterService::formatDate($rawUtcDateWithZ, 'd.m.Y H:i', 'Europe/Minsk');
+        TestRunner::assertEquals('13.08.2026 17:05', $formattedWithZ, 'MeterService::formatDate handles Z suffix with +3h');
+
+        $emptyDate = \TelegramBot\MeterService::formatDate(null);
+        TestRunner::assertEquals('—', $emptyDate, 'MeterService::formatDate handles null');
     }
 }

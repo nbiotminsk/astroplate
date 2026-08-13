@@ -11,7 +11,13 @@ declare(strict_types=1);
 require_once __DIR__ . '/env.php';
 load_env(__DIR__ . '/.env');
 
+$timezone = getenv('BOT_TIMEZONE') ?: 'Europe/Minsk';
+date_default_timezone_set($timezone);
+
 return [
+    // Часовой пояс бота (по умолчанию Europe/Minsk, UTC+3)
+    'timezone' => $timezone,
+
     // Токен бота из @BotFather (переменная TELEGRAM_BOT_TOKEN)
     'telegram_token' => getenv('TELEGRAM_BOT_TOKEN') ?: '',
 
