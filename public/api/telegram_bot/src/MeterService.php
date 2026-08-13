@@ -282,13 +282,14 @@ class MeterService
         }
 
         // 1. Проверяем локальный конфиг config.php
-        if (isset($config['devices'][(int) $input])) {
-            $dev = $config['devices'][(int) $input];
+        $devices = $config['devices'] ?? [];
+        if (isset($devices[(int) $input])) {
+            $dev = $devices[(int) $input];
             return DeviceDTO::fromArray($dev, (string) $input);
         }
 
-        foreach ($config['devices'] as $id => $info) {
-            if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
+        foreach ($devices as $id => $info) {
+            if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
         }

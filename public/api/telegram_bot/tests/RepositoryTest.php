@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace TelegramBot\Tests;
+
+use TelegramBot\Repository\JsonDeviceRepository;
+use TelegramBot\Repository\JsonUserMeterRepository;
+use TelegramBot\Repository\JsonMeterCacheRepository;
+
+class RepositoryTest
+{
+    public static function run(): void
+    {
+        echo "\n🧪 2. Тестирование Репозиториев (Storage Layer)...\n";
+
+        // JsonDeviceRepository
+        $deviceRepo = new JsonDeviceRepository();
+        $allDevices = $deviceRepo->loadAll();
+        TestRunner::assert(is_array($allDevices), 'JsonDeviceRepository loadAll returns array');
+
+        $foundDev = $deviceRepo->findBySerialOrName('8527038');
+        TestRunner::assert($foundDev !== null, 'JsonDeviceRepository findBySerial 8527038');
+        if ($foundDev) {
+            TestRunner::assertEquals('Fluo', $foundDev->name, 'JsonDeviceRepository device name');
+        }
+
+        // JsonUserMeterRepository
+        $userRepo = new JsonUserMeterRepository();
+        $testChatId = 'test_chat_999999';
+        $userRepo->addMeter($testChatId, '8527038', 'Fluo');
+
+        $meters = $userRepo->getMetersByChatId($testChatId);
+        TestRunner::assertEquals('Fluo', $meters['8527038'] ?? null, 'JsonUserMeterRepository add & get meter');
+
+        $userRepo->removeMeter($testChatId, '8527038');
+        $metersAfterRemove = $userRepo->getMetersByChatId($testChatId);
+        TestRunner::assert(!isset($metersAfterRemove['8527038']), 'JsonUserMeterRepository remove meter');
+
+        // JsonMeterCacheRepository
+        $cacheRepo = new JsonMeterCacheRepository();
+        $cacheData = $cacheRepo->loadCache();
+        TestRunner::assert(is_array($cacheData), 'JsonMeterCacheRepository loadCache returns array');
+    }
+}
