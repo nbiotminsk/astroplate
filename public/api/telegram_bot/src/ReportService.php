@@ -5,10 +5,16 @@ declare(strict_types=1);
 namespace TelegramBot;
 
 use TelegramBot\DTO\DeviceDTO;
+use TelegramBot\Repository\UserMeterRepositoryInterface;
 
 class ReportService
 {
-    public static function buildReport(array $config, DeviceDTO $device): string
+    public function __construct(
+        private ?UserMeterRepositoryInterface $userMeterRepo = null,
+        private ?MeterService $meterService = null
+    ) {}
+
+    public function buildReport(array $config, DeviceDTO $device): string
     {
         $name = $device->name;
         $deviceId = $device->deviceId;
@@ -72,7 +78,11 @@ class ReportService
 
                 // Обновляем кэш расхода при получении текущих показаний
                 if ($lastVal !== null && $lastValDate !== null) {
-                    MeterService::getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
+                    if ($this->meterService) {
+                        $this->meterService->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
+                    } else {
+                        (new MeterService())->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
+                    }
                 }
 
                 $meterSerial = $channelSerials[$chNum] ?? null;
@@ -126,7 +136,7 @@ class ReportService
     }
 
     /** Архив за текущий месяц (от 1 числа до текущего дня) */
-    public static function buildMonthReport(array $config, DeviceDTO $device): string
+    public function buildMonthReport(array $config, DeviceDTO $device): string
     {
         $name = $device->name;
         $deviceId = $device->deviceId;
@@ -202,7 +212,10 @@ class ReportService
                 }
                 
                 // Получаем или обновляем данные о последнем расходе из кэша
-                $lastCons = MeterService::getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records);
+                $lastCons = $this->meterService
+                    ? $this->meterService->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records)
+                    : (new MeterService())->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records);
+
                 if ($lastCons && !empty($lastCons['last_change_date'])) {
                     $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . MeterService::formatDate($lastCons['last_change_date'], 'd.m.Y', $config['timezone'] ?? 'Europe/Minsk') . " (на " . round((float) $lastCons['last_change_diff'], 4) . " m³)";
                 } else {
@@ -218,9 +231,9 @@ class ReportService
         return implode("\n", $lines);
     }
 
-    public static function userMetersList(array $config, string $chatId): string
+    public function userMetersList(array $config, string $chatId): string
     {
-        $meters = Storage::getUserMeters($chatId);
+        $meters = $this->userMeterRepo ? $this->userMeterRepo->getMetersByChatId($chatId) : Storage::getUserMeters($chatId);
         if (empty($meters)) {
             return "У вас пока нет сохраненных счетчиков.\n\nВведите серийный номер прибора или команду:\n<code>/add 8527038</code>";
         }

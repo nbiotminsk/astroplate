@@ -33,13 +33,23 @@ class Container
 
     private function registerServices(): void
     {
-        $this->set(Telegram::class, static fn() => new Telegram());
-        $this->set(MeterService::class, static fn() => new MeterService());
-        $this->set(ReportService::class, static fn() => new ReportService());
-
         $this->set(DeviceRepositoryInterface::class, static fn() => new JsonDeviceRepository());
         $this->set(UserMeterRepositoryInterface::class, static fn() => new JsonUserMeterRepository());
         $this->set(MeterCacheRepositoryInterface::class, static fn() => new JsonMeterCacheRepository());
+
+        $this->set(Telegram::class, fn() => new Telegram(
+            $this->get(UserMeterRepositoryInterface::class)
+        ));
+
+        $this->set(MeterService::class, fn() => new MeterService(
+            $this->get(DeviceRepositoryInterface::class),
+            $this->get(MeterCacheRepositoryInterface::class)
+        ));
+
+        $this->set(ReportService::class, fn() => new ReportService(
+            $this->get(UserMeterRepositoryInterface::class),
+            $this->get(MeterService::class)
+        ));
 
         $this->set(CommandDispatcher::class, fn() => new CommandDispatcher([
             new MonthArchiveCallback(

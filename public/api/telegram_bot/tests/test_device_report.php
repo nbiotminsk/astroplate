@@ -28,7 +28,10 @@ $serial = $argv[1] ?? '8554760';
 MeterService::$disableCache = true;
 echo "🚫 Кэш отключён (MeterService::\$disableCache = true)\n\n";
 
-$device = MeterService::deviceLookup($config, $serial);
+$meterService = new MeterService();
+$reportService = new ReportService(null, $meterService);
+
+$device = $meterService->deviceLookup($config, $serial);
 if (!$device) {
     echo "❌ Устройство '{$serial}' не найдено.\n";
     exit(1);
@@ -38,9 +41,9 @@ echo "🔍 Устройство: {$device->name} (serial={$serial}, id={$device-
 echo "📦 initial_values: " . json_encode($device->initialValues) . "\n\n";
 
 echo "--- buildReport ---\n";
-$report = ReportService::buildReport($config, $device);
+$report = $reportService->buildReport($config, $device);
 echo strip_tags($report) . "\n";
 
 echo "\n--- buildMonthReport ---\n";
-$monthReport = ReportService::buildMonthReport($config, $device);
+$monthReport = $reportService->buildMonthReport($config, $device);
 echo strip_tags($monthReport) . "\n";

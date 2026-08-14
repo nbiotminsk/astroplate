@@ -18,18 +18,20 @@ class EdgeCasesTest
         echo "\n🧪 5. Тестирование граничных случаев и надежности (Edge Cases & Resiliency)...\n";
 
         $config = require __DIR__ . '/../config.php';
+        $meterService = new \TelegramBot\MeterService();
+        $reportService = new ReportService();
 
         // 1. Неизвестная команда / Ненайденный прибор
         $unknownUpdate = new TelegramUpdateDTO(99, 'chat_unknown', 'какая_то_неизвестная_команда');
-        $unknownDev = \TelegramBot\MeterService::deviceLookup($config, 'какая_то_неизвестная_команда');
+        $unknownDev = $meterService->deviceLookup($config, 'какая_то_неизвестная_команда');
         TestRunner::assert($unknownDev === null, 'Неизвестная команда корректно возвращает null при поиске прибора');
 
         // 2. Обработка пустого ответа API (payload = [])
         $emptyDevice = new DeviceDTO('fake_empty_id', '999991', 'Тест Пустого Прибора');
-        $reportEmpty = ReportService::buildReport($config, $emptyDevice);
+        $reportEmpty = $reportService->buildReport($config, $emptyDevice);
         TestRunner::assert(str_contains($reportEmpty, 'нет данных'), 'Пустой ответ API не обрушивает бот и содержит «нет данных»');
 
-        $monthEmpty = ReportService::buildMonthReport($config, $emptyDevice);
+        $monthEmpty = $reportService->buildMonthReport($config, $emptyDevice);
         TestRunner::assert(str_contains($monthEmpty, 'записей не найдено') || str_contains($monthEmpty, 'Архив за текущий месяц'), 'Пустой архив API обрабатывается без ошибок');
 
         // 3. Таймаут или сбой HTTP-запроса (code = 0)

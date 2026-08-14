@@ -28,12 +28,13 @@ class CommandTest
     {
         echo "\n🧪 3. Тестирование Паттерна Команда (Command Pattern & DI)...\n";
 
-        $telegram = new Telegram();
-        $meterService = new MeterService();
-        $reportService = new ReportService();
         $deviceRepo = new JsonDeviceRepository();
         $userMeterRepo = new JsonUserMeterRepository();
         $cacheRepo = new JsonMeterCacheRepository();
+
+        $telegram = new Telegram($userMeterRepo);
+        $meterService = new MeterService($deviceRepo, $cacheRepo);
+        $reportService = new ReportService($userMeterRepo, $meterService);
 
         $startCmd = new StartCommand($telegram);
         $myCmd = new MyMetersCommand($telegram, $reportService);

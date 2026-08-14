@@ -4,8 +4,14 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\Repository\UserMeterRepositoryInterface;
+
 class Telegram
 {
+    public function __construct(
+        private ?UserMeterRepositoryInterface $userMeterRepo = null
+    ) {}
+
     public const TO_CMD = <<<TXT
 Команды бота:
 /start — запустить бота и открыть меню
@@ -91,9 +97,9 @@ TXT;
         ], $token);
     }
 
-    public static function buildMainReplyKeyboard(string $chatId): array
+    public function buildMainReplyKeyboard(string $chatId): array
     {
-        $meters = Storage::getUserMeters($chatId);
+        $meters = $this->userMeterRepo ? $this->userMeterRepo->getMetersByChatId($chatId) : Storage::getUserMeters($chatId);
         $keyboard = [];
 
         $buttons = [];

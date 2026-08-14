@@ -6,18 +6,25 @@ namespace TelegramBot;
 
 use TelegramBot\DTO\DeviceDTO;
 use TelegramBot\DTO\MeterReadingDTO;
+use TelegramBot\Repository\DeviceRepositoryInterface;
+use TelegramBot\Repository\MeterCacheRepositoryInterface;
 
 class MeterService
 {
     /** Установи в true для отключения кэша (тестирование) */
     public static bool $disableCache = false;
 
+    public function __construct(
+        private ?DeviceRepositoryInterface $deviceRepo = null,
+        private ?MeterCacheRepositoryInterface $cacheRepo = null
+    ) {}
+
     /**
      * Автоматически получает первичное/начальное показание с API прибора и сохраняет в registered_devices.json
      */
-    public static function fetchAndSaveInitialValues(array $config, string $serial, string $deviceId, array $explicitInitial = []): array
+    public function fetchAndSaveInitialValues(array $config, string $serial, string $deviceId, array $explicitInitial = []): array
     {
-        $customDevices = Storage::loadRegisteredDevices();
+        $customDevices = $this->deviceRepo ? $this->deviceRepo->loadAll() : Storage::loadRegisteredDevices();
         $existing = $customDevices[(int) $serial]['initial_values'] ?? [];
 
         if (!empty($explicitInitial)) {
@@ -41,14 +48,19 @@ class MeterService
         }
 
         if (!empty($initialValues)) {
-            if (!isset($customDevices[(int) $serial])) {
-                $customDevices[(int) $serial] = [
-                    'name' => "Устройство {$serial}",
-                    'device_id' => $deviceId,
-                ];
+            $name = $customDevices[(int) $serial]['name'] ?? "Устройство {$serial}";
+            if ($this->deviceRepo) {
+                $this->deviceRepo->registerDevice((string) $serial, $deviceId, $name, $initialValues);
+            } else {
+                if (!isset($customDevices[(int) $serial])) {
+                    $customDevices[(int) $serial] = [
+                        'name' => $name,
+                        'device_id' => $deviceId,
+                    ];
+                }
+                $customDevices[(int) $serial]['initial_values'] = $initialValues;
+                Storage::saveRegisteredDevices($customDevices);
             }
-            $customDevices[(int) $serial]['initial_values'] = $initialValues;
-            Storage::saveRegisteredDevices($customDevices);
         }
 
         return $initialValues;
@@ -151,9 +163,9 @@ class MeterService
     /**
      * Получает или обновляет кэшированные данные о последнем расходе счетчика
      */
-    public static function getMeterConsumptionInfo(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
+    public function getMeterConsumptionInfo(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
     {
-        $cache = Storage::loadMeterCache();
+        $cache = $this->cacheRepo ? $this->cacheRepo->loadCache() : Storage::loadMeterCache();
         $devCache = self::$disableCache ? null : ($cache[$deviceId]['channels'][$chNum] ?? null);
 
         if ($devCache !== null) {
@@ -170,7 +182,11 @@ class MeterService
                 ];
                 $cache[$deviceId]['channels'][$chNum] = $devCache;
                 if (!self::$disableCache) {
-                    Storage::saveMeterCache($cache);
+                    if ($this->cacheRepo) {
+                        $this->cacheRepo->saveCache($cache);
+                    } else {
+                        Storage::saveMeterCache($cache);
+                    }
                 }
                 return $devCache;
             }
@@ -202,7 +218,11 @@ class MeterService
 
                 if (!empty($devCache['last_change_date']) && !self::$disableCache) {
                     $cache[$deviceId]['channels'][$chNum] = $devCache;
-                    Storage::saveMeterCache($cache);
+                    if ($this->cacheRepo) {
+                        $this->cacheRepo->saveCache($cache);
+                    } else {
+                        Storage::saveMeterCache($cache);
+                    }
                 }
             }
 
@@ -283,13 +303,17 @@ class MeterService
                 $cache[$deviceId] = ['channels' => []];
             }
             $cache[$deviceId]['channels'][$chNum] = $info;
-            Storage::saveMeterCache($cache);
+            if ($this->cacheRepo) {
+                $this->cacheRepo->saveCache($cache);
+            } else {
+                Storage::saveMeterCache($cache);
+            }
         }
 
         return $info;
     }
 
-    public static function deviceLookup(array $config, string $input): ?DeviceDTO
+    public function deviceLookup(array $config, string $input): ?DeviceDTO
     {
         $input = trim($input);
         if ($input === '') {
@@ -310,7 +334,7 @@ class MeterService
         }
 
         // 2. Проверяем пользовательское динамическое хранилище registered_devices.json
-        $customDevices = Storage::loadRegisteredDevices();
+        $customDevices = $this->deviceRepo ? $this->deviceRepo->loadAll() : Storage::loadRegisteredDevices();
         if (isset($customDevices[(int) $input])) {
             $dev = $customDevices[(int) $input];
             return DeviceDTO::fromArray($dev, (string) $input);
@@ -330,7 +354,7 @@ class MeterService
             $name = $item['device_modification']['name'] ?? $item['device_manufacturer']['name'] ?? "Устройство {$serial}";
 
             if ($serial === $input || mb_strtolower($name, 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-                $initialValues = self::fetchAndSaveInitialValues($config, $serial, $devId);
+                $initialValues = $this->fetchAndSaveInitialValues($config, $serial, $devId);
                 return new DeviceDTO(
                     deviceId: $devId,
                     serialNumber: $serial,
