@@ -17,13 +17,12 @@ class ReportService
         $lines[] = "\xF0\x9F\x93\xB1 <b>{$name}</b>";
 
         // Серийные номера и свежие показания счетчиков из /info
-        $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
-        [$code, $infoResp] = Telegram::httpGet($url, UnicBoard::unicboardHeaders($config));
+        $infoPayload = UnicBoard::getDeviceInfo($config, $deviceId);
 
         $channelSerials = [];
         $liveChannels = [];
-        if ($code === 200 && !empty($infoResp['payload']['device_channel'])) {
-            foreach ($infoResp['payload']['device_channel'] as $idx => $ch) {
+        if ($infoPayload && !empty($infoPayload['device_channel'])) {
+            foreach ($infoPayload['device_channel'] as $idx => $ch) {
                 $chNum = $ch['serial_number'] ?? ($idx + 1);
                 if (isset($ch['serial_number'])) {
                     $channelSerials[$chNum] = (string) $ch['serial_number'];
@@ -43,22 +42,8 @@ class ReportService
 
         if (!empty($values['payload'])) {
             foreach ($values['payload'] as $v) {
-                $channelsList = [];
-                if (isset($v['device_channel']) && is_array($v['device_channel'])) {
-                    $channelsList = $v['device_channel'];
-                } elseif (isset($v['channels']) && is_array($v['channels'])) {
-                    $channelsList = $v['channels'];
-                }
-
-                if (!empty($channelsList)) {
-                    foreach ($channelsList as $idx => $chData) {
-                        $chNum = $chData['channel_number'] ?? ($idx + 1);
-                        $channelsHistory[$chNum][] = is_array($chData) ? array_merge($v, $chData) : $v;
-                    }
-                } else {
-                    $ch = $v['channel_number'] ?? 1;
-                    $channelsHistory[$ch][] = $v;
-                }
+                $ch = (int) ($v['channel_number'] ?? 1);
+                $channelsHistory[$ch][] = $v;
             }
             foreach ($channelsHistory as $chNum => &$hList) {
                 usort($hList, static function ($a, $b) {
@@ -167,34 +152,12 @@ class ReportService
 
         if (!empty($allPayloads)) {
             foreach ($allPayloads as $v) {
-                $channelsList = [];
-                if (isset($v['device_channel']) && is_array($v['device_channel'])) {
-                    $channelsList = $v['device_channel'];
-                } elseif (isset($v['channels']) && is_array($v['channels'])) {
-                    $channelsList = $v['channels'];
-                }
-
-                if (!empty($channelsList)) {
-                    foreach ($channelsList as $idx => $chData) {
-                        $ch = $chData['channel_number'] ?? ($idx + 1);
-                        $combined = is_array($chData) ? array_merge($v, $chData) : $v;
-                        $valDate = MeterService::extractRecordDate($combined);
-                        if ($valDate) {
-                            $ts = MeterService::parseUtcTimestamp($valDate);
-                            if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
-                                $channelsMonthData[$ch][] = $combined;
-                            }
-                        }
-                    }
-                } else {
-                    $chData = $v['device_meter'] ?? $v;
-                    $ch = $chData['channel_number'] ?? $v['channel_number'] ?? 1;
-                    $valDate = MeterService::extractRecordDate($chData);
-                    if ($valDate) {
-                        $ts = MeterService::parseUtcTimestamp($valDate);
-                        if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
-                            $channelsMonthData[$ch][] = $chData;
-                        }
+                $ch = (int) ($v['channel_number'] ?? 1);
+                $valDate = MeterService::extractRecordDate($v);
+                if ($valDate) {
+                    $ts = MeterService::parseUtcTimestamp($valDate);
+                    if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
+                        $channelsMonthData[$ch][] = $v;
                     }
                 }
             }

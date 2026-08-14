@@ -26,12 +26,11 @@ class MeterService
             return $existing;
         } else {
             // Опрашиваем API на предмет начальных показаний / стартовых значений
-            $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
-            [$code, $resp] = Telegram::httpGet($url, UnicBoard::unicboardHeaders($config));
+            $infoPayload = UnicBoard::getDeviceInfo($config, $deviceId);
 
             $initialValues = [];
-            if ($code === 200 && !empty($resp['payload']['device_channel'])) {
-                foreach ($resp['payload']['device_channel'] as $idx => $ch) {
+            if ($infoPayload && !empty($infoPayload['device_channel'])) {
+                foreach ($infoPayload['device_channel'] as $idx => $ch) {
                     $chNum = $ch['serial_number'] ?? ($idx + 1);
                     $meter = $ch['device_meter'][0] ?? null;
                     if ($meter && isset($meter['last_value'])) {
@@ -62,34 +61,12 @@ class MeterService
     {
         $records = [];
         foreach ($payload as $v) {
-            $channelsList = [];
-            if (isset($v['device_channel']) && is_array($v['device_channel'])) {
-                $channelsList = $v['device_channel'];
-            } elseif (isset($v['channels']) && is_array($v['channels'])) {
-                $channelsList = $v['channels'];
-            }
-
-            if (!empty($channelsList)) {
-                foreach ($channelsList as $idx => $chData) {
-                    $num = $chData['channel_number'] ?? ($idx + 1);
-                    if ((int) $num === (int) $chNum && is_array($chData)) {
-                        $combined = array_merge($v, $chData);
-                        $val = self::extractRecordValue($combined);
-                        $date = self::extractRecordDate($combined);
-                        if ($val !== null && $date !== null) {
-                            $records[] = new MeterReadingDTO($val, $date, $chNum);
-                        }
-                    }
-                }
-            } else {
-                $chData = $v['device_meter'] ?? $v;
-                $num = $chData['channel_number'] ?? $v['channel_number'] ?? 1;
-                if ((int) $num === (int) $chNum) {
-                    $val = self::extractRecordValue($chData);
-                    $date = self::extractRecordDate($chData);
-                    if ($val !== null && $date !== null) {
-                        $records[] = new MeterReadingDTO($val, $date, (int) $num);
-                    }
+            $num = $v['channel_number'] ?? 1;
+            if ((int) $num === (int) $chNum) {
+                $val = self::extractRecordValue($v);
+                $date = self::extractRecordDate($v);
+                if ($val !== null && $date !== null) {
+                    $records[] = new MeterReadingDTO($val, $date, (int) $num);
                 }
             }
         }
@@ -98,20 +75,15 @@ class MeterService
 
     public static function extractRecordValue(array $rec): ?float
     {
-        foreach (['value', 'meter_reading', 'meter_value', 'last_value', 'pulse', 'counter'] as $key) {
+        foreach (['value', 'last_value', 'value_raw'] as $key) {
             if (isset($rec[$key]) && is_numeric($rec[$key])) {
                 return (float) $rec[$key];
             }
         }
-        foreach (['device_meter', 'channels', 'device_channel'] as $arrKey) {
-            if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
-                foreach ($rec[$arrKey] as $c) {
-                    if (is_array($c)) {
-                        $val = self::extractRecordValue($c);
-                        if ($val !== null) {
-                            return $val;
-                        }
-                    }
+        if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
+            foreach ($rec['device_meter'] as $m) {
+                if (is_array($m) && isset($m['last_value']) && is_numeric($m['last_value'])) {
+                    return (float) $m['last_value'];
                 }
             }
         }
@@ -120,20 +92,15 @@ class MeterService
 
     public static function extractRecordDate(array $rec): ?string
     {
-        foreach (['date', 'last_value_date', 'created_at', 'timestamp', 'time'] as $key) {
+        foreach (['date', 'last_value_date', 'date_created'] as $key) {
             if (!empty($rec[$key]) && is_string($rec[$key])) {
                 return $rec[$key];
             }
         }
-        foreach (['device_meter', 'channels', 'device_channel'] as $arrKey) {
-            if (isset($rec[$arrKey]) && is_array($rec[$arrKey])) {
-                foreach ($rec[$arrKey] as $c) {
-                    if (is_array($c)) {
-                        $val = self::extractRecordDate($c);
-                        if ($val !== null) {
-                            return $val;
-                        }
-                    }
+        if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
+            foreach ($rec['device_meter'] as $m) {
+                if (is_array($m) && !empty($m['last_value_date']) && is_string($m['last_value_date'])) {
+                    return $m['last_value_date'];
                 }
             }
         }
