@@ -234,15 +234,4 @@ class ReportService
         $lines[] = "\nНажмите на кнопку с именем счетчика внизу или введите его серийный номер.";
         return implode("\n", $lines);
     }
-
-    public static function devicesList(array $config): string
-    {
-        $lines = [];
-        $lines[] = "\xF0\x9F\x9A\x80 <b>Доступные устройства:</b>";
-        foreach ($config['devices'] as $id => $info) {
-            $lines[] = "<code>{$id}</code> — {$info['name']}";
-        }
-        $lines[] = "\nВведите числовой ID устройства (серийный номер), чтобы получить данные.";
-        return implode("\n", $lines);
-    }
 }
