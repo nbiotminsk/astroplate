@@ -210,6 +210,7 @@ class UnicBoard
         $resp = null;
         $code = 0;
         $finalPayload = null;
+        $usedFallback = false;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $variant = match ($attempt) {
@@ -222,6 +223,7 @@ class UnicBoard
             $startTs = microtime(true);
 
             if ($attempt >= 3) {
+                $usedFallback = true;
                 if ($attempt === 3) {
                     // Документированный точечный fallback: POST /devices/info с device_ids.
                     $infoUrl = $apiBase . '/api/v1/devices/info';
@@ -350,12 +352,20 @@ class UnicBoard
             && self::hasApiSuccess($resp)
             && ($finalPayload !== null);
 
+        $finalCount = $usedFallback
+            ? ($finalPayload !== null ? 1 : 0)
+            : (is_array($resp) ? ($resp['count'] ?? ($finalPayload !== null ? 1 : null)) : null);
+
+        $finalTotalCount = $usedFallback
+            ? ($finalPayload !== null ? 1 : 0)
+            : (is_array($resp) ? ($resp['total_count'] ?? ($finalPayload !== null ? 1 : null)) : null);
+
         return [
             'http_status' => $code,
             'ok' => $finalOk,
             'payload' => $finalPayload,
-            'count' => is_array($resp) ? ($resp['count'] ?? ($finalPayload !== null ? 1 : null)) : null,
-            'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
+            'count' => $finalCount,
+            'total_count' => $finalTotalCount,
             'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
         ];
     }

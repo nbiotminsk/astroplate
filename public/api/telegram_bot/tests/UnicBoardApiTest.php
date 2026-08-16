@@ -459,8 +459,8 @@ class UnicBoardApiTest
                 $capturedBodiesW[] = $body;
                 return [200, [
                     'ok' => true,
-                    'count' => 1,
-                    'total_count' => 1,
+                    'count' => 100,
+                    'total_count' => 500,
                     'errors' => [],
                     'payload' => [
                         [
@@ -482,8 +482,8 @@ class UnicBoardApiTest
         TestRunner::assertEquals(1, $infoPostAttemptsW, 'Test W (Case G): Использован приоритетный POST fallback на /api/v1/devices/info');
         TestRunner::assertEquals(['device_ids' => ['dev-uuid-w']], $capturedBodiesW[0], 'Test W (Case G): POST fallback использует документированный device_ids с исходным UUID');
         TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Fallback завершился успешно ok=true');
-        TestRunner::assertEquals(1, $infoResponseW['count'], 'Test W (Case G): count сохранен из ответа API');
-        TestRunner::assertEquals(1, $infoResponseW['total_count'], 'Test W (Case G): total_count сохранен из ответа API');
+        TestRunner::assertEquals(1, $infoResponseW['count'], 'Test W (Case G): count равен 1 для найденного устройства');
+        TestRunner::assertEquals(1, $infoResponseW['total_count'], 'Test W (Case G): total_count равен 1 для найденного устройства');
         TestRunner::assertEquals([], $infoResponseW['errors'], 'Test W (Case G): errors сохранены из ответа API');
         $readingsW = MeterService::extractCurrentReadingsFromDeviceInfo($infoResponseW['payload']);
         TestRunner::assertEquals(7.77, $readingsW[1]->lastValue, 'Test W (Case G): last_value равен 7.77');
@@ -518,6 +518,9 @@ class UnicBoardApiTest
                 }
                 return [200, [
                     'ok' => true,
+                    'count' => 50,
+                    'total_count' => 50,
+                    'errors' => [],
                     'payload' => [
                         [
                             'id' => 'other-unrelated-device',
@@ -538,6 +541,9 @@ class UnicBoardApiTest
         TestRunner::assertEquals(3, $infoAttemptsY, 'Test Y (Case G): GET-список остается последней попыткой после POST fallback');
         TestRunner::assert($infoResponseY['ok'] === false, 'Test Y (Case G): Чужой device_id не возвращается как успешный для целевого устройства');
         TestRunner::assert($infoResponseY['payload'] === null, 'Test Y (Case G): payload равен null при отсутствии целевого устройства в списке');
+        TestRunner::assertEquals(0, $infoResponseY['count'], 'Test Y (Case G): count равен 0 когда целевое устройство не найдено');
+        TestRunner::assertEquals(0, $infoResponseY['total_count'], 'Test Y (Case G): total_count равен 0 когда целевое устройство не найдено');
+        TestRunner::assertEquals([], $infoResponseY['errors'], 'Test Y (Case G): errors сохранены');
 
         // Test Z: A structurally incomplete direct /info response must not bypass the completeness check.
         $infoResponseZ = \TelegramBot\UnicBoard::getDeviceInfo(
