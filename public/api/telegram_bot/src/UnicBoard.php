@@ -124,21 +124,10 @@ class UnicBoard
         $code = 0;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $variant = match ($attempt) {
-                1 => 'post_devices_id',
-                2 => 'retry_post_devices_id',
-                3 => 'post_device_ids',
-                default => 'post_devices',
-            };
-
-            $bodyKey = match ($attempt) {
-                3 => 'device_ids',
-                4 => 'devices',
-                default => 'devices_id',
-            };
+            $variant = $attempt === 1 ? 'post_devices_id' : 'retry_post_devices_id';
 
             $startTs = microtime(true);
-            [$code, $resp] = $httpPostJson($url, [$bodyKey => [$deviceUuid]], $headers, $timeout);
+            [$code, $resp] = $httpPostJson($url, ['devices_id' => [$deviceUuid]], $headers, $timeout);
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
@@ -217,6 +206,7 @@ class UnicBoard
         $httpGet ??= [Telegram::class, 'httpGet'];
         $resp = null;
         $code = 0;
+        $finalPayload = null;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $variant = match ($attempt) {
@@ -237,11 +227,15 @@ class UnicBoard
                 $apiOk = self::hasApiSuccess($resp);
                 $deviceItem = null;
                 if ($isJsonArray && isset($resp['payload']) && is_array($resp['payload'])) {
-                    foreach ($resp['payload'] as $item) {
-                        if (is_array($item) && ($item['id'] ?? null) === $deviceId) {
-                            $deviceItem = $item;
-                            break;
+                    if (isset($resp['payload'][0]) || empty($resp['payload'])) {
+                        foreach ($resp['payload'] as $item) {
+                            if (is_array($item) && ($item['id'] ?? null) === $deviceId) {
+                                $deviceItem = $item;
+                                break;
+                            }
                         }
+                    } elseif (($resp['payload']['id'] ?? null) === $deviceId) {
+                        $deviceItem = $resp['payload'];
                     }
                 }
 
@@ -278,7 +272,7 @@ class UnicBoard
                 );
 
                 if ($code === 200 && $apiOk && $hasCompleteChannels) {
-                    $resp = ['ok' => true, 'payload' => $payload];
+                    $finalPayload = $payload;
                     break;
                 }
             } else {
@@ -320,9 +314,8 @@ class UnicBoard
                     $config
                 );
 
-                // Для /info непустой, структурно полный device_channel обязателен:
-                // неполный ответ API встречается временно и должен быть повторен.
                 if ($code === 200 && $apiOk && $hasCompleteChannels) {
+                    $finalPayload = $payload;
                     break;
                 }
             }
@@ -336,16 +329,19 @@ class UnicBoard
             }
         }
 
-        $finalPayload = is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : null;
+        if ($finalPayload === null && is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) && !isset($resp['payload'][0])) {
+            $finalPayload = $resp['payload'];
+        }
+
         $finalOk = $code === 200
             && self::hasApiSuccess($resp)
-            && self::hasCompleteDeviceInfoPayload($finalPayload, $deviceId);
+            && ($finalPayload !== null);
 
         return [
             'http_status' => $code,
             'ok' => $finalOk,
             'payload' => $finalPayload,
-            'count' => is_array($resp) ? ($resp['count'] ?? null) : null,
+            'count' => is_array($resp) ? ($resp['count'] ?? ($finalPayload !== null ? 1 : null)) : null,
             'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
             'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
         ];
@@ -378,10 +374,14 @@ class UnicBoard
     }
 
     /**
-     * Проверяет обязательную для текущего чтения структуру /info и соответствие device_id.
-     * Пустой список или канал без обязательных полей считается временно неполным ответом.
+     * Проверяет соответствие структуры /info спецификации api.json и соответствие device_id.
+     * В соответствии со схемой ApiDeviceResponse, объект прибора должен содержать id,
+     * соответствующий запрошенному, и массив device_channel.
+     * В соответствии со схемой ApiDeviceChannelPayloadResponse, каждый канал должен содержать
+     * обязательные поля serial_number и массив device_meter.
+     * Пустой список каналов или отсутствующая структура счетчиков считается временно неполным ответом.
      */
-    private static function hasCompleteDeviceInfoPayload(?array $payload, string $deviceId): bool
+    public static function hasCompleteDeviceInfoPayload(?array $payload, string $deviceId): bool
     {
         if ($payload === null
             || !isset($payload['id'])
@@ -398,8 +398,7 @@ class UnicBoard
                 || !isset($channel['serial_number'])
                 || !is_numeric($channel['serial_number'])
                 || !array_key_exists('device_meter', $channel)
-                || !is_array($channel['device_meter'])
-                || $channel['device_meter'] === []) {
+                || !is_array($channel['device_meter'])) {
                 return false;
             }
         }

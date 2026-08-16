@@ -315,7 +315,7 @@ class UnicBoardApiTest
         TestRunner::assertEquals(1, count($valuesRespQ['payload']), 'Test Q (Case A): Валидные данные получены');
         TestRunner::assertEquals(10.5, $valuesRespQ['payload'][0]['value'], 'Test Q (Case A): Значение равно 10.5');
 
-        // Test R (Case B): Alternative request variant used (Attempt 3: device_ids body)
+        // Test R (Case B / Test H): All retries send ONLY valid devices_id from api.json, never device_ids, devices, or alt_device_ids
         $valuesAttemptsR = 0;
         $capturedBodiesR = [];
         $valuesRespR = \TelegramBot\UnicBoard::getDeviceValues(
@@ -343,11 +343,16 @@ class UnicBoardApiTest
                 ]];
             }
         );
-        TestRunner::assertEquals(3, $valuesAttemptsR, 'Test R (Case B): Совершены 3 попытки с перебором вариантов');
-        TestRunner::assert(isset($capturedBodiesR[0]['devices_id']), 'Test R (Case B): Попытка 1 использовала devices_id');
-        TestRunner::assert(isset($capturedBodiesR[1]['devices_id']), 'Test R (Case B): Попытка 2 использовала повтор devices_id');
-        TestRunner::assert(isset($capturedBodiesR[2]['device_ids']), 'Test R (Case B): Попытка 3 использовала альтернативный device_ids');
-        TestRunner::assertEquals(15.0, $valuesRespR['payload'][0]['value'], 'Test R (Case B): Альтернативный запрос вернул валидные данные');
+        TestRunner::assertEquals(3, $valuesAttemptsR, 'Test R: Совершены 3 попытки повтора одного валидного запроса');
+        foreach ($capturedBodiesR as $idx => $body) {
+            $attemptNum = $idx + 1;
+            TestRunner::assert(isset($body['devices_id']), "Test R: Попытка {$attemptNum} содержит валидный ключ devices_id согласно api.json");
+            TestRunner::assertEquals(['dev-uuid-r'], $body['devices_id'], "Test R: Попытка {$attemptNum} использует ровно один и тот же device_id");
+            TestRunner::assert(!isset($body['device_ids']), "Test R: Попытка {$attemptNum} НЕ содержит неспецифицированный ключ device_ids");
+            TestRunner::assert(!isset($body['devices']), "Test R: Попытка {$attemptNum} НЕ содержит неспецифицированный ключ devices");
+            TestRunner::assert(!isset($body['alt_device_ids']), "Test R: Попытка {$attemptNum} НЕ содержит alt_device_ids");
+        }
+        TestRunner::assertEquals(15.0, $valuesRespR['payload'][0]['value'], 'Test R: После повторов получены валидные данные');
 
         // Test S (Case C): Immediate success with valid payload, no unnecessary retries
         $valuesAttemptsS = 0;
@@ -445,6 +450,9 @@ class UnicBoardApiTest
                 // Attempt 3 queries /devices/info list
                 return [200, [
                     'ok' => true,
+                    'count' => 1,
+                    'total_count' => 1,
+                    'errors' => [],
                     'payload' => [
                         [
                             'id' => 'dev-uuid-w',
@@ -463,7 +471,55 @@ class UnicBoardApiTest
         );
         TestRunner::assertEquals(3, $infoAttemptsW, 'Test W (Case G): Использован fallback на /api/v1/devices/info');
         TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Fallback завершился успешно ok=true');
+        TestRunner::assertEquals(1, $infoResponseW['count'], 'Test W (Case G): count сохранен из ответа API');
+        TestRunner::assertEquals(1, $infoResponseW['total_count'], 'Test W (Case G): total_count сохранен из ответа API');
+        TestRunner::assertEquals([], $infoResponseW['errors'], 'Test W (Case G): errors сохранены из ответа API');
         $readingsW = MeterService::extractCurrentReadingsFromDeviceInfo($infoResponseW['payload']);
         TestRunner::assertEquals(7.77, $readingsW[1]->lastValue, 'Test W (Case G): last_value равен 7.77');
+
+        // Test X (Case A): Persistent empty response returns ok=true with empty payload after bounded retries
+        $valuesAttemptsX = 0;
+        $valuesRespX = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-x',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsX): array {
+                $valuesAttemptsX++;
+                return [200, ['ok' => true, 'payload' => [], 'count' => 0, 'total_count' => 0, 'errors' => []]];
+            }
+        );
+        TestRunner::assertEquals(3, $valuesAttemptsX, 'Test X (Case A): Выполнено ровно maxRetries попыток при пустом ответе');
+        TestRunner::assert($valuesRespX['ok'] === true, 'Test X (Case A): Итоговый ok=true при пустом payload');
+        TestRunner::assertEquals([], $valuesRespX['payload'], 'Test X (Case A): Итоговый payload пустой массив');
+
+        // Test Y (Case G): /info fallback ensures only the requested device_id is matched (never another device)
+        $infoAttemptsY = 0;
+        $infoResponseY = \TelegramBot\UnicBoard::getDeviceInfo(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'target-device-id',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttemptsY): array {
+                $infoAttemptsY++;
+                if ($infoAttemptsY < 3) {
+                    return [200, null];
+                }
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'id' => 'other-unrelated-device',
+                            'device_channel' => [
+                                ['serial_number' => 1, 'device_meter' => [['last_value' => 99.9]]]
+                            ]
+                        ]
+                    ]
+                ]];
+            }
+        );
+        TestRunner::assertEquals(3, $infoAttemptsY, 'Test Y (Case G): 3 попытки поиска');
+        TestRunner::assert($infoResponseY['ok'] === false, 'Test Y (Case G): Чужой device_id не возвращается как успешный для целевого устройства');
+        TestRunner::assert($infoResponseY['payload'] === null, 'Test Y (Case G): payload равен null при отсутствии целевого устройства в списке');
     }
 }
