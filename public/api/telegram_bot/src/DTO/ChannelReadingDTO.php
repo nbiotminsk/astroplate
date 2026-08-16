@@ -21,8 +21,24 @@ readonly class ChannelReadingDTO
         return $this->lastValue !== null;
     }
 
-    public function isInactive(): bool
+    /**
+     * Канал неактивен, только если последнее показание старше лимита неактивности.
+     * lastDateEventNoData — историческое событие и не является текущим статусом.
+     */
+    public function isInactive(?int $now = null): bool
     {
-        return $this->lastDateEventNoData !== null;
+        if ($this->inactivityLimit === null || $this->inactivityLimit <= 0 || $this->lastValueDate === null) {
+            return false;
+        }
+
+        try {
+            $lastValueAt = preg_match('/[Zz]|[\+\-]\d{2}:?\d{2}$/', $this->lastValueDate)
+                ? new \DateTimeImmutable($this->lastValueDate)
+                : new \DateTimeImmutable($this->lastValueDate, new \DateTimeZone('UTC'));
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return ($now ?? time()) - $lastValueAt->getTimestamp() > $this->inactivityLimit;
     }
 }

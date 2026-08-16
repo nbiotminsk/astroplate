@@ -137,12 +137,15 @@ class MeterService
                 continue;
             }
 
-            $chNum = (int) ($v['channel_number'] ?? 1);
-            $val = isset($v['value']) && is_numeric($v['value']) ? (float) $v['value'] : 0.0;
-            $date = (string) ($v['date'] ?? '');
-            if ($date === '') {
+            if (!isset($v['channel_number']) || !is_numeric($v['channel_number'])
+                || !isset($v['value']) || !is_numeric($v['value'])
+                || empty($v['date']) || !is_string($v['date'])) {
                 continue;
             }
+
+            $chNum = (int) $v['channel_number'];
+            $val = (float) $v['value'];
+            $date = $v['date'];
 
             $records[] = new HistoricalValueDTO(
                 channelNumber: $chNum,
@@ -151,7 +154,8 @@ class MeterService
                 valueRaw: isset($v['value_raw']) && is_numeric($v['value_raw']) ? (float) $v['value_raw'] : null,
                 lastValue: isset($v['last_value']) && is_numeric($v['last_value']) ? (float) $v['last_value'] : null,
                 lastValueDate: !empty($v['last_value_date']) && is_string($v['last_value_date']) ? $v['last_value_date'] : null,
-                valueType: (string) ($v['value_type'] ?? 'DEVICE_DATA'),
+                // Неизвестный тип не приравниваем к физическому DEVICE_DATA.
+                valueType: isset($v['value_type']) && is_string($v['value_type']) ? $v['value_type'] : 'UNKNOWN',
                 journalDataType: (string) ($v['journal_data_type'] ?? 'CURRENT'),
                 kind: (string) ($v['kind'] ?? 'COMMON_CONSUMED'),
                 meterId: (string) ($v['meter_id'] ?? ''),
@@ -162,6 +166,14 @@ class MeterService
         }
 
         return $records;
+    }
+
+    /**
+     * Только DEVICE_DATA считается физическим показанием и может участвовать в расходе.
+     */
+    public static function isPhysicalHistoricalReading(HistoricalValueDTO $record): bool
+    {
+        return $record->valueType === 'DEVICE_DATA';
     }
 
     /**
@@ -213,75 +225,31 @@ class MeterService
     public static function extractChannelRecords(array $payload, int $chNum): array
     {
         $records = [];
-        foreach ($payload as $v) {
-            $num = is_array($v) ? ($v['channel_number'] ?? 1) : ($v instanceof HistoricalValueDTO ? $v->channelNumber : 1);
-            if ((int) $num === (int) $chNum) {
-                $val = self::extractRecordValue($v);
-                $date = self::extractRecordDate($v);
-                if ($val !== null && $date !== null) {
-                    $records[] = new MeterReadingDTO($val, $date, (int) $num);
-                }
+        foreach (self::extractHistoricalRecordsFromValues($payload) as $record) {
+            if ($record->channelNumber === $chNum && self::isPhysicalHistoricalReading($record)) {
+                $records[] = new MeterReadingDTO($record->value, $record->date, $record->channelNumber);
             }
         }
+
         return $records;
     }
 
-    public static function extractRecordValue(mixed $rec): ?float
+    /**
+     * Преобразует только подтверждённые исторические показания в формат расчёта расхода.
+     * INTERPOLATED_LINEAR и неизвестные типы намеренно исключаются.
+     *
+     * @return array<int, array{val: float, date: string}>
+     */
+    private static function recordsForConsumption(array $records): array
     {
-        if ($rec instanceof ChannelReadingDTO) {
-            return $rec->lastValue;
-        }
-        if ($rec instanceof HistoricalValueDTO) {
-            return $rec->value;
-        }
-        if ($rec instanceof MeterReadingDTO) {
-            return $rec->val;
+        $parsed = [];
+        foreach ($records as $record) {
+            if ($record instanceof HistoricalValueDTO && self::isPhysicalHistoricalReading($record)) {
+                $parsed[] = ['val' => $record->value, 'date' => $record->date];
+            }
         }
 
-        if (is_array($rec)) {
-            foreach (['value', 'last_value', 'value_raw'] as $key) {
-                if (isset($rec[$key]) && is_numeric($rec[$key])) {
-                    return (float) $rec[$key];
-                }
-            }
-            if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
-                foreach ($rec['device_meter'] as $m) {
-                    if (is_array($m) && isset($m['last_value']) && is_numeric($m['last_value'])) {
-                        return (float) $m['last_value'];
-                    }
-                }
-            }
-        }
-        return null;
-    }
-
-    public static function extractRecordDate(mixed $rec): ?string
-    {
-        if ($rec instanceof ChannelReadingDTO) {
-            return $rec->lastValueDate;
-        }
-        if ($rec instanceof HistoricalValueDTO) {
-            return $rec->date;
-        }
-        if ($rec instanceof MeterReadingDTO) {
-            return $rec->date;
-        }
-
-        if (is_array($rec)) {
-            foreach (['date', 'last_value_date', 'date_created'] as $key) {
-                if (!empty($rec[$key]) && is_string($rec[$key])) {
-                    return $rec[$key];
-                }
-            }
-            if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
-                foreach ($rec['device_meter'] as $m) {
-                    if (is_array($m) && !empty($m['last_value_date']) && is_string($m['last_value_date'])) {
-                        return $m['last_value_date'];
-                    }
-                }
-            }
-        }
-        return null;
+        return $parsed;
     }
 
     /**
@@ -365,14 +333,7 @@ class MeterService
 
             // 2. Если дата расхода пуста, пробуем заполнить из записей текущего месяца
             if (empty($devCache['last_change_date']) && !empty($monthRecords)) {
-                $parsed = [];
-                foreach ($monthRecords as $r) {
-                    $v = self::extractRecordValue($r);
-                    $d = self::extractRecordDate($r);
-                    if ($v !== null && $d !== null) {
-                        $parsed[] = ['val' => $v, 'date' => $d];
-                    }
-                }
+                $parsed = self::recordsForConsumption($monthRecords);
                 usort($parsed, static function($a, $b) {
                     return self::parseUtcTimestamp($a['date']) - self::parseUtcTimestamp($b['date']);
                 });
@@ -402,16 +363,7 @@ class MeterService
         }
 
         // Кэш отсутствует — строим историю
-        $records = [];
-        if (!empty($monthRecords)) {
-            foreach ($monthRecords as $r) {
-                $v = self::extractRecordValue($r);
-                $d = self::extractRecordDate($r);
-                if ($v !== null && $d !== null) {
-                    $records[] = ['val' => $v, 'date' => $d];
-                }
-            }
-        }
+        $records = self::recordsForConsumption($monthRecords);
 
         $lastVal = null;
         $changeDate = null;
@@ -503,6 +455,9 @@ class MeterService
             if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
+            if (($info['device_id'] ?? null) === $input) {
+                return DeviceDTO::fromArray($info, (string) $id);
+            }
         }
 
         // 2. Проверяем пользовательское динамическое хранилище registered_devices.json
@@ -516,27 +471,14 @@ class MeterService
             if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
-        }
-
-        // 3. Если не найден — пробуем динамически запросить список приборов через API
-        $apiDevicesResp = UnicBoard::getAllDevices($config);
-        $apiDevices = $apiDevicesResp['payload'] ?? [];
-        foreach ($apiDevices as $item) {
-            $serial = (string) ($item['manufacturer_serial_number'] ?? '');
-            $devId = $item['id'] ?? '';
-            $name = $item['device_modification']['name'] ?? $item['device_manufacturer']['name'] ?? "Устройство {$serial}";
-
-            if ($serial === $input || mb_strtolower($name, 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
-                $initialValues = $this->fetchAndSaveInitialValues($config, $serial, $devId);
-                return new DeviceDTO(
-                    deviceId: $devId,
-                    serialNumber: $serial,
-                    name: $name,
-                    initialValues: $initialValues
-                );
+            if (($info['device_id'] ?? null) === $input) {
+                return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
+        // API contract exposes only device/manufacturer/channel identifiers, not a
+        // verified physical water-meter serial. The user-provided local number is
+        // therefore authoritative and remote identifiers must not be repurposed.
         return null;
     }
 }

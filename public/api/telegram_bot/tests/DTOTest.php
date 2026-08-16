@@ -47,7 +47,14 @@ class DTOTest
         TestRunner::assertEquals(1, $chReading->channelNumber, 'ChannelReadingDTO channelNumber');
         TestRunner::assertEquals(0.0, $chReading->lastValue, 'ChannelReadingDTO lastValue handles 0.0');
         TestRunner::assert($chReading->hasReading(), 'ChannelReadingDTO hasReading is true');
-        TestRunner::assert($chReading->isInactive(), 'ChannelReadingDTO isInactive is true');
+        TestRunner::assert(
+            !$chReading->isInactive(strtotime('2026-08-16T10:10:00Z')),
+            'ChannelReadingDTO не считает старое событие no-data текущей неактивностью'
+        );
+        TestRunner::assert(
+            $chReading->isInactive(strtotime('2026-08-17T10:00:01Z')),
+            'ChannelReadingDTO учитывает inactivity_limit относительно last_value_date'
+        );
 
         // HistoricalValueDTO
         $histValue = new HistoricalValueDTO(

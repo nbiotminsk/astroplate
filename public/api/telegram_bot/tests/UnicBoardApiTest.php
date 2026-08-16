@@ -14,7 +14,7 @@ class UnicBoardApiTest
 {
     public static function run(): void
     {
-        echo "\n🧪 6. Тестирование логики UnicBoard API и обработки показаний (Tests A — N)...\n";
+        echo "\n🧪 6. Тестирование логики UnicBoard API и обработки показаний (Tests A — P)...\n";
 
         $config = require __DIR__ . '/../config.php';
         $meterService = new MeterService();
@@ -187,6 +187,10 @@ class UnicBoardApiTest
         $recordsK = MeterService::extractHistoricalRecordsFromValues($valuesPayloadK);
         TestRunner::assertEquals('DEVICE_DATA', $recordsK[0]->valueType, 'Test K: Record 0 is DEVICE_DATA');
         TestRunner::assertEquals('INTERPOLATED_LINEAR', $recordsK[1]->valueType, 'Test K: Record 1 is INTERPOLATED_LINEAR');
+        TestRunner::assert(MeterService::isPhysicalHistoricalReading($recordsK[0]), 'Test K: DEVICE_DATA допускается в расчет расхода');
+        TestRunner::assert(!MeterService::isPhysicalHistoricalReading($recordsK[1]), 'Test K: INTERPOLATED_LINEAR исключается из расчета расхода');
+        $physicalChannelRecordsK = MeterService::extractChannelRecords($valuesPayloadK, 1);
+        TestRunner::assertEquals(1, count($physicalChannelRecordsK), 'Test K: Для расчета остается только физическая запись');
 
         // Test L: current vs historical values
         TestRunner::assert($readingsI[2]->lastValue === 4.29, 'Test L: Current reading is 4.29 from /info');
@@ -196,23 +200,88 @@ class UnicBoardApiTest
         // Test M: HTTP 200 + invalid JSON ($resp is not an array) must result in ok=false
         $code = 200;
         $respNull = null;
-        $finalOk = ($code === 200 && is_array($respNull)) ? (bool) ($respNull['ok'] ?? true) : false;
+        $finalOk = $code === 200 && is_array($respNull) && array_key_exists('ok', $respNull) && $respNull['ok'] === true;
         TestRunner::assert($finalOk === false, 'Test M: HTTP 200 + non-array response ($resp = null) дает ok = false');
 
         $respString = 'invalid json or html';
-        $finalOkStr = ($code === 200 && is_array($respString)) ? (bool) ($respString['ok'] ?? true) : false;
+        $finalOkStr = $code === 200 && is_array($respString) && array_key_exists('ok', $respString) && $respString['ok'] === true;
         TestRunner::assert($finalOkStr === false, 'Test M: HTTP 200 + string response дает ok = false');
 
         $respValidApiFalse = ['ok' => false, 'errors' => ['msg' => 'error']];
-        $finalOkApiFalse = ($code === 200 && is_array($respValidApiFalse)) ? (bool) ($respValidApiFalse['ok'] ?? true) : false;
+        $finalOkApiFalse = $code === 200 && is_array($respValidApiFalse) && array_key_exists('ok', $respValidApiFalse) && $respValidApiFalse['ok'] === true;
         TestRunner::assert($finalOkApiFalse === false, 'Test M: HTTP 200 + API ok=false дает ok = false');
 
         $respValidApiTrue = ['ok' => true, 'payload' => []];
-        $finalOkApiTrue = ($code === 200 && is_array($respValidApiTrue)) ? (bool) ($respValidApiTrue['ok'] ?? true) : false;
+        $finalOkApiTrue = $code === 200 && is_array($respValidApiTrue) && array_key_exists('ok', $respValidApiTrue) && $respValidApiTrue['ok'] === true;
         TestRunner::assert($finalOkApiTrue === true, 'Test M: HTTP 200 + API ok=true дает ok = true');
 
-        // Test N: Diagnostic toggle
-        TestRunner::assert(!\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => false]), 'Test N: Diagnostics disabled by config');
-        TestRunner::assert(\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => true]), 'Test N: Diagnostics enabled by config');
+        // Test N: /info must retry HTTP 200 + ok=true responses with incomplete device_channel.
+        $infoAttempts = 0;
+        $infoResponse = \TelegramBot\UnicBoard::getDeviceInfo(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'device-id',
+            maxRetries: 4,
+            retryDelayUs: 0,
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttempts): array {
+                $infoAttempts++;
+
+                if ($infoAttempts === 1) {
+                    return [200, ['ok' => true, 'payload' => ['id' => 'device-id', 'device_channel' => []]]];
+                }
+
+                if ($infoAttempts === 2) {
+                    return [200, ['ok' => true, 'payload' => [
+                        'id' => 'device-id',
+                        'device_channel' => [['serial_number' => 1]],
+                    ]]];
+                }
+
+                if ($infoAttempts === 3) {
+                    return [200, ['ok' => true, 'payload' => [
+                        'id' => 'another-device-id',
+                        'device_channel' => [[
+                            'serial_number' => 1,
+                            'device_meter' => [['last_value' => 1.0]],
+                        ]],
+                    ]]];
+                }
+
+                return [200, ['ok' => true, 'payload' => [
+                    'id' => 'device-id',
+                    'device_channel' => [[
+                        'serial_number' => 1,
+                        'device_meter' => [['last_value' => 1.0]],
+                    ]],
+                ]]];
+            }
+        );
+        TestRunner::assertEquals(4, $infoAttempts, 'Test N: /info повторяется при пустом/неполном канале и чужом device_id');
+        TestRunner::assert($infoResponse['ok'] === true, 'Test N: Полный повторный ответ /info принят');
+
+        // Test O: valid JSON without the mandatory ok=true is not a successful /info response.
+        $missingOkAttempts = 0;
+        $missingOkResponse = \TelegramBot\UnicBoard::getDeviceInfo(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'device-id',
+            maxRetries: 1,
+            retryDelayUs: 0,
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$missingOkAttempts): array {
+                $missingOkAttempts++;
+
+                return [200, ['payload' => [
+                    'id' => 'device-id',
+                    'device_channel' => [[
+                        'serial_number' => 1,
+                        'device_meter' => [['last_value' => 1.0]],
+                    ]],
+                ]]];
+            }
+        );
+        TestRunner::assertEquals(1, $missingOkAttempts, 'Test O: HTTP 200 + JSON без ok обработан как неуспех');
+        TestRunner::assert($missingOkResponse['ok'] === false, 'Test O: Отсутствующий ok не становится ok=true');
+
+        // Test P: Diagnostic toggle
+        TestRunner::assert(!\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => false]), 'Test P: Diagnostics disabled by config');
+        TestRunner::assert(\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => true]), 'Test P: Diagnostics enabled by config');
     }
 }

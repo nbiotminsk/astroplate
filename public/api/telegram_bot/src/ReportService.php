@@ -30,20 +30,24 @@ class ReportService
         $infoPayload = $infoResp['payload'] ?? null;
         $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 
-        // 2. Историю для расчета расхода запрашиваем через POST /api/v1/devices/values (опционально)
-        $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
-        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
-
+        // /values не нужен для успешного получения текущего показания. Запрашиваем
+        // архив только как явно обозначенный фолбэк, если /info не дал онлайн-данных.
+        $historyRecords = [];
         $historyByChannel = [];
-        foreach ($historyRecords as $rec) {
-            $historyByChannel[$rec->channelNumber][] = $rec;
+        if (empty($currentReadings)) {
+            $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
+            $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+
+            foreach ($historyRecords as $rec) {
+                $historyByChannel[$rec->channelNumber][] = $rec;
+            }
+            foreach ($historyByChannel as $chNum => &$hList) {
+                usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
+                    return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
+                });
+            }
+            unset($hList);
         }
-        foreach ($historyByChannel as $chNum => &$hList) {
-            usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
-                return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
-            });
-        }
-        unset($hList);
 
         // 3. Формируем блок показаний по каналам
         if (!empty($currentReadings)) {
@@ -215,7 +219,9 @@ class ReportService
         $channelsMonthData = [];
         foreach ($historyRecords as $rec) {
             $ts = MeterService::parseUtcTimestamp($rec->date);
-            if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
+            // Расход — только по физическим DEVICE_DATA; интерполяция остаётся
+            // доступной в обычном архивном фолбэке и явно помечается там.
+            if ($ts >= $startMonthTs && $ts <= $endMonthTs && MeterService::isPhysicalHistoricalReading($rec)) {
                 $channelsMonthData[$rec->channelNumber][] = $rec;
             }
         }

@@ -22,6 +22,14 @@ class UnicBoard
     }
 
     /**
+     * HTTP success is not API success: the response must explicitly contain ok=true.
+     */
+    private static function hasApiSuccess(mixed $resp): bool
+    {
+        return is_array($resp) && array_key_exists('ok', $resp) && $resp['ok'] === true;
+    }
+
+    /**
      * Запись структурированной диагностики запросов (без секретов и токенов).
      */
     public static function logDiagnostic(
@@ -109,7 +117,7 @@ class UnicBoard
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
-            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $payloadCount = count($payload);
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
@@ -149,7 +157,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
+        $finalOk = $code === 200 && self::hasApiSuccess($resp);
 
         return [
             'http_status' => $code,
@@ -171,23 +179,26 @@ class UnicBoard
         string $deviceId,
         int $timeout = 10,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000
+        int $retryDelayUs = 500000,
+        ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
         $url = $apiBase . '/api/v1/devices/' . $deviceId . '/info';
         $headers = self::unicboardHeaders($config);
+        $httpGet ??= [Telegram::class, 'httpGet'];
         $resp = null;
         $code = 0;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             $startTs = microtime(true);
-            [$code, $resp] = Telegram::httpGet($url, $headers, $timeout);
+            [$code, $resp] = $httpGet($url, $headers, $timeout);
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
-            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : null;
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+            $hasCompleteChannels = self::hasCompleteDeviceInfoPayload($payload, $deviceId);
 
             $channelCount = ($payload && isset($payload['device_channel']) && is_array($payload['device_channel']))
                 ? count($payload['device_channel'])
@@ -205,7 +216,7 @@ class UnicBoard
                         'channel_number' => $chNum,
                         'last_value' => isset($m['last_value']) && is_numeric($m['last_value']) ? (float) $m['last_value'] : null,
                         'last_value_date' => $m['last_value_date'] ?? null,
-                        'is_alive' => $m['is_alive'] ?? null,
+                        'is_alive' => $ch['is_alive'] ?? $m['is_alive'] ?? null,
                         'inactivity_limit' => $ch['inactivity_limit'] ?? null,
                         'last_date_event_no_data' => $ch['last_date_event_no_data'] ?? null,
                     ];
@@ -221,11 +232,22 @@ class UnicBoard
                 $channelCount,
                 $durationMs,
                 $errors,
-                ['channels' => $channelsDiag],
+                [
+                    'channels' => $channelsDiag,
+                    'response_shape' => [
+                        'is_json_array' => $isJsonArray,
+                        'has_ok_field' => $isJsonArray && array_key_exists('ok', $resp),
+                        'has_payload' => $payload !== null,
+                        'has_expected_device_id' => $payload !== null && ($payload['id'] ?? null) === $deviceId,
+                        'has_complete_device_channels' => $hasCompleteChannels,
+                    ],
+                ],
                 $config
             );
 
-            if ($code === 200 && $apiOk && $payload !== null) {
+            // Для /info непустой, структурно полный device_channel обязателен:
+            // неполный ответ API встречается временно и должен быть повторен.
+            if ($code === 200 && $apiOk && $hasCompleteChannels) {
                 break;
             }
 
@@ -238,16 +260,49 @@ class UnicBoard
             }
         }
 
-        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
+        $finalPayload = is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : null;
+        $finalOk = $code === 200
+            && self::hasApiSuccess($resp)
+            && self::hasCompleteDeviceInfoPayload($finalPayload, $deviceId);
 
         return [
             'http_status' => $code,
             'ok' => $finalOk,
-            'payload' => is_array($resp) ? ($resp['payload'] ?? null) : null,
+            'payload' => $finalPayload,
             'count' => is_array($resp) ? ($resp['count'] ?? null) : null,
             'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
             'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
         ];
+    }
+
+    /**
+     * Проверяет обязательную для текущего чтения структуру /info и соответствие device_id.
+     * Пустой список или канал без обязательных полей считается временно неполным ответом.
+     */
+    private static function hasCompleteDeviceInfoPayload(?array $payload, string $deviceId): bool
+    {
+        if ($payload === null
+            || !isset($payload['id'])
+            || !is_string($payload['id'])
+            || $payload['id'] !== $deviceId
+            || !isset($payload['device_channel'])
+            || !is_array($payload['device_channel'])
+            || $payload['device_channel'] === []) {
+            return false;
+        }
+
+        foreach ($payload['device_channel'] as $channel) {
+            if (!is_array($channel)
+                || !isset($channel['serial_number'])
+                || !is_numeric($channel['serial_number'])
+                || !array_key_exists('device_meter', $channel)
+                || !is_array($channel['device_meter'])
+                || $channel['device_meter'] === []) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -275,7 +330,7 @@ class UnicBoard
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
-            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
 
@@ -305,7 +360,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
+        $finalOk = $code === 200 && self::hasApiSuccess($resp);
 
         return [
             'http_status' => $code,
@@ -349,7 +404,7 @@ class UnicBoard
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
-            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
 
@@ -379,7 +434,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
+        $finalOk = $code === 200 && self::hasApiSuccess($resp);
 
         return [
             'http_status' => $code,
@@ -422,7 +477,7 @@ class UnicBoard
             $durationMs = (microtime(true) - $startTs) * 1000;
 
             $isJsonArray = is_array($resp);
-            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
 
@@ -452,7 +507,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
+        $finalOk = $code === 200 && self::hasApiSuccess($resp);
 
         return [
             'http_status' => $code,
