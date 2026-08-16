@@ -30,8 +30,8 @@ return [
     // Секретный токен Webhook (переменная TELEGRAM_WEBHOOK_SECRET)
     'webhook_secret' => getenv('TELEGRAM_WEBHOOK_SECRET') ?: '',
 
-    // Включение расширенной диагностики API (по умолчанию отключено)
-    'enable_diagnostics' => filter_var(getenv('ENABLE_DIAGNOSTICS') ?: 'false', FILTER_VALIDATE_BOOLEAN),
+    // Включение расширенной диагностики API (по умолчанию включено)
+    'enable_diagnostics' => filter_var(getenv('ENABLE_DIAGNOSTICS') ?: 'true', FILTER_VALIDATE_BOOLEAN),
 
     /* Список устройств по умолчанию (опционально) */
     'devices' => [],

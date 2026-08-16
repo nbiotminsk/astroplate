@@ -139,6 +139,7 @@ class UnicBoard
 
             $firstRec = $payload[0] ?? [];
             $extraDiag = array_filter([
+                'request_body_field' => 'devices_id',
                 'journal_data_type' => $journalDataType ?? ($firstRec['journal_data_type'] ?? null),
                 'value_type' => $firstRec['value_type'] ?? null,
                 'request_variant' => $variant,
@@ -259,6 +260,7 @@ class UnicBoard
                     $errors,
                     [
                         'request_variant' => $variant,
+                        'total_count' => $isJsonArray ? ($resp['total_count'] ?? null) : null,
                         'channels' => $channelsDiag,
                         'response_shape' => [
                             'is_json_array' => $isJsonArray,
@@ -302,6 +304,7 @@ class UnicBoard
                     $errors,
                     [
                         'request_variant' => $variant,
+                        'total_count' => $isJsonArray ? ($resp['total_count'] ?? null) : null,
                         'channels' => $channelsDiag,
                         'response_shape' => [
                             'is_json_array' => $isJsonArray,
@@ -437,6 +440,7 @@ class UnicBoard
             $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+            $totalCount = $isJsonArray ? ($resp['total_count'] ?? null) : null;
 
             self::logDiagnostic(
                 'GET /api/v1/devices/{id}/temperatures',
@@ -447,7 +451,10 @@ class UnicBoard
                 count($payload),
                 $durationMs,
                 $errors,
-                ['request_variant' => $variant],
+                array_filter([
+                    'request_variant' => $variant,
+                    'total_count' => $totalCount,
+                ], static fn($v) => $v !== null),
                 $config
             );
 
@@ -514,6 +521,7 @@ class UnicBoard
             $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+            $totalCount = $isJsonArray ? ($resp['total_count'] ?? null) : null;
 
             self::logDiagnostic(
                 'GET /api/v1/devices/{id}/battery-level',
@@ -524,7 +532,10 @@ class UnicBoard
                 count($payload),
                 $durationMs,
                 $errors,
-                ['request_variant' => $variant],
+                array_filter([
+                    'request_variant' => $variant,
+                    'total_count' => $totalCount,
+                ], static fn($v) => $v !== null),
                 $config
             );
 
@@ -590,6 +601,7 @@ class UnicBoard
             $apiOk = self::hasApiSuccess($resp);
             $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+            $totalCount = $isJsonArray ? ($resp['total_count'] ?? null) : null;
 
             self::logDiagnostic(
                 'GET /api/v1/devices/info',
@@ -600,7 +612,10 @@ class UnicBoard
                 count($payload),
                 $durationMs,
                 $errors,
-                ['request_variant' => $variant],
+                array_filter([
+                    'request_variant' => $variant,
+                    'total_count' => $totalCount,
+                ], static fn($v) => $v !== null),
                 $config
             );
 
