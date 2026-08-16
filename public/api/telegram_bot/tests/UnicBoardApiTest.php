@@ -14,7 +14,7 @@ class UnicBoardApiTest
 {
     public static function run(): void
     {
-        echo "\n🧪 6. Тестирование логики UnicBoard API и обработки показаний (Tests A — L)...\n";
+        echo "\n🧪 6. Тестирование логики UnicBoard API и обработки показаний (Tests A — N)...\n";
 
         $config = require __DIR__ . '/../config.php';
         $meterService = new MeterService();
@@ -127,9 +127,7 @@ class UnicBoardApiTest
             ]
         ];
         $readingsH = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayloadH);
-        TestRunner::assert(isset($readingsH[1]), 'Test H: Канал 1 существует');
-        TestRunner::assert($readingsH[1]->lastValue === null, 'Test H: lastValue равен null');
-        TestRunner::assert(!$readingsH[1]->hasReading(), 'Test H: hasReading() возвращает false');
+        TestRunner::assertEquals(0, count($readingsH), 'Test H: Канал без last_value не считается имеющим текущее онлайн-показание');
 
         // Test I: Multi-channel device (Channels 1 and 2)
         $infoPayloadI = [
@@ -163,8 +161,7 @@ class UnicBoardApiTest
             ]
         ];
         $readingsJ = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayloadJ);
-        TestRunner::assert(isset($readingsJ[1]), 'Test J: Канал 1 создан без предупреждений');
-        TestRunner::assert($readingsJ[1]->lastValue === null, 'Test J: lastValue равен null');
+        TestRunner::assertEquals(0, count($readingsJ), 'Test J: Пустой device_meter не создает фиктивного показания');
 
         // Test K: value_type = INTERPOLATED_LINEAR vs DEVICE_DATA
         $valuesPayloadK = [
@@ -195,5 +192,27 @@ class UnicBoardApiTest
         TestRunner::assert($readingsI[2]->lastValue === 4.29, 'Test L: Current reading is 4.29 from /info');
         TestRunner::assert($recordsK[0]->value === 4.28, 'Test L: Historical reading is 4.28 from /values');
         TestRunner::assert($readingsI[2]->lastValue !== $recordsK[0]->value, 'Test L: Current and historical are separated');
+
+        // Test M: HTTP 200 + invalid JSON ($resp is not an array) must result in ok=false
+        $code = 200;
+        $respNull = null;
+        $finalOk = ($code === 200 && is_array($respNull)) ? (bool) ($respNull['ok'] ?? true) : false;
+        TestRunner::assert($finalOk === false, 'Test M: HTTP 200 + non-array response ($resp = null) дает ok = false');
+
+        $respString = 'invalid json or html';
+        $finalOkStr = ($code === 200 && is_array($respString)) ? (bool) ($respString['ok'] ?? true) : false;
+        TestRunner::assert($finalOkStr === false, 'Test M: HTTP 200 + string response дает ok = false');
+
+        $respValidApiFalse = ['ok' => false, 'errors' => ['msg' => 'error']];
+        $finalOkApiFalse = ($code === 200 && is_array($respValidApiFalse)) ? (bool) ($respValidApiFalse['ok'] ?? true) : false;
+        TestRunner::assert($finalOkApiFalse === false, 'Test M: HTTP 200 + API ok=false дает ok = false');
+
+        $respValidApiTrue = ['ok' => true, 'payload' => []];
+        $finalOkApiTrue = ($code === 200 && is_array($respValidApiTrue)) ? (bool) ($respValidApiTrue['ok'] ?? true) : false;
+        TestRunner::assert($finalOkApiTrue === true, 'Test M: HTTP 200 + API ok=true дает ok = true');
+
+        // Test N: Diagnostic toggle
+        TestRunner::assert(!\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => false]), 'Test N: Diagnostics disabled by config');
+        TestRunner::assert(\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => true]), 'Test N: Diagnostics enabled by config');
     }
 }

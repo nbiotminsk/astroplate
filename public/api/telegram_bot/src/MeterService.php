@@ -106,15 +106,18 @@ class MeterService
                 ? $ch['last_date_event_no_data']
                 : null;
 
-            $readings[$chNum] = new ChannelReadingDTO(
-                channelNumber: $chNum,
-                lastValue: $lastVal,
-                lastValueDate: $lastValDate,
-                unitMultiplier: $unitMultiplier,
-                valueMultiplier: $valueMultiplier,
-                inactivityLimit: $inactivityLimit,
-                lastDateEventNoData: $lastDateEventNoData
-            );
+            // Канал включается в текущие онлайн-показания только при наличии валидного last_value
+            if ($lastVal !== null) {
+                $readings[$chNum] = new ChannelReadingDTO(
+                    channelNumber: $chNum,
+                    lastValue: $lastVal,
+                    lastValueDate: $lastValDate,
+                    unitMultiplier: $unitMultiplier,
+                    valueMultiplier: $valueMultiplier,
+                    inactivityLimit: $inactivityLimit,
+                    lastDateEventNoData: $lastDateEventNoData
+                );
+            }
         }
 
         ksort($readings);
@@ -325,8 +328,15 @@ class MeterService
     /**
      * Получает или обновляет кэшированные данные о последнем расходе счетчика
      */
-    public function getMeterConsumptionInfo(array $config, string $deviceId, int $chNum, ?float $currentVal, ?string $currentDate, array $monthRecords = []): array
-    {
+    public function getMeterConsumptionInfo(
+        array $config,
+        string $deviceId,
+        int $chNum,
+        ?float $currentVal,
+        ?string $currentDate,
+        array $monthRecords = [],
+        bool $fetchDeepHistoryIfMissing = false
+    ): array {
         $cache = $this->cacheRepo ? $this->cacheRepo->loadCache() : Storage::loadMeterCache();
         $devCache = self::$disableCache ? null : ($cache[$deviceId]['channels'][$chNum] ?? null);
 
@@ -425,8 +435,8 @@ class MeterService
             }
         }
 
-        // Если в текущем месяце дата смены показаний не найдена — разово опрашиваем историю API (-1 год)
-        if ($changeDate === null) {
+        // Если в текущем месяце дата смены показаний не найдена и разрешен глубокий опрос — разово опрашиваем историю API (-1 год)
+        if ($changeDate === null && $fetchDeepHistoryIfMissing) {
             $history = UnicBoard::getDeviceValues($config, $deviceId, 500, date('Y-m-d', strtotime('-1 year')));
             if (!empty($history['payload'])) {
                 $hRecords = self::extractChannelRecords($history['payload'], $chNum);

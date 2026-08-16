@@ -6,7 +6,7 @@ namespace TelegramBot;
 
 class UnicBoard
 {
-    public static bool $enableDiagnostics = true;
+    public static bool $enableDiagnostics = false;
 
     public static function unicboardHeaders(array $config): array
     {
@@ -14,6 +14,11 @@ class UnicBoard
             'Authorization: Bearer ' . ($config['unicboard_token'] ?? ''),
             'Accept: application/json',
         ];
+    }
+
+    public static function shouldLogDiagnostic(array $config = []): bool
+    {
+        return (bool) ($config['enable_diagnostics'] ?? self::$enableDiagnostics);
     }
 
     /**
@@ -28,9 +33,10 @@ class UnicBoard
         ?int $payloadCount,
         float $durationMs,
         array $errors = [],
-        array $extra = []
+        array $extra = [],
+        array $config = []
     ): void {
-        if (!self::$enableDiagnostics) {
+        if (!self::shouldLogDiagnostic($config)) {
             return;
         }
 
@@ -108,6 +114,12 @@ class UnicBoard
             $payloadCount = count($payload);
             $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
 
+            $firstRec = $payload[0] ?? [];
+            $extraDiag = array_filter([
+                'journal_data_type' => $journalDataType ?? ($firstRec['journal_data_type'] ?? null),
+                'value_type' => $firstRec['value_type'] ?? null,
+            ], static fn($v) => $v !== null);
+
             self::logDiagnostic(
                 'POST /api/v1/devices/values',
                 $deviceUuid,
@@ -116,7 +128,9 @@ class UnicBoard
                 $apiOk,
                 $payloadCount,
                 $durationMs,
-                $errors
+                $errors,
+                $extraDiag,
+                $config
             );
 
             // Если HTTP 200 и API ok=true — ответ полностью валиден (даже если payload=[])
@@ -135,7 +149,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
 
         return [
             'http_status' => $code,
@@ -179,6 +193,25 @@ class UnicBoard
                 ? count($payload['device_channel'])
                 : 0;
 
+            $channelsDiag = [];
+            if ($payload && isset($payload['device_channel']) && is_array($payload['device_channel'])) {
+                foreach ($payload['device_channel'] as $idx => $ch) {
+                    if (!is_array($ch)) {
+                        continue;
+                    }
+                    $chNum = isset($ch['serial_number']) && is_numeric($ch['serial_number']) ? (int) $ch['serial_number'] : ($idx + 1);
+                    $m = (!empty($ch['device_meter']) && is_array($ch['device_meter'])) ? ($ch['device_meter'][0] ?? []) : [];
+                    $channelsDiag[] = [
+                        'channel_number' => $chNum,
+                        'last_value' => isset($m['last_value']) && is_numeric($m['last_value']) ? (float) $m['last_value'] : null,
+                        'last_value_date' => $m['last_value_date'] ?? null,
+                        'is_alive' => $m['is_alive'] ?? null,
+                        'inactivity_limit' => $ch['inactivity_limit'] ?? null,
+                        'last_date_event_no_data' => $ch['last_date_event_no_data'] ?? null,
+                    ];
+                }
+            }
+
             self::logDiagnostic(
                 'GET /api/v1/devices/{id}/info',
                 $deviceId,
@@ -188,7 +221,8 @@ class UnicBoard
                 $channelCount,
                 $durationMs,
                 $errors,
-                ['channels' => $channelCount]
+                ['channels' => $channelsDiag],
+                $config
             );
 
             if ($code === 200 && $apiOk && $payload !== null) {
@@ -204,7 +238,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
 
         return [
             'http_status' => $code,
@@ -253,7 +287,9 @@ class UnicBoard
                 $apiOk,
                 count($payload),
                 $durationMs,
-                $errors
+                $errors,
+                [],
+                $config
             );
 
             if ($code === 200 && $apiOk) {
@@ -269,7 +305,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
 
         return [
             'http_status' => $code,
@@ -325,7 +361,9 @@ class UnicBoard
                 $apiOk,
                 count($payload),
                 $durationMs,
-                $errors
+                $errors,
+                [],
+                $config
             );
 
             if ($code === 200 && $apiOk) {
@@ -341,7 +379,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
 
         return [
             'http_status' => $code,
@@ -396,7 +434,9 @@ class UnicBoard
                 $apiOk,
                 count($payload),
                 $durationMs,
-                $errors
+                $errors,
+                [],
+                $config
             );
 
             if ($code === 200 && $apiOk) {
@@ -412,7 +452,7 @@ class UnicBoard
             }
         }
 
-        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+        $finalOk = ($code === 200 && is_array($resp)) ? (bool) ($resp['ok'] ?? true) : false;
 
         return [
             'http_status' => $code,

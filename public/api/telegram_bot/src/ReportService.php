@@ -65,10 +65,10 @@ class ReportService
                 $valStr = $lastVal !== null ? (string) round($lastVal, 4) : '—';
                 $valWithUnit = $valStr !== '—' ? "{$valStr} m³" : '—';
 
-                // Обновляем кэш расхода
+                // Обновляем кэш расхода (без глубокого опроса -1 год для быстрой отдачи отчета)
                 if ($lastVal !== null && $lastValDate !== null) {
                     $svc = $this->meterService ?? new MeterService();
-                    $svc->getMeterConsumptionInfo($config, $deviceId, $chNum, $lastVal, $lastValDate, $historyByChannel[$chNum] ?? []);
+                    $svc->getMeterConsumptionInfo($config, $deviceId, $chNum, $lastVal, $lastValDate, $historyByChannel[$chNum] ?? [], false);
                 }
 
                 // Разница с предыдущим значением из истории
@@ -110,8 +110,8 @@ class ReportService
             $inactivityStr = !empty($inactivityNotes) ? ' ' . implode(', ', array_unique($inactivityNotes)) : '';
             $lines[] = "🕒 Дата: <b>({$dateStr})</b>{$inactivityStr}";
         } elseif (!empty($historyByChannel)) {
-            // Фолбэк: если /info вернул пустые каналы, но в /values есть история
-            $lines[] = "📊 <b>Последние сохраненные показания:</b>";
+            // Фолбэк: если в /info нет валидных онлайн-показаний, но в /values есть история
+            $lines[] = "📊 <b>Последние сохраненные показания (нет текущих онлайн-данных):</b>";
             $totalChannels = count($historyByChannel);
             ksort($historyByChannel);
 
@@ -128,6 +128,19 @@ class ReportService
                 $valStr = $val !== null ? (string) round($val, 4) : '—';
                 $valWithUnit = $valStr !== '—' ? "{$valStr} m³" : '—';
 
+                $typeNotes = [];
+                if ($latest && $latest->journalDataType === 'END_OF_DAY') {
+                    $typeNotes[] = 'на конец суток';
+                } elseif ($latest && $latest->journalDataType !== 'CURRENT') {
+                    $typeNotes[] = $latest->journalDataType;
+                }
+                if ($latest && $latest->valueType === 'INTERPOLATED_LINEAR') {
+                    $typeNotes[] = 'интерполяция';
+                } elseif ($latest && $latest->valueType !== 'DEVICE_DATA') {
+                    $typeNotes[] = $latest->valueType;
+                }
+                $typeNoteStr = !empty($typeNotes) ? " <i>(" . implode(', ', $typeNotes) . ")</i>" : " <i>(архив)</i>";
+
                 if ($isFluo) {
                     $meterLabel = "Счетчик Fluo № {$deviceSerial}";
                     $prefix = "";
@@ -139,11 +152,11 @@ class ReportService
                     $prefix = "";
                 }
 
-                $lines[] = "{$prefix}<b>{$meterLabel}</b>: <b>{$valWithUnit}</b>";
+                $lines[] = "{$prefix}<b>{$meterLabel}</b>: <b>{$valWithUnit}</b>{$typeNoteStr}";
             }
 
             $dateStr = $latestDate ? MeterService::formatDate($latestDate, 'd.m.Y H:i', $timezone) : '—';
-            $lines[] = "🕒 Дата: <b>({$dateStr})</b>";
+            $lines[] = "🕒 Дата архива: <b>({$dateStr})</b>";
         } else {
             $lines[] = "📊 Показания: нет данных";
         }
