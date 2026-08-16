@@ -5,13 +5,14 @@ dist/
 
 # dependencies
 node_modules/
+venv/
+scratch/
 
 # logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-
 
 # environment variables
 .env
@@ -27,8 +28,8 @@ pnpm-debug.log*
 .idea/
 hutki_api_text.txt
 hutki.pdf
-node_modules
-venv/
-scratch/
-
 .vercel
+
+# telegram bot storage
+public/api/telegram_bot/storage/user_meters.json
+public/api/telegram_bot/storage/meter_cache.json

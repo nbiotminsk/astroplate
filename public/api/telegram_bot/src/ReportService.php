@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\DTO\ChannelReadingDTO;
 use TelegramBot\DTO\DeviceDTO;
+use TelegramBot\DTO\HistoricalValueDTO;
 use TelegramBot\Repository\UserMeterRepositoryInterface;
 
 class ReportService
@@ -18,214 +20,282 @@ class ReportService
     {
         $name = $device->name;
         $deviceId = $device->deviceId;
+        $timezone = $config['timezone'] ?? 'Europe/Minsk';
 
         $lines = [];
-        $lines[] = "\xF0\x9F\x93\xB1 <b>{$name}</b>";
+        $lines[] = "📱 <b>{$name}</b>";
 
-        // Серийные номера и свежие показания счетчиков из /info
-        $infoPayload = UnicBoard::getDeviceInfo($config, $deviceId);
+        // 1. Текущие показания получаем ПЕРВИЧНО из GET /api/v1/devices/{device_id}/info
+        $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+        $infoPayload = $infoResp['payload'] ?? null;
+        $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 
-        $channelSerials = [];
-        $liveChannels = [];
-        if ($infoPayload && !empty($infoPayload['device_channel'])) {
-            foreach ($infoPayload['device_channel'] as $idx => $ch) {
-                $chNum = $ch['serial_number'] ?? ($idx + 1);
-                if (isset($ch['serial_number'])) {
-                    $channelSerials[$chNum] = (string) $ch['serial_number'];
-                }
-                $liveChannels[$chNum] = $ch;
-            }
+        // 2. Историю для расчета расхода запрашиваем через POST /api/v1/devices/values (опционально)
+        $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
+        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+
+        $historyByChannel = [];
+        foreach ($historyRecords as $rec) {
+            $historyByChannel[$rec->channelNumber][] = $rec;
         }
-
-        // Показания по каналам (запрашиваем историю с запасом limit=50)
-        $values = UnicBoard::getDeviceValues($config, $deviceId, 50);
-        $channelsHistory = [];
-
-        // Добавляем текущие (живые) каналы из /info
-        foreach ($liveChannels as $chNum => $chData) {
-            $channelsHistory[$chNum][] = $chData;
+        foreach ($historyByChannel as $chNum => &$hList) {
+            usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
+                return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
+            });
         }
+        unset($hList);
 
-        if (!empty($values['payload'])) {
-            foreach ($values['payload'] as $v) {
-                $ch = (int) ($v['channel_number'] ?? 1);
-                $channelsHistory[$ch][] = $v;
-            }
-            foreach ($channelsHistory as $chNum => &$hList) {
-                usort($hList, static function ($a, $b) {
-                    $tA = MeterService::parseUtcTimestamp(MeterService::extractRecordDate($a));
-                    $tB = MeterService::parseUtcTimestamp(MeterService::extractRecordDate($b));
-                    return $tB - $tA;
-                });
-            }
-            unset($hList);
-            ksort($channelsHistory);
-        }
+        // 3. Формируем блок показаний по каналам
+        if (!empty($currentReadings)) {
+            $lines[] = "📊 <b>Текущие показания:</b>";
+            $totalChannels = count($currentReadings);
+            $latestDate = null;
+            $inactivityNotes = [];
 
-        if (!empty($channelsHistory)) {
-            $lines[] = "\xF0\x9F\x93\x8A <b>Текущие показания:</b>";
-            $totalChannels = count($channelsHistory);
+            $isFluo = MeterService::isFluoDevice($infoPayload, $device);
+            $deviceSerial = $device->serialNumber !== '' ? $device->serialNumber : $deviceId;
 
-            foreach ($channelsHistory as $chNum => $history) {
-                $latest = $history[0] ?? null;
-                $prev = $history[1] ?? null;
-
-                $rawVal = $latest ? MeterService::extractRecordValue($latest) : null;
-                $lastVal = $rawVal !== null ? round($rawVal, 4) : null;
-                $lastValDate = $latest ? MeterService::extractRecordDate($latest) : null;
-                $dateStr = $lastValDate ? MeterService::formatDate($lastValDate, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
-                $valStr = $lastVal !== null ? (string) $lastVal : '—';
-
-                // Обновляем кэш расхода при получении текущих показаний
-                if ($lastVal !== null && $lastValDate !== null) {
-                    if ($this->meterService) {
-                        $this->meterService->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
-                    } else {
-                        (new MeterService())->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $lastVal, $lastValDate, $history);
-                    }
+            foreach ($currentReadings as $chNum => $reading) {
+                $lastVal = $reading->lastValue;
+                $lastValDate = $reading->lastValueDate;
+                if ($lastValDate !== null && ($latestDate === null || $lastValDate > $latestDate)) {
+                    $latestDate = $lastValDate;
                 }
 
-                $meterSerial = $channelSerials[$chNum] ?? null;
-                if ($meterSerial && strlen((string) $meterSerial) > 4) {
-                    $meterLabel = "Счетчик № {$meterSerial}";
-                } else {
-                    $meterLabel = "Канал ";
-                }
-
-                $diffStr = '';
-                if ($latest !== null && $prev !== null) {
-                    $prevVal = MeterService::extractRecordValue($prev);
-                    if ($rawVal !== null && $prevVal !== null) {
-                        $diff = $rawVal - $prevVal;
-                        $formattedDiff = ($diff > 0 ? '+' : '') . round($diff, 4);
-                        $diffStr = " (<b>{$formattedDiff} m³</b>)";
-                    }
-                }
-
+                $valStr = $lastVal !== null ? (string) round($lastVal, 4) : '—';
                 $valWithUnit = $valStr !== '—' ? "{$valStr} m³" : '—';
-                $prefix = $totalChannels > 1 ? "{$chNum}. " : "";
-                $lines[] = "{$prefix}<b>{$meterLabel}</b>: <b>{$valWithUnit}</b>{$diffStr} (<i>{$dateStr}</i>)";
+
+                // Обновляем кэш расхода
+                if ($lastVal !== null && $lastValDate !== null) {
+                    $svc = $this->meterService ?? new MeterService();
+                    $svc->getMeterConsumptionInfo($config, $deviceId, $chNum, $lastVal, $lastValDate, $historyByChannel[$chNum] ?? []);
+                }
+
+                // Разница с предыдущим значением из истории
+                $diffStr = '';
+                $channelHistory = $historyByChannel[$chNum] ?? [];
+                if ($lastVal !== null && !empty($channelHistory)) {
+                    // Ищем ближайшую предыдущую запись с другим значением
+                    foreach ($channelHistory as $hRec) {
+                        if (round($hRec->value, 4) != round($lastVal, 4)) {
+                            $diff = $lastVal - $hRec->value;
+                            $formattedDiff = ($diff > 0 ? '+' : '') . round($diff, 4);
+                            $diffStr = " (<b>{$formattedDiff} m³</b>)";
+                            break;
+                        }
+                    }
+                }
+
+                if ($isFluo) {
+                    $meterLabel = "Счетчик Fluo № {$deviceSerial}";
+                    $prefix = "";
+                } elseif ($totalChannels > 1) {
+                    $meterLabel = "Канал {$chNum}";
+                    $prefix = "{$chNum}. ";
+                } else {
+                    $meterLabel = "Счетчик № {$deviceSerial}";
+                    $prefix = "";
+                }
+
+                if ($reading->isInactive() && $reading->lastDateEventNoData !== null) {
+                    $inactivityDate = MeterService::formatDate($reading->lastDateEventNoData, 'd.m.Y', $timezone);
+                    $inactivityNotes[] = "<i>(нет данных с {$inactivityDate})</i>";
+                }
+
+                $lines[] = "{$prefix}<b>{$meterLabel}</b>: <b>{$valWithUnit}</b>{$diffStr}";
             }
+
+            // Единый вывод даты и времени для прибора
+            $dateStr = $latestDate ? MeterService::formatDate($latestDate, 'd.m.Y H:i', $timezone) : '—';
+            $inactivityStr = !empty($inactivityNotes) ? ' ' . implode(', ', array_unique($inactivityNotes)) : '';
+            $lines[] = "🕒 Дата: <b>({$dateStr})</b>{$inactivityStr}";
+        } elseif (!empty($historyByChannel)) {
+            // Фолбэк: если /info вернул пустые каналы, но в /values есть история
+            $lines[] = "📊 <b>Последние сохраненные показания:</b>";
+            $totalChannels = count($historyByChannel);
+            ksort($historyByChannel);
+
+            $isFluo = MeterService::isFluoDevice($infoPayload, $device);
+            $deviceSerial = $device->serialNumber !== '' ? $device->serialNumber : $deviceId;
+            $latestDate = null;
+
+            foreach ($historyByChannel as $chNum => $history) {
+                $latest = $history[0] ?? null;
+                $val = $latest ? $latest->value : null;
+                if ($latest && $latest->date && ($latestDate === null || $latest->date > $latestDate)) {
+                    $latestDate = $latest->date;
+                }
+                $valStr = $val !== null ? (string) round($val, 4) : '—';
+                $valWithUnit = $valStr !== '—' ? "{$valStr} m³" : '—';
+
+                if ($isFluo) {
+                    $meterLabel = "Счетчик Fluo № {$deviceSerial}";
+                    $prefix = "";
+                } elseif ($totalChannels > 1) {
+                    $meterLabel = "Канал {$chNum}";
+                    $prefix = "{$chNum}. ";
+                } else {
+                    $meterLabel = "Счетчик № {$deviceSerial}";
+                    $prefix = "";
+                }
+
+                $lines[] = "{$prefix}<b>{$meterLabel}</b>: <b>{$valWithUnit}</b>";
+            }
+
+            $dateStr = $latestDate ? MeterService::formatDate($latestDate, 'd.m.Y H:i', $timezone) : '—';
+            $lines[] = "🕒 Дата: <b>({$dateStr})</b>";
         } else {
-            $lines[] = "\xF0\x9F\x93\x8A Показания: нет данных";
+            $lines[] = "📊 Показания: нет данных";
         }
 
-        // Температура
-        $temp = UnicBoard::getTemperature($config, $deviceId, 1);
-        if ($temp !== null) {
-            $t = MeterService::extractRecordValue($temp) ?? $temp['value'] ?? null;
-            $lines[] = "\xF0\x9F\x92\xA8 Температура: <b>" . ($t !== null ? $t : '—') . " °C</b>";
+        // 4. Температура (опциональная телеметрия)
+        $temp = UnicBoard::getLatestTemperature($config, $deviceId);
+        if ($temp !== null && isset($temp['value']) && is_numeric($temp['value'])) {
+            $lines[] = "💨 Температура: <b>" . round((float) $temp['value'], 1) . " °C</b>";
         } else {
-            $lines[] = "\xF0\x9F\x92\xA8 Температура: нет данных";
+            $lines[] = "💨 Температура: нет данных";
         }
 
-        // Батарея
-        $bat = UnicBoard::getBattery($config, $deviceId, 1);
-        if ($bat !== null) {
-            $b = MeterService::extractRecordValue($bat) ?? $bat['value'] ?? null;
-            $lines[] = "\xF0\x9F\x94\x8B Батарея: <b>" . ($b !== null ? $b : '—') . " V</b>";
+        // 5. Батарея (опциональная телеметрия)
+        $bat = UnicBoard::getLatestBattery($config, $deviceId);
+        if ($bat !== null && isset($bat['value']) && is_numeric($bat['value'])) {
+            $lines[] = "🔋 Батарея: <b>" . round((float) $bat['value'], 2) . " V</b>";
         } else {
-            $lines[] = "\xF0\x9F\x94\x8B Батарея: нет данных";
+            $lines[] = "🔋 Батарея: нет данных";
         }
 
-        if (empty($channelsHistory) && $temp === null && $bat === null) {
-            $lines[] = "\n\xE2\x9A\xA0\xEF\xB8\x8F Не удалось получить данные по устройству {$deviceId}.";
+        if (empty($currentReadings) && empty($historyRecords) && $temp === null && $bat === null) {
+            $lines[] = "\n⚠️ Не удалось получить данные по устройству {$deviceId}.";
         }
 
         return implode("\n", $lines);
     }
 
-    /** Архив за текущий месяц (от 1 числа до текущего дня) */
+    /**
+     * Архив за текущий месяц (от 1 числа до текущего дня)
+     */
     public function buildMonthReport(array $config, DeviceDTO $device): string
     {
         $name = $device->name;
         $deviceId = $device->deviceId;
+        $timezone = $config['timezone'] ?? 'Europe/Minsk';
 
         $firstDay = date('01.m.Y 00:00');
         $lastDay = date('d.m.Y H:i');
 
         $lines = [];
-        $lines[] = "\xF0\x9F\x93\x85 <b>Архив за текущий месяц ({$name})</b>";
+        $lines[] = "📅 <b>Архив за текущий месяц ({$name})</b>";
         $lines[] = "Период: <b>{$firstDay}</b> — <b>{$lastDay}</b>\n";
-
-        $channelSerials = UnicBoard::getDeviceChannelsSerials($config, $deviceId);
 
         $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
         $endMonthTs = time();
 
-        // Запрашиваем только текущий месяц + свежие онлайн показания
-        $values = UnicBoard::getDeviceValues($config, $deviceId, 100, date('Y-m-01'));
-        $latestLive = UnicBoard::getDeviceValues($config, $deviceId, 1);
+        // 1. Запрашиваем исторические значения за текущий месяц
+        $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 100, date('Y-m-01\T00:00:00'));
+        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
 
-        $allPayloads = array_merge($values['payload'] ?? [], $latestLive['payload'] ?? []);
+        // 2. Запрашиваем текущие онлайн показания из /info
+        $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+        $infoPayload = $infoResp['payload'] ?? null;
+        $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
+
         $channelsMonthData = [];
-
-        if (!empty($allPayloads)) {
-            foreach ($allPayloads as $v) {
-                $ch = (int) ($v['channel_number'] ?? 1);
-                $valDate = MeterService::extractRecordDate($v);
-                if ($valDate) {
-                    $ts = MeterService::parseUtcTimestamp($valDate);
-                    if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
-                        $channelsMonthData[$ch][] = $v;
-                    }
-                }
+        foreach ($historyRecords as $rec) {
+            $ts = MeterService::parseUtcTimestamp($rec->date);
+            if ($ts >= $startMonthTs && $ts <= $endMonthTs) {
+                $channelsMonthData[$rec->channelNumber][] = $rec;
             }
-            ksort($channelsMonthData);
         }
+        ksort($channelsMonthData);
+
+        // Если для каналов из /info нет записей в /values, инициализируем их
+        foreach ($currentReadings as $chNum => $reading) {
+            if (!isset($channelsMonthData[$chNum])) {
+                $channelsMonthData[$chNum] = [];
+            }
+        }
+        ksort($channelsMonthData);
 
         if (!empty($channelsMonthData)) {
             $totalChannels = count($channelsMonthData);
             foreach ($channelsMonthData as $chNum => $records) {
-                usort($records, static function($a, $b) {
-                    return MeterService::parseUtcTimestamp(MeterService::extractRecordDate($b)) - MeterService::parseUtcTimestamp(MeterService::extractRecordDate($a));
+                usort($records, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
+                    return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
                 });
 
-                $latestInMonth = reset($records);
-                $earliestInMonth = end($records);
+                $latestHistory = reset($records) ?: null;
+                $earliestInMonth = end($records) ?: null;
 
-                $rawValEnd = MeterService::extractRecordValue($latestInMonth);
-                $valEnd = $rawValEnd !== null ? round($rawValEnd, 4) : null;
-                $dateEnd = MeterService::extractRecordDate($latestInMonth);
-                $dateEndStr = $dateEnd ? MeterService::formatDate($dateEnd, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
+                // Начало месяца
+                $valStart = $earliestInMonth ? $earliestInMonth->value : null;
+                $dateStart = $earliestInMonth ? $earliestInMonth->date : null;
+                $dateStartStr = $dateStart ? MeterService::formatDate($dateStart, 'd.m.Y H:i', $timezone) : '—';
 
-                $rawValStart = MeterService::extractRecordValue($earliestInMonth);
-                $valStart = $rawValStart !== null ? round($rawValStart, 4) : null;
-                $dateStart = MeterService::extractRecordDate($earliestInMonth);
-                $dateStartStr = $dateStart ? MeterService::formatDate($dateStart, 'd.m.Y H:i', $config['timezone'] ?? 'Europe/Minsk') : '—';
+                // Конец периода: приоритет текущему показанию из /info, если оно новее
+                $currentCh = $currentReadings[$chNum] ?? null;
+                if ($currentCh && $currentCh->hasReading()) {
+                    $valEnd = $currentCh->lastValue;
+                    $dateEnd = $currentCh->lastValueDate;
+                } elseif ($latestHistory) {
+                    $valEnd = $latestHistory->value;
+                    $dateEnd = $latestHistory->date;
+                } else {
+                    $valEnd = null;
+                    $dateEnd = null;
+                }
+                $dateEndStr = $dateEnd ? MeterService::formatDate($dateEnd, 'd.m.Y H:i', $timezone) : '—';
 
-                $meterSerial = $channelSerials[$chNum] ?? null;
-                $meterLabel = $meterSerial ? "Счетчик № {$meterSerial}" : "Счетчик {$chNum}";
-                $prefix = $totalChannels > 1 ? "{$chNum}. " : "";
+                // Если начало месяца не зафиксировано в /values, используем начальное значение прибора
+                if ($valStart === null && isset($device->initialValues[(string) $chNum])) {
+                    $valStart = (float) $device->initialValues[(string) $chNum];
+                    $dateStartStr = date('01.m.Y 00:00');
+                } elseif ($valStart === null && $valEnd !== null) {
+                    $valStart = $valEnd;
+                    $dateStartStr = $dateEndStr;
+                }
 
-                $valStartStr = $valStart !== null ? "{$valStart} m³" : '—';
-                $valEndStr = $valEnd !== null ? "{$valEnd} m³" : '—';
+                $isFluo = MeterService::isFluoDevice($infoPayload, $device);
+                $deviceSerial = $device->serialNumber !== '' ? $device->serialNumber : $deviceId;
+
+                if ($isFluo) {
+                    $meterLabel = "Счетчик Fluo № {$deviceSerial}";
+                    $prefix = "";
+                } elseif ($totalChannels > 1) {
+                    $meterLabel = "Канал {$chNum}";
+                    $prefix = "{$chNum}. ";
+                } else {
+                    $meterLabel = "Счетчик № {$deviceSerial}";
+                    $prefix = "";
+                }
+
+                $valStartStr = $valStart !== null ? round($valStart, 4) . " m³" : '—';
+                $valEndStr = $valEnd !== null ? round($valEnd, 4) . " m³" : '—';
 
                 $lines[] = "<b>{$prefix}{$meterLabel}:</b>";
                 $lines[] = "  • Нач. месяца ({$dateStartStr}): <b>{$valStartStr}</b>";
                 $lines[] = "  • Кон. периода ({$dateEndStr}): <b>{$valEndStr}</b>";
 
-                if ($valEnd !== null && $valStart !== null && is_numeric($valEnd) && is_numeric($valStart)) {
-                    $monthConsumption = (float) $valEnd - (float) $valStart;
+                if ($valEnd !== null && $valStart !== null) {
+                    $monthConsumption = $valEnd - $valStart;
                     $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . round($monthConsumption, 4);
                     $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
                 }
-                
-                // Получаем или обновляем данные о последнем расходе из кэша
-                $lastCons = $this->meterService
-                    ? $this->meterService->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records)
-                    : (new MeterService())->getMeterConsumptionInfo($config, $deviceId, (int)$chNum, $valEnd, $dateEnd, $records);
+
+                // Кэш расхода
+                $svc = $this->meterService ?? new MeterService();
+                $lastCons = $svc->getMeterConsumptionInfo($config, $deviceId, (int) $chNum, $valEnd, $dateEnd, $records);
 
                 if ($lastCons && !empty($lastCons['last_change_date'])) {
-                    $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . MeterService::formatDate($lastCons['last_change_date'], 'd.m.Y', $config['timezone'] ?? 'Europe/Minsk') . " (на " . round((float) $lastCons['last_change_diff'], 4) . " m³)";
+                    $diffVal = isset($lastCons['last_change_diff']) ? round((float) $lastCons['last_change_diff'], 4) : 0.0;
+                    $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . MeterService::formatDate($lastCons['last_change_date'], 'd.m.Y', $timezone) . " (на {$diffVal} m³)";
                 } else {
                     $lines[] = "\n  ℹ️ Последний расход не обнаружен.";
                 }
-                
+
                 $lines[] = "";
             }
         } else {
-            $lines[] = "\xF0\x9F\x93\x8A В текущем месяце записей не найдено.";
+            $lines[] = "📊 В текущем месяце записей не найдено.";
         }
 
         return implode("\n", $lines);

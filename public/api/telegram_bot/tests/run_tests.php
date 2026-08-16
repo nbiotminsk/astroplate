@@ -23,6 +23,7 @@ require_once __DIR__ . '/RepositoryTest.php';
 require_once __DIR__ . '/CommandTest.php';
 require_once __DIR__ . '/ContainerTest.php';
 require_once __DIR__ . '/EdgeCasesTest.php';
+require_once __DIR__ . '/UnicBoardApiTest.php';
 
 echo "============================================================\n";
 echo "🚀 ЗАПУСК ТЕХНОЛОГИЧЕСКОГО ТЕСТОВОГО НАБОРА TELEGRAM-БОТА\n";
@@ -33,6 +34,7 @@ RepositoryTest::run();
 CommandTest::run();
 ContainerTest::run();
 EdgeCasesTest::run();
+UnicBoardApiTest::run();
 
 $exitCode = TestRunner::summarize();
 exit($exitCode);

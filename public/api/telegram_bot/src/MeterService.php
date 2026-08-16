@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TelegramBot;
 
+use TelegramBot\DTO\ChannelReadingDTO;
 use TelegramBot\DTO\DeviceDTO;
+use TelegramBot\DTO\HistoricalValueDTO;
 use TelegramBot\DTO\MeterReadingDTO;
 use TelegramBot\Repository\DeviceRepositoryInterface;
 use TelegramBot\Repository\MeterCacheRepositoryInterface;
@@ -20,6 +22,146 @@ class MeterService
     ) {}
 
     /**
+     * Определяет, является ли прибор умным счетчиком модели Fluo
+     */
+    public static function isFluoDevice(?array $infoPayload, ?DeviceDTO $device = null): bool
+    {
+        if ($infoPayload && !empty($infoPayload['device_modification'])) {
+            $mod = $infoPayload['device_modification'];
+            $modType = $mod['device_modification_type'] ?? [];
+            $sysName = mb_strtolower((string) ($modType['sys_name'] ?? ''), 'UTF-8');
+            $nameRu = mb_strtolower((string) ($modType['name_ru'] ?? ''), 'UTF-8');
+            $nameEn = mb_strtolower((string) ($modType['name_en'] ?? ''), 'UTF-8');
+            $modName = mb_strtolower((string) ($mod['name'] ?? ''), 'UTF-8');
+
+            if (
+                str_contains($sysName, 'fluo') ||
+                str_contains($nameRu, 'fluo') ||
+                str_contains($nameEn, 'fluo') ||
+                $modName === 'mm230'
+            ) {
+                return true;
+            }
+        }
+
+        if ($device !== null) {
+            $devName = mb_strtolower($device->name, 'UTF-8');
+            if (str_contains($devName, 'fluo')) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Извлекает текущие показания каналов из полезной нагрузки /info
+     *
+     * @return ChannelReadingDTO[] Массив ChannelReadingDTO с ключами channel_number
+     */
+    public static function extractCurrentReadingsFromDeviceInfo(?array $infoPayload): array
+    {
+        if (!$infoPayload || empty($infoPayload['device_channel']) || !is_array($infoPayload['device_channel'])) {
+            return [];
+        }
+
+        $readings = [];
+        foreach ($infoPayload['device_channel'] as $idx => $ch) {
+            if (!is_array($ch)) {
+                continue;
+            }
+
+            $chNum = isset($ch['serial_number']) && is_numeric($ch['serial_number'])
+                ? (int) $ch['serial_number']
+                : ($idx + 1);
+
+            $lastVal = null;
+            $lastValDate = null;
+            $unitMultiplier = 1.0;
+            $valueMultiplier = 1.0;
+
+            if (!empty($ch['device_meter']) && is_array($ch['device_meter'])) {
+                $meter = $ch['device_meter'][0] ?? null;
+                if (is_array($meter)) {
+                    if (isset($meter['last_value']) && is_numeric($meter['last_value'])) {
+                        $lastVal = (float) $meter['last_value'];
+                    }
+                    if (!empty($meter['last_value_date']) && is_string($meter['last_value_date'])) {
+                        $lastValDate = $meter['last_value_date'];
+                    }
+                    if (isset($meter['unit_multiplier']) && is_numeric($meter['unit_multiplier'])) {
+                        $unitMultiplier = (float) $meter['unit_multiplier'];
+                    }
+                    if (isset($meter['value_multiplier']) && is_numeric($meter['value_multiplier'])) {
+                        $valueMultiplier = (float) $meter['value_multiplier'];
+                    }
+                }
+            }
+
+            $inactivityLimit = isset($ch['inactivity_limit']) && is_numeric($ch['inactivity_limit'])
+                ? (int) $ch['inactivity_limit']
+                : null;
+
+            $lastDateEventNoData = !empty($ch['last_date_event_no_data']) && is_string($ch['last_date_event_no_data'])
+                ? $ch['last_date_event_no_data']
+                : null;
+
+            $readings[$chNum] = new ChannelReadingDTO(
+                channelNumber: $chNum,
+                lastValue: $lastVal,
+                lastValueDate: $lastValDate,
+                unitMultiplier: $unitMultiplier,
+                valueMultiplier: $valueMultiplier,
+                inactivityLimit: $inactivityLimit,
+                lastDateEventNoData: $lastDateEventNoData
+            );
+        }
+
+        ksort($readings);
+        return $readings;
+    }
+
+    /**
+     * Извлекает исторические записи из полезной нагрузки /values
+     *
+     * @return HistoricalValueDTO[]
+     */
+    public static function extractHistoricalRecordsFromValues(array $valuesPayload): array
+    {
+        $records = [];
+        foreach ($valuesPayload as $v) {
+            if (!is_array($v)) {
+                continue;
+            }
+
+            $chNum = (int) ($v['channel_number'] ?? 1);
+            $val = isset($v['value']) && is_numeric($v['value']) ? (float) $v['value'] : 0.0;
+            $date = (string) ($v['date'] ?? '');
+            if ($date === '') {
+                continue;
+            }
+
+            $records[] = new HistoricalValueDTO(
+                channelNumber: $chNum,
+                date: $date,
+                value: $val,
+                valueRaw: isset($v['value_raw']) && is_numeric($v['value_raw']) ? (float) $v['value_raw'] : null,
+                lastValue: isset($v['last_value']) && is_numeric($v['last_value']) ? (float) $v['last_value'] : null,
+                lastValueDate: !empty($v['last_value_date']) && is_string($v['last_value_date']) ? $v['last_value_date'] : null,
+                valueType: (string) ($v['value_type'] ?? 'DEVICE_DATA'),
+                journalDataType: (string) ($v['journal_data_type'] ?? 'CURRENT'),
+                kind: (string) ($v['kind'] ?? 'COMMON_CONSUMED'),
+                meterId: (string) ($v['meter_id'] ?? ''),
+                deviceId: (string) ($v['device_id'] ?? ''),
+                tariffNumber: (int) ($v['tariff_number'] ?? -1),
+                dateCreated: !empty($v['date_created']) && is_string($v['date_created']) ? $v['date_created'] : null
+            );
+        }
+
+        return $records;
+    }
+
+    /**
      * Автоматически получает первичное/начальное показание с API прибора и сохраняет в registered_devices.json
      */
     public function fetchAndSaveInitialValues(array $config, string $serial, string $deviceId, array $explicitInitial = []): array
@@ -32,17 +174,13 @@ class MeterService
         } elseif (!empty($existing)) {
             return $existing;
         } else {
-            // Опрашиваем API на предмет начальных показаний / стартовых значений
-            $infoPayload = UnicBoard::getDeviceInfo($config, $deviceId);
+            $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+            $readings = self::extractCurrentReadingsFromDeviceInfo($infoResp['payload'] ?? null);
 
             $initialValues = [];
-            if ($infoPayload && !empty($infoPayload['device_channel'])) {
-                foreach ($infoPayload['device_channel'] as $idx => $ch) {
-                    $chNum = $ch['serial_number'] ?? ($idx + 1);
-                    $meter = $ch['device_meter'][0] ?? null;
-                    if ($meter && isset($meter['last_value'])) {
-                        $initialValues[(string) $chNum] = (float) $meter['last_value'];
-                    }
+            foreach ($readings as $chNum => $reading) {
+                if ($reading->hasReading()) {
+                    $initialValues[(string) $chNum] = $reading->lastValue;
                 }
             }
         }
@@ -73,7 +211,7 @@ class MeterService
     {
         $records = [];
         foreach ($payload as $v) {
-            $num = $v['channel_number'] ?? 1;
+            $num = is_array($v) ? ($v['channel_number'] ?? 1) : ($v instanceof HistoricalValueDTO ? $v->channelNumber : 1);
             if ((int) $num === (int) $chNum) {
                 $val = self::extractRecordValue($v);
                 $date = self::extractRecordDate($v);
@@ -85,34 +223,58 @@ class MeterService
         return $records;
     }
 
-    public static function extractRecordValue(array $rec): ?float
+    public static function extractRecordValue(mixed $rec): ?float
     {
-        foreach (['value', 'last_value', 'value_raw'] as $key) {
-            if (isset($rec[$key]) && is_numeric($rec[$key])) {
-                return (float) $rec[$key];
-            }
+        if ($rec instanceof ChannelReadingDTO) {
+            return $rec->lastValue;
         }
-        if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
-            foreach ($rec['device_meter'] as $m) {
-                if (is_array($m) && isset($m['last_value']) && is_numeric($m['last_value'])) {
-                    return (float) $m['last_value'];
+        if ($rec instanceof HistoricalValueDTO) {
+            return $rec->value;
+        }
+        if ($rec instanceof MeterReadingDTO) {
+            return $rec->val;
+        }
+
+        if (is_array($rec)) {
+            foreach (['value', 'last_value', 'value_raw'] as $key) {
+                if (isset($rec[$key]) && is_numeric($rec[$key])) {
+                    return (float) $rec[$key];
+                }
+            }
+            if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
+                foreach ($rec['device_meter'] as $m) {
+                    if (is_array($m) && isset($m['last_value']) && is_numeric($m['last_value'])) {
+                        return (float) $m['last_value'];
+                    }
                 }
             }
         }
         return null;
     }
 
-    public static function extractRecordDate(array $rec): ?string
+    public static function extractRecordDate(mixed $rec): ?string
     {
-        foreach (['date', 'last_value_date', 'date_created'] as $key) {
-            if (!empty($rec[$key]) && is_string($rec[$key])) {
-                return $rec[$key];
-            }
+        if ($rec instanceof ChannelReadingDTO) {
+            return $rec->lastValueDate;
         }
-        if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
-            foreach ($rec['device_meter'] as $m) {
-                if (is_array($m) && !empty($m['last_value_date']) && is_string($m['last_value_date'])) {
-                    return $m['last_value_date'];
+        if ($rec instanceof HistoricalValueDTO) {
+            return $rec->date;
+        }
+        if ($rec instanceof MeterReadingDTO) {
+            return $rec->date;
+        }
+
+        if (is_array($rec)) {
+            foreach (['date', 'last_value_date', 'date_created'] as $key) {
+                if (!empty($rec[$key]) && is_string($rec[$key])) {
+                    return $rec[$key];
+                }
+            }
+            if (isset($rec['device_meter']) && is_array($rec['device_meter'])) {
+                foreach ($rec['device_meter'] as $m) {
+                    if (is_array($m) && !empty($m['last_value_date']) && is_string($m['last_value_date'])) {
+                        return $m['last_value_date'];
+                    }
                 }
             }
         }
@@ -169,7 +331,7 @@ class MeterService
         $devCache = self::$disableCache ? null : ($cache[$deviceId]['channels'][$chNum] ?? null);
 
         if ($devCache !== null) {
-            $lastVal = isset($devCache['last_value']) ? (float) $devCache['last_value'] : null;
+            $lastVal = isset($devCache['last_value']) && is_numeric($devCache['last_value']) ? (float) $devCache['last_value'] : null;
 
             // 1. Если передано актуальное показание и оно выросло — обновляем расход в кэше
             if ($currentVal !== null && $lastVal !== null && round($currentVal, 4) > round($lastVal, 4)) {
@@ -195,8 +357,8 @@ class MeterService
             if (empty($devCache['last_change_date']) && !empty($monthRecords)) {
                 $parsed = [];
                 foreach ($monthRecords as $r) {
-                    $v = is_array($r) ? self::extractRecordValue($r) : ($r instanceof MeterReadingDTO ? $r->val : null);
-                    $d = is_array($r) ? self::extractRecordDate($r) : ($r instanceof MeterReadingDTO ? $r->date : null);
+                    $v = self::extractRecordValue($r);
+                    $d = self::extractRecordDate($r);
                     if ($v !== null && $d !== null) {
                         $parsed[] = ['val' => $v, 'date' => $d];
                     }
@@ -233,8 +395,8 @@ class MeterService
         $records = [];
         if (!empty($monthRecords)) {
             foreach ($monthRecords as $r) {
-                $v = is_array($r) ? self::extractRecordValue($r) : ($r instanceof MeterReadingDTO ? $r->val : null);
-                $d = is_array($r) ? self::extractRecordDate($r) : ($r instanceof MeterReadingDTO ? $r->date : null);
+                $v = self::extractRecordValue($r);
+                $d = self::extractRecordDate($r);
                 if ($v !== null && $d !== null) {
                     $records[] = ['val' => $v, 'date' => $d];
                 }
@@ -341,13 +503,14 @@ class MeterService
         }
 
         foreach ($customDevices as $id => $info) {
-            if (mb_strtolower($info['name'], 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
+            if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
         // 3. Если не найден — пробуем динамически запросить список приборов через API
-        $apiDevices = UnicBoard::getAllDevices($config);
+        $apiDevicesResp = UnicBoard::getAllDevices($config);
+        $apiDevices = $apiDevicesResp['payload'] ?? [];
         foreach ($apiDevices as $item) {
             $serial = (string) ($item['manufacturer_serial_number'] ?? '');
             $devId = $item['id'] ?? '';

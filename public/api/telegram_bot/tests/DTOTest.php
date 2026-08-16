@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace TelegramBot\Tests;
 
+use TelegramBot\DTO\ChannelReadingDTO;
 use TelegramBot\DTO\DeviceDTO;
+use TelegramBot\DTO\HistoricalValueDTO;
 use TelegramBot\DTO\MeterReadingDTO;
 use TelegramBot\DTO\TelegramUpdateDTO;
 
@@ -31,6 +33,36 @@ class DTOTest
         TestRunner::assertEquals(4.23, $reading->val, 'MeterReadingDTO val');
         TestRunner::assertEquals('2026-08-13T14:05:00', $reading->date, 'MeterReadingDTO date');
         TestRunner::assertEquals(2, $reading->channelNumber, 'MeterReadingDTO channelNumber');
+
+        // ChannelReadingDTO
+        $chReading = new ChannelReadingDTO(
+            channelNumber: 1,
+            lastValue: 0.0,
+            lastValueDate: '2026-08-16T10:00:00',
+            unitMultiplier: 10.0,
+            valueMultiplier: 1.0,
+            inactivityLimit: 86400,
+            lastDateEventNoData: '2026-08-16T03:00:00'
+        );
+        TestRunner::assertEquals(1, $chReading->channelNumber, 'ChannelReadingDTO channelNumber');
+        TestRunner::assertEquals(0.0, $chReading->lastValue, 'ChannelReadingDTO lastValue handles 0.0');
+        TestRunner::assert($chReading->hasReading(), 'ChannelReadingDTO hasReading is true');
+        TestRunner::assert($chReading->isInactive(), 'ChannelReadingDTO isInactive is true');
+
+        // HistoricalValueDTO
+        $histValue = new HistoricalValueDTO(
+            channelNumber: 2,
+            date: '2026-08-15T00:00:00',
+            value: 4.29,
+            valueRaw: 4.29,
+            valueType: 'DEVICE_DATA',
+            journalDataType: 'CURRENT',
+            kind: 'COMMON_CONSUMED',
+            meterId: 'uuid-123'
+        );
+        TestRunner::assertEquals(2, $histValue->channelNumber, 'HistoricalValueDTO channelNumber');
+        TestRunner::assertEquals(4.29, $histValue->value, 'HistoricalValueDTO value');
+        TestRunner::assertEquals('DEVICE_DATA', $histValue->valueType, 'HistoricalValueDTO valueType');
 
         // TelegramUpdateDTO text message
         $textUpdate = [

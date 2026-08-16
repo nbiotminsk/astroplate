@@ -6,61 +6,151 @@ namespace TelegramBot;
 
 class UnicBoard
 {
+    public static bool $enableDiagnostics = true;
+
     public static function unicboardHeaders(array $config): array
     {
-        return ['Authorization: Bearer ' . $config['unicboard_token']];
+        return [
+            'Authorization: Bearer ' . ($config['unicboard_token'] ?? ''),
+            'Accept: application/json',
+        ];
+    }
+
+    /**
+     * Запись структурированной диагностики запросов (без секретов и токенов).
+     */
+    public static function logDiagnostic(
+        string $endpoint,
+        string $deviceId,
+        int $attempt,
+        int $httpStatus,
+        bool $ok,
+        ?int $payloadCount,
+        float $durationMs,
+        array $errors = [],
+        array $extra = []
+    ): void {
+        if (!self::$enableDiagnostics) {
+            return;
+        }
+
+        $entry = [
+            'tag' => 'UNICBOARD_API',
+            'time' => date('Y-m-d\TH:i:sP'),
+            'endpoint' => $endpoint,
+            'device_id' => $deviceId,
+            'attempt' => $attempt,
+            'http_status' => $httpStatus,
+            'ok' => $ok,
+            'payload_count' => $payloadCount,
+            'duration_ms' => round($durationMs, 2),
+        ];
+
+        if (!empty($errors)) {
+            $entry['errors'] = $errors;
+        }
+        if (!empty($extra)) {
+            $entry['extra'] = $extra;
+        }
+
+        error_log(json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
     }
 
     /**
      * Полные показания по одному device_id через POST /api/v1/devices/values
-     * При холодном старте или пустом payload при 200 делает повторные попытки с задержкой 0.5 сек.
+     *
+     * @return array{http_status: int, ok: bool, payload: array, count: ?int, total_count: ?int, errors: array}
      */
     public static function getDeviceValues(
         array $config,
         string $deviceUuid,
-        int $limit = 10,
+        int $limit = 50,
         ?string $periodFrom = null,
         int $timeout = 15,
+        ?string $periodTo = null,
+        bool $endOfDay = true,
+        ?string $journalDataType = null,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000 // 0.5 секунды
+        int $retryDelayUs = 500000
     ): array {
         $headers = self::unicboardHeaders($config);
-        $apiBase = $config['unicboard_api_base'];
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
 
         if ($periodFrom === null) {
             $periodFrom = date('Y-m-d\T00:00:00', strtotime('-30 days'));
         }
 
-        $url = $apiBase . '/api/v1/devices/values?limit=' . $limit . '&period_from=' . urlencode($periodFrom);
+        $queryParams = [
+            'limit' => $limit,
+            'period_from' => $periodFrom,
+            'end_of_day' => $endOfDay ? 'true' : 'false',
+        ];
+        if ($periodTo !== null) {
+            $queryParams['period_to'] = $periodTo;
+        }
+        if ($journalDataType !== null) {
+            $queryParams['journal_data_type'] = $journalDataType;
+        }
+
+        $url = $apiBase . '/api/v1/devices/values?' . http_build_query($queryParams);
         $payload = [];
-        $resp = [];
+        $resp = null;
         $code = 0;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            $startTs = microtime(true);
             [$code, $resp] = Telegram::httpPostJson($url, ['devices_id' => [$deviceUuid]], $headers, $timeout);
-            $payload = $resp['payload'] ?? [];
+            $durationMs = (microtime(true) - $startTs) * 1000;
 
-            // Если данные успешно получены, выходим
-            if (!empty($payload)) {
+            $isJsonArray = is_array($resp);
+            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
+            $payloadCount = count($payload);
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+
+            self::logDiagnostic(
+                'POST /api/v1/devices/values',
+                $deviceUuid,
+                $attempt,
+                $code,
+                $apiOk,
+                $payloadCount,
+                $durationMs,
+                $errors
+            );
+
+            // Если HTTP 200 и API ok=true — ответ полностью валиден (даже если payload=[])
+            if ($code === 200 && $apiOk) {
                 break;
             }
 
-            // На холодном старте (пустой payload при 200 или сбой подключения code 0) ждем 0.5с и повторяем
+            // Не повторяем при ошибках клиента 4xx (например 401, 404, 400)
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+
+            // Повторяем только при сетевом сбое (code=0), 5xx или если API ok=false
             if ($attempt < $maxRetries) {
                 usleep($retryDelayUs);
             }
         }
 
+        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+
         return [
-            'http_code' => $code,
+            'http_status' => $code,
+            'ok' => $finalOk,
             'payload' => $payload,
-            'errors' => $resp['errors'] ?? [],
-            'ok' => !empty($payload),
+            'count' => is_array($resp) ? ($resp['count'] ?? $payloadCount) : null,
+            'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
         ];
     }
 
     /**
      * Информация по конкретному прибору GET /api/v1/devices/{device_id}/info
+     *
+     * @return array{http_status: int, ok: bool, payload: ?array, count: ?int, total_count: ?int, errors: array}
      */
     public static function getDeviceInfo(
         array $config,
@@ -68,21 +158,69 @@ class UnicBoard
         int $timeout = 10,
         int $maxRetries = 3,
         int $retryDelayUs = 500000
-    ): ?array {
-        $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/info';
+    ): array {
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
+        $url = $apiBase . '/api/v1/devices/' . $deviceId . '/info';
+        $headers = self::unicboardHeaders($config);
+        $resp = null;
+        $code = 0;
+
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            [$code, $resp] = Telegram::httpGet($url, self::unicboardHeaders($config), $timeout);
-            if ($code === 200 && isset($resp['payload']) && is_array($resp['payload'])) {
-                return $resp['payload'];
+            $startTs = microtime(true);
+            [$code, $resp] = Telegram::httpGet($url, $headers, $timeout);
+            $durationMs = (microtime(true) - $startTs) * 1000;
+
+            $isJsonArray = is_array($resp);
+            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : null;
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+
+            $channelCount = ($payload && isset($payload['device_channel']) && is_array($payload['device_channel']))
+                ? count($payload['device_channel'])
+                : 0;
+
+            self::logDiagnostic(
+                'GET /api/v1/devices/{id}/info',
+                $deviceId,
+                $attempt,
+                $code,
+                $apiOk,
+                $channelCount,
+                $durationMs,
+                $errors,
+                ['channels' => $channelCount]
+            );
+
+            if ($code === 200 && $apiOk && $payload !== null) {
+                break;
             }
+
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+
             if ($attempt < $maxRetries) {
                 usleep($retryDelayUs);
             }
         }
-        return null;
+
+        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+
+        return [
+            'http_status' => $code,
+            'ok' => $finalOk,
+            'payload' => is_array($resp) ? ($resp['payload'] ?? null) : null,
+            'count' => is_array($resp) ? ($resp['count'] ?? null) : null,
+            'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
+        ];
     }
 
-    /** Температура прибора */
+    /**
+     * Температура прибора GET /api/v1/devices/{device_id}/temperatures
+     *
+     * @return array{http_status: int, ok: bool, payload: array, errors: array}
+     */
     public static function getTemperature(
         array $config,
         string $deviceId,
@@ -90,21 +228,71 @@ class UnicBoard
         int $timeout = 10,
         int $maxRetries = 3,
         int $retryDelayUs = 500000
-    ): ?array {
-        $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/temperatures?limit=' . $limit;
+    ): array {
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
+        $url = $apiBase . '/api/v1/devices/' . $deviceId . '/temperatures?limit=' . $limit;
+        $headers = self::unicboardHeaders($config);
+        $resp = null;
+        $code = 0;
+
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            [$code, $resp] = Telegram::httpGet($url, self::unicboardHeaders($config), $timeout);
-            if ($code === 200 && isset($resp['payload'][0])) {
-                return $resp['payload'][0];
+            $startTs = microtime(true);
+            [$code, $resp] = Telegram::httpGet($url, $headers, $timeout);
+            $durationMs = (microtime(true) - $startTs) * 1000;
+
+            $isJsonArray = is_array($resp);
+            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+
+            self::logDiagnostic(
+                'GET /api/v1/devices/{id}/temperatures',
+                $deviceId,
+                $attempt,
+                $code,
+                $apiOk,
+                count($payload),
+                $durationMs,
+                $errors
+            );
+
+            if ($code === 200 && $apiOk) {
+                break;
             }
+
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+
             if ($attempt < $maxRetries) {
                 usleep($retryDelayUs);
             }
         }
-        return null;
+
+        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+
+        return [
+            'http_status' => $code,
+            'ok' => $finalOk,
+            'payload' => is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [],
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
+        ];
     }
 
-    /** Уровень батареи прибора */
+    /**
+     * Получить последнюю запись температуры прибора (или null)
+     */
+    public static function getLatestTemperature(array $config, string $deviceId, int $timeout = 10): ?array
+    {
+        $res = self::getTemperature($config, $deviceId, 1, $timeout);
+        return $res['payload'][0] ?? null;
+    }
+
+    /**
+     * Уровень батареи прибора GET /api/v1/devices/{device_id}/battery-level
+     *
+     * @return array{http_status: int, ok: bool, payload: array, errors: array}
+     */
     public static function getBattery(
         array $config,
         string $deviceId,
@@ -112,59 +300,127 @@ class UnicBoard
         int $timeout = 10,
         int $maxRetries = 3,
         int $retryDelayUs = 500000
-    ): ?array {
-        $url = $config['unicboard_api_base'] . '/api/v1/devices/' . $deviceId . '/battery-level?limit=' . ($limit === 1 ? 10 : $limit);
+    ): array {
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
+        $url = $apiBase . '/api/v1/devices/' . $deviceId . '/battery-level?limit=' . ($limit === 1 ? 10 : $limit);
+        $headers = self::unicboardHeaders($config);
+        $resp = null;
+        $code = 0;
+
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            [$code, $resp] = Telegram::httpGet($url, self::unicboardHeaders($config), $timeout);
-            if ($code === 200 && isset($resp['payload'][0])) {
-                return $resp['payload'][0];
+            $startTs = microtime(true);
+            [$code, $resp] = Telegram::httpGet($url, $headers, $timeout);
+            $durationMs = (microtime(true) - $startTs) * 1000;
+
+            $isJsonArray = is_array($resp);
+            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+
+            self::logDiagnostic(
+                'GET /api/v1/devices/{id}/battery-level',
+                $deviceId,
+                $attempt,
+                $code,
+                $apiOk,
+                count($payload),
+                $durationMs,
+                $errors
+            );
+
+            if ($code === 200 && $apiOk) {
+                break;
             }
+
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+
             if ($attempt < $maxRetries) {
                 usleep($retryDelayUs);
             }
         }
-        return null;
+
+        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
+
+        return [
+            'http_status' => $code,
+            'ok' => $finalOk,
+            'payload' => is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [],
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
+        ];
+    }
+
+    /**
+     * Получить последнюю запись батареи прибора (или null)
+     */
+    public static function getLatestBattery(array $config, string $deviceId, int $timeout = 10): ?array
+    {
+        $res = self::getBattery($config, $deviceId, 1, $timeout);
+        return $res['payload'][0] ?? null;
     }
 
     /**
      * Запрос всех доступных приборов через GET /api/v1/devices/info
+     *
+     * @return array{http_status: int, ok: bool, payload: array, count: ?int, total_count: ?int, errors: array}
      */
     public static function getAllDevices(
         array $config,
+        int $limit = 100,
         int $timeout = 15,
         int $maxRetries = 3,
         int $retryDelayUs = 500000
     ): array {
-        $url = $config['unicboard_api_base'] . '/api/v1/devices/info?limit=100';
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
+        $url = $apiBase . '/api/v1/devices/info?limit=' . $limit;
+        $headers = self::unicboardHeaders($config);
+        $resp = null;
+        $code = 0;
+
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            [$code, $resp] = Telegram::httpGet($url, self::unicboardHeaders($config), $timeout);
-            if ($code === 200 && isset($resp['payload']) && is_array($resp['payload'])) {
-                return $resp['payload'];
+            $startTs = microtime(true);
+            [$code, $resp] = Telegram::httpGet($url, $headers, $timeout);
+            $durationMs = (microtime(true) - $startTs) * 1000;
+
+            $isJsonArray = is_array($resp);
+            $apiOk = $isJsonArray && ($resp['ok'] ?? false) === true;
+            $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [];
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+
+            self::logDiagnostic(
+                'GET /api/v1/devices/info',
+                'all',
+                $attempt,
+                $code,
+                $apiOk,
+                count($payload),
+                $durationMs,
+                $errors
+            );
+
+            if ($code === 200 && $apiOk) {
+                break;
             }
+
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+
             if ($attempt < $maxRetries) {
                 usleep($retryDelayUs);
             }
         }
-        return [];
-    }
 
-    /**
-     * Карта серийных номеров счетчиков по номерам каналов для прибора
-     */
-    public static function getDeviceChannelsSerials(array $config, string $deviceId): array
-    {
-        $payload = self::getDeviceInfo($config, $deviceId);
-        if (!$payload || !isset($payload['device_channel'])) {
-            return [];
-        }
+        $finalOk = is_array($resp) ? (bool) ($resp['ok'] ?? ($code === 200)) : ($code === 200);
 
-        $serials = [];
-        foreach ($payload['device_channel'] as $idx => $ch) {
-            $chNum = $idx + 1;
-            if (isset($ch['serial_number'])) {
-                $serials[$chNum] = (string) $ch['serial_number'];
-            }
-        }
-        return $serials;
+        return [
+            'http_status' => $code,
+            'ok' => $finalOk,
+            'payload' => is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [],
+            'count' => is_array($resp) ? ($resp['count'] ?? null) : null,
+            'total_count' => is_array($resp) ? ($resp['total_count'] ?? null) : null,
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
+        ];
     }
 }
