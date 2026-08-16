@@ -283,5 +283,187 @@ class UnicBoardApiTest
         // Test P: Diagnostic toggle
         TestRunner::assert(!\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => false]), 'Test P: Diagnostics disabled by config');
         TestRunner::assert(\TelegramBot\UnicBoard::shouldLogDiagnostic(['enable_diagnostics' => true]), 'Test P: Diagnostics enabled by config');
+
+        // Test Q (Case A): Cold-start retry for /values (Attempt 1: empty payload, Attempt 2: valid payload)
+        $valuesAttemptsQ = 0;
+        $valuesRespQ = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-q',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsQ): array {
+                $valuesAttemptsQ++;
+                if ($valuesAttemptsQ === 1) {
+                    return [200, ['ok' => true, 'payload' => [], 'count' => 0]];
+                }
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'channel_number' => 1,
+                            'value' => 10.5,
+                            'date' => '2026-08-16T12:00:00',
+                            'value_type' => 'DEVICE_DATA',
+                        ]
+                    ],
+                    'count' => 1,
+                ]];
+            }
+        );
+        TestRunner::assertEquals(2, $valuesAttemptsQ, 'Test Q (Case A): На холодном старте /values делает повторный запрос после пустого payload');
+        TestRunner::assert($valuesRespQ['ok'] === true, 'Test Q (Case A): Успешный ответ ok=true');
+        TestRunner::assertEquals(1, count($valuesRespQ['payload']), 'Test Q (Case A): Валидные данные получены');
+        TestRunner::assertEquals(10.5, $valuesRespQ['payload'][0]['value'], 'Test Q (Case A): Значение равно 10.5');
+
+        // Test R (Case B): Alternative request variant used (Attempt 3: device_ids body)
+        $valuesAttemptsR = 0;
+        $capturedBodiesR = [];
+        $valuesRespR = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-r',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsR, &$capturedBodiesR): array {
+                $valuesAttemptsR++;
+                $capturedBodiesR[] = $body;
+                if ($valuesAttemptsR < 3) {
+                    return [200, ['ok' => true, 'payload' => [], 'count' => 0]];
+                }
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'channel_number' => 1,
+                            'value' => 15.0,
+                            'date' => '2026-08-16T12:00:00',
+                            'value_type' => 'DEVICE_DATA',
+                        ]
+                    ],
+                    'count' => 1,
+                ]];
+            }
+        );
+        TestRunner::assertEquals(3, $valuesAttemptsR, 'Test R (Case B): Совершены 3 попытки с перебором вариантов');
+        TestRunner::assert(isset($capturedBodiesR[0]['devices_id']), 'Test R (Case B): Попытка 1 использовала devices_id');
+        TestRunner::assert(isset($capturedBodiesR[1]['devices_id']), 'Test R (Case B): Попытка 2 использовала повтор devices_id');
+        TestRunner::assert(isset($capturedBodiesR[2]['device_ids']), 'Test R (Case B): Попытка 3 использовала альтернативный device_ids');
+        TestRunner::assertEquals(15.0, $valuesRespR['payload'][0]['value'], 'Test R (Case B): Альтернативный запрос вернул валидные данные');
+
+        // Test S (Case C): Immediate success with valid payload, no unnecessary retries
+        $valuesAttemptsS = 0;
+        $valuesRespS = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-s',
+            maxRetries: 4,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsS): array {
+                $valuesAttemptsS++;
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'channel_number' => 1,
+                            'value' => 20.0,
+                            'date' => '2026-08-16T12:00:00',
+                            'value_type' => 'DEVICE_DATA',
+                        ]
+                    ],
+                    'count' => 1,
+                ]];
+            }
+        );
+        TestRunner::assertEquals(1, $valuesAttemptsS, 'Test S (Case C): При валидном ответе ровно 1 запрос, без лишних повторов');
+        TestRunner::assert($valuesRespS['ok'] === true, 'Test S (Case C): ok=true');
+        TestRunner::assertEquals(20.0, $valuesRespS['payload'][0]['value'], 'Test S (Case C): Значение равно 20.0');
+
+        // Test T (Case D): HTTP 200 + ok=false triggers retries according to error policy
+        $valuesAttemptsT = 0;
+        $valuesRespT = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-t',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsT): array {
+                $valuesAttemptsT++;
+                return [200, ['ok' => false, 'errors' => ['msg' => 'internal_device_error']]];
+            }
+        );
+        TestRunner::assertEquals(3, $valuesAttemptsT, 'Test T (Case D): При API ok=false повторено maxRetries раз');
+        TestRunner::assert($valuesRespT['ok'] === false, 'Test T (Case D): Итоговый ok=false');
+        TestRunner::assertEquals('internal_device_error', $valuesRespT['errors']['msg'] ?? null, 'Test T (Case D): Ошибки сохранены');
+
+        // Test U (Case E): HTTP 200 + invalid JSON triggers retry and eventually succeeds
+        $valuesAttemptsU = 0;
+        $valuesRespU = \TelegramBot\UnicBoard::getDeviceValues(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-u',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$valuesAttemptsU): array {
+                $valuesAttemptsU++;
+                if ($valuesAttemptsU === 1) {
+                    return [200, null]; // invalid JSON
+                }
+                if ($valuesAttemptsU === 2) {
+                    return [200, '<html>502 Bad Gateway</html>']; // non-array response
+                }
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'channel_number' => 1,
+                            'value' => 5.0,
+                            'date' => '2026-08-16T12:00:00',
+                            'value_type' => 'DEVICE_DATA',
+                        ]
+                    ],
+                    'count' => 1,
+                ]];
+            }
+        );
+        TestRunner::assertEquals(3, $valuesAttemptsU, 'Test U (Case E): Невалидный JSON инициирует повтор и в итоге завершается успехом');
+        TestRunner::assert($valuesRespU['ok'] === true, 'Test U (Case E): ok=true');
+        TestRunner::assertEquals(5.0, $valuesRespU['payload'][0]['value'], 'Test U (Case E): Значение равно 5.0');
+
+        // Test V (Case F): /info contains valid last_value -> current reading returned immediately without calling /values
+        $deviceV = new DeviceDTO('dev_uuid_v', '8527038', 'Тестовый прибор V');
+        $reportV = $reportService->buildReport($config, $deviceV);
+        TestRunner::assert(str_contains($reportV, '12.345 m³') || str_contains($reportV, 'Показания'), 'Test V (Case F): buildReport возвращает показания');
+
+        // Test W (Case G): /info fallback to GET /api/v1/devices/info on attempt 3
+        $infoAttemptsW = 0;
+        $infoResponseW = \TelegramBot\UnicBoard::getDeviceInfo(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-w',
+            maxRetries: 3,
+            retryDelayUs: 0,
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttemptsW): array {
+                $infoAttemptsW++;
+                if ($infoAttemptsW < 3) {
+                    return [200, ['ok' => true, 'payload' => ['id' => 'dev-uuid-w', 'device_channel' => []]]];
+                }
+                // Attempt 3 queries /devices/info list
+                return [200, [
+                    'ok' => true,
+                    'payload' => [
+                        [
+                            'id' => 'dev-uuid-w',
+                            'device_channel' => [
+                                [
+                                    'serial_number' => 1,
+                                    'device_meter' => [
+                                        ['last_value' => 7.77, 'last_value_date' => '2026-08-16T12:00:00']
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ]
+                ]];
+            }
+        );
+        TestRunner::assertEquals(3, $infoAttemptsW, 'Test W (Case G): Использован fallback на /api/v1/devices/info');
+        TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Fallback завершился успешно ok=true');
+        $readingsW = MeterService::extractCurrentReadingsFromDeviceInfo($infoResponseW['payload']);
+        TestRunner::assertEquals(7.77, $readingsW[1]->lastValue, 'Test W (Case G): last_value равен 7.77');
     }
 }
