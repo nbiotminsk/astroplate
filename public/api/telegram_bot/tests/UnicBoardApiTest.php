@@ -216,46 +216,52 @@ class UnicBoardApiTest
         TestRunner::assert($finalOkApiTrue === true, 'Test M: HTTP 200 + API ok=true дает ok = true');
 
         // Test N: /info must retry HTTP 200 + ok=true responses with incomplete device_channel.
-        $infoAttempts = 0;
+        $infoGetAttempts = 0;
+        $infoPostAttempts = 0;
         $infoResponse = \TelegramBot\UnicBoard::getDeviceInfo(
             ['unicboard_api_base' => 'https://unused.example'],
             'device-id',
             maxRetries: 4,
             retryDelayUs: 0,
-            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttempts): array {
-                $infoAttempts++;
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoGetAttempts): array {
+                $infoGetAttempts++;
 
-                if ($infoAttempts === 1) {
+                if ($infoGetAttempts === 1) {
                     return [200, ['ok' => true, 'payload' => ['id' => 'device-id', 'device_channel' => []]]];
                 }
 
-                if ($infoAttempts === 2) {
+                if ($infoGetAttempts === 2) {
                     return [200, ['ok' => true, 'payload' => [
                         'id' => 'device-id',
                         'device_channel' => [['serial_number' => 1]],
                     ]]];
                 }
 
-                if ($infoAttempts === 3) {
-                    return [200, ['ok' => true, 'payload' => [
+                return [200, ['ok' => true, 'payload' => [
+                    [
+                        'id' => 'device-id',
+                        'device_channel' => [[
+                            'serial_number' => 1,
+                            'device_meter' => [['last_value' => 1.0]],
+                        ]],
+                    ],
+                ]]];
+            },
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$infoPostAttempts): array {
+                $infoPostAttempts++;
+                return [200, ['ok' => true, 'payload' => [
+                    [
                         'id' => 'another-device-id',
                         'device_channel' => [[
                             'serial_number' => 1,
                             'device_meter' => [['last_value' => 1.0]],
                         ]],
-                    ]]];
-                }
-
-                return [200, ['ok' => true, 'payload' => [
-                    'id' => 'device-id',
-                    'device_channel' => [[
-                        'serial_number' => 1,
-                        'device_meter' => [['last_value' => 1.0]],
-                    ]],
+                    ],
                 ]]];
             }
         );
-        TestRunner::assertEquals(4, $infoAttempts, 'Test N: /info повторяется при пустом/неполном канале и чужом device_id');
+        TestRunner::assertEquals(3, $infoGetAttempts, 'Test N: GET fallback списка выполняется после неполных ответов');
+        TestRunner::assertEquals(1, $infoPostAttempts, 'Test N: POST fallback с device_ids выполнен перед GET списком');
         TestRunner::assert($infoResponse['ok'] === true, 'Test N: Полный повторный ответ /info принят');
 
         // Test O: valid JSON without the mandatory ok=true is not a successful /info response.
@@ -435,19 +441,22 @@ class UnicBoardApiTest
         $reportV = $reportService->buildReport($config, $deviceV);
         TestRunner::assert(str_contains($reportV, '12.345 m³') || str_contains($reportV, 'Показания'), 'Test V (Case F): buildReport возвращает показания');
 
-        // Test W (Case G): /info fallback to GET /api/v1/devices/info on attempt 3
-        $infoAttemptsW = 0;
+        // Test W (Case G): the documented POST /devices/info fallback has priority over the broad GET list.
+        $infoGetAttemptsW = 0;
+        $infoPostAttemptsW = 0;
+        $capturedBodiesW = [];
         $infoResponseW = \TelegramBot\UnicBoard::getDeviceInfo(
             ['unicboard_api_base' => 'https://unused.example'],
             'dev-uuid-w',
             maxRetries: 3,
             retryDelayUs: 0,
-            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttemptsW): array {
-                $infoAttemptsW++;
-                if ($infoAttemptsW < 3) {
-                    return [200, ['ok' => true, 'payload' => ['id' => 'dev-uuid-w', 'device_channel' => []]]];
-                }
-                // Attempt 3 queries /devices/info list
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$infoGetAttemptsW): array {
+                $infoGetAttemptsW++;
+                return [200, ['ok' => true, 'payload' => ['id' => 'dev-uuid-w', 'device_channel' => []]]];
+            },
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$infoPostAttemptsW, &$capturedBodiesW): array {
+                $infoPostAttemptsW++;
+                $capturedBodiesW[] = $body;
                 return [200, [
                     'ok' => true,
                     'count' => 1,
@@ -469,7 +478,9 @@ class UnicBoardApiTest
                 ]];
             }
         );
-        TestRunner::assertEquals(3, $infoAttemptsW, 'Test W (Case G): Использован fallback на /api/v1/devices/info');
+        TestRunner::assertEquals(2, $infoGetAttemptsW, 'Test W (Case G): До fallback выполнены две точечные GET-попытки');
+        TestRunner::assertEquals(1, $infoPostAttemptsW, 'Test W (Case G): Использован приоритетный POST fallback на /api/v1/devices/info');
+        TestRunner::assertEquals(['device_ids' => ['dev-uuid-w']], $capturedBodiesW[0], 'Test W (Case G): POST fallback использует документированный device_ids с исходным UUID');
         TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Fallback завершился успешно ok=true');
         TestRunner::assertEquals(1, $infoResponseW['count'], 'Test W (Case G): count сохранен из ответа API');
         TestRunner::assertEquals(1, $infoResponseW['total_count'], 'Test W (Case G): total_count сохранен из ответа API');
@@ -498,7 +509,7 @@ class UnicBoardApiTest
         $infoResponseY = \TelegramBot\UnicBoard::getDeviceInfo(
             ['unicboard_api_base' => 'https://unused.example'],
             'target-device-id',
-            maxRetries: 3,
+            maxRetries: 4,
             retryDelayUs: 0,
             httpGet: static function (string $url, array $headers, int $timeout) use (&$infoAttemptsY): array {
                 $infoAttemptsY++;
@@ -516,10 +527,33 @@ class UnicBoardApiTest
                         ]
                     ]
                 ]];
-            }
+            },
+            httpPostJson: static fn(string $url, array $body, array $headers, int $timeout): array => [200, [
+                'ok' => true,
+                'payload' => [
+                    ['id' => 'other-unrelated-device', 'device_channel' => []],
+                ],
+            ]]
         );
-        TestRunner::assertEquals(3, $infoAttemptsY, 'Test Y (Case G): 3 попытки поиска');
+        TestRunner::assertEquals(3, $infoAttemptsY, 'Test Y (Case G): GET-список остается последней попыткой после POST fallback');
         TestRunner::assert($infoResponseY['ok'] === false, 'Test Y (Case G): Чужой device_id не возвращается как успешный для целевого устройства');
         TestRunner::assert($infoResponseY['payload'] === null, 'Test Y (Case G): payload равен null при отсутствии целевого устройства в списке');
+
+        // Test Z: A structurally incomplete direct /info response must not bypass the completeness check.
+        $infoResponseZ = \TelegramBot\UnicBoard::getDeviceInfo(
+            ['unicboard_api_base' => 'https://unused.example'],
+            'dev-uuid-z',
+            maxRetries: 1,
+            retryDelayUs: 0,
+            httpGet: static fn(string $url, array $headers, int $timeout): array => [200, [
+                'ok' => true,
+                'payload' => [
+                    'id' => 'dev-uuid-z',
+                    'device_channel' => [],
+                ],
+            ]]
+        );
+        TestRunner::assert($infoResponseZ['ok'] === false, 'Test Z: Неполный /info не становится успешным при завершении попыток');
+        TestRunner::assert($infoResponseZ['payload'] === null, 'Test Z: Неполный /info не возвращается как финальный payload');
     }
 }
