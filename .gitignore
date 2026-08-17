@@ -33,3 +33,4 @@ hutki.pdf
 # telegram bot storage
 public/api/telegram_bot/storage/user_meters.json
 public/api/telegram_bot/storage/meter_cache.json
+public/api/telegram_bot/storage/*.log

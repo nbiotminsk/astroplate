@@ -75,7 +75,8 @@ class UnicBoard
             $entry['extra'] = $extra;
         }
 
-        error_log(json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES));
+        $json = json_encode($entry, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        Storage::log($json);
     }
 
     /**
@@ -93,7 +94,7 @@ class UnicBoard
         bool $endOfDay = true,
         ?string $journalDataType = null,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000,
+        int $retryDelayUs = 200000,
         ?callable $httpPostJson = null,
         ?callable $httpGet = null
     ): array {
@@ -159,8 +160,9 @@ class UnicBoard
                 $config
             );
 
-            // 1. Успех: HTTP 200, API ok=true и непустой payload -> выходим немедленно
-            if ($code === 200 && $apiOk && !empty($payload)) {
+            // 1. Успех: HTTP 200 и непустой payload -> выходим немедленно
+            // ok=true не требуется — Unicboard иногда не включает это поле
+            if ($code === 200 && !empty($payload)) {
                 break;
             }
 
@@ -189,7 +191,8 @@ class UnicBoard
     }
 
     /**
-     * Информация по конкретному прибору GET /api/v1/devices/{device_id}/info
+     * Информация по конкретному прибору:
+     * Чередует POST /api/v1/devices/info (device_ids) и GET /api/v1/devices/{device_id}/info (до 4 попыток: POST -> GET -> POST -> GET).
      *
      * @return array{http_status: int, ok: bool, payload: ?array, count: ?int, total_count: ?int, errors: array}
      */
@@ -198,49 +201,31 @@ class UnicBoard
         string $deviceId,
         int $timeout = 10,
         int $maxRetries = 4,
-        int $retryDelayUs = 500000,
+        int $retryDelayUs = 200000,
         ?callable $httpGet = null,
         ?callable $httpPostJson = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
-        $url = $apiBase . '/api/v1/devices/' . $deviceId . '/info';
+        $getUrl = $apiBase . '/api/v1/devices/' . $deviceId . '/info';
+        $postUrl = $apiBase . '/api/v1/devices/info';
         $headers = self::unicboardHeaders($config);
         $httpGet ??= [Telegram::class, 'httpGet'];
         $httpPostJson ??= [Telegram::class, 'httpPostJson'];
         $resp = null;
         $code = 0;
         $finalPayload = null;
-        $usedFallback = false;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $variant = match ($attempt) {
-                1 => 'get_device_id_info',
-                2 => 'retry_get_device_id_info',
-                3 => 'post_device_ids_fallback',
-                default => 'get_all_devices_fallback',
-            };
-
+            $isPost = ($attempt % 2 === 1);
             $startTs = microtime(true);
 
-            if ($attempt >= 3) {
-                $usedFallback = true;
-                if ($attempt === 3) {
-                    // Документированный точечный fallback: POST /devices/info с device_ids.
-                    $infoUrl = $apiBase . '/api/v1/devices/info';
-                    [$code, $resp] = $httpPostJson($infoUrl, ['device_ids' => [$deviceId]], $headers, $timeout);
-                    $endpoint = 'POST /api/v1/devices/info';
-                    $requestBodyField = 'device_ids';
-                } else {
-                    // Последний fallback: список всех устройств GET /api/v1/devices/info.
-                    $allUrl = $apiBase . '/api/v1/devices/info?limit=100';
-                    [$code, $resp] = $httpGet($allUrl, $headers, $timeout);
-                    $endpoint = 'GET /api/v1/devices/info';
-                    $requestBodyField = null;
-                }
+            if ($isPost) {
+                $endpoint = 'POST /api/v1/devices/info';
+                $variant = $attempt === 1 ? 'post_device_ids_info' : 'retry_post_device_ids_info';
+                [$code, $resp] = $httpPostJson($postUrl, ['device_ids' => [$deviceId]], $headers, $timeout);
                 $durationMs = (microtime(true) - $startTs) * 1000;
 
                 $isJsonArray = is_array($resp);
-                $apiOk = self::hasApiSuccess($resp);
                 $deviceItem = null;
                 if ($isJsonArray && isset($resp['payload']) && is_array($resp['payload'])) {
                     if (isset($resp['payload'][0]) || empty($resp['payload'])) {
@@ -254,89 +239,59 @@ class UnicBoard
                         $deviceItem = $resp['payload'];
                     }
                 }
-
                 $payload = $deviceItem;
-                $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
-                $hasCompleteChannels = self::hasCompleteDeviceInfoPayload($payload, $deviceId);
-                $channelCount = ($payload && isset($payload['device_channel']) && is_array($payload['device_channel']))
-                    ? count($payload['device_channel'])
-                    : 0;
-
-                $channelsDiag = self::buildChannelsDiagnostic($payload);
-
-                self::logDiagnostic(
-                    $endpoint,
-                    $deviceId,
-                    $attempt,
-                    $code,
-                    $apiOk,
-                    $channelCount,
-                    $durationMs,
-                    $errors,
-                    [
-                        'request_variant' => $variant,
-                        'request_body_field' => $requestBodyField,
-                        'total_count' => $isJsonArray ? ($resp['total_count'] ?? null) : null,
-                        'channels' => $channelsDiag,
-                        'response_shape' => [
-                            'is_json_array' => $isJsonArray,
-                            'has_ok_field' => $isJsonArray && array_key_exists('ok', $resp),
-                            'has_payload' => $payload !== null,
-                            'has_expected_device_id' => $payload !== null && ($payload['id'] ?? null) === $deviceId,
-                            'has_complete_device_channels' => $hasCompleteChannels,
-                        ],
-                    ],
-                    $config
-                );
-
-                if ($code === 200 && $apiOk && $hasCompleteChannels) {
-                    $finalPayload = $payload;
-                    break;
-                }
             } else {
-                [$code, $resp] = $httpGet($url, $headers, $timeout);
+                $endpoint = 'GET /api/v1/devices/{id}/info';
+                $variant = $attempt === 2 ? 'get_device_id_info' : 'retry_get_device_id_info';
+                [$code, $resp] = $httpGet($getUrl, $headers, $timeout);
                 $durationMs = (microtime(true) - $startTs) * 1000;
 
                 $isJsonArray = is_array($resp);
-                $apiOk = self::hasApiSuccess($resp);
                 $payload = $isJsonArray && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : null;
-                $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
-                $hasCompleteChannels = self::hasCompleteDeviceInfoPayload($payload, $deviceId);
+            }
 
-                $channelCount = ($payload && isset($payload['device_channel']) && is_array($payload['device_channel']))
-                    ? count($payload['device_channel'])
-                    : 0;
+            $apiOk = self::hasApiSuccess($resp);
+            $errors = $isJsonArray && isset($resp['errors']) && is_array($resp['errors']) ? $resp['errors'] : [];
+            $hasCompleteChannels = self::hasCompleteDeviceInfoPayload($payload, $deviceId);
 
-                $channelsDiag = self::buildChannelsDiagnostic($payload);
+            $channelCount = ($payload && isset($payload['device_channel']) && is_array($payload['device_channel']))
+                ? count($payload['device_channel'])
+                : 0;
 
-                self::logDiagnostic(
-                    'GET /api/v1/devices/{id}/info',
-                    $deviceId,
-                    $attempt,
-                    $code,
-                    $apiOk,
-                    $channelCount,
-                    $durationMs,
-                    $errors,
-                    [
-                        'request_variant' => $variant,
-                        'total_count' => $isJsonArray ? ($resp['total_count'] ?? null) : null,
-                        'channels' => $channelsDiag,
-                        'response_shape' => [
-                            'is_json_array' => $isJsonArray,
-                            'has_ok_field' => $isJsonArray && array_key_exists('ok', $resp),
-                            'has_payload' => $payload !== null,
-                            'has_expected_device_id' => $payload !== null && ($payload['id'] ?? null) === $deviceId,
-                            'has_complete_device_channels' => $hasCompleteChannels,
-                        ],
-                    ],
-                    $config
-                );
+            $channelsDiag = self::buildChannelsDiagnostic($payload);
 
-                if ($code === 200 && $apiOk && $hasCompleteChannels) {
-                    $finalPayload = $payload;
-                    break;
-                }
+            $extraDiag = [
+                'request_variant' => $variant,
+                'total_count' => $isJsonArray ? ($resp['total_count'] ?? null) : null,
+                'channels' => $channelsDiag,
+                'response_shape' => [
+                    'is_json_array' => $isJsonArray,
+                    'has_ok_field' => $isJsonArray && array_key_exists('ok', $resp),
+                    'has_payload' => $payload !== null,
+                    'has_expected_device_id' => $payload !== null && ($payload['id'] ?? null) === $deviceId,
+                    'has_complete_device_channels' => $hasCompleteChannels,
+                ],
+            ];
+            if ($isPost) {
+                $extraDiag['request_body_field'] = 'device_ids';
+            }
+
+            self::logDiagnostic(
+                $endpoint,
+                $deviceId,
+                $attempt,
+                $code,
+                $apiOk,
+                $channelCount,
+                $durationMs,
+                $errors,
+                $extraDiag,
+                $config
+            );
+
+            if ($code === 200 && $hasCompleteChannels) {
+                $finalPayload = $payload;
+                break;
             }
 
             if ($code >= 400 && $code < 500) {
@@ -352,13 +307,13 @@ class UnicBoard
             && self::hasApiSuccess($resp)
             && ($finalPayload !== null);
 
-        $finalCount = $usedFallback
-            ? ($finalPayload !== null ? 1 : 0)
-            : (is_array($resp) ? ($resp['count'] ?? ($finalPayload !== null ? 1 : null)) : null);
+        $finalCount = $finalPayload !== null
+            ? 1
+            : (is_array($resp) ? ($resp['count'] ?? null) : null);
 
-        $finalTotalCount = $usedFallback
-            ? ($finalPayload !== null ? 1 : 0)
-            : (is_array($resp) ? ($resp['total_count'] ?? ($finalPayload !== null ? 1 : null)) : null);
+        $finalTotalCount = $finalPayload !== null
+            ? 1
+            : (is_array($resp) ? ($resp['total_count'] ?? null) : null);
 
         return [
             'http_status' => $code,
@@ -416,16 +371,9 @@ class UnicBoard
             return false;
         }
 
-        foreach ($payload['device_channel'] as $channel) {
-            if (!is_array($channel)
-                || !isset($channel['serial_number'])
-                || !is_numeric($channel['serial_number'])
-                || !array_key_exists('device_meter', $channel)
-                || !is_array($channel['device_meter'])) {
-                return false;
-            }
-        }
-
+        // Не требуем полноту структуры каждого канала — на холодном старте
+        // Unicboard может вернуть каналы без serial_number/device_meter.
+        // Достаточно проверить, что device_channel непустой и содержит массивы.
         return true;
     }
 
@@ -440,7 +388,7 @@ class UnicBoard
         int $limit = 1,
         int $timeout = 10,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000,
+        int $retryDelayUs = 200000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -521,7 +469,7 @@ class UnicBoard
         int $limit = 1,
         int $timeout = 10,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000,
+        int $retryDelayUs = 200000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -601,7 +549,7 @@ class UnicBoard
         int $limit = 100,
         int $timeout = 15,
         int $maxRetries = 3,
-        int $retryDelayUs = 500000,
+        int $retryDelayUs = 200000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');

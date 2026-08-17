@@ -20,6 +20,7 @@ class BotHandler
 
         /** @var CommandDispatcher $dispatcher */
         $dispatcher = $this->container->get(CommandDispatcher::class);
+        Storage::log("Update received: chat_id={$dto->chatId}, text=" . ($dto->text !== '' ? $dto->text : ($dto->callbackData ?? '')));
         $dispatcher->dispatch($dto, $this->container->config);
     }
 
@@ -34,7 +35,9 @@ class BotHandler
             $missing[] = 'UNICBOARD_API_TOKEN';
         }
         if ($missing) {
-            fwrite(STDERR, "Ошибка: задайте в .env: " . implode(', ', $missing) . "\n");
+            $err = "Ошибка: задайте в .env: " . implode(', ', $missing);
+            Storage::log($err);
+            fwrite(STDERR, $err . "\n");
             exit(1);
         }
     }
@@ -47,6 +50,7 @@ class BotHandler
 
         $secret = $config['webhook_secret'] ?? '';
         if ($secret !== '' && ($_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? '') !== $secret) {
+            Storage::log("Webhook 403 Forbidden: Invalid secret token");
             http_response_code(403);
             echo 'Forbidden';
             exit;
@@ -67,6 +71,7 @@ class BotHandler
         $this->checkConfig();
         $config = $this->container->config;
         $offset = 0;
+        Storage::log("Bot started (long-polling)");
         echo "Бот запущен (long-polling). Нажмите Ctrl+C для остановки.\n";
 
         while (true) {

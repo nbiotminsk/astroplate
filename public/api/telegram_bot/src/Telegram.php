@@ -33,7 +33,8 @@ TXT;
         ]);
         $body = curl_exec($ch);
         if ($body === false) {
-            error_log('cURL Error (GET ' . $url . '): ' . curl_error($ch));
+            $err = 'cURL Error (GET ' . $url . '): ' . curl_error($ch);
+            Storage::log($err);
             @curl_close($ch);
             return [0, null];
         }
@@ -59,7 +60,8 @@ TXT;
         ]);
         $data = curl_exec($ch);
         if ($data === false) {
-            error_log('cURL Error (POST ' . $url . '): ' . curl_error($ch));
+            $err = 'cURL Error (POST ' . $url . '): ' . curl_error($ch);
+            Storage::log($err);
             @curl_close($ch);
             return [0, null];
         }

@@ -21,6 +21,23 @@ class Storage
         return __DIR__ . '/../storage/meter_cache.json';
     }
 
+    public static function logFile(): string
+    {
+        return __DIR__ . '/../storage/bot.log';
+    }
+
+    public static function log(string $message, array $context = []): void
+    {
+        $file = self::logFile();
+        $dir = dirname($file);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $time = date('Y-m-d H:i:s');
+        $contextStr = !empty($context) ? ' ' . json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) : '';
+        @file_put_contents($file, "[{$time}] {$message}{$contextStr}\n", FILE_APPEND | LOCK_EX);
+    }
+
     public static function atomicWriteJson(string $filePath, array $data): void
     {
         $dir = dirname($filePath);

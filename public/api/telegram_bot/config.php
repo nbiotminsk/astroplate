@@ -14,9 +14,20 @@ load_env(__DIR__ . '/.env');
 $timezone = getenv('BOT_TIMEZONE') ?: 'Europe/Minsk';
 date_default_timezone_set($timezone);
 
+$logFile = getenv('BOT_LOG_FILE') ?: (__DIR__ . '/storage/bot.log');
+$logDir = dirname($logFile);
+if (!is_dir($logDir)) {
+    @mkdir($logDir, 0755, true);
+}
+@ini_set('log_errors', '1');
+@ini_set('error_log', $logFile);
+
 return [
     // Часовой пояс бота (по умолчанию Europe/Minsk, UTC+3)
     'timezone' => $timezone,
+
+    // Путь к файлу логов бота (по умолчанию storage/bot.log)
+    'log_file' => $logFile,
 
     // Токен бота из @BotFather (переменная TELEGRAM_BOT_TOKEN)
     'telegram_token' => getenv('TELEGRAM_BOT_TOKEN') ?: '',

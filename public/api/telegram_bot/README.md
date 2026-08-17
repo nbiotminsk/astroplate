@@ -88,12 +88,12 @@ Accept: application/json
 
 ## 🔄 Стратегия отказоустойчивости и ретраев
 
-В [`UnicBoard::getDeviceInfo()`](file:///Users/nikolaj/Projects/astroplate/public/api/telegram_bot/src/UnicBoard.php) реализована многоуровневая стратегия:
+В [`UnicBoard::getDeviceInfo()`](file:///Users/nikolaj/Projects/astroplate/public/api/telegram_bot/src/UnicBoard.php) реализована адаптивная стратегия чередования (до 4 попыток с логированием скорости ответа):
 
-1. **Попытка 1**: `GET /api/v1/devices/{id}/info` (прямой запрос).
-2. **Попытка 2**: Повторный `GET /api/v1/devices/{id}/info` при сетевом сбое или неполном ответе.
-3. **Попытка 3**: `POST /api/v1/devices/info` с телом `{"device_ids": [id]}` (точечный fallback по контракту API).
-4. **Попытка 4**: `GET /api/v1/devices/info?limit=100` (пакетный fallback с фильтрацией по целевому UUID).
+1. **Попытка 1**: `POST /api/v1/devices/info` с телом `{"device_ids": [id]}` (точечный опрос по контракту API).
+2. **Попытка 2**: `GET /api/v1/devices/{id}/info` (прямой опрос конкретного прибора).
+3. **Попытка 3**: Повторный `POST /api/v1/devices/info` с телом `{"device_ids": [id]}`.
+4. **Попытка 4**: Повторный `GET /api/v1/devices/{id}/info`.
 
 ### Разделение ответственности:
 - **`UnicBoard` (API-клиент)**: Отвечает за транспорт и структурную валидацию (`hasCompleteDeviceInfoPayload`). Значение `last_value: null` считается корректным ответом API (например, для новых непривязанных приборов) и не вызывает бесконечных ретраев.
@@ -180,7 +180,7 @@ python3 public/api/telegram_bot/test_jupiter_api.py
 
 ## 📝 Логирование и диагностика
 
-Все API-запросы логируются в структурированном JSON-формате `stdout`/`stderr`:
+Все события бота, ошибки и структурированные JSON-логи API-запросов автоматически записываются в файл **`storage/bot.log`** (путь можно переопределить через переменную `BOT_LOG_FILE` в `.env`), а также в стандартный поток `stderr`:
 
 ```json
 {
@@ -207,4 +207,9 @@ python3 public/api/telegram_bot/test_jupiter_api.py
     ]
   }
 }
+```
+
+Просмотр логов в реальном времени:
+```bash
+tail -f storage/bot.log
 ```
