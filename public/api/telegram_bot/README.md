@@ -90,10 +90,10 @@ Accept: application/json
 
 В [`UnicBoard::getDeviceInfo()`](file:///Users/nikolaj/Projects/astroplate/public/api/telegram_bot/src/UnicBoard.php) реализована адаптивная стратегия чередования (до 4 попыток с логированием скорости ответа):
 
-1. **Попытка 1**: `POST /api/v1/devices/info` с телом `{"device_ids": [id]}` (точечный опрос по контракту API).
-2. **Попытка 2**: `GET /api/v1/devices/{id}/info` (прямой опрос конкретного прибора).
-3. **Попытка 3**: Повторный `POST /api/v1/devices/info` с телом `{"device_ids": [id]}`.
-4. **Попытка 4**: Повторный `GET /api/v1/devices/{id}/info`.
+1. **Попытка 1**: `GET /api/v1/devices/{id}/info` (прямой опрос конкретного прибора).
+2. **Попытка 2**: `POST /api/v1/devices/info` с телом `{"device_ids": [id]}` (точечный опрос по контракту API).
+3. **Попытка 3**: Повторный `GET /api/v1/devices/{id}/info`.
+4. **Попытка 4**: Повторный `POST /api/v1/devices/info` с телом `{"device_ids": [id]}`.
 
 ### Разделение ответственности:
 - **`UnicBoard` (API-клиент)**: Отвечает за транспорт и структурную валидацию (`hasCompleteDeviceInfoPayload`). Значение `last_value: null` считается корректным ответом API (например, для новых непривязанных приборов) и не вызывает бесконечных ретраев.

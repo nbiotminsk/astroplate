@@ -215,7 +215,7 @@ class UnicBoardApiTest
         $finalOkApiTrue = $code === 200 && is_array($respValidApiTrue) && array_key_exists('ok', $respValidApiTrue) && $respValidApiTrue['ok'] === true;
         TestRunner::assert($finalOkApiTrue === true, 'Test M: HTTP 200 + API ok=true дает ok = true');
 
-        // Test N: /info alternates POST and GET. If POST attempt 1 returns incomplete, GET attempt 2 succeeds.
+        // Test N: /info alternates GET and POST. If GET attempt 1 returns incomplete, POST attempt 2 succeeds.
         $infoGetAttempts = 0;
         $infoPostAttempts = 0;
         $infoResponse = \TelegramBot\UnicBoard::getDeviceInfo(
@@ -225,24 +225,22 @@ class UnicBoardApiTest
             retryDelayUs: 0,
             httpGet: static function (string $url, array $headers, int $timeout) use (&$infoGetAttempts): array {
                 $infoGetAttempts++;
-                return [200, ['ok' => true, 'payload' => [
-                    'id' => 'device-id',
-                    'device_channel' => [['serial_number' => 1]],
-                ]]];
+                // Попытка 1 (GET): пустые каналы -> неполный ответ
+                return [200, ['ok' => true, 'payload' => ['id' => 'device-id', 'device_channel' => []]]];
             },
             httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$infoPostAttempts): array {
                 $infoPostAttempts++;
-                // Попытка 1 (POST): пустые каналы -> неполный ответ
+                // Попытка 2 (POST): полный ответ
                 return [200, ['ok' => true, 'payload' => [
                     [
                         'id' => 'device-id',
-                        'device_channel' => [],
+                        'device_channel' => [['serial_number' => 1]],
                     ],
                 ]]];
             }
         );
-        TestRunner::assertEquals(1, $infoPostAttempts, 'Test N: Выполнен 1 POST-запрос на 1-й попытке');
-        TestRunner::assertEquals(1, $infoGetAttempts, 'Test N: Выполнен 1 GET-запрос на 2-й попытке');
+        TestRunner::assertEquals(1, $infoGetAttempts, 'Test N: Выполнен 1 GET-запрос на 1-й попытке');
+        TestRunner::assertEquals(1, $infoPostAttempts, 'Test N: Выполнен 1 POST-запрос на 2-й попытке');
         TestRunner::assert($infoResponse['ok'] === true, 'Test N: Полный повторный ответ /info принят');
 
         // Test O: valid JSON without the mandatory ok=true is not a successful /info response.
@@ -252,17 +250,15 @@ class UnicBoardApiTest
             'device-id',
             maxRetries: 1,
             retryDelayUs: 0,
-            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$missingOkAttempts): array {
+            httpGet: static function (string $url, array $headers, int $timeout) use (&$missingOkAttempts): array {
                 $missingOkAttempts++;
 
                 return [200, ['payload' => [
-                    [
-                        'id' => 'device-id',
-                        'device_channel' => [[
-                            'serial_number' => 1,
-                            'device_meter' => [['last_value' => 1.0]],
-                        ]],
-                    ]
+                    'id' => 'device-id',
+                    'device_channel' => [[
+                        'serial_number' => 1,
+                        'device_meter' => [['last_value' => 1.0]],
+                    ]],
                 ]]];
             }
         );
@@ -424,7 +420,7 @@ class UnicBoardApiTest
         $reportV = $reportService->buildReport($config, $deviceV);
         TestRunner::assert(str_contains($reportV, '12.345 m³') || str_contains($reportV, 'Показания'), 'Test V (Case F): buildReport возвращает показания');
 
-        // Test W (Case G): Чередование POST -> GET -> POST (успех на 3-й попытке)
+        // Test W (Case G): Чередование GET -> POST -> GET (успех на 3-й попытке)
         $infoGetAttemptsW = 0;
         $infoPostAttemptsW = 0;
         $infoResponseW = \TelegramBot\UnicBoard::getDeviceInfo(
@@ -434,40 +430,38 @@ class UnicBoardApiTest
             retryDelayUs: 0,
             httpGet: static function (string $url, array $headers, int $timeout) use (&$infoGetAttemptsW): array {
                 $infoGetAttemptsW++;
-                // Попытка 2 (GET): пустой device_channel
-                return [200, ['ok' => true, 'payload' => ['id' => 'dev-uuid-w', 'device_channel' => []]]];
-            },
-            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$infoPostAttemptsW): array {
-                $infoPostAttemptsW++;
-                if ($infoPostAttemptsW === 1) {
-                    // Попытка 1 (POST): пустой device_channel
-                    return [200, ['ok' => true, 'payload' => [['id' => 'dev-uuid-w', 'device_channel' => []]]]];
+                if ($infoGetAttemptsW === 1) {
+                    // Попытка 1 (GET): пустой device_channel
+                    return [200, ['ok' => true, 'payload' => ['id' => 'dev-uuid-w', 'device_channel' => []]]];
                 }
-                // Попытка 3 (POST): полный ответ
+                // Попытка 3 (GET): полный ответ
                 return [200, [
                     'ok' => true,
                     'count' => 1,
                     'total_count' => 1,
                     'errors' => [],
                     'payload' => [
-                        [
-                            'id' => 'dev-uuid-w',
-                            'device_channel' => [
-                                [
-                                    'serial_number' => 1,
-                                    'device_meter' => [
-                                        ['last_value' => 7.77, 'last_value_date' => '2026-08-16T12:00:00']
-                                    ]
+                        'id' => 'dev-uuid-w',
+                        'device_channel' => [
+                            [
+                                'serial_number' => 1,
+                                'device_meter' => [
+                                    ['last_value' => 7.77, 'last_value_date' => '2026-08-16T12:00:00']
                                 ]
                             ]
                         ]
                     ]
                 ]];
+            },
+            httpPostJson: static function (string $url, array $body, array $headers, int $timeout) use (&$infoPostAttemptsW): array {
+                $infoPostAttemptsW++;
+                // Попытка 2 (POST): пустой device_channel
+                return [200, ['ok' => true, 'payload' => [['id' => 'dev-uuid-w', 'device_channel' => []]]]];
             }
         );
-        TestRunner::assertEquals(2, $infoPostAttemptsW, 'Test W (Case G): Выполнены 2 POST-попытки');
-        TestRunner::assertEquals(1, $infoGetAttemptsW, 'Test W (Case G): Выполнена 1 GET-попытка');
-        TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Третья попытка (POST) завершилась успешно ok=true');
+        TestRunner::assertEquals(2, $infoGetAttemptsW, 'Test W (Case G): Выполнены 2 GET-попытки');
+        TestRunner::assertEquals(1, $infoPostAttemptsW, 'Test W (Case G): Выполнена 1 POST-попытка');
+        TestRunner::assert($infoResponseW['ok'] === true, 'Test W (Case G): Третья попытка (GET) завершилась успешно ok=true');
         TestRunner::assertEquals(1, $infoResponseW['count'], 'Test W (Case G): count равен 1 для найденного устройства');
         TestRunner::assertEquals(1, $infoResponseW['total_count'], 'Test W (Case G): total_count равен 1 для найденного устройства');
         TestRunner::assertEquals([], $infoResponseW['errors'], 'Test W (Case G): errors сохранены из ответа API');
@@ -490,7 +484,7 @@ class UnicBoardApiTest
         TestRunner::assert($valuesRespX['ok'] === true, 'Test X (Case A): Итоговый ok=true при пустом payload');
         TestRunner::assertEquals([], $valuesRespX['payload'], 'Test X (Case A): Итоговый payload пустой массив');
 
-        // Test Y (Case G): 4 чередующихся попытки (2 POST + 2 GET) — сервер не отвечает, устройство не найдено
+        // Test Y (Case G): 4 чередующихся попытки (2 GET + 2 POST) — сервер не отвечает, устройство не найдено
         $infoPostAttemptsY = 0;
         $infoGetAttemptsY = 0;
         $infoResponseY = \TelegramBot\UnicBoard::getDeviceInfo(
@@ -507,8 +501,8 @@ class UnicBoardApiTest
                 return [200, null];
             }
         );
-        TestRunner::assertEquals(2, $infoPostAttemptsY, 'Test Y (Case G): Выполнены 2 POST-попытки');
         TestRunner::assertEquals(2, $infoGetAttemptsY, 'Test Y (Case G): Выполнены 2 GET-попытки');
+        TestRunner::assertEquals(2, $infoPostAttemptsY, 'Test Y (Case G): Выполнены 2 POST-попытки');
         TestRunner::assert($infoResponseY['ok'] === false, 'Test Y (Case G): Устройство не найдено');
         TestRunner::assert($infoResponseY['payload'] === null, 'Test Y (Case G): payload равен null при отсутствии данных');
         TestRunner::assert($infoResponseY['count'] === null, 'Test Y (Case G): count равен null когда resp невалидный');
@@ -521,13 +515,11 @@ class UnicBoardApiTest
             'dev-uuid-z',
             maxRetries: 1,
             retryDelayUs: 0,
-            httpPostJson: static fn(string $url, array $body, array $headers, int $timeout): array => [200, [
+            httpGet: static fn(string $url, array $headers, int $timeout): array => [200, [
                 'ok' => true,
                 'payload' => [
-                    [
-                        'id' => 'dev-uuid-z',
-                        'device_channel' => [],
-                    ]
+                    'id' => 'dev-uuid-z',
+                    'device_channel' => [],
                 ],
             ]]
         );

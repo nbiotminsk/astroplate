@@ -192,7 +192,7 @@ class UnicBoard
 
     /**
      * Информация по конкретному прибору:
-     * Чередует POST /api/v1/devices/info (device_ids) и GET /api/v1/devices/{device_id}/info (до 4 попыток: POST -> GET -> POST -> GET).
+     * Чередует GET /api/v1/devices/{device_id}/info и POST /api/v1/devices/info (device_ids) (до 4 попыток: GET -> POST -> GET -> POST).
      *
      * @return array{http_status: int, ok: bool, payload: ?array, count: ?int, total_count: ?int, errors: array}
      */
@@ -216,12 +216,12 @@ class UnicBoard
         $finalPayload = null;
 
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
-            $isPost = ($attempt % 2 === 1);
+            $isPost = ($attempt % 2 === 0);
             $startTs = microtime(true);
 
             if ($isPost) {
                 $endpoint = 'POST /api/v1/devices/info';
-                $variant = $attempt === 1 ? 'post_device_ids_info' : 'retry_post_device_ids_info';
+                $variant = $attempt === 2 ? 'post_device_ids_info' : 'retry_post_device_ids_info';
                 [$code, $resp] = $httpPostJson($postUrl, ['device_ids' => [$deviceId]], $headers, $timeout);
                 $durationMs = (microtime(true) - $startTs) * 1000;
 
@@ -242,7 +242,7 @@ class UnicBoard
                 $payload = $deviceItem;
             } else {
                 $endpoint = 'GET /api/v1/devices/{id}/info';
-                $variant = $attempt === 2 ? 'get_device_id_info' : 'retry_get_device_id_info';
+                $variant = $attempt === 1 ? 'get_device_id_info' : 'retry_get_device_id_info';
                 [$code, $resp] = $httpGet($getUrl, $headers, $timeout);
                 $durationMs = (microtime(true) - $startTs) * 1000;
 
