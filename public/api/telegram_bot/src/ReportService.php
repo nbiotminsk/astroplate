@@ -27,6 +27,14 @@ class ReportService
 
         // 1. Текущие показания получаем ПЕРВИЧНО из GET /api/v1/devices/{device_id}/info
         $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+        $httpStatus = $infoResp['http_status'] ?? 0;
+
+        // Если сервер UnicBoard недоступен (сетевой таймаут / сбой подключения)
+        if ($httpStatus === 0 && !$infoResp['ok']) {
+            $lines[] = "\n⚠️ <i>Сервер сбора данных временно недоступен. Пожалуйста, попробуйте снова через минуту.</i>";
+            return implode("\n", $lines);
+        }
+
         $infoPayload = $infoResp['payload'] ?? null;
         $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 
@@ -209,10 +217,18 @@ class ReportService
 
         // 1. Запрашиваем исторические значения за текущий месяц
         $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 100, date('Y-m-01\T00:00:00'));
-        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+        $valuesStatus = $valuesResp['http_status'] ?? 0;
 
         // 2. Запрашиваем текущие онлайн показания из /info
         $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+        $infoStatus = $infoResp['http_status'] ?? 0;
+
+        if ($valuesStatus === 0 && $infoStatus === 0 && !$valuesResp['ok'] && !$infoResp['ok']) {
+            $lines[] = "\n⚠️ <i>Сервер сбора данных временно недоступен. Пожалуйста, попробуйте снова через минуту.</i>";
+            return implode("\n", $lines);
+        }
+
+        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
         $infoPayload = $infoResp['payload'] ?? null;
         $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 

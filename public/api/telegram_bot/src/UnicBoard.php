@@ -89,7 +89,7 @@ class UnicBoard
         string $deviceUuid,
         int $limit = 50,
         ?string $periodFrom = null,
-        int $timeout = 15,
+        int $timeout = 5,
         ?string $periodTo = null,
         bool $endOfDay = true,
         ?string $journalDataType = null,
@@ -199,7 +199,7 @@ class UnicBoard
     public static function getDeviceInfo(
         array $config,
         string $deviceId,
-        int $timeout = 10,
+        int $timeout = 5,
         int $maxRetries = 4,
         int $retryDelayUs = 200000,
         ?callable $httpGet = null,
@@ -386,7 +386,7 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $limit = 1,
-        int $timeout = 10,
+        int $timeout = 5,
         int $maxRetries = 3,
         int $retryDelayUs = 200000,
         ?callable $httpGet = null
@@ -452,7 +452,7 @@ class UnicBoard
     /**
      * Получить последнюю запись температуры прибора (или null)
      */
-    public static function getLatestTemperature(array $config, string $deviceId, int $timeout = 10, ?callable $httpGet = null): ?array
+    public static function getLatestTemperature(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
     {
         $res = self::getTemperature($config, $deviceId, 1, $timeout, httpGet: $httpGet);
         return $res['payload'][0] ?? null;
@@ -467,7 +467,7 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $limit = 1,
-        int $timeout = 10,
+        int $timeout = 5,
         int $maxRetries = 3,
         int $retryDelayUs = 200000,
         ?callable $httpGet = null
@@ -533,7 +533,7 @@ class UnicBoard
     /**
      * Получить последнюю запись батареи прибора (или null)
      */
-    public static function getLatestBattery(array $config, string $deviceId, int $timeout = 10, ?callable $httpGet = null): ?array
+    public static function getLatestBattery(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
     {
         $res = self::getBattery($config, $deviceId, 1, $timeout, httpGet: $httpGet);
         return $res['payload'][0] ?? null;
@@ -547,7 +547,7 @@ class UnicBoard
     public static function getAllDevices(
         array $config,
         int $limit = 100,
-        int $timeout = 15,
+        int $timeout = 5,
         int $maxRetries = 3,
         int $retryDelayUs = 200000,
         ?callable $httpGet = null
