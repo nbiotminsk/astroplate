@@ -1,5 +1,4 @@
 import { plainify, titleify } from "@/lib/utils/textConverter";
-import React from "react";
 
 export interface ISearchItem {
   group: string;

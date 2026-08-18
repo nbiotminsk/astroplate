@@ -181,8 +181,11 @@ const homepage = homepageEntry.data as any;
                   <ul class="mt-5 flex-1 space-y-2.5">
                     {card.features.map((feature: any) => {
                       const isLink =
-                        typeof feature === "object" && feature?.link;
-                      const text = isLink ? feature.text : feature;
+                        typeof feature === "object" && feature !== null && feature?.link;
+                      const text =
+                        typeof feature === "object" && feature !== null
+                          ? (feature.text ?? Object.entries(feature).map(([k, v]) => `${k}: ${v}`).join(", "))
+                          : feature;
                       return (
                         <li
                           class={`flex items-start gap-2 text-sm leading-relaxed ${
