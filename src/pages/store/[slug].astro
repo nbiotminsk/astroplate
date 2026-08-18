@@ -10,6 +10,7 @@ import {
   getStoreLabelMeta,
   normalizeStoreLabel,
 } from "@/lib/utils/storeLabels";
+import { markdownify } from "@/lib/utils/textConverter";
 import { render } from "astro:content";
 
 export async function getStaticPaths() {
@@ -293,7 +294,7 @@ const productSchema = {
       <div class="row items-start gap-y-8">
         <div class="lg:col-6">
           <ImageMod
-            class="w-full max-h-[420px] object-contain rounded-xl border border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-body"
+            class="w-full max-h-105 object-contain rounded-xl border border-border bg-light p-4 dark:border-darkmode-border dark:bg-darkmode-body"
             src={image}
             alt={title}
             width={620}
@@ -336,7 +337,7 @@ const productSchema = {
           >
             {isInStock ? "В наличии" : "Нет в наличии"}
           </p>
-          {description && <p class="mb-6" set:html={description} />}
+          {description && <div class="mb-6 prose dark:prose-invert" set:html={markdownify(description, true)} />}
 
           <div class="content mb-6">
             <Content />
