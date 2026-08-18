@@ -163,7 +163,7 @@ const CheckoutModal = () => {
         onClick={closeModal}
       />
       <div className={`modal ${isOpen ? "show" : ""}`}>
-        <div className="modal-content w-[500px]!">
+        <div className="modal-content w-125!">
           <button
             className="modal-close"
             onClick={closeModal}
@@ -373,7 +373,15 @@ const CheckoutModal = () => {
                       className="underline hover:text-primary"
                       target="_blank"
                     >
-                      договора публичной оферты
+                      договора оферты
+                    </a>{" "}
+                    и соглашаетесь с{" "}
+                    <a
+                      href="/info/personalnye-dannye"
+                      className="underline hover:text-primary"
+                      target="_blank"
+                    >
+                      политикой обработки персональных данных
                     </a>
                   </p>
                   <button
