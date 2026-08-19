@@ -45,9 +45,28 @@ class MeterDetailCommand implements CommandInterface
         $userMeters = $this->userMeterRepo->getMetersByChatId($chatId);
         $isAdded = isset($userMeters[$serial]);
 
-        $report = $this->reportService->buildReport($config, $device);
-        $keyboard = $this->telegram->buildDeviceKeyboard($serial, $isAdded);
-
-        $this->telegram->sendMessage($chatId, $report, $token, $keyboard);
+        try {
+            $report = $this->reportService->buildReport($config, $device);
+            $keyboard = $this->telegram->buildDeviceKeyboard($serial, $isAdded);
+            $this->telegram->sendMessage($chatId, $report, $token, $keyboard);
+        } catch (\TelegramBot\Exception\ApiUnavailableException $e) {
+            $isRetry = $update->callbackData === 'is_auto_retry'; // Flag to distinguish retry
+            if (!$isRetry) {
+                $this->telegram->sendMessage($chatId, "⚠️ <i>Сервер сбора данных временно недоступен.\nБот автоматически попробует запросить данные через 10 секунд и пришлет ответ.</i>", $token);
+                
+                // Для Webhook (когда работает fastcgi_finish_request) мы можем просто подождать в фоне
+                sleep(10);
+                
+                try {
+                    $report = $this->reportService->buildReport($config, $device);
+                    $keyboard = $this->telegram->buildDeviceKeyboard($serial, $isAdded);
+                    $this->telegram->sendMessage($chatId, $report, $token, $keyboard);
+                } catch (\TelegramBot\Exception\ApiUnavailableException $e2) {
+                    $this->telegram->sendMessage($chatId, "⚠️ <i>Сервер сбора данных всё ещё недоступен. Попробуйте позже.</i>", $token);
+                }
+            } else {
+                $this->telegram->sendMessage($chatId, "⚠️ <i>Сервер сбора данных всё ещё недоступен. Попробуйте позже.</i>", $token);
+            }
+        }
     }
 }

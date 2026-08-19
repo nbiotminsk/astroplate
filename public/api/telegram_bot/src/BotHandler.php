@@ -58,11 +58,19 @@ class BotHandler
 
         $raw = file_get_contents('php://input');
         $update = json_decode((string) $raw, true);
+        
+        // Отвечаем Telegram мгновенно, чтобы закрыть соединение
+        http_response_code(200);
+        echo 'ok';
+        
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        }
+
+        // Выполняем тяжелую работу (опросы API) в фоне
         if (is_array($update)) {
             $this->handleUpdate($update);
         }
-        http_response_code(200);
-        echo 'ok';
     }
 
     /** Режим Long-polling. Запуск из CLI. */

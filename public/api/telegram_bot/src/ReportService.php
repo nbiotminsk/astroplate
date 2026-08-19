@@ -31,8 +31,7 @@ class ReportService
 
         // Если сервер UnicBoard недоступен (сетевой таймаут / сбой подключения)
         if ($httpStatus === 0 && !$infoResp['ok']) {
-            $lines[] = "\n⚠️ <i>Сервер сбора данных временно недоступен. Пожалуйста, попробуйте снова через минуту.</i>";
-            return implode("\n", $lines);
+            throw new \TelegramBot\Exception\ApiUnavailableException();
         }
 
         $infoPayload = $infoResp['payload'] ?? null;

@@ -192,7 +192,7 @@ class UnicBoard
 
     /**
      * Информация по конкретному прибору:
-     * Чередует GET /api/v1/devices/{device_id}/info и POST /api/v1/devices/info (device_ids) (до 4 попыток: GET -> POST -> GET -> POST).
+     * Чередует GET /api/v1/devices/{device_id}/info и POST /api/v1/devices/info (device_ids) (до 3 попыток: GET -> POST -> GET).
      *
      * @return array{http_status: int, ok: bool, payload: ?array, count: ?int, total_count: ?int, errors: array}
      */
@@ -200,7 +200,7 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $timeout = 5,
-        int $maxRetries = 4,
+        int $maxRetries = 3,
         int $retryDelayUs = 200000,
         ?callable $httpGet = null,
         ?callable $httpPostJson = null
