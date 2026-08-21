@@ -358,10 +358,10 @@ class ReportService
                 $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 10.0;
                 $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
 
-                // Литраж на импульс и расчет импульсов
-                $litersPerPulse = $unitMultiplier * $valueMultiplier;
+                // В UnicBoard базовый множитель 1 соответствует 10 литрам на импульс (0.01 м³)
+                $litersPerPulse = $unitMultiplier * 10.0 * $valueMultiplier;
                 $m3PerPulse = $litersPerPulse / 1000.0;
-                $pulses = ($litersPerPulse > 0 && $lastVal !== null) ? (int) round(($lastVal * 1000.0) / $litersPerPulse) : 0;
+                $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : 0;
 
                 $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
                 $meterNum = $chConfig['meter_number'] ?? null;
@@ -369,11 +369,12 @@ class ReportService
 
                 $formattedVal = $lastVal !== null ? number_format($lastVal, 2, '.', '') . ' m³' : '—';
                 $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
+                $multiplierLiters = round($litersPerPulse, 3);
 
                 $statusActive = in_array($chNum, $activeChannels, true) ? "✅ Активен" : "⏸ Отключен в боте";
 
                 $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
-                $lines[] = "• Вес импульса (множитель): <b>{$unitMultiplier} л/имп</b> ({$m3PerPulse} м³/имп)";
+                $lines[] = "• Вес импульса (множитель): <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
                 $lines[] = "• Число импульсов: <b>{$pulses} имп.</b>";
                 $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
                 $lines[] = "• Последний срез: {$dateStr}\n";
