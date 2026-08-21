@@ -109,11 +109,11 @@ class ReportService
                 }
 
                 if ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "• № {$meterNum}";
+                    $meterLabel = "• Счетчик № {$meterNum}";
                 } elseif (count($currentReadings) > 1) {
                     $meterLabel = "• Вход {$chNum}";
                 } else {
-                    $meterLabel = "• № {$deviceSerial}";
+                    $meterLabel = "• Счетчик № {$deviceSerial}";
                 }
 
                 if ($reading->isInactive() && $reading->lastDateEventNoData !== null) {
@@ -157,7 +157,7 @@ class ReportService
                 $valWithUnit = $displayVal !== null ? number_format($displayVal, 2, '.', '') . ' m³' : '—';
 
                 if ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "• № {$meterNum}";
+                    $meterLabel = "• Счетчик № {$meterNum}";
                 } else {
                     $meterLabel = "• Вход {$chNum}";
                 }
