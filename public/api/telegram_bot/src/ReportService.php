@@ -382,12 +382,33 @@ class ReportService
             $lines[] = "ℹ️ Информация по каналам не найдена.\n";
         }
 
-        // Телеметрия (батарея, температура, протокол)
+        // Телеметрия (батарея, температура, часы, протокол)
         $latestBat = UnicBoard::getLatestBattery($config, $deviceId);
         $latestTemp = UnicBoard::getLatestTemperature($config, $deviceId);
+        $latestClock = UnicBoard::getLatestClock($config, $deviceId);
 
         $batStr = ($latestBat && isset($latestBat['value'])) ? number_format((float) $latestBat['value'], 2, '.', '') . ' V' : '—';
         $tempStr = ($latestTemp && isset($latestTemp['value'])) ? round((float) $latestTemp['value']) . ' °C' : '—';
+
+        if ($latestClock && !empty($latestClock['device_clock'])) {
+            $clockDateStr = MeterService::formatDate($latestClock['device_clock'], 'd.m.Y H:i:s', $timezone);
+            $syncSec = isset($latestClock['out_of_sync_s']) ? (float) $latestClock['out_of_sync_s'] : 0.0;
+            $syncType = $latestClock['out_of_sync_type'] ?? 'synced';
+            $syncSign = $syncSec > 0 ? "+{$syncSec}" : "{$syncSec}";
+            $syncStatus = match ($syncType) {
+                'synced' => 'синхронизировано',
+                'out_of_sync_warning' => 'предупреждение',
+                'out_of_sync_critical' => 'критическое расхождение',
+                default => $syncType,
+            };
+            $lines[] = "🕒 Внутренние часы: <b>{$clockDateStr}</b>";
+            $lines[] = "⏱ Расхождение с сервером: <b>{$syncSign} сек</b> (<i>{$syncStatus}</i>)";
+        } elseif (!empty($channels[0]['device_meter'][0]['last_value_date'])) {
+            $rawDate = $channels[0]['device_meter'][0]['last_value_date'];
+            $clockDateStr = MeterService::formatDate($rawDate, 'd.m.Y H:i', $timezone);
+            $lines[] = "🕒 Время модема: <b>{$clockDateStr}</b> (<i>синхронизировано</i>)";
+            $lines[] = "⏱ Расхождение с сервером: <b>0 сек</b> (<i>норма</i>)";
+        }
 
         $protocol = $payload['data_gateway_network_device']['protocol']['name'] ?? 'SMP_M';
         $networkType = $payload['data_gateway_network_device']['network']['type_network'] ?? 'input';

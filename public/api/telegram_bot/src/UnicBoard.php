@@ -540,6 +540,56 @@ class UnicBoard
     }
 
     /**
+     * Часы и синхронизация прибора GET /api/v1/devices/{device_id}/clocks
+     *
+     * @return array{http_status: int, ok: bool, payload: array, errors: array}
+     */
+    public static function getClock(
+        array $config,
+        string $deviceId,
+        int $limit = 1,
+        int $timeout = 5,
+        int $maxRetries = 2,
+        int $retryDelayUs = 200000,
+        ?callable $httpGet = null
+    ): array {
+        $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
+        $url = $apiBase . '/api/v1/devices/' . $deviceId . '/clocks?limit=' . $limit;
+        $headers = self::unicboardHeaders($config);
+        $httpGet ??= [Telegram::class, 'httpGet'];
+        $resp = null;
+        $code = 0;
+
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            [$code, $resp] = $httpGet($url, $headers, $timeout);
+            if ($code === 200 && self::hasApiSuccess($resp)) {
+                break;
+            }
+            if ($code >= 400 && $code < 500) {
+                break;
+            }
+            if ($attempt < $maxRetries) {
+                usleep($retryDelayUs);
+            }
+        }
+
+        $finalOk = $code === 200 && self::hasApiSuccess($resp);
+
+        return [
+            'http_status' => $code,
+            'ok' => $finalOk,
+            'payload' => is_array($resp) && isset($resp['payload']) && is_array($resp['payload']) ? $resp['payload'] : [],
+            'errors' => is_array($resp) ? ($resp['errors'] ?? []) : [],
+        ];
+    }
+
+    public static function getLatestClock(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
+    {
+        $res = self::getClock($config, $deviceId, 1, $timeout, httpGet: $httpGet);
+        return $res['payload'][0] ?? null;
+    }
+
+    /**
      * Запрос всех доступных приборов через GET /api/v1/devices/info
      *
      * @return array{http_status: int, ok: bool, payload: array, count: ?int, total_count: ?int, errors: array}
