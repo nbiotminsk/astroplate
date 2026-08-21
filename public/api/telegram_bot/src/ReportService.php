@@ -382,8 +382,39 @@ class ReportService
             }
         }
 
+        // Запрашиваем историю /values на случай, если в /info нет среза данных
+        $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
+        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+        $historyByChannel = [];
+        foreach ($historyRecords as $rec) {
+            $historyByChannel[$rec->channelNumber][] = $rec;
+        }
+        foreach ($historyByChannel as $chN => &$hList) {
+            usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
+                return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
+            });
+        }
+        unset($hList);
+
+        if (empty($channels) && !empty($historyByChannel)) {
+            foreach ($historyByChannel as $chNumInt => $histList) {
+                $latestH = $histList[0] ?? null;
+                $channels[] = [
+                    'serial_number' => $chNumInt,
+                    'device_meter' => [
+                        [
+                            'last_value' => $latestH ? $latestH->value : null,
+                            'last_value_date' => $latestH ? $latestH->date : null,
+                            'unit_multiplier' => 1.0,
+                            'value_multiplier' => 1.0,
+                        ]
+                    ]
+                ];
+            }
+        }
+
         if (empty($channels) && !empty($device->channels)) {
-            // Фолбэк 2: локальная конфигурация каналов
+            // Фолбэк 3: локальная конфигурация каналов
             foreach ($device->channels as $chNumStr => $chConf) {
                 $chNumInt = (int) $chNumStr;
                 $channels[] = [
@@ -409,19 +440,30 @@ class ReportService
 
                 $lastVal = isset($meterBilling['last_value']) && is_numeric($meterBilling['last_value']) ? (float) $meterBilling['last_value'] : null;
                 $lastValDate = $meterBilling['last_value_date'] ?? null;
-                $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 10.0;
+
+                // Если в /info нет значения или даты среза, берем из истории /values:
+                if (($lastVal === null || $lastValDate === null) && !empty($historyByChannel[$chNum])) {
+                    $latestH = $historyByChannel[$chNum][0] ?? null;
+                    if ($latestH) {
+                        $lastVal ??= (float) $latestH->value;
+                        $lastValDate ??= $latestH->date;
+                    }
+                }
+
+                $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 1.0;
                 $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
 
                 // В UnicBoard базовый множитель 1 соответствует 10 литрам на импульс (0.01 м³)
                 $litersPerPulse = $unitMultiplier * 10.0 * $valueMultiplier;
                 $m3PerPulse = $litersPerPulse / 1000.0;
-                $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : 0;
+                $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : null;
 
                 $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
                 $meterNum = $chConfig['meter_number'] ?? null;
                 $meterLabel = $meterNum ? " (№ <code>{$meterNum}</code>)" : "";
 
                 $formattedVal = $lastVal !== null ? number_format($lastVal, 2, '.', '') . ' m³' : '—';
+                $pulsesStr = $pulses !== null ? "{$pulses} имп." : '—';
                 $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
                 $multiplierLiters = round($litersPerPulse, 3);
 
@@ -429,7 +471,7 @@ class ReportService
 
                 $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
                 $lines[] = "• Вес импульса (множитель): <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
-                $lines[] = "• Число импульсов: <b>{$pulses} имп.</b>";
+                $lines[] = "• Число импульсов: <b>{$pulsesStr}</b>";
                 $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
                 $lines[] = "• Последний срез: {$dateStr}\n";
             }
