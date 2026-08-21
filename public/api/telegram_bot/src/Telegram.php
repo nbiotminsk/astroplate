@@ -28,6 +28,7 @@ class Telegram
 /start — открыть главное меню
 /my — список ваших адресов и счётчиков
 /add — мастер добавления нового прибора
+/ping — тест связи с серверами
 TXT;
 
     public static function httpGet(string $url, array $headers = [], int $timeout = 8, int $connectTimeout = 4): array
@@ -127,6 +128,9 @@ TXT;
         $keyboard[] = [
             ['text' => '➕ Добавить счетчик'],
             ['text' => '📋 Мои счетчики']
+        ];
+        $keyboard[] = [
+            ['text' => '⚡ Тест сервера']
         ];
 
         return [

@@ -156,5 +156,17 @@ class CommandTest
         $diagUpdate = new TelegramUpdateDTO(19, '777', '', true, 'diag_8554760', 'cb_diag');
         TestRunner::assert($diagCb->supports($diagUpdate), 'DiagnosticCallback supports diag_8554760');
         TestRunner::assert(!$diagCb->supports($editOpenUpdate), 'DiagnosticCallback rejects other callbacks');
+
+        // PingServerCommand tests
+        $pingCmd = new \TelegramBot\Command\PingServerCommand($telegram);
+        $pingBtnUpdate = new TelegramUpdateDTO(20, '777', '⚡ Тест сервера');
+        $pingCmdUpdate = new TelegramUpdateDTO(21, '777', '/ping');
+        $pingCbUpdate = new TelegramUpdateDTO(22, '777', '', true, 'server_ping', 'cb_ping');
+        $otherUpdate = new TelegramUpdateDTO(23, '777', 'Счетчик 123');
+
+        TestRunner::assert($pingCmd->supports($pingBtnUpdate), 'PingServerCommand supports button ⚡ Тест сервера');
+        TestRunner::assert($pingCmd->supports($pingCmdUpdate), 'PingServerCommand supports command /ping');
+        TestRunner::assert($pingCmd->supports($pingCbUpdate), 'PingServerCommand supports callback server_ping');
+        TestRunner::assert(!$pingCmd->supports($otherUpdate), 'PingServerCommand rejects unrelated text');
     }
 }

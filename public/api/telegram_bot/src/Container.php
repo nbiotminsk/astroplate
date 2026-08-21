@@ -15,6 +15,7 @@ use TelegramBot\Command\InitMeterCommand;
 use TelegramBot\Command\MeterDetailCommand;
 use TelegramBot\Command\MonthArchiveCallback;
 use TelegramBot\Command\MyMetersCommand;
+use TelegramBot\Command\PingServerCommand;
 use TelegramBot\Command\StartCommand;
 use TelegramBot\Repository\DeviceRepositoryInterface;
 use TelegramBot\Repository\JsonDeviceRepository;
@@ -103,6 +104,9 @@ class Container
                 $this->get(MeterService::class),
                 $this->get(DeviceRepositoryInterface::class),
                 $this->get(MeterCacheRepositoryInterface::class)
+            ),
+            new PingServerCommand(
+                $this->get(Telegram::class)
             ),
             new MeterDetailCommand(
                 $this->get(Telegram::class),
