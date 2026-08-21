@@ -35,8 +35,15 @@ class JsonDeviceRepository implements DeviceRepositoryInterface
         return null;
     }
 
-    public function registerDevice(string $serial, string $uuid, string $name, array $initialValues = []): void
-    {
-        Storage::registerCustomDevice($serial, $uuid, $name, $initialValues);
+    public function registerDevice(
+        string $serial,
+        string $uuid,
+        string $name,
+        array $initialValues = [],
+        ?string $address = null,
+        ?array $activeChannels = null,
+        ?array $channels = null
+    ): void {
+        Storage::registerCustomDevice($serial, $uuid, $name, $initialValues, $address, $activeChannels, $channels);
     }
 }

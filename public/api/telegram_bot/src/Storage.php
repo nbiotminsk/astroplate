@@ -68,6 +68,43 @@ class Storage
         return json_decode((string) $content, true) ?: [];
     }
 
+    public static function userStatesFile(): string
+    {
+        return __DIR__ . '/../storage/user_states.json';
+    }
+
+    public static function loadUserStates(): array
+    {
+        return self::loadJsonWithLock(self::userStatesFile());
+    }
+
+    public static function saveUserStates(array $states): void
+    {
+        self::atomicWriteJson(self::userStatesFile(), $states);
+    }
+
+    public static function getUserState(string $chatId): ?array
+    {
+        $all = self::loadUserStates();
+        return $all[$chatId] ?? null;
+    }
+
+    public static function setUserState(string $chatId, array $state): void
+    {
+        $all = self::loadUserStates();
+        $all[$chatId] = $state;
+        self::saveUserStates($all);
+    }
+
+    public static function clearUserState(string $chatId): void
+    {
+        $all = self::loadUserStates();
+        if (isset($all[$chatId])) {
+            unset($all[$chatId]);
+            self::saveUserStates($all);
+        }
+    }
+
     public static function loadRegisteredDevices(): array
     {
         return self::loadJsonWithLock(self::customDevicesFile());
@@ -78,16 +115,33 @@ class Storage
         self::atomicWriteJson(self::customDevicesFile(), $devices);
     }
 
-    public static function registerCustomDevice(string $serial, string $uuid, string $name, array $initialValues = []): void
-    {
+    public static function registerCustomDevice(
+        string $serial,
+        string $uuid,
+        string $name,
+        array $initialValues = [],
+        ?string $address = null,
+        ?array $activeChannels = null,
+        ?array $channels = null
+    ): void {
         $devices = self::loadRegisteredDevices();
-        $devices[(int) $serial] = [
-            'name' => $name,
-            'device_id' => $uuid,
-        ];
+        $devData = $devices[(int) $serial] ?? [];
+        $devData['name'] = $name;
+        $devData['device_id'] = $uuid;
+        $devData['serial_number'] = $serial;
         if (!empty($initialValues)) {
-            $devices[(int) $serial]['initial_values'] = $initialValues;
+            $devData['initial_values'] = $initialValues;
         }
+        if ($address !== null && $address !== '') {
+            $devData['address'] = $address;
+        }
+        if ($activeChannels !== null) {
+            $devData['active_channels'] = array_values(array_map('intval', $activeChannels));
+        }
+        if ($channels !== null) {
+            $devData['channels'] = $channels;
+        }
+        $devices[(int) $serial] = $devData;
         self::saveRegisteredDevices($devices);
     }
 
@@ -107,16 +161,20 @@ class Storage
         return $all[$chatId] ?? [];
     }
 
-    public static function addUserMeter(string $chatId, string $serial, string $name, string $deviceId = ''): void
+    public static function addUserMeter(string $chatId, string $serial, string $name, string $deviceId = '', ?string $address = null): void
     {
         $all = self::loadUserMeters();
         if (!isset($all[$chatId])) {
             $all[$chatId] = [];
         }
-        $all[$chatId][$serial] = [
+        $meterData = [
             'name' => $name,
             'device_id' => $deviceId,
         ];
+        if ($address !== null && $address !== '') {
+            $meterData['address'] = $address;
+        }
+        $all[$chatId][$serial] = $meterData;
         self::saveUserMeters($all);
     }
 

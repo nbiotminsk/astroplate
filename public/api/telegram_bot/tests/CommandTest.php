@@ -80,5 +80,75 @@ class CommandTest
 
         $handledCb = $dispatcher->dispatch($cbMonthUpdate, $config);
         TestRunner::assert($handledCb, 'CommandDispatcher successfully matched callback month_');
+
+        // AddDeviceCommand Wizard & FSM tests
+        $addBtnUpdate = new TelegramUpdateDTO(5, '777', '➕ Добавить счетчик');
+        TestRunner::assert($addCmd->supports($addBtnUpdate), 'AddDeviceCommand supports button ➕ Добавить счетчик');
+
+        $addCmdUpdate = new TelegramUpdateDTO(6, '777', '/add');
+        TestRunner::assert($addCmd->supports($addCmdUpdate), 'AddDeviceCommand supports /add');
+
+        // Wizard callback queries support
+        $wizCbUpdate = new TelegramUpdateDTO(7, '777', '', true, 'wiz_ch_2', 'cb_wiz');
+        TestRunner::assert($addCmd->supports($wizCbUpdate), 'AddDeviceCommand supports callback wiz_ch_2');
+
+        $wizCancelUpdate = new TelegramUpdateDTO(8, '777', '', true, 'wiz_cancel', 'cb_cancel');
+        TestRunner::assert($addCmd->supports($wizCancelUpdate), 'AddDeviceCommand supports callback wiz_cancel');
+
+        // FSM State storage check
+        \TelegramBot\Storage::setUserState('777', [
+            'step' => 'WAITING_ADDRESS',
+            'serial' => '8554760',
+            'uuid' => 'ae0bf621-39e3-47e5-9126-52ec6e90d242',
+            'ch_count' => 2,
+        ]);
+        $state = \TelegramBot\Storage::getUserState('777');
+        TestRunner::assertEquals('WAITING_ADDRESS', $state['step'] ?? '', 'Storage::getUserState returns correct step');
+        TestRunner::assertEquals('8554760', $state['serial'] ?? '', 'Storage::getUserState returns serial');
+
+        // While in state, AddDeviceCommand intercepts text messages
+        $addrInputUpdate = new TelegramUpdateDTO(9, '777', 'ул. Кольцова 8 корпус 2 кв. 74');
+        TestRunner::assert($addCmd->supports($addrInputUpdate), 'AddDeviceCommand intercepts message while user is in active wizard state');
+
+        // Cancel resets state
+        $cancelUpdate = new TelegramUpdateDTO(10, '777', '❌ Отмена');
+        TestRunner::assert($addCmd->supports($cancelUpdate), 'AddDeviceCommand supports ❌ Отмена');
+
+        \TelegramBot\Storage::clearUserState('777');
+        TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Storage::clearUserState resets user state');
+
+        // EditDeviceCommand tests
+        $editCmd = new \TelegramBot\Command\EditDeviceCommand($telegram, $meterService, $reportService, $deviceRepo, $userMeterRepo);
+        
+        $editOpenUpdate = new TelegramUpdateDTO(11, '777', '', true, 'edit_8554760', 'cb_edit');
+        TestRunner::assert($editCmd->supports($editOpenUpdate), 'EditDeviceCommand supports edit_8554760');
+
+        $editAddrUpdate = new TelegramUpdateDTO(12, '777', '', true, 'edit_addr_8554760', 'cb_edit_addr');
+        TestRunner::assert($editCmd->supports($editAddrUpdate), 'EditDeviceCommand supports edit_addr_8554760');
+
+        $editMetersUpdate = new TelegramUpdateDTO(13, '777', '', true, 'edit_meters_8554760', 'cb_edit_meters');
+        TestRunner::assert($editCmd->supports($editMetersUpdate), 'EditDeviceCommand supports edit_meters_8554760');
+
+        $editInitUpdate = new TelegramUpdateDTO(14, '777', '', true, 'edit_init_8554760', 'cb_edit_init');
+        TestRunner::assert($editCmd->supports($editInitUpdate), 'EditDeviceCommand supports edit_init_8554760');
+
+        $editChUpdate = new TelegramUpdateDTO(15, '777', '', true, 'edit_ch_8554760', 'cb_edit_ch');
+        TestRunner::assert($editCmd->supports($editChUpdate), 'EditDeviceCommand supports edit_ch_8554760');
+
+        $setChUpdate = new TelegramUpdateDTO(16, '777', '', true, 'set_ch_8554760_2', 'cb_set_ch');
+        TestRunner::assert($editCmd->supports($setChUpdate), 'EditDeviceCommand supports set_ch_8554760_2');
+
+        $backDevUpdate = new TelegramUpdateDTO(17, '777', '', true, 'back_dev_8554760', 'cb_back');
+        TestRunner::assert($editCmd->supports($backDevUpdate), 'EditDeviceCommand supports back_dev_8554760');
+
+        // Edit text state support
+        \TelegramBot\Storage::setUserState('777', [
+            'step' => 'EDIT_ADDRESS',
+            'serial' => '8554760',
+        ]);
+        $editTextInput = new TelegramUpdateDTO(18, '777', 'ул. Новая 15 кв. 42');
+        TestRunner::assert($editCmd->supports($editTextInput), 'EditDeviceCommand intercepts text in EDIT_ADDRESS state');
+
+        \TelegramBot\Storage::clearUserState('777');
     }
 }

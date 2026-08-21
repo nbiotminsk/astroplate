@@ -111,5 +111,39 @@ class DTOTest
 
         $emptyDate = \TelegramBot\MeterService::formatDate(null);
         TestRunner::assertEquals('—', $emptyDate, 'MeterService::formatDate handles null');
+
+        // DeviceDTO extended fields (address, activeChannels, channels)
+        $extendedDevData = [
+            'name' => 'ул. Кольцова 8',
+            'address' => 'ул. Кольцова 8 корпус 2 кв. 74',
+            'device_id' => 'ae0bf621-39e3-47e5-9126-52ec6e90d242',
+            'serial_number' => '8554760',
+            'active_channels' => [2],
+            'channels' => [
+                '2' => [
+                    'meter_number' => '87654321',
+                    'user_initial' => 142.5,
+                    'base_api_value' => 4.3,
+                ],
+            ],
+        ];
+        $extDto = DeviceDTO::fromArray($extendedDevData);
+        TestRunner::assertEquals('ул. Кольцова 8 корпус 2 кв. 74', $extDto->address, 'DeviceDTO address mapping');
+        TestRunner::assertEquals([2], $extDto->activeChannels, 'DeviceDTO activeChannels mapping');
+        TestRunner::assertEquals('87654321', $extDto->channels['2']['meter_number'], 'DeviceDTO channel meter_number mapping');
+
+        // MeterService::calculateDisplayValue (Scenario 2: what you see is what you write)
+        // User saw 142.50 on meter dial when API was at 4.30.
+        // If current API is still 4.30, display must be exactly 142.50.
+        $calcCurrent = \TelegramBot\MeterService::calculateDisplayValue(4.30, 142.50, 4.30);
+        TestRunner::assertEquals(142.50, $calcCurrent, 'calculateDisplayValue: at moment of binding displays exact user initial');
+
+        // If API increments to 5.80 (+1.50 m³ water consumed), display must be 144.00.
+        $calcNew = \TelegramBot\MeterService::calculateDisplayValue(5.80, 142.50, 4.30);
+        TestRunner::assertEquals(144.00, $calcNew, 'calculateDisplayValue: accumulates only new delta');
+
+        // Format to 2 decimal places check
+        $formatted = number_format($calcNew, 2, '.', '') . ' m³';
+        TestRunner::assertEquals('144.00 m³', $formatted, 'Format to 2 decimal places');
     }
 }

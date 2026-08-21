@@ -35,11 +35,9 @@ TXT;
         if ($body === false) {
             $err = 'cURL Error (GET ' . $url . '): ' . curl_error($ch);
             Storage::log($err);
-            @curl_close($ch);
             return [0, null];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        @curl_close($ch);
 
         return [$code, json_decode((string) $body, true)];
     }
@@ -62,11 +60,9 @@ TXT;
         if ($data === false) {
             $err = 'cURL Error (POST ' . $url . '): ' . curl_error($ch);
             Storage::log($err);
-            @curl_close($ch);
             return [0, null];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        @curl_close($ch);
 
         return [$code, json_decode((string) $data, true)];
     }
@@ -106,8 +102,9 @@ TXT;
 
         $buttons = [];
         foreach ($meters as $serial => $data) {
-            $name = is_array($data) ? ($data['name'] ?? "Счетчик {$serial}") : (string) $data;
-            $buttons[] = ['text' => "💧 {$name} ({$serial})"];
+            $addr = is_array($data) ? ($data['address'] ?? $data['name'] ?? "Счетчик {$serial}") : (string) $data;
+            $prefix = (str_starts_with($addr, '📍') || str_starts_with($addr, '💧')) ? '' : '📍 ';
+            $buttons[] = ['text' => "{$prefix}{$addr}"];
             if (count($buttons) === 2) {
                 $keyboard[] = $buttons;
                 $buttons = [];
@@ -129,21 +126,98 @@ TXT;
         ];
     }
 
+    public static function buildCancelReplyKeyboard(): array
+    {
+        return [
+            'keyboard' => [
+                [['text' => '❌ Отмена']]
+            ],
+            'resize_keyboard' => true,
+            'one_time_keyboard' => false,
+        ];
+    }
+
+    public static function buildChannelChoiceInlineKeyboard(): array
+    {
+        return [
+            'inline_keyboard' => [
+                [['text' => '1️⃣ и 2️⃣ (Оба входа)', 'callback_data' => 'wiz_ch_1_2']],
+                [['text' => '1️⃣ Только 1-й вход', 'callback_data' => 'wiz_ch_1']],
+                [['text' => '2️⃣ Только 2-й вход', 'callback_data' => 'wiz_ch_2']],
+                [['text' => '❌ Отмена', 'callback_data' => 'wiz_cancel']],
+            ]
+        ];
+    }
+
+    public static function buildSkipChannelInlineKeyboard(): array
+    {
+        return [
+            'inline_keyboard' => [
+                [['text' => '⏩ Пропустить этот вход', 'callback_data' => 'wiz_skip']],
+                [['text' => '❌ Отмена', 'callback_data' => 'wiz_cancel']],
+            ]
+        ];
+    }
+
     public static function buildDeviceKeyboard(string $serialOrId, bool $isAdded = false): array
     {
         $addRemoveBtn = $isAdded
             ? ['text' => '❌ Удалить счетчик', 'callback_data' => 'del_' . $serialOrId]
             : ['text' => '➕ Сохранить в Мои счетчики', 'callback_data' => 'add_' . $serialOrId];
 
+        $buttons = [
+            [
+                ['text' => '📅 Архив за месяц', 'callback_data' => 'month_' . $serialOrId],
+            ],
+        ];
+
+        if ($isAdded) {
+            $buttons[] = [
+                ['text' => '✏️ Изменить', 'callback_data' => 'edit_' . $serialOrId],
+            ];
+        }
+
+        $buttons[] = [
+            $addRemoveBtn,
+        ];
+
+        return [
+            'inline_keyboard' => $buttons,
+        ];
+    }
+
+    public static function buildEditDeviceKeyboard(string $serialOrId): array
+    {
         return [
             'inline_keyboard' => [
                 [
-                    ['text' => '📅 Архив за месяц', 'callback_data' => 'month_' . $serialOrId],
+                    ['text' => '📍 Название / Адрес', 'callback_data' => 'edit_addr_' . $serialOrId],
                 ],
                 [
-                    $addRemoveBtn
-                ]
-            ]
+                    ['text' => '🏷️ Номера счётчиков', 'callback_data' => 'edit_meters_' . $serialOrId],
+                ],
+                [
+                    ['text' => '🔢 Начальные показания', 'callback_data' => 'edit_init_' . $serialOrId],
+                ],
+                [
+                    ['text' => '🔌 Количество каналов', 'callback_data' => 'edit_ch_' . $serialOrId],
+                ],
+                [
+                    ['text' => '🔙 Назад к прибору', 'callback_data' => 'back_dev_' . $serialOrId],
+                ],
+            ],
+        ];
+    }
+
+    public static function buildEditChannelChoiceKeyboard(string $serialOrId): array
+    {
+        return [
+            'inline_keyboard' => [
+                [['text' => '1️⃣ и 2️⃣ (Оба входа)', 'callback_data' => 'set_ch_' . $serialOrId . '_1_2']],
+                [['text' => '1️⃣ Только 1-й вход', 'callback_data' => 'set_ch_' . $serialOrId . '_1']],
+                [['text' => '2️⃣ Только 2-й вход', 'callback_data' => 'set_ch_' . $serialOrId . '_2']],
+                [['text' => '🔙 Назад к настройкам', 'callback_data' => 'edit_' . $serialOrId]],
+            ],
         ];
     }
 }

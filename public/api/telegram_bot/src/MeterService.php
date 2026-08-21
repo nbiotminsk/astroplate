@@ -437,6 +437,17 @@ class MeterService
         return $info;
     }
 
+    public static function calculateDisplayValue(float $currentApiVal, ?float $userInitial, ?float $baseApiVal): float
+    {
+        if ($userInitial === null) {
+            return $currentApiVal;
+        }
+        $base = $baseApiVal ?? 0.0;
+        $delta = max(0.0, $currentApiVal - $base);
+
+        return $userInitial + $delta;
+    }
+
     public function deviceLookup(array $config, string $input): ?DeviceDTO
     {
         $input = trim($input);
@@ -444,41 +455,74 @@ class MeterService
             return null;
         }
 
+        $cleanInput = trim(preg_replace('/^[📍💧\s]+/u', '', $input));
+        if (preg_match('/\((\d+)\)$/', $cleanInput, $matches)) {
+            $cleanInput = $matches[1];
+        }
+
         // 1. Проверяем локальный конфиг config.php
         $devices = $config['devices'] ?? [];
-        if (isset($devices[(int) $input])) {
-            $dev = $devices[(int) $input];
-            return DeviceDTO::fromArray($dev, (string) $input);
+        if (isset($devices[(int) $cleanInput])) {
+            $dev = $devices[(int) $cleanInput];
+            return DeviceDTO::fromArray($dev, (string) $cleanInput);
         }
 
         foreach ($devices as $id => $info) {
-            if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
+            if (
+                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
+                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
+            ) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
-            if (($info['device_id'] ?? null) === $input) {
+            if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
         // 2. Проверяем пользовательское динамическое хранилище registered_devices.json
         $customDevices = $this->deviceRepo ? $this->deviceRepo->loadAll() : Storage::loadRegisteredDevices();
-        if (isset($customDevices[(int) $input])) {
-            $dev = $customDevices[(int) $input];
-            return DeviceDTO::fromArray($dev, (string) $input);
+        if (isset($customDevices[(int) $cleanInput])) {
+            $dev = $customDevices[(int) $cleanInput];
+            return DeviceDTO::fromArray($dev, (string) $cleanInput);
         }
 
         foreach ($customDevices as $id => $info) {
-            if (mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')) {
+            if (
+                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
+                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
+            ) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
-            if (($info['device_id'] ?? null) === $input) {
+            if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
                 return DeviceDTO::fromArray($info, (string) $id);
             }
         }
 
-        // API contract exposes only device/manufacturer/channel identifiers, not a
-        // verified physical water-meter serial. The user-provided local number is
-        // therefore authoritative and remote identifiers must not be repurposed.
+        // 3. Проверяем удаленный UnicBoard API по серийному номеру / MAC / ID
+        if (ctype_digit($cleanInput) || preg_match('/^[0-9a-f-]{36}$/i', $cleanInput)) {
+            $allRemote = UnicBoard::getAllDevices($config, 100);
+            if (($allRemote['ok'] ?? false) && !empty($allRemote['payload'])) {
+                foreach ($allRemote['payload'] as $item) {
+                    $mfgSerial = (string) ($item['manufacturer_serial_number'] ?? '');
+                    $mac = (string) ($item['data_gateway_network_device']['mac'] ?? '');
+                    $devId = (string) ($item['id'] ?? '');
+
+                    if ($mfgSerial === $cleanInput || $mac === $cleanInput || $devId === $cleanInput) {
+                        $devName = $item['device_modification']['name'] ?? $item['device_modification']['device_modification_type']['name_ru'] ?? "Устройство {$mfgSerial}";
+                        return new DeviceDTO(
+                            deviceId: $devId,
+                            serialNumber: $mfgSerial !== '' ? $mfgSerial : $cleanInput,
+                            name: $devName
+                        );
+                    }
+                }
+            }
+        }
+
         return null;
     }
 }
