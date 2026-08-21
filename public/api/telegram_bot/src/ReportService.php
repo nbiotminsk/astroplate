@@ -87,7 +87,7 @@ class ReportService
                     : null;
                 $meterNum = $chConfig['meter_number'] ?? null;
 
-                if ($lastVal !== null && $userInitial !== null && $baseApiVal === null) {
+                if ($lastVal !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $lastVal > 0))) {
                     $baseApiVal = (float) $lastVal;
                     if (!empty($device->serialNumber)) {
                         Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
@@ -165,7 +165,7 @@ class ReportService
                     : null;
                 $meterNum = $chConfig['meter_number'] ?? null;
 
-                if ($val !== null && $userInitial !== null && $baseApiVal === null) {
+                if ($val !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $val > 0))) {
                     $baseApiVal = (float) $val;
                     if (!empty($device->serialNumber)) {
                         Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);

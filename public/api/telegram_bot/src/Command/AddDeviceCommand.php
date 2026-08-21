@@ -305,21 +305,10 @@ class AddDeviceCommand implements CommandInterface
             $meterNum = $parts[0] ?? '';
             $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
 
-            $baseApiVal = 0.0;
-            try {
-                $info = UnicBoard::getDeviceInfo($config, (string) $state['uuid']);
-                $readings = MeterService::extractCurrentReadingsFromDeviceInfo($info['payload'] ?? null);
-                if (isset($readings[1]) && $readings[1]->lastValue !== null) {
-                    $baseApiVal = (float) $readings[1]->lastValue;
-                }
-            } catch (\Exception $e) {
-                // Если API временно не ответило, база = 0.0
-            }
-
             $state['channels_config']['1'] = [
                 'meter_number' => $meterNum,
                 'user_initial' => $userInit,
-                'base_api_value' => $baseApiVal,
+                'base_api_value' => null,
             ];
 
             if (in_array(2, $state['active_channels'] ?? [], true)) {
@@ -345,21 +334,10 @@ class AddDeviceCommand implements CommandInterface
             $meterNum = $parts[0] ?? '';
             $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
 
-            $baseApiVal = 0.0;
-            try {
-                $info = UnicBoard::getDeviceInfo($config, (string) $state['uuid']);
-                $readings = MeterService::extractCurrentReadingsFromDeviceInfo($info['payload'] ?? null);
-                if (isset($readings[2]) && $readings[2]->lastValue !== null) {
-                    $baseApiVal = (float) $readings[2]->lastValue;
-                }
-            } catch (\Exception $e) {
-                // Игнорируем
-            }
-
             $state['channels_config']['2'] = [
                 'meter_number' => $meterNum,
                 'user_initial' => $userInit,
-                'base_api_value' => $baseApiVal,
+                'base_api_value' => null,
             ];
 
             $this->finishWizard($chatId, $state, $config);
