@@ -167,16 +167,12 @@ class ReportService
         // 4. Температура и батарея
         $temp = UnicBoard::getLatestTemperature($config, $deviceId);
         $bat = UnicBoard::getLatestBattery($config, $deviceId);
-        $telemetryParts = [];
 
         if ($temp !== null && isset($temp['value']) && is_numeric($temp['value'])) {
-            $telemetryParts[] = "💨 " . round((float) $temp['value'], 1) . " °C";
+            $lines[] = "💨 Температура: " . round((float) $temp['value'], 1) . " °C";
         }
         if ($bat !== null && isset($bat['value']) && is_numeric($bat['value'])) {
-            $telemetryParts[] = "🔋 " . round((float) $bat['value'], 2) . " V";
-        }
-        if (!empty($telemetryParts)) {
-            $lines[] = implode('  |  ', $telemetryParts);
+            $lines[] = "🔋 Батарея: " . number_format((float) $bat['value'], 2, '.', '') . " V";
         }
 
         if (empty($currentReadings) && empty($historyRecords) && $temp === null && $bat === null) {
@@ -415,8 +411,8 @@ class ReportService
         $networkType = $payload['data_gateway_network_device']['network']['type_network'] ?? 'input';
         $modemName = ($payload['device_modification']['device_modification_type']['name_ru'] ?? 'Модем') . ' ' . ($payload['device_modification']['name'] ?? '');
 
-        $lines[] = "🔋 Напряжение батареи: <b>{$batStr}</b>";
-        $lines[] = "💨 Температура модема: <b>{$tempStr}</b>";
+        $lines[] = "💨 Температура: <b>{$tempStr}</b>";
+        $lines[] = "🔋 Батарея: <b>{$batStr}</b>";
         $lines[] = "📡 Протокол передачи: <b>{$protocol}</b> ({$networkType})";
         if (!empty(trim($modemName))) {
             $lines[] = "🏷️ Модификация: <b>{$modemName}</b>";
