@@ -150,5 +150,11 @@ class CommandTest
         TestRunner::assert($editCmd->supports($editTextInput), 'EditDeviceCommand intercepts text in EDIT_ADDRESS state');
 
         \TelegramBot\Storage::clearUserState('777');
+
+        // DiagnosticCallback tests
+        $diagCb = new \TelegramBot\Command\DiagnosticCallback($telegram, $meterService, $reportService);
+        $diagUpdate = new TelegramUpdateDTO(19, '777', '', true, 'diag_8554760', 'cb_diag');
+        TestRunner::assert($diagCb->supports($diagUpdate), 'DiagnosticCallback supports diag_8554760');
+        TestRunner::assert(!$diagCb->supports($editOpenUpdate), 'DiagnosticCallback rejects other callbacks');
     }
 }

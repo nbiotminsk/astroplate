@@ -169,6 +169,9 @@ TXT;
             [
                 ['text' => '📅 Архив за месяц', 'callback_data' => 'month_' . $serialOrId],
             ],
+            [
+                ['text' => '⚙️ Диагностика', 'callback_data' => 'diag_' . $serialOrId],
+            ],
         ];
 
         if ($isAdded) {
@@ -183,6 +186,17 @@ TXT;
 
         return [
             'inline_keyboard' => $buttons,
+        ];
+    }
+
+    public static function buildDiagnosticKeyboard(string $serialOrId): array
+    {
+        return [
+            'inline_keyboard' => [
+                [
+                    ['text' => '🔙 Назад к прибору', 'callback_data' => 'back_dev_' . $serialOrId],
+                ],
+            ],
         ];
     }
 

@@ -326,6 +326,84 @@ class ReportService
         return implode("\n", $lines);
     }
 
+    public function buildDiagnosticReport(array $config, DeviceDTO $device): string
+    {
+        $timezone = $config['timezone'] ?? 'Europe/Minsk';
+        $deviceId = $device->deviceId;
+        $deviceSerial = $device->serialNumber ?? '—';
+        $addr = $device->address ?: $device->name;
+
+        $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+        $payload = $infoResp['payload'] ?? [];
+
+        $lines = [];
+        $lines[] = "⚙️ <b>Диагностика модема № {$deviceSerial}</b>";
+        if (!empty($addr)) {
+            $lines[] = "📍 <i>{$addr}</i>\n";
+        } else {
+            $lines[] = "";
+        }
+
+        $channels = $payload['device_channel'] ?? [];
+        $activeChannels = $device->activeChannels ?? [1, 2];
+
+        if (!empty($channels)) {
+            foreach ($channels as $ch) {
+                $chNum = (int) ($ch['serial_number'] ?? 1);
+                $meters = $ch['device_meter'] ?? [];
+                $meterBilling = $meters[0] ?? [];
+
+                $lastVal = isset($meterBilling['last_value']) && is_numeric($meterBilling['last_value']) ? (float) $meterBilling['last_value'] : null;
+                $lastValDate = $meterBilling['last_value_date'] ?? null;
+                $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 10.0;
+                $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
+
+                // Литраж на импульс и расчет импульсов
+                $litersPerPulse = $unitMultiplier * $valueMultiplier;
+                $m3PerPulse = $litersPerPulse / 1000.0;
+                $pulses = ($litersPerPulse > 0 && $lastVal !== null) ? (int) round(($lastVal * 1000.0) / $litersPerPulse) : 0;
+
+                $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
+                $meterNum = $chConfig['meter_number'] ?? null;
+                $meterLabel = $meterNum ? " (№ <code>{$meterNum}</code>)" : "";
+
+                $formattedVal = $lastVal !== null ? number_format($lastVal, 2, '.', '') . ' m³' : '—';
+                $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
+
+                $statusActive = in_array($chNum, $activeChannels, true) ? "✅ Активен" : "⏸ Отключен в боте";
+
+                $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
+                $lines[] = "• Вес импульса (множитель): <b>{$unitMultiplier} л/имп</b> ({$m3PerPulse} м³/имп)";
+                $lines[] = "• Число импульсов: <b>{$pulses} имп.</b>";
+                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
+                $lines[] = "• Последний срез: {$dateStr}\n";
+            }
+        } else {
+            $lines[] = "ℹ️ Информация по каналам не найдена.\n";
+        }
+
+        // Телеметрия (батарея, температура, протокол)
+        $latestBat = UnicBoard::getLatestBattery($config, $deviceId);
+        $latestTemp = UnicBoard::getLatestTemperature($config, $deviceId);
+
+        $batStr = ($latestBat && isset($latestBat['value'])) ? number_format((float) $latestBat['value'], 2, '.', '') . ' V' : '—';
+        $tempStr = ($latestTemp && isset($latestTemp['value'])) ? round((float) $latestTemp['value']) . ' °C' : '—';
+
+        $protocol = $payload['data_gateway_network_device']['protocol']['name'] ?? 'SMP_M';
+        $networkType = $payload['data_gateway_network_device']['network']['type_network'] ?? 'input';
+        $modemName = ($payload['device_modification']['device_modification_type']['name_ru'] ?? 'Модем') . ' ' . ($payload['device_modification']['name'] ?? '');
+
+        $lines[] = "🔋 Напряжение батареи: <b>{$batStr}</b>";
+        $lines[] = "💨 Температура модема: <b>{$tempStr}</b>";
+        $lines[] = "📡 Протокол передачи: <b>{$protocol}</b> ({$networkType})";
+        if (!empty(trim($modemName))) {
+            $lines[] = "🏷️ Модификация: <b>{$modemName}</b>";
+        }
+        $lines[] = "🆔 UUID: <code>{$deviceId}</code>";
+
+        return implode("\n", $lines);
+    }
+
     public function userMetersList(array $config, string $chatId): string
     {
         $meters = $this->userMeterRepo ? $this->userMeterRepo->getMetersByChatId($chatId) : Storage::getUserMeters($chatId);

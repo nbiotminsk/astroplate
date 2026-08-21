@@ -9,6 +9,7 @@ use TelegramBot\Command\AddMeterCallback;
 use TelegramBot\Command\CommandDispatcher;
 use TelegramBot\Command\DelDeviceCommand;
 use TelegramBot\Command\DelMeterCallback;
+use TelegramBot\Command\DiagnosticCallback;
 use TelegramBot\Command\EditDeviceCommand;
 use TelegramBot\Command\InitMeterCommand;
 use TelegramBot\Command\MeterDetailCommand;
@@ -54,6 +55,11 @@ class Container
 
         $this->set(CommandDispatcher::class, fn() => new CommandDispatcher([
             new MonthArchiveCallback(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(ReportService::class)
+            ),
+            new DiagnosticCallback(
                 $this->get(Telegram::class),
                 $this->get(MeterService::class),
                 $this->get(ReportService::class)
