@@ -472,8 +472,7 @@ class ReportService
                 $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
                 $lines[] = "• Вес импульса (множитель): <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
                 $lines[] = "• Число импульсов: <b>{$pulsesStr}</b>";
-                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
-                $lines[] = "• Последний срез: {$dateStr}\n";
+                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>\n";
             }
         } else {
             $lines[] = "ℹ️ Информация по каналам не найдена.\n";
