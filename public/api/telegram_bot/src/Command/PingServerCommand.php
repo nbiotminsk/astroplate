@@ -58,11 +58,24 @@ class PingServerCommand implements CommandInterface
         $tz = date_default_timezone_get();
         $devicesCount = count(Storage::loadRegisteredDevices());
 
+        $errDetail = '';
+        if (!$isOk && !empty($unicResp['errors'])) {
+            $errItem = $unicResp['errors'][0] ?? [];
+            $errText = is_array($errItem) ? ($errItem['error_message'] ?? json_encode($errItem)) : (string) $errItem;
+            if ($errText !== '') {
+                $errDetail = "• Диагностика: <code>" . htmlspecialchars($errText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</code>\n";
+            }
+        }
+
         $msg = "⚡ <b>Диагностика связи и серверов</b>\n\n";
         $msg .= "🌐 <b>Сервер сбора данных (UnicBoard API):</b>\n";
         $msg .= "• Статус: {$apiStatus}\n";
         $msg .= "• Время отклика: <b>{$durationMs} мс</b>\n";
-        $msg .= "• Хост: <code>{$apiHost}</code>\n\n";
+        $msg .= "• Хост: <code>{$apiHost}</code>\n";
+        if ($errDetail !== '') {
+            $msg .= $errDetail;
+        }
+        $msg .= "\n";
 
         $msg .= "🤖 <b>Сервер Telegram-бота:</b>\n";
         $msg .= "• Статус: ✅ <b>Онлайн</b>\n";

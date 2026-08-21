@@ -43,9 +43,9 @@ TXT;
         ]);
         $body = curl_exec($ch);
         if ($body === false) {
-            $err = 'cURL Error (GET ' . $url . '): ' . curl_error($ch);
-            Storage::log($err);
-            return [0, null];
+            $err = curl_error($ch);
+            Storage::log('cURL Error (GET ' . $url . '): ' . $err);
+            return [0, ['ok' => false, 'errors' => [['error_message' => $err]]]];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
@@ -60,6 +60,7 @@ TXT;
             CURLOPT_CONNECTTIMEOUT => $connectTimeout,
             CURLOPT_TIMEOUT => $timeout,
             CURLOPT_IPRESOLVE => CURL_IPRESOLVE_V4,
+            CURLOPT_USERAGENT => 'TeleofisBot/1.0',
             CURLOPT_POST => true,
             CURLOPT_POSTFIELDS => json_encode($payload, JSON_UNESCAPED_UNICODE),
             CURLOPT_HTTPHEADER => array_merge(
@@ -69,9 +70,9 @@ TXT;
         ]);
         $data = curl_exec($ch);
         if ($data === false) {
-            $err = 'cURL Error (POST ' . $url . '): ' . curl_error($ch);
-            Storage::log($err);
-            return [0, null];
+            $err = curl_error($ch);
+            Storage::log('cURL Error (POST ' . $url . '): ' . $err);
+            return [0, ['ok' => false, 'errors' => [['error_message' => $err]]]];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
