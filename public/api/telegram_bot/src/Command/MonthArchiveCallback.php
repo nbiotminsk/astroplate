@@ -33,7 +33,8 @@ class MonthArchiveCallback implements CommandInterface
         $device = $this->meterService->deviceLookup($config, $serial);
         if ($device) {
             $monthReport = $this->reportService->buildMonthReport($config, $device);
-            $this->telegram->sendMessage($chatId, $monthReport, $token);
+            $key = Telegram::buildDiagnosticKeyboard($serial);
+            $this->telegram->sendMessage($chatId, $monthReport, $token, $key);
         } else {
             $this->telegram->sendMessage($chatId, "Устройство не найдено.", $token);
         }

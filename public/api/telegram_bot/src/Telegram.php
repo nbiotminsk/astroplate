@@ -30,7 +30,7 @@ class Telegram
 /add — мастер добавления нового прибора
 TXT;
 
-    public static function httpGet(string $url, array $headers = [], int $timeout = 5, int $connectTimeout = 2): array
+    public static function httpGet(string $url, array $headers = [], int $timeout = 8, int $connectTimeout = 4): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -50,7 +50,7 @@ TXT;
         return [$code, json_decode((string) $body, true)];
     }
 
-    public static function httpPostJson(string $url, array $payload, array $headers = [], int $timeout = 5, int $connectTimeout = 2): array
+    public static function httpPostJson(string $url, array $payload, array $headers = [], int $timeout = 8, int $connectTimeout = 4): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
