@@ -408,7 +408,14 @@ class AddDeviceCommand implements CommandInterface
 
         Telegram::sendMessage(
             $chatId,
-            "🎉 <b>Счётчик успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 Модем: <b>№ {$serial}</b>\n\n{$summary}\n\n<i>Нажмите кнопку ниже или выберите адрес в меню, чтобы просмотреть текущие показания.</i>",
+            "🎉 <b>Счётчик успешно добавлен в систему!</b>",
+            $token,
+            $mainKey
+        );
+
+        Telegram::sendMessage(
+            $chatId,
+            "📍 <b>{$address}</b>\n🆔 Модем: <b>№ {$serial}</b>\n\n{$summary}\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
             $token,
             $devKey
         );

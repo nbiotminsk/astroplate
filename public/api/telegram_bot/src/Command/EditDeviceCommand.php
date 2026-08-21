@@ -257,7 +257,14 @@ class EditDeviceCommand implements CommandInterface
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Адрес установки успешно изменён!</b>\n\n📍 <b>{$text}</b> (Прибор № {$serial})\n\n<i>Нажмите кнопку ниже или выберите адрес в меню, чтобы просмотреть показания.</i>",
+                "✅ <b>Адрес установки успешно изменён!</b>",
+                $token,
+                $newMainKey
+            );
+
+            Telegram::sendMessage(
+                $chatId,
+                "📍 <b>{$text}</b> (Прибор № {$serial})\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
                 $token,
                 $devKey
             );
@@ -304,7 +311,14 @@ class EditDeviceCommand implements CommandInterface
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Номера счётчиков успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n{$summary}",
+                "✅ <b>Номера счётчиков успешно сохранены!</b>",
+                $token,
+                $newMainKey
+            );
+
+            Telegram::sendMessage(
+                $chatId,
+                "📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
                 $token,
                 $devKey
             );
@@ -358,7 +372,14 @@ class EditDeviceCommand implements CommandInterface
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Начальные показания успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n{$summary}",
+                "✅ <b>Начальные показания успешно сохранены!</b>",
+                $token,
+                $newMainKey
+            );
+
+            Telegram::sendMessage(
+                $chatId,
+                "📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
                 $token,
                 $devKey
             );
