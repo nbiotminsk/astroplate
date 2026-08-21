@@ -348,6 +348,35 @@ class ReportService
         }
 
         $channels = $payload['device_channel'] ?? [];
+        if (empty($channels)) {
+            // Фолбэк 1: поиск прибора в общем списке
+            $allDevices = UnicBoard::getAllDevices($config);
+            foreach ($allDevices['payload'] ?? [] as $devItem) {
+                if (($devItem['id'] ?? null) === $deviceId && !empty($devItem['device_channel'])) {
+                    $payload = $devItem;
+                    $channels = $devItem['device_channel'];
+                    break;
+                }
+            }
+        }
+
+        if (empty($channels) && !empty($device->channels)) {
+            // Фолбэк 2: локальная конфигурация каналов
+            foreach ($device->channels as $chNumStr => $chConf) {
+                $chNumInt = (int) $chNumStr;
+                $channels[] = [
+                    'serial_number' => $chNumInt,
+                    'device_meter' => [
+                        [
+                            'last_value' => $chConf['base_api_value'] ?? null,
+                            'unit_multiplier' => 1.0,
+                            'value_multiplier' => 1.0,
+                        ]
+                    ]
+                ];
+            }
+        }
+
         $activeChannels = $device->activeChannels ?? [1, 2];
 
         if (!empty($channels)) {
