@@ -442,8 +442,10 @@ class MeterService
         if ($userInitial === null) {
             return $currentApiVal;
         }
-        $base = $baseApiVal ?? 0.0;
-        $delta = max(0.0, $currentApiVal - $base);
+        if ($baseApiVal === null) {
+            return $userInitial;
+        }
+        $delta = max(0.0, $currentApiVal - $baseApiVal);
 
         return $userInitial + $delta;
     }

@@ -145,6 +145,23 @@ class Storage
         self::saveRegisteredDevices($devices);
     }
 
+    public static function updateDeviceChannelBaseApiValue(string $serial, string $chNum, float $baseApiVal): void
+    {
+        $devices = self::loadRegisteredDevices();
+        $key = isset($devices[(int) $serial]) ? (int) $serial : (isset($devices[$serial]) ? $serial : (int) $serial);
+        if (!isset($devices[$key])) {
+            return;
+        }
+        if (!isset($devices[$key]['channels'])) {
+            $devices[$key]['channels'] = [];
+        }
+        if (!isset($devices[$key]['channels'][$chNum])) {
+            $devices[$key]['channels'][$chNum] = [];
+        }
+        $devices[$key]['channels'][$chNum]['base_api_value'] = $baseApiVal;
+        self::saveRegisteredDevices($devices);
+    }
+
     public static function loadUserMeters(): array
     {
         return self::loadJsonWithLock(self::userStorageFile());

@@ -133,6 +133,10 @@ class DTOTest
         TestRunner::assertEquals('87654321', $extDto->channels['2']['meter_number'], 'DeviceDTO channel meter_number mapping');
 
         // MeterService::calculateDisplayValue (Scenario 2: what you see is what you write)
+        // If baseApiVal is null (first poll), display value MUST be exactly userInitial, NOT userInitial + API pulses!
+        $calcNullBase = \TelegramBot\MeterService::calculateDisplayValue(0.30, 0.30, null);
+        TestRunner::assertEquals(0.30, $calcNullBase, 'calculateDisplayValue: null base_api_value returns exact userInitial without double counting');
+
         // User saw 142.50 on meter dial when API was at 4.30.
         // If current API is still 4.30, display must be exactly 142.50.
         $calcCurrent = \TelegramBot\MeterService::calculateDisplayValue(4.30, 142.50, 4.30);

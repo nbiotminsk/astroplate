@@ -79,9 +79,20 @@ class ReportService
 
                 // Конфигурация канала (номер счетчика, начальные показания, база API)
                 $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                $userInitial = isset($chConfig['user_initial']) ? (float) $chConfig['user_initial'] : ($device->initialValues[(string) $chNum] ?? null);
-                $baseApiVal = isset($chConfig['base_api_value']) ? (float) $chConfig['base_api_value'] : null;
+                $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
+                    ? (float) $chConfig['user_initial']
+                    : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
+                    ? (float) $chConfig['base_api_value']
+                    : null;
                 $meterNum = $chConfig['meter_number'] ?? null;
+
+                if ($lastVal !== null && $userInitial !== null && $baseApiVal === null) {
+                    $baseApiVal = (float) $lastVal;
+                    if (!empty($device->serialNumber)) {
+                        Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                    }
+                }
 
                 $displayVal = $lastVal !== null
                     ? MeterService::calculateDisplayValue((float) $lastVal, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
@@ -146,9 +157,20 @@ class ReportService
                 }
 
                 $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                $userInitial = isset($chConfig['user_initial']) ? (float) $chConfig['user_initial'] : ($device->initialValues[(string) $chNum] ?? null);
-                $baseApiVal = isset($chConfig['base_api_value']) ? (float) $chConfig['base_api_value'] : null;
+                $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
+                    ? (float) $chConfig['user_initial']
+                    : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
+                    ? (float) $chConfig['base_api_value']
+                    : null;
                 $meterNum = $chConfig['meter_number'] ?? null;
+
+                if ($val !== null && $userInitial !== null && $baseApiVal === null) {
+                    $baseApiVal = (float) $val;
+                    if (!empty($device->serialNumber)) {
+                        Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                    }
+                }
 
                 $displayVal = $val !== null
                     ? MeterService::calculateDisplayValue((float) $val, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
