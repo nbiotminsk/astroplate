@@ -89,15 +89,22 @@ class ReportService
 
                 $valWithUnit = $displayVal !== null ? number_format($displayVal, 2, '.', '') . ' m³' : '—';
 
-                // Обновляем кэш расхода и выводим дельту последнего расхода
+                // Обновляем кэш расхода и выводим дельту расхода за сегодня
                 $diffStr = '';
                 if ($lastVal !== null) {
                     $svc = $this->meterService ?? new MeterService();
                     $consInfo = $svc->getMeterConsumptionInfo($config, $deviceId, (int) $chNum, $lastVal, $lastValDate, $historyByChannel[$chNum] ?? [], false);
 
-                    if (!empty($consInfo['last_change_diff']) && (float) $consInfo['last_change_diff'] > 0) {
-                        $diffVal = (float) $consInfo['last_change_diff'];
-                        $diffStr = " (<b>+" . number_format($diffVal, 2, '.', '') . " m³</b>)";
+                    if (!empty($consInfo['last_change_diff']) && (float) $consInfo['last_change_diff'] > 0 && !empty($consInfo['last_change_date'])) {
+                        $tz = new \DateTimeZone($timezone);
+                        $changeTs = MeterService::parseUtcTimestamp((string) $consInfo['last_change_date']);
+                        $changeDay = (new \DateTimeImmutable("@{$changeTs}"))->setTimezone($tz)->format('Y-m-d');
+                        $todayDay = (new \DateTimeImmutable('now', $tz))->format('Y-m-d');
+
+                        if ($changeDay === $todayDay) {
+                            $diffVal = (float) $consInfo['last_change_diff'];
+                            $diffStr = " (<b>+" . number_format($diffVal, 2, '.', '') . " m³</b>)";
+                        }
                     }
                 }
 
