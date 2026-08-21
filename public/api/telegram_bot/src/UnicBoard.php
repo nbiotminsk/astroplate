@@ -89,12 +89,12 @@ class UnicBoard
         string $deviceUuid,
         int $limit = 50,
         ?string $periodFrom = null,
-        int $timeout = 5,
+        int $timeout = 3,
         ?string $periodTo = null,
         bool $endOfDay = true,
         ?string $journalDataType = null,
-        int $maxRetries = 3,
-        int $retryDelayUs = 200000,
+        int $maxRetries = 2,
+        int $retryDelayUs = 150000,
         ?callable $httpPostJson = null,
         ?callable $httpGet = null
     ): array {
@@ -199,9 +199,9 @@ class UnicBoard
     public static function getDeviceInfo(
         array $config,
         string $deviceId,
-        int $timeout = 5,
-        int $maxRetries = 3,
-        int $retryDelayUs = 200000,
+        int $timeout = 3,
+        int $maxRetries = 2,
+        int $retryDelayUs = 150000,
         ?callable $httpGet = null,
         ?callable $httpPostJson = null
     ): array {
@@ -386,9 +386,9 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $limit = 1,
-        int $timeout = 5,
-        int $maxRetries = 3,
-        int $retryDelayUs = 200000,
+        int $timeout = 3,
+        int $maxRetries = 2,
+        int $retryDelayUs = 150000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -452,7 +452,7 @@ class UnicBoard
     /**
      * Получить последнюю запись температуры прибора (или null)
      */
-    public static function getLatestTemperature(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
+    public static function getLatestTemperature(array $config, string $deviceId, int $timeout = 3, ?callable $httpGet = null): ?array
     {
         $res = self::getTemperature($config, $deviceId, 1, $timeout, httpGet: $httpGet);
         return $res['payload'][0] ?? null;
@@ -467,9 +467,9 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $limit = 1,
-        int $timeout = 5,
-        int $maxRetries = 3,
-        int $retryDelayUs = 200000,
+        int $timeout = 3,
+        int $maxRetries = 2,
+        int $retryDelayUs = 150000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -533,7 +533,7 @@ class UnicBoard
     /**
      * Получить последнюю запись батареи прибора (или null)
      */
-    public static function getLatestBattery(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
+    public static function getLatestBattery(array $config, string $deviceId, int $timeout = 3, ?callable $httpGet = null): ?array
     {
         $res = self::getBattery($config, $deviceId, 1, $timeout, httpGet: $httpGet);
         return $res['payload'][0] ?? null;
@@ -548,9 +548,9 @@ class UnicBoard
         array $config,
         string $deviceId,
         int $limit = 1,
-        int $timeout = 5,
+        int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 200000,
+        int $retryDelayUs = 150000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -583,7 +583,7 @@ class UnicBoard
         ];
     }
 
-    public static function getLatestClock(array $config, string $deviceId, int $timeout = 5, ?callable $httpGet = null): ?array
+    public static function getLatestClock(array $config, string $deviceId, int $timeout = 3, ?callable $httpGet = null): ?array
     {
         $res = self::getClock($config, $deviceId, 1, $timeout, httpGet: $httpGet);
         return $res['payload'][0] ?? null;
@@ -597,9 +597,9 @@ class UnicBoard
     public static function getAllDevices(
         array $config,
         int $limit = 100,
-        int $timeout = 5,
-        int $maxRetries = 3,
-        int $retryDelayUs = 200000,
+        int $timeout = 3,
+        int $maxRetries = 2,
+        int $retryDelayUs = 150000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
