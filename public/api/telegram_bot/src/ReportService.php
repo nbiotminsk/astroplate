@@ -370,31 +370,33 @@ class ReportService
         }
 
         $channels = $payload['device_channel'] ?? [];
-        if (empty($channels)) {
-            // Фолбэк 1: поиск прибора в общем списке
-            $allDevices = UnicBoard::getAllDevices($config);
-            foreach ($allDevices['payload'] ?? [] as $devItem) {
-                if (($devItem['id'] ?? null) === $deviceId && !empty($devItem['device_channel'])) {
-                    $payload = $devItem;
-                    $channels = $devItem['device_channel'];
+
+        // Проверяем, есть ли уже показания в /info
+        $hasValuesInInfo = false;
+        if (!empty($channels)) {
+            foreach ($channels as $ch) {
+                if (isset($ch['device_meter'][0]['last_value']) && is_numeric($ch['device_meter'][0]['last_value'])) {
+                    $hasValuesInInfo = true;
                     break;
                 }
             }
         }
 
-        // Запрашиваем историю /values на случай, если в /info нет среза данных
-        $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
-        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+        // Запрашиваем историю /values ТОЛЬКО если в /info нет каналов или нет показаний
         $historyByChannel = [];
-        foreach ($historyRecords as $rec) {
-            $historyByChannel[$rec->channelNumber][] = $rec;
+        if (!$hasValuesInInfo) {
+            $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 10);
+            $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+            foreach ($historyRecords as $rec) {
+                $historyByChannel[$rec->channelNumber][] = $rec;
+            }
+            foreach ($historyByChannel as $chN => &$hList) {
+                usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
+                    return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
+                });
+            }
+            unset($hList);
         }
-        foreach ($historyByChannel as $chN => &$hList) {
-            usort($hList, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
-                return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
-            });
-        }
-        unset($hList);
 
         if (empty($channels) && !empty($historyByChannel)) {
             foreach ($historyByChannel as $chNumInt => $histList) {

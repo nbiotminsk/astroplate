@@ -166,8 +166,8 @@ class UnicBoard
                 break;
             }
 
-            // 2. Ошибки клиента 4xx (например 401 Unauthorized, 404 Not Found) — не повторяем
-            if ($code >= 400 && $code < 500) {
+            // 2. Ошибки клиента 4xx (например 401 Unauthorized, 404 Not Found) или 501 — не повторяем
+            if (($code >= 400 && $code < 500) || $code === 501) {
                 break;
             }
 
@@ -294,7 +294,7 @@ class UnicBoard
                 break;
             }
 
-            if ($code >= 400 && $code < 500) {
+            if (($code >= 400 && $code < 500) || $code === 501) {
                 break;
             }
 
@@ -430,7 +430,7 @@ class UnicBoard
                 break;
             }
 
-            if ($code >= 400 && $code < 500) {
+            if (($code >= 400 && $code < 500) || $code === 501) {
                 break;
             }
 
@@ -511,7 +511,7 @@ class UnicBoard
                 break;
             }
 
-            if ($code >= 400 && $code < 500) {
+            if (($code >= 400 && $code < 500) || $code === 501) {
                 break;
             }
 
@@ -565,7 +565,7 @@ class UnicBoard
             if ($code === 200 && self::hasApiSuccess($resp)) {
                 break;
             }
-            if ($code >= 400 && $code < 500) {
+            if (($code >= 400 && $code < 500) || $code === 501) {
                 break;
             }
             if ($attempt < $maxRetries) {
