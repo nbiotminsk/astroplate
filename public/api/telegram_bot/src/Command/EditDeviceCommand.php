@@ -285,11 +285,12 @@ class EditDeviceCommand implements CommandInterface
 
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
+            $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
             $device = $this->meterService->deviceLookup($config, $serial);
             $report = $device ? $this->reportService->buildReport($config, $device) : "Номер счётчика обновлён.";
 
-            Telegram::sendMessage($chatId, "✅ <b>Номера счётчиков успешно обновлены!</b>\n\n" . $report, $token, $mainKey);
+            Telegram::sendMessage($chatId, "✅ <b>Номера счётчиков успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
             return;
         }
 
@@ -338,11 +339,12 @@ class EditDeviceCommand implements CommandInterface
 
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
+            $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
             $device = $this->meterService->deviceLookup($config, $serial);
             $report = $device ? $this->reportService->buildReport($config, $device) : "Показания обновлены.";
 
-            Telegram::sendMessage($chatId, "✅ <b>Начальные показания успешно обновлены!</b>\n\n" . $report, $token, $mainKey);
+            Telegram::sendMessage($chatId, "✅ <b>Начальные показания успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
             return;
         }
     }

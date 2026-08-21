@@ -39,7 +39,13 @@ class AddDeviceCommand implements CommandInterface
             return Storage::getUserState($update->chatId) !== null;
         }
 
-        return Storage::getUserState($update->chatId) !== null;
+        $state = Storage::getUserState($update->chatId);
+        if ($state !== null) {
+            $step = (string) ($state['step'] ?? '');
+            return !str_starts_with($step, 'EDIT_');
+        }
+
+        return false;
     }
 
     public function handle(TelegramUpdateDTO $update, array $config): void

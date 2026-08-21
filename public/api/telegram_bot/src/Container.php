@@ -80,6 +80,13 @@ class Container
                 $this->get(Telegram::class),
                 $this->get(ReportService::class)
             ),
+            new EditDeviceCommand(
+                $this->get(Telegram::class),
+                $this->get(MeterService::class),
+                $this->get(ReportService::class),
+                $this->get(DeviceRepositoryInterface::class),
+                $this->get(UserMeterRepositoryInterface::class)
+            ),
             new AddDeviceCommand(
                 $this->get(Telegram::class),
                 $this->get(MeterService::class),
@@ -89,13 +96,6 @@ class Container
             ),
             new DelDeviceCommand(
                 $this->get(Telegram::class),
-                $this->get(UserMeterRepositoryInterface::class)
-            ),
-            new EditDeviceCommand(
-                $this->get(Telegram::class),
-                $this->get(MeterService::class),
-                $this->get(ReportService::class),
-                $this->get(DeviceRepositoryInterface::class),
                 $this->get(UserMeterRepositoryInterface::class)
             ),
             new InitMeterCommand(
