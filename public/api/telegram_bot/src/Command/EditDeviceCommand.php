@@ -237,25 +237,32 @@ class EditDeviceCommand implements CommandInterface
                 return;
             }
 
+            // 1. Сохраняем в registered_devices.json
             $customDevices = Storage::loadRegisteredDevices();
-            if (isset($customDevices[(int) $serial])) {
-                $customDevices[(int) $serial]['address'] = $text;
-                $customDevices[(int) $serial]['name'] = $text;
-                Storage::saveRegisteredDevices($customDevices);
+            $key = isset($customDevices[(int) $serial]) ? (int) $serial : (isset($customDevices[$serial]) ? $serial : (int) $serial);
+            if (!isset($customDevices[$key])) {
+                $customDevices[$key] = [];
             }
+            $customDevices[$key]['address'] = $text;
+            $customDevices[$key]['name'] = $text;
+            Storage::saveRegisteredDevices($customDevices);
 
-            $userMeters = Storage::loadUserMeters();
-            if (isset($userMeters[$chatId][$serial])) {
-                $userMeters[$chatId][$serial]['name'] = $text;
-                $userMeters[$chatId][$serial]['address'] = $text;
-                Storage::saveUserMeters($userMeters);
-            }
+            // 2. Сохраняем/обновляем привязку у пользователя в user_meters.json
+            Storage::addUserMeter($chatId, (string) $serial, $text, '', $text);
 
+            // 3. Очищаем состояние ввода
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
-            $device = $this->meterService->deviceLookup($config, $serial);
-            $report = $device ? $this->reportService->buildReport($config, $device) : "📍 {$text}";
+            $report = "📍 <b>{$text}</b>";
+            try {
+                $device = $this->meterService->deviceLookup($config, $serial);
+                if ($device) {
+                    $report = $this->reportService->buildReport($config, $device);
+                }
+            } catch (\Throwable $e) {
+                Storage::log("Edit address report error: " . $e->getMessage());
+            }
 
             Telegram::sendMessage($chatId, "✅ <b>Адрес установки успешно изменён!</b>\n\n" . $report, $token, $newMainKey);
             return;
@@ -267,19 +274,20 @@ class EditDeviceCommand implements CommandInterface
             $activeChannels = $state['active_channels'] ?? [1, 2];
 
             $customDevices = Storage::loadRegisteredDevices();
-            if (!isset($customDevices[(int) $serial]['channels'])) {
-                $customDevices[(int) $serial]['channels'] = [];
+            $key = isset($customDevices[(int) $serial]) ? (int) $serial : (isset($customDevices[$serial]) ? $serial : (int) $serial);
+            if (!isset($customDevices[$key]['channels'])) {
+                $customDevices[$key]['channels'] = [];
             }
 
             if (count($activeChannels) === 1) {
                 $ch = (string) $activeChannels[0];
-                $customDevices[(int) $serial]['channels'][$ch]['meter_number'] = $parts[0] ?? '';
+                $customDevices[$key]['channels'][$ch]['meter_number'] = $parts[0] ?? '';
             } else {
                 if (isset($parts[0])) {
-                    $customDevices[(int) $serial]['channels']['1']['meter_number'] = $parts[0];
+                    $customDevices[$key]['channels']['1']['meter_number'] = $parts[0];
                 }
                 if (isset($parts[1])) {
-                    $customDevices[(int) $serial]['channels']['2']['meter_number'] = $parts[1];
+                    $customDevices[$key]['channels']['2']['meter_number'] = $parts[1];
                 }
             }
 
@@ -287,8 +295,15 @@ class EditDeviceCommand implements CommandInterface
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
-            $device = $this->meterService->deviceLookup($config, $serial);
-            $report = $device ? $this->reportService->buildReport($config, $device) : "Номер счётчика обновлён.";
+            $report = "Номера счётчиков обновлены.";
+            try {
+                $device = $this->meterService->deviceLookup($config, $serial);
+                if ($device) {
+                    $report = $this->reportService->buildReport($config, $device);
+                }
+            } catch (\Throwable $e) {
+                Storage::log("Edit meters report error: " . $e->getMessage());
+            }
 
             Telegram::sendMessage($chatId, "✅ <b>Номера счётчиков успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
             return;
@@ -306,11 +321,12 @@ class EditDeviceCommand implements CommandInterface
             try {
                 $info = UnicBoard::getDeviceInfo($config, $uuid);
                 $readings = MeterService::extractCurrentReadingsFromDeviceInfo($info['payload'] ?? null);
-            } catch (\Exception $e) {}
+            } catch (\Throwable $e) {}
 
             $customDevices = Storage::loadRegisteredDevices();
-            if (!isset($customDevices[(int) $serial]['channels'])) {
-                $customDevices[(int) $serial]['channels'] = [];
+            $key = isset($customDevices[(int) $serial]) ? (int) $serial : (isset($customDevices[$serial]) ? $serial : (int) $serial);
+            if (!isset($customDevices[$key]['channels'])) {
+                $customDevices[$key]['channels'] = [];
             }
 
             if (count($activeChannels) === 1) {
@@ -318,9 +334,9 @@ class EditDeviceCommand implements CommandInterface
                 $val = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
                 $base = isset($readings[(int) $ch]) && $readings[(int) $ch]->lastValue !== null ? (float) $readings[(int) $ch]->lastValue : 0.0;
 
-                $customDevices[(int) $serial]['channels'][$ch]['user_initial'] = $val;
-                $customDevices[(int) $serial]['channels'][$ch]['base_api_value'] = $base;
-                $customDevices[(int) $serial]['initial_values'][$ch] = $val;
+                $customDevices[$key]['channels'][$ch]['user_initial'] = $val;
+                $customDevices[$key]['channels'][$ch]['base_api_value'] = $base;
+                $customDevices[$key]['initial_values'][$ch] = $val;
             } else {
                 $val1 = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
                 $val2 = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : (isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0);
@@ -328,21 +344,28 @@ class EditDeviceCommand implements CommandInterface
                 $base1 = isset($readings[1]) && $readings[1]->lastValue !== null ? (float) $readings[1]->lastValue : 0.0;
                 $base2 = isset($readings[2]) && $readings[2]->lastValue !== null ? (float) $readings[2]->lastValue : 0.0;
 
-                $customDevices[(int) $serial]['channels']['1']['user_initial'] = $val1;
-                $customDevices[(int) $serial]['channels']['1']['base_api_value'] = $base1;
-                $customDevices[(int) $serial]['initial_values']['1'] = $val1;
+                $customDevices[$key]['channels']['1']['user_initial'] = $val1;
+                $customDevices[$key]['channels']['1']['base_api_value'] = $base1;
+                $customDevices[$key]['initial_values']['1'] = $val1;
 
-                $customDevices[(int) $serial]['channels']['2']['user_initial'] = $val2;
-                $customDevices[(int) $serial]['channels']['2']['base_api_value'] = $base2;
-                $customDevices[(int) $serial]['initial_values']['2'] = $val2;
+                $customDevices[$key]['channels']['2']['user_initial'] = $val2;
+                $customDevices[$key]['channels']['2']['base_api_value'] = $base2;
+                $customDevices[$key]['initial_values']['2'] = $val2;
             }
 
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
-            $device = $this->meterService->deviceLookup($config, $serial);
-            $report = $device ? $this->reportService->buildReport($config, $device) : "Показания обновлены.";
+            $report = "Показания обновлены.";
+            try {
+                $device = $this->meterService->deviceLookup($config, $serial);
+                if ($device) {
+                    $report = $this->reportService->buildReport($config, $device);
+                }
+            } catch (\Throwable $e) {
+                Storage::log("Edit initial report error: " . $e->getMessage());
+            }
 
             Telegram::sendMessage($chatId, "✅ <b>Начальные показания успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
             return;
