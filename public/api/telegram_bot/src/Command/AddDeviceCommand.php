@@ -394,27 +394,23 @@ class AddDeviceCommand implements CommandInterface
 
         $token = $config['telegram_token'];
         $mainKey = $this->telegram->buildMainReplyKeyboard($chatId);
+        $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
-        $deviceDto = new DeviceDTO(
-            deviceId: $uuid,
-            serialNumber: $serial,
-            name: $address,
-            initialValues: $initialValues,
-            address: $address,
-            activeChannels: $activeChannels,
-            channels: $channelsConfig
-        );
-
-        if ($this->reportService) {
-            try {
-                $report = $this->reportService->buildReport($config, $deviceDto);
-                Telegram::sendMessage($chatId, "🎉 <b>Счётчик успешно добавлен!</b>\n\n" . $report, $token, $mainKey);
-                return;
-            } catch (\Exception $e) {
-                // Если API временно недоступно, выводим подтверждение регистрации
-            }
+        $summaryLines = [];
+        foreach ($activeChannels as $ch) {
+            $chStr = (string) $ch;
+            $meterNum = $channelsConfig[$chStr]['meter_number'] ?? '';
+            $initVal = isset($initialValues[$chStr]) ? number_format((float) $initialValues[$chStr], 2, '.', '') : '0.00';
+            $meterPart = $meterNum !== '' ? " (Счётчик № {$meterNum})" : '';
+            $summaryLines[] = "• Вход {$ch}{$meterPart}: <b>{$initVal} m³</b>";
         }
+        $summary = implode("\n", $summaryLines);
 
-        Telegram::sendMessage($chatId, "🎉 <b>Счётчик успешно добавлен!</b>\n\n📍 <b>{$address}</b>\n(№ модема: <code>{$serial}</code>)", $token, $mainKey);
+        Telegram::sendMessage(
+            $chatId,
+            "🎉 <b>Счётчик успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 Модем: <b>№ {$serial}</b>\n\n{$summary}\n\n<i>Нажмите кнопку ниже или выберите адрес в меню, чтобы просмотреть текущие показания.</i>",
+            $token,
+            $devKey
+        );
     }
 }

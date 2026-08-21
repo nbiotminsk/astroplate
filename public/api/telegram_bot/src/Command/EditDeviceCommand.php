@@ -250,21 +250,17 @@ class EditDeviceCommand implements CommandInterface
             // 2. Сохраняем/обновляем привязку у пользователя в user_meters.json
             Storage::addUserMeter($chatId, (string) $serial, $text, '', $text);
 
-            // 3. Очищаем состояние ввода
+            // 3. Очищаем состояние ввода и обновляем клавиатуры
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
+            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
-            $report = "📍 <b>{$text}</b>";
-            try {
-                $device = $this->meterService->deviceLookup($config, $serial);
-                if ($device) {
-                    $report = $this->reportService->buildReport($config, $device);
-                }
-            } catch (\Throwable $e) {
-                Storage::log("Edit address report error: " . $e->getMessage());
-            }
-
-            Telegram::sendMessage($chatId, "✅ <b>Адрес установки успешно изменён!</b>\n\n" . $report, $token, $newMainKey);
+            Telegram::sendMessage(
+                $chatId,
+                "✅ <b>Адрес установки успешно изменён!</b>\n\n📍 <b>{$text}</b> (Прибор № {$serial})\n\n<i>Нажмите кнопку ниже или выберите адрес в меню, чтобы просмотреть показания.</i>",
+                $token,
+                $devKey
+            );
             return;
         }
 
@@ -279,33 +275,39 @@ class EditDeviceCommand implements CommandInterface
                 $customDevices[$key]['channels'] = [];
             }
 
+            $summaryLines = [];
             if (count($activeChannels) === 1) {
                 $ch = (string) $activeChannels[0];
-                $customDevices[$key]['channels'][$ch]['meter_number'] = $parts[0] ?? '';
+                $num = $parts[0] ?? '';
+                $customDevices[$key]['channels'][$ch]['meter_number'] = $num;
+                $summaryLines[] = "• Канал {$ch}: № <b>{$num}</b>";
             } else {
-                if (isset($parts[0])) {
-                    $customDevices[$key]['channels']['1']['meter_number'] = $parts[0];
+                $num1 = $parts[0] ?? '';
+                $num2 = $parts[1] ?? '';
+                if ($num1 !== '') {
+                    $customDevices[$key]['channels']['1']['meter_number'] = $num1;
+                    $summaryLines[] = "• Канал 1: № <b>{$num1}</b>";
                 }
-                if (isset($parts[1])) {
-                    $customDevices[$key]['channels']['2']['meter_number'] = $parts[1];
+                if ($num2 !== '') {
+                    $customDevices[$key]['channels']['2']['meter_number'] = $num2;
+                    $summaryLines[] = "• Канал 2: № <b>{$num2}</b>";
                 }
             }
 
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
+            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
-            $report = "Номера счётчиков обновлены.";
-            try {
-                $device = $this->meterService->deviceLookup($config, $serial);
-                if ($device) {
-                    $report = $this->reportService->buildReport($config, $device);
-                }
-            } catch (\Throwable $e) {
-                Storage::log("Edit meters report error: " . $e->getMessage());
-            }
+            $addr = $customDevices[$key]['address'] ?? $customDevices[$key]['name'] ?? "Прибор № {$serial}";
+            $summary = implode("\n", $summaryLines);
 
-            Telegram::sendMessage($chatId, "✅ <b>Номера счётчиков успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
+            Telegram::sendMessage(
+                $chatId,
+                "✅ <b>Номера счётчиков успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n{$summary}",
+                $token,
+                $devKey
+            );
             return;
         }
 
@@ -314,14 +316,6 @@ class EditDeviceCommand implements CommandInterface
             $cleanText = str_replace(',', '.', $text);
             $parts = preg_split('/[\s]+/', $cleanText);
             $activeChannels = $state['active_channels'] ?? [1, 2];
-            $uuid = (string) ($state['uuid'] ?? '');
-
-            // Получаем текущие показания с API для фиксации точки отсчета base_api_value
-            $readings = [];
-            try {
-                $info = UnicBoard::getDeviceInfo($config, $uuid);
-                $readings = MeterService::extractCurrentReadingsFromDeviceInfo($info['payload'] ?? null);
-            } catch (\Throwable $e) {}
 
             $customDevices = Storage::loadRegisteredDevices();
             $key = isset($customDevices[(int) $serial]) ? (int) $serial : (isset($customDevices[$serial]) ? $serial : (int) $serial);
@@ -329,45 +323,45 @@ class EditDeviceCommand implements CommandInterface
                 $customDevices[$key]['channels'] = [];
             }
 
+            $summaryLines = [];
             if (count($activeChannels) === 1) {
                 $ch = (string) $activeChannels[0];
                 $val = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
-                $base = isset($readings[(int) $ch]) && $readings[(int) $ch]->lastValue !== null ? (float) $readings[(int) $ch]->lastValue : 0.0;
+                $valFormatted = number_format($val, 2, '.', '');
 
                 $customDevices[$key]['channels'][$ch]['user_initial'] = $val;
-                $customDevices[$key]['channels'][$ch]['base_api_value'] = $base;
                 $customDevices[$key]['initial_values'][$ch] = $val;
+                $summaryLines[] = "• Вход {$ch}: <b>{$valFormatted} m³</b>";
             } else {
                 $val1 = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
                 $val2 = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : (isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0);
-
-                $base1 = isset($readings[1]) && $readings[1]->lastValue !== null ? (float) $readings[1]->lastValue : 0.0;
-                $base2 = isset($readings[2]) && $readings[2]->lastValue !== null ? (float) $readings[2]->lastValue : 0.0;
+                $val1F = number_format($val1, 2, '.', '');
+                $val2F = number_format($val2, 2, '.', '');
 
                 $customDevices[$key]['channels']['1']['user_initial'] = $val1;
-                $customDevices[$key]['channels']['1']['base_api_value'] = $base1;
                 $customDevices[$key]['initial_values']['1'] = $val1;
 
                 $customDevices[$key]['channels']['2']['user_initial'] = $val2;
-                $customDevices[$key]['channels']['2']['base_api_value'] = $base2;
                 $customDevices[$key]['initial_values']['2'] = $val2;
+
+                $summaryLines[] = "• Вход 1: <b>{$val1F} m³</b>";
+                $summaryLines[] = "• Вход 2: <b>{$val2F} m³</b>";
             }
 
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
+            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
-            $report = "Показания обновлены.";
-            try {
-                $device = $this->meterService->deviceLookup($config, $serial);
-                if ($device) {
-                    $report = $this->reportService->buildReport($config, $device);
-                }
-            } catch (\Throwable $e) {
-                Storage::log("Edit initial report error: " . $e->getMessage());
-            }
+            $addr = $customDevices[$key]['address'] ?? $customDevices[$key]['name'] ?? "Прибор № {$serial}";
+            $summary = implode("\n", $summaryLines);
 
-            Telegram::sendMessage($chatId, "✅ <b>Начальные показания успешно обновлены!</b>\n\n" . $report, $token, $newMainKey);
+            Telegram::sendMessage(
+                $chatId,
+                "✅ <b>Начальные показания успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n{$summary}",
+                $token,
+                $devKey
+            );
             return;
         }
     }
