@@ -53,7 +53,6 @@ class PingServerCommand implements CommandInterface
             $apiStatus = "⚠️ <b>Ошибка ответа (HTTP {$httpCode})</b>";
         }
 
-        $apiHost = parse_url($config['unicboard_api_base'] ?? 'https://api.public.data-aggregator.unicboard.by', PHP_URL_HOST);
         $nowDate = date('d.m.Y H:i:s');
         $tz = date_default_timezone_get();
         $devicesCount = count(Storage::loadRegisteredDevices());
@@ -63,15 +62,17 @@ class PingServerCommand implements CommandInterface
             $errItem = $unicResp['errors'][0] ?? [];
             $errText = is_array($errItem) ? ($errItem['error_message'] ?? json_encode($errItem)) : (string) $errItem;
             if ($errText !== '') {
-                $errDetail = "• Диагностика: <code>" . htmlspecialchars($errText, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</code>\n";
+                // Маскируем внутренние адреса и хосты
+                $cleanErr = (string) preg_replace('/https?:\/\/[^\/\s]+/i', 'сервер', $errText);
+                $cleanErr = (string) preg_replace('/[a-z0-9.-]+\.unicboard\.by/i', 'сервер', $cleanErr);
+                $errDetail = "• Ошибка: <code>" . htmlspecialchars($cleanErr, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8') . "</code>\n";
             }
         }
 
         $msg = "⚡ <b>Диагностика связи и серверов</b>\n\n";
-        $msg .= "🌐 <b>Сервер сбора данных (UnicBoard API):</b>\n";
+        $msg .= "🌐 <b>Сервер сбора данных:</b>\n";
         $msg .= "• Статус: {$apiStatus}\n";
         $msg .= "• Время отклика: <b>{$durationMs} мс</b>\n";
-        $msg .= "• Хост: <code>{$apiHost}</code>\n";
         if ($errDetail !== '') {
             $msg .= $errDetail;
         }
