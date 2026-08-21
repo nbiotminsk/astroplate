@@ -253,20 +253,12 @@ class EditDeviceCommand implements CommandInterface
             // 3. Очищаем состояние ввода и обновляем клавиатуры
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
-            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Адрес установки успешно изменён!</b>",
+                "✅ <b>Адрес установки успешно изменён!</b>\n\n📍 <b>{$text}</b> (Прибор № {$serial})\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
                 $token,
                 $newMainKey
-            );
-
-            Telegram::sendMessage(
-                $chatId,
-                "📍 <b>{$text}</b> (Прибор № {$serial})\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
-                $token,
-                $devKey
             );
             return;
         }
@@ -304,23 +296,15 @@ class EditDeviceCommand implements CommandInterface
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
-            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
             $addr = $customDevices[$key]['address'] ?? $customDevices[$key]['name'] ?? "Прибор № {$serial}";
             $summary = implode("\n", $summaryLines);
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Номера счётчиков успешно сохранены!</b>",
+                "✅ <b>Номера счётчиков успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
                 $token,
                 $newMainKey
-            );
-
-            Telegram::sendMessage(
-                $chatId,
-                "📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
-                $token,
-                $devKey
             );
             return;
         }
@@ -365,23 +349,15 @@ class EditDeviceCommand implements CommandInterface
             Storage::saveRegisteredDevices($customDevices);
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
-            $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
             $addr = $customDevices[$key]['address'] ?? $customDevices[$key]['name'] ?? "Прибор № {$serial}";
             $summary = implode("\n", $summaryLines);
 
             Telegram::sendMessage(
                 $chatId,
-                "✅ <b>Начальные показания успешно сохранены!</b>",
+                "✅ <b>Начальные показания успешно сохранены!</b>\n\n📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
                 $token,
                 $newMainKey
-            );
-
-            Telegram::sendMessage(
-                $chatId,
-                "📍 <b>{$addr}</b> (Прибор № {$serial})\n\n{$summary}\n\n<i>Нажмите кнопку ниже для просмотра показаний:</i>",
-                $token,
-                $devKey
             );
             return;
         }
