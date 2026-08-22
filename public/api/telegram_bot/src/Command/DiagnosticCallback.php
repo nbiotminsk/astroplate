@@ -27,16 +27,56 @@ class DiagnosticCallback implements CommandInterface
         $token = $config['telegram_token'];
         $cbId = $update->callbackQueryId;
         $chatId = $update->chatId;
-        $serial = str_replace('diag_', '', $update->callbackData);
+        $cbData = $update->callbackData;
 
         Telegram::answerCallbackQuery($cbId, $token);
-        $device = $this->meterService->deviceLookup($config, $serial);
-        if ($device) {
-            $diagReport = $this->reportService->buildDiagnosticReport($config, $device);
-            $key = Telegram::buildDiagnosticKeyboard($serial);
-            Telegram::sendMessage($chatId, $diagReport, $token, $key);
+
+        if (str_starts_with($cbData, 'diag_ch_')) {
+            $serial = str_replace('diag_ch_', '', $cbData);
+            $sub = 'ch';
+        } elseif (str_starts_with($cbData, 'diag_bat_')) {
+            $serial = str_replace('diag_bat_', '', $cbData);
+            $sub = 'bat';
+        } elseif (str_starts_with($cbData, 'diag_temp_')) {
+            $serial = str_replace('diag_temp_', '', $cbData);
+            $sub = 'temp';
+        } elseif (str_starts_with($cbData, 'diag_clock_')) {
+            $serial = str_replace('diag_clock_', '', $cbData);
+            $sub = 'clock';
         } else {
-            Telegram::sendMessage($chatId, "Прибор не найден.", $token);
+            $serial = str_replace('diag_', '', $cbData);
+            $sub = 'menu';
         }
+
+        $device = $this->meterService->deviceLookup($config, $serial);
+        if (!$device) {
+            Telegram::sendMessage($chatId, "Прибор не найден.", $token);
+            return;
+        }
+
+        switch ($sub) {
+            case 'ch':
+                $report = $this->reportService->buildDiagChannelsReport($config, $device);
+                $key = Telegram::buildDiagSubKeyboard($serial);
+                break;
+            case 'bat':
+                $report = $this->reportService->buildDiagBatteryReport($config, $device);
+                $key = Telegram::buildDiagSubKeyboard($serial);
+                break;
+            case 'temp':
+                $report = $this->reportService->buildDiagTemperatureReport($config, $device);
+                $key = Telegram::buildDiagSubKeyboard($serial);
+                break;
+            case 'clock':
+                $report = $this->reportService->buildDiagClockReport($config, $device);
+                $key = Telegram::buildDiagSubKeyboard($serial);
+                break;
+            default:
+                $report = $this->reportService->buildDiagnosticReport($config, $device);
+                $key = Telegram::buildDiagnosticKeyboard($serial);
+                break;
+        }
+
+        Telegram::sendMessage($chatId, $report, $token, $key);
     }
 }

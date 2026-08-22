@@ -94,7 +94,7 @@ class UnicBoard
         bool $endOfDay = true,
         ?string $journalDataType = null,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpPostJson = null,
         ?callable $httpGet = null
     ): array {
@@ -201,7 +201,7 @@ class UnicBoard
         string $deviceId,
         int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpGet = null,
         ?callable $httpPostJson = null
     ): array {
@@ -388,7 +388,7 @@ class UnicBoard
         int $limit = 1,
         int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -469,7 +469,7 @@ class UnicBoard
         int $limit = 1,
         int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -550,7 +550,7 @@ class UnicBoard
         int $limit = 1,
         int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');
@@ -599,7 +599,7 @@ class UnicBoard
         int $limit = 100,
         int $timeout = 3,
         int $maxRetries = 2,
-        int $retryDelayUs = 150000,
+        int $retryDelayUs = 500000,
         ?callable $httpGet = null
     ): array {
         $apiBase = rtrim((string) ($config['unicboard_api_base'] ?? ''), '/');

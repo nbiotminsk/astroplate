@@ -120,11 +120,11 @@ class ReportService
                 }
 
                 if ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "• Счетчик № {$meterNum}";
+                    $meterLabel = "{$chNum}. 💧 Счетчик № {$meterNum}";
                 } elseif (count($currentReadings) > 1) {
-                    $meterLabel = "• Вход {$chNum}";
+                    $meterLabel = "{$chNum}. 💧 Вход {$chNum}";
                 } else {
-                    $meterLabel = "• Счетчик № {$deviceSerial}";
+                    $meterLabel = "{$chNum}. 💧 Счетчик № {$deviceSerial}";
                 }
 
                 if ($reading->isInactive() && $reading->lastDateEventNoData !== null) {
@@ -179,9 +179,9 @@ class ReportService
                 $valWithUnit = $displayVal !== null ? number_format($displayVal, 2, '.', '') . ' m³' : '—';
 
                 if ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "• Счетчик № {$meterNum}";
+                    $meterLabel = "{$chNum}. 💧 Счетчик № {$meterNum}";
                 } else {
-                    $meterLabel = "• Вход {$chNum}";
+                    $meterLabel = "{$chNum}. 💧 Вход {$chNum}";
                 }
 
                 $lines[] = "{$meterLabel}: <b>{$valWithUnit}</b>";
@@ -193,18 +193,7 @@ class ReportService
             $lines[] = "• Показания: нет данных";
         }
 
-        // 4. Температура и батарея
-        $temp = UnicBoard::getLatestTemperature($config, $deviceId);
-        $bat = UnicBoard::getLatestBattery($config, $deviceId);
-
-        if ($temp !== null && isset($temp['value']) && is_numeric($temp['value'])) {
-            $lines[] = "💨 Температура: " . round((float) $temp['value'], 1) . " °C";
-        }
-        if ($bat !== null && isset($bat['value']) && is_numeric($bat['value'])) {
-            $lines[] = "🔋 Батарея: " . number_format((float) $bat['value'], 2, '.', '') . " V";
-        }
-
-        if (empty($currentReadings) && empty($historyRecords) && $temp === null && $bat === null) {
+        if (empty($currentReadings) && empty($historyRecords)) {
             $lines[] = "\n⚠️ Не удалось получить данные по устройству {$deviceId}.";
         }
 
@@ -353,6 +342,21 @@ class ReportService
 
     public function buildDiagnosticReport(array $config, DeviceDTO $device): string
     {
+        $deviceSerial = $device->serialNumber ?? '—';
+        $addr = $device->address ?: $device->name;
+
+        $lines = [];
+        $lines[] = "⚙️ <b>Диагностика модема № {$deviceSerial}</b>";
+        if (!empty($addr)) {
+            $lines[] = "📍 <i>{$addr}</i>";
+        }
+        $lines[] = "\nВыберите нужный раздел для диагностики:";
+
+        return implode("\n", $lines);
+    }
+
+    public function buildDiagChannelsReport(array $config, DeviceDTO $device): string
+    {
         $timezone = $config['timezone'] ?? 'Europe/Minsk';
         $deviceId = $device->deviceId;
         $deviceSerial = $device->serialNumber ?? '—';
@@ -362,7 +366,7 @@ class ReportService
         $payload = $infoResp['payload'] ?? [];
 
         $lines = [];
-        $lines[] = "⚙️ <b>Диагностика модема № {$deviceSerial}</b>";
+        $lines[] = "📊 <b>Каналы и импульсы (Модем № {$deviceSerial})</b>";
         if (!empty($addr)) {
             $lines[] = "📍 <i>{$addr}</i>\n";
         } else {
@@ -371,7 +375,6 @@ class ReportService
 
         $channels = $payload['device_channel'] ?? [];
 
-        // Проверяем, есть ли уже показания в /info
         $hasValuesInInfo = false;
         if (!empty($channels)) {
             foreach ($channels as $ch) {
@@ -382,7 +385,6 @@ class ReportService
             }
         }
 
-        // Запрашиваем историю /values ТОЛЬКО если в /info нет каналов или нет показаний
         $historyByChannel = [];
         if (!$hasValuesInInfo) {
             $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 10);
@@ -416,7 +418,6 @@ class ReportService
         }
 
         if (empty($channels) && !empty($device->channels)) {
-            // Фолбэк 3: локальная конфигурация каналов
             foreach ($device->channels as $chNumStr => $chConf) {
                 $chNumInt = (int) $chNumStr;
                 $channels[] = [
@@ -443,7 +444,6 @@ class ReportService
                 $lastVal = isset($meterBilling['last_value']) && is_numeric($meterBilling['last_value']) ? (float) $meterBilling['last_value'] : null;
                 $lastValDate = $meterBilling['last_value_date'] ?? null;
 
-                // Если в /info нет значения или даты среза, берем из истории /values:
                 if (($lastVal === null || $lastValDate === null) && !empty($historyByChannel[$chNum])) {
                     $latestH = $historyByChannel[$chNum][0] ?? null;
                     if ($latestH) {
@@ -455,7 +455,6 @@ class ReportService
                 $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 1.0;
                 $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
 
-                // В UnicBoard базовый множитель 1 соответствует 10 литрам на импульс (0.01 м³)
                 $litersPerPulse = $unitMultiplier * 10.0 * $valueMultiplier;
                 $m3PerPulse = $litersPerPulse / 1000.0;
                 $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : null;
@@ -472,21 +471,86 @@ class ReportService
                 $statusActive = in_array($chNum, $activeChannels, true) ? "✅ Активен" : "⏸ Отключен в боте";
 
                 $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
-                $lines[] = "• Вес импульса (множитель): <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
+                $lines[] = "• Вес импульса: <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
                 $lines[] = "• Число импульсов: <b>{$pulsesStr}</b>";
-                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>\n";
+                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
+                $lines[] = "• Дата опроса: <b>{$dateStr}</b>\n";
             }
         } else {
             $lines[] = "ℹ️ Информация по каналам не найдена.\n";
         }
 
-        // Телеметрия (батарея, температура, часы, протокол)
+        $protocol = $payload['data_gateway_network_device']['protocol']['name'] ?? 'SMP_M';
+        $networkType = $payload['data_gateway_network_device']['network']['type_network'] ?? 'input';
+        $modemName = ($payload['device_modification']['device_modification_type']['name_ru'] ?? 'Модем') . ' ' . ($payload['device_modification']['name'] ?? '');
+
+        $lines[] = "📡 Протокол передачи: <b>{$protocol}</b> ({$networkType})";
+        if (!empty(trim($modemName))) {
+            $lines[] = "🏷️ Модификация: <b>{$modemName}</b>";
+        }
+        $lines[] = "🆔 UUID: <code>{$deviceId}</code>";
+
+        return implode("\n", $lines);
+    }
+
+    public function buildDiagBatteryReport(array $config, DeviceDTO $device): string
+    {
+        $deviceId = $device->deviceId;
+        $deviceSerial = $device->serialNumber ?? '—';
+        $addr = $device->address ?: $device->name;
+
         $latestBat = UnicBoard::getLatestBattery($config, $deviceId);
+        $batStr = ($latestBat && isset($latestBat['value'])) ? number_format((float) $latestBat['value'], 2, '.', '') . ' V' : '—';
+
+        $lines = [];
+        $lines[] = "🔋 <b>Питание и батарея (Модем № {$deviceSerial})</b>";
+        if (!empty($addr)) {
+            $lines[] = "📍 <i>{$addr}</i>\n";
+        } else {
+            $lines[] = "";
+        }
+        $lines[] = "🔋 Напряжение батареи: <b>{$batStr}</b>";
+
+        return implode("\n", $lines);
+    }
+
+    public function buildDiagTemperatureReport(array $config, DeviceDTO $device): string
+    {
+        $deviceId = $device->deviceId;
+        $deviceSerial = $device->serialNumber ?? '—';
+        $addr = $device->address ?: $device->name;
+
         $latestTemp = UnicBoard::getLatestTemperature($config, $deviceId);
+        $tempStr = ($latestTemp && isset($latestTemp['value'])) ? round((float) $latestTemp['value'], 1) . ' °C' : '—';
+
+        $lines = [];
+        $lines[] = "🌡️ <b>Температура (Модем № {$deviceSerial})</b>";
+        if (!empty($addr)) {
+            $lines[] = "📍 <i>{$addr}</i>\n";
+        } else {
+            $lines[] = "";
+        }
+        $lines[] = "💨 Температура прибора: <b>{$tempStr}</b>";
+
+        return implode("\n", $lines);
+    }
+
+    public function buildDiagClockReport(array $config, DeviceDTO $device): string
+    {
+        $timezone = $config['timezone'] ?? 'Europe/Minsk';
+        $deviceId = $device->deviceId;
+        $deviceSerial = $device->serialNumber ?? '—';
+        $addr = $device->address ?: $device->name;
+
         $latestClock = UnicBoard::getLatestClock($config, $deviceId);
 
-        $batStr = ($latestBat && isset($latestBat['value'])) ? number_format((float) $latestBat['value'], 2, '.', '') . ' V' : '—';
-        $tempStr = ($latestTemp && isset($latestTemp['value'])) ? round((float) $latestTemp['value']) . ' °C' : '—';
+        $lines = [];
+        $lines[] = "🕒 <b>Время и синхронизация (Модем № {$deviceSerial})</b>";
+        if (!empty($addr)) {
+            $lines[] = "📍 <i>{$addr}</i>\n";
+        } else {
+            $lines[] = "";
+        }
 
         if ($latestClock && !empty($latestClock['device_clock'])) {
             $clockDateStr = MeterService::formatDate($latestClock['device_clock'], 'd.m.Y H:i:s', $timezone);
@@ -501,24 +565,9 @@ class ReportService
             };
             $lines[] = "🕒 Внутренние часы: <b>{$clockDateStr}</b>";
             $lines[] = "⏱ Расхождение с сервером: <b>{$syncSign} сек</b> (<i>{$syncStatus}</i>)";
-        } elseif (!empty($channels[0]['device_meter'][0]['last_value_date'])) {
-            $rawDate = $channels[0]['device_meter'][0]['last_value_date'];
-            $clockDateStr = MeterService::formatDate($rawDate, 'd.m.Y H:i', $timezone);
-            $lines[] = "🕒 Время модема: <b>{$clockDateStr}</b> (<i>синхронизировано</i>)";
-            $lines[] = "⏱ Расхождение с сервером: <b>0 сек</b> (<i>норма</i>)";
+        } else {
+            $lines[] = "🕒 Информация о часах временно недоступна.";
         }
-
-        $protocol = $payload['data_gateway_network_device']['protocol']['name'] ?? 'SMP_M';
-        $networkType = $payload['data_gateway_network_device']['network']['type_network'] ?? 'input';
-        $modemName = ($payload['device_modification']['device_modification_type']['name_ru'] ?? 'Модем') . ' ' . ($payload['device_modification']['name'] ?? '');
-
-        $lines[] = "💨 Температура: <b>{$tempStr}</b>";
-        $lines[] = "🔋 Батарея: <b>{$batStr}</b>";
-        $lines[] = "📡 Протокол передачи: <b>{$protocol}</b> ({$networkType})";
-        if (!empty(trim($modemName))) {
-            $lines[] = "🏷️ Модификация: <b>{$modemName}</b>";
-        }
-        $lines[] = "🆔 UUID: <code>{$deviceId}</code>";
 
         return implode("\n", $lines);
     }

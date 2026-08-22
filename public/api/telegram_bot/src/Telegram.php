@@ -31,7 +31,7 @@ class Telegram
 /ping — тест связи с серверами
 TXT;
 
-    public static function httpGet(string $url, array $headers = [], int $timeout = 3, int $connectTimeout = 2): array
+    public static function httpGet(string $url, array $headers = [], int $timeout = 3, int $connectTimeout = 4): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -44,7 +44,7 @@ TXT;
         $body = curl_exec($ch);
         if ($body === false) {
             $err = curl_error($ch);
-            Storage::log('cURL Error (GET ' . $url . '): ' . $err);
+            Storage::log('cURL Error (GET ' . self::redactUrlForLog($url) . '): ' . $err);
             return [0, ['ok' => false, 'errors' => [['error_message' => $err]]]];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
@@ -52,7 +52,7 @@ TXT;
         return [$code, json_decode((string) $body, true)];
     }
 
-    public static function httpPostJson(string $url, array $payload, array $headers = [], int $timeout = 3, int $connectTimeout = 2): array
+    public static function httpPostJson(string $url, array $payload, array $headers = [], int $timeout = 3, int $connectTimeout = 4): array
     {
         $ch = curl_init($url);
         curl_setopt_array($ch, [
@@ -71,12 +71,21 @@ TXT;
         $data = curl_exec($ch);
         if ($data === false) {
             $err = curl_error($ch);
-            Storage::log('cURL Error (POST ' . $url . '): ' . $err);
+            Storage::log('cURL Error (POST ' . self::redactUrlForLog($url) . '): ' . $err);
             return [0, ['ok' => false, 'errors' => [['error_message' => $err]]]];
         }
         $code = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 
         return [$code, json_decode((string) $data, true)];
+    }
+
+    private static function redactUrlForLog(string $url): string
+    {
+        return (string) preg_replace(
+            '#(https://api\\.telegram\\.org/bot)[^/]+#',
+            '$1[REDACTED]',
+            $url
+        );
     }
 
     public static function tgApi(string $method, array $params, string $token): array
@@ -208,9 +217,20 @@ TXT;
     {
         return [
             'inline_keyboard' => [
-                [
-                    ['text' => '🔙 Назад к прибору', 'callback_data' => 'back_dev_' . $serialOrId],
-                ],
+                [['text' => '📊 Каналы / Импульсы', 'callback_data' => 'diag_ch_'    . $serialOrId]],
+                [['text' => '🔋 Батарея',            'callback_data' => 'diag_bat_'   . $serialOrId]],
+                [['text' => '🌡️ Температура',         'callback_data' => 'diag_temp_'  . $serialOrId]],
+                [['text' => '🕒 Часы',                'callback_data' => 'diag_clock_' . $serialOrId]],
+                [['text' => '🔙 Назад к прибору',     'callback_data' => 'back_dev_'   . $serialOrId]],
+            ],
+        ];
+    }
+
+    public static function buildDiagSubKeyboard(string $serialOrId): array
+    {
+        return [
+            'inline_keyboard' => [
+                [['text' => '🔙 К диагностике', 'callback_data' => 'diag_' . $serialOrId]],
             ],
         ];
     }
