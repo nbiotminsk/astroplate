@@ -17,7 +17,29 @@ spl_autoload_register(static function (string $class): void {
     }
 });
 
-// Дергаем API UnicBoard, чтобы он "проснулся"
-UnicBoard::getAllDevices($config, 1);
+// Запрашиваем UnicBoard API для «пробуждения» и проверки доступности сервера
+$startTs = microtime(true);
+$res = UnicBoard::getAllDevices($config, 1, 5, 2, 500000);
+$durationMs = round((microtime(true) - $startTs) * 1000, 1);
 
-echo "API PING OK\n";
+$httpCode = $res['http_status'] ?? 0;
+$isOk = ($res['ok'] ?? false) || ($httpCode >= 200 && $httpCode < 300);
+
+if ($isOk) {
+    $logMsg = "PING OK: Server responded in {$durationMs} ms (HTTP {$httpCode})";
+    Storage::log($logMsg);
+    if (PHP_SAPI !== 'cli') {
+        header('Content-Type: text/plain; charset=utf-8');
+        http_response_code(200);
+    }
+    echo "API PING OK (HTTP {$httpCode}, {$durationMs} ms)\n";
+} else {
+    $err = !empty($res['errors']) ? json_encode($res['errors'], JSON_UNESCAPED_UNICODE) : 'Timeout / No connection';
+    $logMsg = "PING FAILED: Server error (HTTP {$httpCode}, {$durationMs} ms) - {$err}";
+    Storage::log($logMsg);
+    if (PHP_SAPI !== 'cli') {
+        header('Content-Type: text/plain; charset=utf-8');
+        http_response_code(502);
+    }
+    echo "API PING FAILED (HTTP {$httpCode}, {$durationMs} ms): {$err}\n";
+}
