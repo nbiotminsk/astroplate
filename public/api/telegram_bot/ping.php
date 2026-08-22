@@ -19,7 +19,7 @@ spl_autoload_register(static function (string $class): void {
 
 // Запрашиваем UnicBoard API для «пробуждения» и проверки доступности сервера
 $startTs = microtime(true);
-$res = UnicBoard::getAllDevices($config, 1, 5, 2, 500000);
+$res = UnicBoard::getAllDevices($config, 1, 5, 2, 2000000);
 $durationMs = round((microtime(true) - $startTs) * 1000, 1);
 
 $httpCode = $res['http_status'] ?? 0;
