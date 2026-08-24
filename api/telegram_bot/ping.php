@@ -152,6 +152,17 @@ if ($isOk) {
         http_response_code(200);
     }
     echo "{$statusOutput}\n";
+
+    if (isset($_GET['logs'])) {
+        echo "\n=== RECENT LOGS ===\n";
+        $logFile = Storage::logFile();
+        if (file_exists($logFile)) {
+            $lines = file($logFile);
+            echo implode('', array_slice($lines, -30));
+        } else {
+            echo "No log file\n";
+        }
+    }
 } else {
     $err = !empty($res['errors']) ? json_encode($res['errors'], JSON_UNESCAPED_UNICODE) : 'Timeout / No connection';
     $logMsg = "PING FAILED: Server error (HTTP {$httpCode}, {$durationMs} ms) - {$err}, {$dbMsg}";
