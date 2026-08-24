@@ -1,55 +1,14 @@
-name: CI/CD Pipeline
+name: Deploy Webhook
 
 on:
   push:
     branches:
-      - main
-  workflow_dispatch:
-
-permissions:
-  contents: write
+      - deploy
 
 jobs:
-  validate-and-deploy:
+  trigger-webhook:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-
-      - name: Install dependencies
-        run: npm ci
-
-      - name: Run Check (Lint & Types)
+      - name: Trigger Hosting Webhook
         run: |
-          node scripts/themeGenerator.js
-          node scripts/jsonGenerator.js
-          npm run check
-
-      - name: Build Project
-        run: npm run build
-
-      - name: Prepare for Deployment
-        run: |
-          touch dist/.nojekyll
-          if [ -f dist/htaccess.txt ]; then
-            cp dist/htaccess.txt dist/.htaccess
-            chmod 644 dist/.htaccess
-          fi
-
-      - name: Deploy to Deploy Branch
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
-          publish_branch: deploy
-          force_orphan: true
-          commit_message: "Deploy: ${{ github.sha }} [skip ci]"
-
+          curl -f -X POST "https://by4010.hb.by:8443/modules/git/public/web-hook.php?uuid=545844a5-6f56-2a7d-37aa-0a92eb58d127"
