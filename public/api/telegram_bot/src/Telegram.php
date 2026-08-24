@@ -191,10 +191,11 @@ TXT;
 
         $buttons = [
             [
-                ['text' => '📅 Архив за месяц', 'callback_data' => 'month_' . $serialOrId],
+                ['text' => '🔄 Опросить / Обновить', 'callback_data' => 'back_dev_' . $serialOrId],
+                ['text' => '📅 Архив за месяц',     'callback_data' => 'month_' . $serialOrId],
             ],
             [
-                ['text' => '⚙️ Диагностика', 'callback_data' => 'diag_' . $serialOrId],
+                ['text' => '⚙️ Диагностика',          'callback_data' => 'diag_' . $serialOrId],
             ],
         ];
 

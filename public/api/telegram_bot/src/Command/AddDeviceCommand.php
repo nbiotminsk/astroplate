@@ -436,11 +436,22 @@ class AddDeviceCommand implements CommandInterface
         $devTypeLabel = $isFluo ? 'Счётчик Fluo' : 'Счётчик';
         $serialLabel = $isFluo ? '№' : 'Модем: №';
 
-        Telegram::sendMessage(
-            $chatId,
-            "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 {$serialLabel} <b>{$serial}</b>\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
-            $token,
-            $mainKey
-        );
+        $savedDevice = $this->deviceRepo->findBySerialOrName($serial) ?? new DeviceDTO($uuid, $serial, $address, $initialValues, $address, $activeChannels, $channelsConfig);
+        try {
+            $report = $this->reportService->buildReport($config, $savedDevice);
+            Telegram::sendMessage(
+                $chatId,
+                "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n{$report}",
+                $token,
+                $devKey
+            );
+        } catch (\Throwable) {
+            Telegram::sendMessage(
+                $chatId,
+                "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 {$serialLabel} <b>{$serial}</b>\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
+                $token,
+                $devKey
+            );
+        }
     }
 }
