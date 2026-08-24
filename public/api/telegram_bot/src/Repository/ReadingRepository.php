@@ -209,4 +209,36 @@ class ReadingRepository
             return null;
         }
     }
+
+    /**
+     * Возвращает кэшированный снимок, только если он был обновлен не ранее maxAgeSeconds назад.
+     * Позволяет десяткам пользователей одного счетчика получать данные мгновенно без повторных запросов в API.
+     */
+    public function getFreshDeviceInfoSnapshot(string $deviceId, int $maxAgeSeconds = 60): ?array
+    {
+        $pdo = $this->getPdo();
+        if (!$pdo) {
+            return null;
+        }
+
+        try {
+            $stmt = $pdo->prepare("SELECT payload_json, updated_at FROM device_info_cache WHERE device_id = :dev_id LIMIT 1");
+            $stmt->execute([':dev_id' => $deviceId]);
+            $row = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if (!$row || empty($row['payload_json'])) {
+                return null;
+            }
+
+            $updatedAt = !empty($row['updated_at']) ? strtotime((string) $row['updated_at']) : 0;
+            if ((time() - $updatedAt) <= $maxAgeSeconds) {
+                $decoded = json_decode((string) $row['payload_json'], true);
+                return is_array($decoded) ? $decoded : null;
+            }
+
+            return null;
+        } catch (Throwable $e) {
+            return null;
+        }
+    }
 }

@@ -29,25 +29,30 @@ class ReportService
         $lines = [];
         $lines[] = "{$headerPrefix}<b>{$title}</b>\n";
 
-        // 1. Текущие показания получаем ПЕРВИЧНО из GET /api/v1/devices/{device_id}/info
-        $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
-        $httpStatus = $infoResp['http_status'] ?? 0;
+        // 1. Проверяем горячий снимок из БД (если другой пользователь или ping.php опрашивал прибор менее 60 сек назад)
+        $freshSnapshot = $this->readingRepo?->getFreshDeviceInfoSnapshot($deviceId, 60);
+        $infoPayload = null;
         $isOffline = false;
 
-        $infoPayload = $infoResp['payload'] ?? null;
-
-        if ($infoResp['ok'] && !empty($infoPayload)) {
-            // Успешно получено из API -> кэшируем в БД
-            $this->readingRepo?->saveDeviceInfoSnapshot($deviceId, $infoPayload);
+        if (!empty($freshSnapshot)) {
+            $infoPayload = $freshSnapshot;
         } else {
-            // Если сервер UnicBoard недоступен или вернул ошибку -> пробуем взять снапшот из БД
-            $cachedSnapshot = $this->readingRepo?->getDeviceInfoSnapshot($deviceId);
-            if (!empty($cachedSnapshot)) {
-                $infoPayload = $cachedSnapshot;
-                $isOffline = true;
-                $lines[] = "<i>(⚠️ UnicBoard API недоступен — показаны последние данные из БД)</i>\n";
-            } elseif ($httpStatus === 0 && !$infoResp['ok']) {
-                throw new \TelegramBot\Exception\ApiUnavailableException();
+            // Опрашиваем UnicBoard API и обновляем общий снимок в БД
+            $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
+            $httpStatus = $infoResp['http_status'] ?? 0;
+
+            if ($infoResp['ok'] && !empty($infoResp['payload'])) {
+                $infoPayload = $infoResp['payload'];
+                $this->readingRepo?->saveDeviceInfoSnapshot($deviceId, $infoPayload);
+            } else {
+                $cachedSnapshot = $this->readingRepo?->getDeviceInfoSnapshot($deviceId);
+                if (!empty($cachedSnapshot)) {
+                    $infoPayload = $cachedSnapshot;
+                    $isOffline = true;
+                    $lines[] = "<i>(⚠️ UnicBoard API недоступен — показаны последние данные из БД)</i>\n";
+                } elseif ($httpStatus === 0 && !$infoResp['ok']) {
+                    throw new \TelegramBot\Exception\ApiUnavailableException();
+                }
             }
         }
 
