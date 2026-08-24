@@ -18,6 +18,7 @@ spl_autoload_register(static function (string $class): void {
 });
 
 // Запрашиваем UnicBoard API для «пробуждения» и проверки доступности сервера
+// Быстрый эндпоинт мониторинга работоспособности бота и связи с UnicBoard
 $startTs = microtime(true);
 $res = UnicBoard::getAllDevices($config, 1, 5, 2, 2000000);
 $durationMs = round((microtime(true) - $startTs) * 1000, 1);
