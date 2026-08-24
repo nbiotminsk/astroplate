@@ -10,7 +10,63 @@ permissions:
   contents: write
 
 jobs:
-  validate-and-deploy:
+  check-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      site: ${{ steps.filter.outputs.site }}
+      api: ${{ steps.filter.outputs.api }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Check changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters:
+            site:
+              - '!(public/api/**)'
+            api:
+              - 'public/api/**'
+
+  deploy-api-fast:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.site == 'false' && needs.check-changes.outputs.api == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main (for API files)
+        uses: actions/checkout@v4
+        with:
+          path: main-repo
+
+      - name: Checkout deploy branch
+        uses: actions/checkout@v4
+        with:
+          ref: deploy
+          path: deploy-repo
+
+      - name: Sync API files into deploy branch
+        run: |
+          mkdir -p deploy-repo/api
+          rsync -av --delete main-repo/public/api/ deploy-repo/api/
+          cd deploy-repo
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add api/
+          if git diff --staged --quiet; then
+            echo "No changes in API files."
+          else
+            git commit -m "Fast Deploy (API only): ${{ github.sha }} [skip ci]"
+            git push origin deploy
+          fi
+
+      - name: Trigger Hosting Webhook
+        run: |
+          curl -f -X POST "https://by4010.hb.by:8443/modules/git/public/web-hook.php?uuid=545844a5-6f56-2a7d-37aa-0a92eb58d127"
+
+  deploy-full-site:
+    needs: check-changes
+    if: ${{ needs.check-changes.outputs.site == 'true' || (needs.check-changes.outputs.site == 'false' && needs.check-changes.outputs.api == 'false') }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
