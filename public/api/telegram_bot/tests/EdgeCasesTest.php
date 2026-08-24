@@ -105,6 +105,15 @@ class EdgeCasesTest
         $monthWithInitReport = $reportService->buildMonthReport($config, $deviceWithInit);
         TestRunner::assert(str_contains($monthWithInitReport, 'Архив за текущий месяц'), 'Месячный отчет формируется корректно для прибора с начальными показаниями');
 
+        // Тест отчета Fluo без пересчета
+        $fluoDevice = new DeviceDTO(
+            deviceId: '2e50bc92-6c87-4b64-b22e-e96e7997476f',
+            serialNumber: '8527038',
+            name: 'Fluo Test'
+        );
+        $fluoMonthReport = $reportService->buildMonthReport($config, $fluoDevice);
+        TestRunner::assert(str_contains($fluoMonthReport, 'Счетчик Fluo № 8527038'), 'Месячный отчет Fluo содержит правильную метку');
+
         // Чистим тестовые данные
         $userRepo->removeMeter($userA, $sharedSerial);
         $userRepo->removeMeter($userB, $sharedSerial);
