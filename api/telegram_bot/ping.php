@@ -53,6 +53,7 @@ if ($pdo) {
             }
         }
 
+        $processedSerials = [];
         $devicesCount = 0;
         $newReadingsCount = 0;
         $updatedSnapshots = 0;
@@ -81,6 +82,7 @@ if ($pdo) {
             }
 
             $devicesCount++;
+            $processedSerials[] = $serial;
 
             // 1. Сохраняем свежий снимок устройства для быстрого офлайн-доступа
             $readingRepo->saveDeviceInfoSnapshot($deviceId, $devPayload);
@@ -128,7 +130,8 @@ if ($pdo) {
             }
         }
 
-        $syncMsg = "SYNC: Опрошено приборов: {$devicesCount}, новых показаний записано в БД: {$newReadingsCount}";
+        $serialsList = !empty($processedSerials) ? ' [' . implode(', ', $processedSerials) . ']' : '';
+        $syncMsg = "SYNC: Опрошено приборов: {$devicesCount}{$serialsList}, новых показаний записано в БД: {$newReadingsCount}";
     } catch (\Throwable $e) {
         $dbMsg = "DB Error: " . $e->getMessage();
     }
