@@ -82,9 +82,11 @@ class EditDeviceCommand implements CommandInterface
                     return;
                 }
 
+                $isFluo = MeterService::isFluoDevice(null, $device);
                 $addr = $device->address ?: $device->name;
-                $text = "⚙️ <b>Настройки прибора № {$serial}</b>\n(📍 {$addr})\n\nВыберите, что хотите изменить:";
-                $key = Telegram::buildEditDeviceKeyboard($serial);
+                $devTitle = $isFluo ? "счётчика Fluo" : "прибора";
+                $text = "⚙️ <b>Настройки {$devTitle} № {$serial}</b>\n(📍 {$addr})\n\nВыберите, что хотите изменить:";
+                $key = Telegram::buildEditDeviceKeyboard($serial, $isFluo);
                 Telegram::sendMessage($chatId, $text, $token, $key);
                 return;
             }
@@ -152,15 +154,24 @@ class EditDeviceCommand implements CommandInterface
                     return;
                 }
 
-                $activeChannels = $device->activeChannels ?? [1, 2];
+                $isFluo = MeterService::isFluoDevice(null, $device);
+                $activeChannels = $isFluo ? [1] : ($device->activeChannels ?? [1, 2]);
                 Storage::setUserState($chatId, [
                     'step' => 'EDIT_INITIAL',
                     'serial' => $serial,
                     'active_channels' => $activeChannels,
                     'uuid' => $device->deviceId,
+                    'is_fluo' => $isFluo,
                 ]);
 
-                if (count($activeChannels) === 1) {
+                if ($isFluo) {
+                    Telegram::sendMessage(
+                        $chatId,
+                        "🔢 Введите текущие показания с циферблата счётчика Fluo:\n\n<i>Пример: <code>0.12</code></i>",
+                        $token,
+                        $cancelKey
+                    );
+                } elseif (count($activeChannels) === 1) {
                     $chNum = $activeChannels[0];
                     Telegram::sendMessage(
                         $chatId,

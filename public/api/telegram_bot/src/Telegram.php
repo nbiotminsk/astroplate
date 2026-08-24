@@ -235,26 +235,36 @@ TXT;
         ];
     }
 
-    public static function buildEditDeviceKeyboard(string $serialOrId): array
+    public static function buildEditDeviceKeyboard(string $serialOrId, bool $isFluo = false): array
     {
-        return [
-            'inline_keyboard' => [
-                [
-                    ['text' => '📍 Название / Адрес', 'callback_data' => 'edit_addr_' . $serialOrId],
-                ],
-                [
-                    ['text' => '🏷️ Номера счётчиков', 'callback_data' => 'edit_meters_' . $serialOrId],
-                ],
-                [
-                    ['text' => '🔢 Начальные показания', 'callback_data' => 'edit_init_' . $serialOrId],
-                ],
-                [
-                    ['text' => '🔌 Количество каналов', 'callback_data' => 'edit_ch_' . $serialOrId],
-                ],
-                [
-                    ['text' => '🔙 Назад к прибору', 'callback_data' => 'back_dev_' . $serialOrId],
-                ],
+        $buttons = [
+            [
+                ['text' => '📍 Название / Адрес', 'callback_data' => 'edit_addr_' . $serialOrId],
             ],
+        ];
+
+        if (!$isFluo) {
+            $buttons[] = [
+                ['text' => '🏷️ Номера счётчиков', 'callback_data' => 'edit_meters_' . $serialOrId],
+            ];
+        }
+
+        $buttons[] = [
+            ['text' => '🔢 Начальные показания', 'callback_data' => 'edit_init_' . $serialOrId],
+        ];
+
+        if (!$isFluo) {
+            $buttons[] = [
+                ['text' => '🔌 Количество каналов', 'callback_data' => 'edit_ch_' . $serialOrId],
+            ];
+        }
+
+        $buttons[] = [
+            ['text' => '🔙 Назад к прибору', 'callback_data' => 'back_dev_' . $serialOrId],
+        ];
+
+        return [
+            'inline_keyboard' => $buttons,
         ];
     }
 

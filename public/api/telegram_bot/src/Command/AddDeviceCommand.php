@@ -242,20 +242,26 @@ class AddDeviceCommand implements CommandInterface
                 return;
             }
 
+            $isFluo = MeterService::isFluoDevice($foundDevice);
             $uuid = (string) ($foundDevice['id'] ?? '');
             $serial = (string) ($foundDevice['manufacturer_serial_number'] ?? $serialInput);
             $channels = $foundDevice['device_channel'] ?? [];
-            $chCount = count($channels) > 0 ? count($channels) : 2;
+            $chCount = $isFluo ? 1 : (count($channels) > 0 ? count($channels) : 2);
 
             $state['step'] = 'WAITING_ADDRESS';
             $state['serial'] = $serial;
             $state['uuid'] = $uuid;
             $state['ch_count'] = $chCount;
+            $state['is_fluo'] = $isFluo;
+            if ($isFluo) {
+                $state['active_channels'] = [1];
+            }
             Storage::setUserState($chatId, $state);
 
+            $devTitle = $isFluo ? "Счётчик Fluo <b>№ {$serial}</b>" : "Модем <b>№ {$serial}</b>";
             Telegram::sendMessage(
                 $chatId,
-                "✅ Модем <b>№ {$serial}</b> найден!\n\n📍 Введите адрес установки (например: <code>ул. Кольцова 8 корпус 2 кв. 74</code>):",
+                "✅ {$devTitle} найден!\n\n📍 Введите адрес установки (например: <code>ул. Кольцова 8 корпус 2 кв. 74</code>):",
                 $token,
                 $cancelKey
             );
@@ -271,9 +277,21 @@ class AddDeviceCommand implements CommandInterface
             }
 
             $state['address'] = $address;
-            $chCount = (int) ($state['ch_count'] ?? 2);
+            $isFluo = !empty($state['is_fluo']);
+            $chCount = (int) ($state['ch_count'] ?? ($isFluo ? 1 : 2));
 
-            if ($chCount > 1) {
+            if ($isFluo) {
+                $state['active_channels'] = [1];
+                $state['step'] = 'WAITING_METER_CH1';
+                Storage::setUserState($chatId, $state);
+
+                Telegram::sendMessage(
+                    $chatId,
+                    "📍 <b>Адрес:</b> {$address}\n\n🔢 Введите текущие показания с циферблата счётчика Fluo (в м³):\n\n<i>Пример: <code>0.12</code> или просто <code>0</code></i>",
+                    $token,
+                    $cancelKey
+                );
+            } elseif ($chCount > 1) {
                 $state['step'] = 'WAITING_CHANNELS_SELECT';
                 Storage::setUserState($chatId, $state);
 
@@ -301,9 +319,29 @@ class AddDeviceCommand implements CommandInterface
         // 8. Шаг 3: Ввод номера счётчика для 1-го входа
         if ($currentStep === 'WAITING_METER_CH1') {
             $cleanText = trim(str_replace(',', '.', $text));
+            $isFluo = !empty($state['is_fluo']);
+
+            if ($isFluo) {
+                $userInit = is_numeric($cleanText) ? (float) $cleanText : 0.0;
+                $meterNum = (string) ($state['serial'] ?? '');
+
+                $state['channels_config']['1'] = [
+                    'meter_number' => $meterNum,
+                    'user_initial' => $userInit,
+                    'base_api_value' => null,
+                ];
+                $this->finishWizard($chatId, $state, $config);
+                return;
+            }
+
             $parts = preg_split('/[\s]+/', $cleanText);
             $meterNum = $parts[0] ?? '';
             $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
+
+            if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
+                $userInit = (float) $parts[0];
+                $meterNum = '';
+            }
 
             $state['channels_config']['1'] = [
                 'meter_number' => $meterNum,
@@ -334,6 +372,11 @@ class AddDeviceCommand implements CommandInterface
             $meterNum = $parts[0] ?? '';
             $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
 
+            if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
+                $userInit = (float) $parts[0];
+                $meterNum = '';
+            }
+
             $state['channels_config']['2'] = [
                 'meter_number' => $meterNum,
                 'user_initial' => $userInit,
@@ -349,7 +392,8 @@ class AddDeviceCommand implements CommandInterface
         $serial = (string) ($state['serial'] ?? '');
         $uuid = (string) ($state['uuid'] ?? '');
         $address = (string) ($state['address'] ?? "Счетчик {$serial}");
-        $activeChannels = (array) ($state['active_channels'] ?? [1, 2]);
+        $isFluo = !empty($state['is_fluo']);
+        $activeChannels = $isFluo ? [1] : (array) ($state['active_channels'] ?? [1, 2]);
         $channelsConfig = (array) ($state['channels_config'] ?? []);
 
         $initialValues = [];
@@ -375,18 +419,26 @@ class AddDeviceCommand implements CommandInterface
         $devKey = Telegram::buildDeviceKeyboard($serial, true);
 
         $summaryLines = [];
-        foreach ($activeChannels as $ch) {
-            $chStr = (string) $ch;
-            $meterNum = $channelsConfig[$chStr]['meter_number'] ?? '';
-            $initVal = isset($initialValues[$chStr]) ? number_format((float) $initialValues[$chStr], 2, '.', '') : '0.00';
-            $meterPart = $meterNum !== '' ? " (Счётчик № {$meterNum})" : '';
-            $summaryLines[] = "• Вход {$ch}{$meterPart}: <b>{$initVal} m³</b>";
+        if ($isFluo) {
+            $initVal = isset($initialValues['1']) ? number_format((float) $initialValues['1'], 2, '.', '') : '0.00';
+            $summaryLines[] = "• Начальные показания: <b>{$initVal} m³</b> (№ <code>{$serial}</code>)";
+        } else {
+            foreach ($activeChannels as $ch) {
+                $chStr = (string) $ch;
+                $meterNum = $channelsConfig[$chStr]['meter_number'] ?? '';
+                $initVal = isset($initialValues[$chStr]) ? number_format((float) $initialValues[$chStr], 2, '.', '') : '0.00';
+                $meterPart = $meterNum !== '' ? " (Счётчик № {$meterNum})" : '';
+                $summaryLines[] = "• Вход {$ch}{$meterPart}: <b>{$initVal} m³</b>";
+            }
         }
         $summary = implode("\n", $summaryLines);
 
+        $devTypeLabel = $isFluo ? 'Счётчик Fluo' : 'Счётчик';
+        $serialLabel = $isFluo ? '№' : 'Модем: №';
+
         Telegram::sendMessage(
             $chatId,
-            "🎉 <b>Счётчик успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 Модем: <b>№ {$serial}</b>\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
+            "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 {$serialLabel} <b>{$serial}</b>\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
             $token,
             $mainKey
         );

@@ -117,6 +117,20 @@ class CommandTest
         \TelegramBot\Storage::clearUserState('777');
         TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Storage::clearUserState resets user state');
 
+        // Fluo device wizard state test
+        \TelegramBot\Storage::setUserState('777', [
+            'step' => 'WAITING_ADDRESS',
+            'serial' => '8527038',
+            'uuid' => '2e50bc92-6c87-4b64-b22e-e96e7997476f',
+            'ch_count' => 1,
+            'is_fluo' => true,
+            'active_channels' => [1],
+        ]);
+        $fluoState = \TelegramBot\Storage::getUserState('777');
+        TestRunner::assert(!empty($fluoState['is_fluo']), 'Fluo device has is_fluo flag');
+        TestRunner::assertEquals(1, count($fluoState['active_channels'] ?? []), 'Fluo device has exactly 1 active channel');
+        \TelegramBot\Storage::clearUserState('777');
+
         // EditDeviceCommand tests
         $editCmd = new \TelegramBot\Command\EditDeviceCommand($telegram, $meterService, $reportService, $deviceRepo, $userMeterRepo);
         
