@@ -23,6 +23,10 @@ spl_autoload_register(static function (string $class): void {
 
 $config = require __DIR__ . '/../config.php';
 
+if (PHP_SAPI !== 'cli') {
+    header('Content-Type: text/plain; charset=utf-8');
+}
+
 echo "🚀 Запуск миграции данных из JSON в MariaDB (база: " . ($config['database']['database'] ?? 'teleofis_24') . ")...\n";
 
 $pdo = Database::getConnection($config);
