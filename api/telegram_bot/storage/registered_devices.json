@@ -1,0 +1,34 @@
+{
+    "8527038": {
+        "name": "Fluo",
+        "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f",
+        "initial_values": {
+            "1": 0
+        }
+    },
+    "8524390": {
+        "name": "Юпитер",
+        "device_id": "420de7d0-5e14-453d-8ad3-5a1dc3729e34",
+        "initial_values": {
+            "1": 0.06,
+            "2": 0.05
+        }
+    },
+    "8554760": {
+        "name": "Домашний тест",
+        "device_id": "ae0bf621-39e3-47e5-9126-52ec6e90d242",
+        "initial_values": {
+            "1": 0,
+            "2": 0
+        },
+        "address": "Домашний тест",
+        "channels": {
+            "1": {
+                "base_api_value": 0
+            },
+            "2": {
+                "base_api_value": 4.3
+            }
+        }
+    }
+}

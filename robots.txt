@@ -1,0 +1,11 @@
+User-agent: *
+Allow: /
+Disallow: /api/*
+Disallow: /cart
+Disallow: /404
+Disallow: /*?utm*
+
+Sitemap: https://teleofis24.by/sitemap-index.xml
+
+# Yandex-specific directives
+Clean-param: utm_source&utm_medium&utm_campaign&utm_term&utm_content&yclid&gclid /
