@@ -485,24 +485,53 @@ class MeterService
             }
         }
 
-        // 2. Проверяем пользовательское динамическое хранилище registered_devices.json
+        // 2. Проверяем динамический репозиторий устройств (MariaDB / JSON)
+        if ($this->deviceRepo !== null) {
+            $foundByRepo = $this->deviceRepo->findBySerialOrName($cleanInput) ?? $this->deviceRepo->findBySerialOrName($input);
+            if ($foundByRepo !== null) {
+                return $foundByRepo;
+            }
+        }
+
         $customDevices = $this->deviceRepo ? $this->deviceRepo->loadAll() : Storage::loadRegisteredDevices();
+        if (isset($customDevices[$cleanInput])) {
+            $dev = $customDevices[$cleanInput];
+            return ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
+        }
         if (isset($customDevices[(int) $cleanInput])) {
             $dev = $customDevices[(int) $cleanInput];
-            return DeviceDTO::fromArray($dev, (string) $cleanInput);
+            return ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
         }
 
         foreach ($customDevices as $id => $info) {
-            if (
-                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
-                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
-                mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
-                mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
-            ) {
-                return DeviceDTO::fromArray($info, (string) $id);
+            if ($info instanceof DeviceDTO) {
+                if (
+                    mb_strtolower($info->name, 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                    mb_strtolower($info->address ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                    mb_strtolower($info->name, 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
+                    mb_strtolower($info->address ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
+                    $info->serialNumber === $cleanInput ||
+                    $info->serialNumber === $input ||
+                    $info->deviceId === $cleanInput ||
+                    $info->deviceId === $input
+                ) {
+                    return $info;
+                }
+                continue;
             }
-            if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
-                return DeviceDTO::fromArray($info, (string) $id);
+
+            if (is_array($info)) {
+                if (
+                    mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                    mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') ||
+                    mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
+                    mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
+                ) {
+                    return DeviceDTO::fromArray($info, (string) $id);
+                }
+                if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
+                    return DeviceDTO::fromArray($info, (string) $id);
+                }
             }
         }
 
