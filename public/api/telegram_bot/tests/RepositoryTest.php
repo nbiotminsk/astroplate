@@ -45,5 +45,51 @@ class RepositoryTest
         $cacheRepo = new JsonMeterCacheRepository();
         $cacheData = $cacheRepo->loadCache();
         TestRunner::assert(is_array($cacheData), 'JsonMeterCacheRepository loadCache returns array');
+
+        // SQL Repositories with in-memory SQLite PDO
+        $sqlitePdo = new \PDO('sqlite::memory:');
+        $sqlitePdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        \TelegramBot\Database::setConnection($sqlitePdo);
+        \TelegramBot\Database::autoMigrate($sqlitePdo);
+
+        $sqlDevRepo = new \TelegramBot\Repository\SqlDeviceRepository();
+        $sqlDevRepo->registerDevice('1234567', 'uuid-1234', 'Счетчик Тест', ['1' => 10.5], 'ул. Тестовая 1', [1]);
+        $dev = $sqlDevRepo->findBySerialOrName('1234567');
+        TestRunner::assert($dev !== null, 'SqlDeviceRepository finds registered device');
+        if ($dev) {
+            TestRunner::assertEquals('Счетчик Тест', $dev->name, 'SqlDeviceRepository returns correct name');
+            TestRunner::assertEquals('ул. Тестовая 1', $dev->address, 'SqlDeviceRepository returns correct address');
+        }
+
+        $sqlUserRepo = new \TelegramBot\Repository\SqlUserMeterRepository();
+        $sqlUserRepo->addMeter('chat_sql_1', '1234567', 'Мой Счётчик', 'uuid-1234', 'ул. Тестовая 1');
+        $userMeters = $sqlUserRepo->getMetersByChatId('chat_sql_1');
+        TestRunner::assert(isset($userMeters['1234567']), 'SqlUserMeterRepository gets user meters');
+
+        $sqlUserRepo->setUserState('chat_sql_1', ['step' => 'TEST_STEP']);
+        $state = $sqlUserRepo->getUserState('chat_sql_1');
+        TestRunner::assertEquals('TEST_STEP', $state['step'] ?? '', 'SqlUserMeterRepository state persistence');
+
+        $sqlUserRepo->clearUserState('chat_sql_1');
+        $stateCleared = $sqlUserRepo->getUserState('chat_sql_1');
+        TestRunner::assert(empty($stateCleared), 'SqlUserMeterRepository clearUserState');
+
+        $sqlUserRepo->removeMeter('chat_sql_1', '1234567');
+        $userMetersAfterRemove = $sqlUserRepo->getMetersByChatId('chat_sql_1');
+        TestRunner::assert(!isset($userMetersAfterRemove['1234567']), 'SqlUserMeterRepository removes meter');
+
+        $readingRepo = new \TelegramBot\Repository\ReadingRepository();
+        $readingRepo->saveHistoricalReadings('uuid-1234', 1, [
+            new \TelegramBot\DTO\HistoricalValueDTO(1, '2026-08-01 00:00:00', 10.5, 10.5, null, null, 'DEVICE_DATA'),
+            new \TelegramBot\DTO\HistoricalValueDTO(1, '2026-08-15 00:00:00', 15.8, 15.8, null, null, 'DEVICE_DATA'),
+        ]);
+        $readings = $readingRepo->getHistoricalReadings('uuid-1234', 1);
+        TestRunner::assertEquals(2, count($readings), 'ReadingRepository retrieves historical readings');
+
+        $readingRepo->saveDeviceInfoSnapshot('uuid-1234', ['test' => 'snapshot']);
+        $snapshot = $readingRepo->getDeviceInfoSnapshot('uuid-1234');
+        TestRunner::assertEquals('snapshot', $snapshot['test'] ?? '', 'ReadingRepository saves and gets device info snapshot');
+
+        \TelegramBot\Database::reset();
     }
 }

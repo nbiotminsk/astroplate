@@ -22,6 +22,10 @@ use TelegramBot\Repository\JsonDeviceRepository;
 use TelegramBot\Repository\JsonMeterCacheRepository;
 use TelegramBot\Repository\JsonUserMeterRepository;
 use TelegramBot\Repository\MeterCacheRepositoryInterface;
+use TelegramBot\Repository\ReadingRepository;
+use TelegramBot\Repository\SqlDeviceRepository;
+use TelegramBot\Repository\SqlMeterCacheRepository;
+use TelegramBot\Repository\SqlUserMeterRepository;
 use TelegramBot\Repository\UserMeterRepositoryInterface;
 
 class Container
@@ -36,9 +40,10 @@ class Container
 
     private function registerServices(): void
     {
-        $this->set(DeviceRepositoryInterface::class, static fn() => new JsonDeviceRepository());
-        $this->set(UserMeterRepositoryInterface::class, static fn() => new JsonUserMeterRepository());
-        $this->set(MeterCacheRepositoryInterface::class, static fn() => new JsonMeterCacheRepository());
+        $this->set(DeviceRepositoryInterface::class, fn() => new SqlDeviceRepository($this->config));
+        $this->set(UserMeterRepositoryInterface::class, fn() => new SqlUserMeterRepository($this->config));
+        $this->set(MeterCacheRepositoryInterface::class, fn() => new SqlMeterCacheRepository($this->config));
+        $this->set(ReadingRepository::class, fn() => new ReadingRepository($this->config));
 
         $this->set(Telegram::class, fn() => new Telegram(
             $this->get(UserMeterRepositoryInterface::class)
@@ -46,12 +51,14 @@ class Container
 
         $this->set(MeterService::class, fn() => new MeterService(
             $this->get(DeviceRepositoryInterface::class),
-            $this->get(MeterCacheRepositoryInterface::class)
+            $this->get(MeterCacheRepositoryInterface::class),
+            $this->get(ReadingRepository::class)
         ));
 
         $this->set(ReportService::class, fn() => new ReportService(
             $this->get(UserMeterRepositoryInterface::class),
-            $this->get(MeterService::class)
+            $this->get(MeterService::class),
+            $this->get(ReadingRepository::class)
         ));
 
         $this->set(CommandDispatcher::class, fn() => new CommandDispatcher([

@@ -44,6 +44,17 @@ return [
     // Включение расширенной диагностики API (по умолчанию включено)
     'enable_diagnostics' => filter_var(getenv('ENABLE_DIAGNOSTICS') ?: 'true', FILTER_VALIDATE_BOOLEAN),
 
+    // Подключение к базе данных MySQL / MariaDB (teleofis_24)
+    'database' => [
+        'driver' => getenv('DB_DRIVER') ?: 'mysql',
+        'host' => getenv('DB_HOST') ?: 'localhost',
+        'port' => (int) (getenv('DB_PORT') ?: 3306),
+        'database' => getenv('DB_NAME') ?: 'teleofis_24',
+        'username' => getenv('DB_USER') ?: 'teleofis',
+        'password' => getenv('DB_PASS') ?: 'Y@W8vsydVwv@bn44',
+        'charset' => 'utf8mb4',
+    ],
+
     /* Список устройств по умолчанию (опционально) */
     'devices' => [],
 ];

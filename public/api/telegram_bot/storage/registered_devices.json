@@ -30,5 +30,17 @@
                 "base_api_value": 4.3
             }
         }
+    },
+    "1234567": {
+        "name": "Счетчик Тест",
+        "device_id": "uuid-1234",
+        "serial_number": "1234567",
+        "initial_values": {
+            "1": 10.5
+        },
+        "address": "ул. Тестовая 1",
+        "active_channels": [
+            1
+        ]
     }
 }

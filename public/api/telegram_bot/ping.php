@@ -26,21 +26,36 @@ $durationMs = round((microtime(true) - $startTs) * 1000, 1);
 $httpCode = $res['http_status'] ?? 0;
 $isOk = ($res['ok'] ?? false) || ($httpCode >= 200 && $httpCode < 300);
 
+// Проверяем статус базы данных MariaDB
+$dbMsg = '';
+try {
+    $pdo = Database::getConnection($config);
+    if ($pdo) {
+        $ver = $pdo->query("SELECT VERSION()")->fetchColumn();
+        $tables = $pdo->query("SHOW TABLES")->fetchAll(\PDO::FETCH_COLUMN);
+        $dbMsg = "DB OK (MariaDB {$ver}, tables: " . implode(', ', $tables) . ")";
+    } else {
+        $dbMsg = "DB: JSON fallback active";
+    }
+} catch (\Throwable $e) {
+    $dbMsg = "DB Error: " . $e->getMessage();
+}
+
 if ($isOk) {
-    $logMsg = "PING OK: Server responded in {$durationMs} ms (HTTP {$httpCode})";
+    $logMsg = "PING OK: Server responded in {$durationMs} ms (HTTP {$httpCode}), {$dbMsg}";
     Storage::log($logMsg);
     if (PHP_SAPI !== 'cli') {
         header('Content-Type: text/plain; charset=utf-8');
         http_response_code(200);
     }
-    echo "API PING OK (HTTP {$httpCode}, {$durationMs} ms)\n";
+    echo "API PING OK (HTTP {$httpCode}, {$durationMs} ms)\n{$dbMsg}\n";
 } else {
     $err = !empty($res['errors']) ? json_encode($res['errors'], JSON_UNESCAPED_UNICODE) : 'Timeout / No connection';
-    $logMsg = "PING FAILED: Server error (HTTP {$httpCode}, {$durationMs} ms) - {$err}";
+    $logMsg = "PING FAILED: Server error (HTTP {$httpCode}, {$durationMs} ms) - {$err}, {$dbMsg}";
     Storage::log($logMsg);
     if (PHP_SAPI !== 'cli') {
         header('Content-Type: text/plain; charset=utf-8');
         http_response_code(502);
     }
-    echo "API PING FAILED (HTTP {$httpCode}, {$durationMs} ms): {$err}\n";
+    echo "API PING FAILED (HTTP {$httpCode}, {$durationMs} ms): {$err}\n{$dbMsg}\n";
 }

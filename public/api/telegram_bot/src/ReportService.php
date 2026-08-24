@@ -7,13 +7,15 @@ namespace TelegramBot;
 use TelegramBot\DTO\ChannelReadingDTO;
 use TelegramBot\DTO\DeviceDTO;
 use TelegramBot\DTO\HistoricalValueDTO;
+use TelegramBot\Repository\ReadingRepository;
 use TelegramBot\Repository\UserMeterRepositoryInterface;
 
 class ReportService
 {
     public function __construct(
         private ?UserMeterRepositoryInterface $userMeterRepo = null,
-        private ?MeterService $meterService = null
+        private ?MeterService $meterService = null,
+        private ?ReadingRepository $readingRepo = null
     ) {}
 
     public function buildReport(array $config, DeviceDTO $device): string
@@ -30,13 +32,25 @@ class ReportService
         // 1. Текущие показания получаем ПЕРВИЧНО из GET /api/v1/devices/{device_id}/info
         $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
         $httpStatus = $infoResp['http_status'] ?? 0;
-
-        // Если сервер UnicBoard недоступен (сетевой таймаут / сбой подключения)
-        if ($httpStatus === 0 && !$infoResp['ok']) {
-            throw new \TelegramBot\Exception\ApiUnavailableException();
-        }
+        $isOffline = false;
 
         $infoPayload = $infoResp['payload'] ?? null;
+
+        if ($infoResp['ok'] && !empty($infoPayload)) {
+            // Успешно получено из API -> кэшируем в БД
+            $this->readingRepo?->saveDeviceInfoSnapshot($deviceId, $infoPayload);
+        } else {
+            // Если сервер UnicBoard недоступен или вернул ошибку -> пробуем взять снапшот из БД
+            $cachedSnapshot = $this->readingRepo?->getDeviceInfoSnapshot($deviceId);
+            if (!empty($cachedSnapshot)) {
+                $infoPayload = $cachedSnapshot;
+                $isOffline = true;
+                $lines[] = "<i>(⚠️ UnicBoard API недоступен — показаны последние данные из БД)</i>\n";
+            } elseif ($httpStatus === 0 && !$infoResp['ok']) {
+                throw new \TelegramBot\Exception\ApiUnavailableException();
+            }
+        }
+
         $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 
         // /values не нужен для успешного получения текущего показания. Запрашиваем
@@ -46,6 +60,17 @@ class ReportService
         if (empty($currentReadings)) {
             $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 50);
             $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
+
+            if (empty($historyRecords)) {
+                // Пробуем из БД
+                $activeChs = $device->activeChannels ?? [1, 2];
+                foreach ($activeChs as $ch) {
+                    $dbHist = $this->readingRepo?->getHistoricalReadings($deviceId, (int) $ch, null, null, 10);
+                    if (!empty($dbHist)) {
+                        $historyRecords = array_merge($historyRecords, $dbHist);
+                    }
+                }
+            }
 
             foreach ($historyRecords as $rec) {
                 $historyByChannel[$rec->channelNumber][] = $rec;
@@ -228,6 +253,8 @@ class ReportService
         $startMonthTs = strtotime(date('Y-m-01 00:00:00'));
         $endMonthTs = time();
 
+        $activeChannels = $device->activeChannels ?? [1, 2];
+
         // 1. Запрашиваем исторические значения за текущий месяц
         $valuesResp = UnicBoard::getDeviceValues($config, $deviceId, 100, date('Y-m-01\T00:00:00'));
         $valuesStatus = $valuesResp['http_status'] ?? 0;
@@ -236,13 +263,34 @@ class ReportService
         $infoResp = UnicBoard::getDeviceInfo($config, $deviceId);
         $infoStatus = $infoResp['http_status'] ?? 0;
 
-        if ($valuesStatus === 0 && $infoStatus === 0 && !$valuesResp['ok'] && !$infoResp['ok']) {
+        if ($valuesResp['ok'] && !empty($valuesResp['payload'])) {
+            $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload']);
+            foreach ($historyRecords as $rec) {
+                $this->readingRepo?->saveHistoricalReadings($deviceId, $rec->channelNumber, [$rec]);
+            }
+        } else {
+            // Фолбэк: загружаем историю из БД
+            $historyRecords = [];
+            foreach ($activeChannels as $ch) {
+                $dbHist = $this->readingRepo?->getHistoricalReadings($deviceId, (int) $ch, date('Y-m-01 00:00:00'));
+                if (!empty($dbHist)) {
+                    $historyRecords = array_merge($historyRecords, $dbHist);
+                }
+            }
+        }
+
+        if ($infoResp['ok'] && !empty($infoResp['payload'])) {
+            $infoPayload = $infoResp['payload'];
+            $this->readingRepo?->saveDeviceInfoSnapshot($deviceId, $infoPayload);
+        } else {
+            $infoPayload = $this->readingRepo?->getDeviceInfoSnapshot($deviceId);
+        }
+
+        if (empty($historyRecords) && empty($infoPayload) && $valuesStatus === 0 && $infoStatus === 0) {
             $lines[] = "\n⚠️ <i>Сервер сбора данных временно недоступен. Пожалуйста, попробуйте снова через минуту.</i>";
             return implode("\n", $lines);
         }
 
-        $historyRecords = MeterService::extractHistoricalRecordsFromValues($valuesResp['payload'] ?? []);
-        $infoPayload = $infoResp['payload'] ?? null;
         $currentReadings = MeterService::extractCurrentReadingsFromDeviceInfo($infoPayload);
 
         $channelsMonthData = [];

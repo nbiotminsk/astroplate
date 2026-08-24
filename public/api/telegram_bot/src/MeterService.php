@@ -10,6 +10,7 @@ use TelegramBot\DTO\HistoricalValueDTO;
 use TelegramBot\DTO\MeterReadingDTO;
 use TelegramBot\Repository\DeviceRepositoryInterface;
 use TelegramBot\Repository\MeterCacheRepositoryInterface;
+use TelegramBot\Repository\ReadingRepository;
 
 class MeterService
 {
@@ -18,7 +19,8 @@ class MeterService
 
     public function __construct(
         private ?DeviceRepositoryInterface $deviceRepo = null,
-        private ?MeterCacheRepositoryInterface $cacheRepo = null
+        private ?MeterCacheRepositoryInterface $cacheRepo = null,
+        private ?ReadingRepository $readingRepo = null
     ) {}
 
     /**
