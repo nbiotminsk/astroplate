@@ -10,63 +10,7 @@ permissions:
   contents: write
 
 jobs:
-  check-changes:
-    runs-on: ubuntu-latest
-    outputs:
-      site: ${{ steps.filter.outputs.site }}
-      api: ${{ steps.filter.outputs.api }}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Check changed paths
-        uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters:
-            site:
-              - '!(public/api/**)'
-            api:
-              - 'public/api/**'
-
-  deploy-api-fast:
-    needs: check-changes
-    if: ${{ needs.check-changes.outputs.site == 'false' && needs.check-changes.outputs.api == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout main (for API files)
-        uses: actions/checkout@v4
-        with:
-          path: main-repo
-
-      - name: Checkout deploy branch
-        uses: actions/checkout@v4
-        with:
-          ref: deploy
-          path: deploy-repo
-
-      - name: Sync API files into deploy branch
-        run: |
-          mkdir -p deploy-repo/api
-          rsync -av --delete main-repo/public/api/ deploy-repo/api/
-          cd deploy-repo
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add api/
-          if git diff --staged --quiet; then
-            echo "No changes in API files."
-          else
-            git commit -m "Fast Deploy (API only): ${{ github.sha }} [skip ci]"
-            git push origin deploy
-          fi
-
-      - name: Trigger Hosting Webhook
-        run: |
-          curl -f -X POST "https://by4010.hb.by:8443/modules/git/public/web-hook.php?uuid=545844a5-6f56-2a7d-37aa-0a92eb58d127"
-
-  deploy-full-site:
-    needs: check-changes
-    if: ${{ needs.check-changes.outputs.site == 'true' || (needs.check-changes.outputs.site == 'false' && needs.check-changes.outputs.api == 'false') }}
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
@@ -74,25 +18,61 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Check changed paths
+        uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters:
+            site:
+              - '!public/api/**'
+            api:
+              - 'public/api/**'
+
+      - name: Fast Deploy API Files
+        if: ${{ steps.filter.outputs.site == 'false' && steps.filter.outputs.api == 'true' && github.event_name != 'workflow_dispatch' }}
+        run: |
+          echo "Fast deploying API files..."
+          git fetch origin deploy:deploy
+          git checkout deploy
+          git checkout main -- public/api
+          rm -rf api
+          mkdir -p api
+          cp -r public/api/* api/
+          rm -rf public
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add api
+          if git diff --staged --quiet; then
+            echo "No changes in API."
+          else
+            git commit -m "Fast Deploy (API only): ${{ github.sha }} [skip ci]"
+            git push origin deploy
+          fi
+
       - name: Setup Node.js
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: actions/setup-node@v4
         with:
           node-version: 22
           cache: npm
 
       - name: Install dependencies
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         run: npm ci
 
       - name: Run Check (Lint & Types)
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         run: |
           node scripts/themeGenerator.js
           node scripts/jsonGenerator.js
           npm run check
 
       - name: Build Project
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         run: npm run build
 
       - name: Prepare for Deployment
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         run: |
           touch dist/.nojekyll
           if [ -f dist/htaccess.txt ]; then
@@ -100,7 +80,8 @@ jobs:
             chmod 644 dist/.htaccess
           fi
 
-      - name: Deploy to Deploy Branch
+      - name: Deploy Full Site to Deploy Branch
+        if: ${{ steps.filter.outputs.site == 'true' || steps.filter.outputs.api == 'false' || github.event_name == 'workflow_dispatch' }}
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
