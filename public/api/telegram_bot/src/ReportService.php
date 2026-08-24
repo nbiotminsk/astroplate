@@ -77,28 +77,44 @@ class ReportService
                     $latestDate = $lastValDate;
                 }
 
-                // Конфигурация канала (номер счетчика, начальные показания, база API)
-                $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
-                    ? (float) $chConfig['user_initial']
-                    : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
-                $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
-                    ? (float) $chConfig['base_api_value']
-                    : null;
-                $meterNum = $chConfig['meter_number'] ?? null;
+                $isFluo = MeterService::isFluoDevice($infoPayload, $device);
 
-                if ($lastVal !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $lastVal > 0))) {
-                    $baseApiVal = (float) $lastVal;
-                    if (!empty($device->serialNumber)) {
-                        Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                if ($isFluo) {
+                    $displayVal = $lastVal;
+                    $valWithUnit = $displayVal !== null ? number_format($displayVal, 3, '.', '') . ' m³' : '—';
+                    $meterLabel = "💧 Счетчик Fluo № {$deviceSerial}";
+                } else {
+                    // Конфигурация канала (номер счетчика, начальные показания, база API)
+                    $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
+                    $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
+                        ? (float) $chConfig['user_initial']
+                        : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                    $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
+                        ? (float) $chConfig['base_api_value']
+                        : null;
+                    $meterNum = $chConfig['meter_number'] ?? null;
+
+                    if ($lastVal !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $lastVal > 0))) {
+                        $baseApiVal = (float) $lastVal;
+                        if (!empty($device->serialNumber)) {
+                            Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                        }
+                    }
+
+                    $displayVal = $lastVal !== null
+                        ? MeterService::calculateDisplayValue((float) $lastVal, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
+                        : null;
+
+                    $valWithUnit = $displayVal !== null ? number_format($displayVal, 2, '.', '') . ' m³' : '—';
+
+                    if ($meterNum !== null && $meterNum !== '') {
+                        $meterLabel = "{$chNum}. 💧 Счетчик № {$meterNum}";
+                    } elseif (count($currentReadings) > 1) {
+                        $meterLabel = "{$chNum}. 💧 Вход {$chNum}";
+                    } else {
+                        $meterLabel = "{$chNum}. 💧 Счетчик № {$deviceSerial}";
                     }
                 }
-
-                $displayVal = $lastVal !== null
-                    ? MeterService::calculateDisplayValue((float) $lastVal, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
-                    : null;
-
-                $valWithUnit = $displayVal !== null ? number_format($displayVal, 2, '.', '') . ' m³' : '—';
 
                 // Обновляем кэш расхода и выводим дельту расхода за сегодня
                 $diffStr = '';
@@ -114,17 +130,10 @@ class ReportService
 
                         if ($changeDay === $todayDay) {
                             $diffVal = (float) $consInfo['last_change_diff'];
-                            $diffStr = " (<b>+" . number_format($diffVal, 2, '.', '') . " m³</b>)";
+                            $diffFmt = number_format($diffVal, $isFluo ? 3 : 2, '.', '');
+                            $diffStr = " (<b>+{$diffFmt} m³</b>)";
                         }
                     }
-                }
-
-                if ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "{$chNum}. 💧 Счетчик № {$meterNum}";
-                } elseif (count($currentReadings) > 1) {
-                    $meterLabel = "{$chNum}. 💧 Вход {$chNum}";
-                } else {
-                    $meterLabel = "{$chNum}. 💧 Счетчик № {$deviceSerial}";
                 }
 
                 if ($reading->isInactive() && $reading->lastDateEventNoData !== null) {
@@ -289,58 +298,64 @@ class ReportService
                 }
                 $dateEndStr = $dateEnd ? MeterService::formatDate($dateEnd, 'd.m.Y H:i', $timezone) : '—';
 
-                // Конфигурация канала (номер счетчика, начальные показания, база API)
-                $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
-                    ? (float) $chConfig['user_initial']
-                    : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
-                $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
-                    ? (float) $chConfig['base_api_value']
-                    : null;
-                $meterNum = $chConfig['meter_number'] ?? null;
-
-                if ($rawValEnd !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $rawValEnd > 0))) {
-                    $baseApiVal = (float) $rawValEnd;
-                    if (!empty($device->serialNumber)) {
-                        Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
-                    }
-                }
-
-                $displayValEnd = $rawValEnd !== null
-                    ? MeterService::calculateDisplayValue($rawValEnd, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
-                    : null;
-
-                if ($rawValStart !== null) {
-                    $displayValStart = MeterService::calculateDisplayValue($rawValStart, $userInitial !== null ? (float) $userInitial : null, $baseApiVal);
-                } elseif ($userInitial !== null) {
-                    $displayValStart = (float) $userInitial;
-                    $dateStartStr = date('01.m.Y 00:00');
-                } elseif ($displayValEnd !== null) {
-                    $displayValStart = $displayValEnd;
-                    $dateStartStr = $dateEndStr;
-                } else {
-                    $displayValStart = null;
-                }
-
                 $isFluo = MeterService::isFluoDevice($infoPayload, $device);
                 $deviceSerial = $device->serialNumber !== '' ? $device->serialNumber : $deviceId;
 
                 if ($isFluo) {
+                    $displayValEnd = $rawValEnd;
+                    $displayValStart = $rawValStart !== null ? $rawValStart : ($rawValEnd !== null ? $rawValEnd : null);
+                    $valStartStr = $displayValStart !== null ? number_format($displayValStart, 3, '.', '') . " m³" : '—';
+                    $valEndStr = $displayValEnd !== null ? number_format($displayValEnd, 3, '.', '') . " m³" : '—';
                     $meterLabel = "Счетчик Fluo № {$deviceSerial}";
                     $prefix = "";
-                } elseif ($meterNum !== null && $meterNum !== '') {
-                    $meterLabel = "💧 Счетчик № {$meterNum}";
-                    $prefix = "{$chNum}. ";
-                } elseif ($totalChannels > 1) {
-                    $meterLabel = "Канал {$chNum}";
-                    $prefix = "{$chNum}. ";
                 } else {
-                    $meterLabel = "Счетчик № {$deviceSerial}";
-                    $prefix = "";
-                }
+                    // Конфигурация канала (номер счетчика, начальные показания, база API)
+                    $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
+                    $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
+                        ? (float) $chConfig['user_initial']
+                        : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                    $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
+                        ? (float) $chConfig['base_api_value']
+                        : null;
+                    $meterNum = $chConfig['meter_number'] ?? null;
 
-                $valStartStr = $displayValStart !== null ? number_format($displayValStart, 2, '.', '') . " m³" : '—';
-                $valEndStr = $displayValEnd !== null ? number_format($displayValEnd, 2, '.', '') . " m³" : '—';
+                    if ($rawValEnd !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $rawValEnd > 0))) {
+                        $baseApiVal = (float) $rawValEnd;
+                        if (!empty($device->serialNumber)) {
+                            Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                        }
+                    }
+
+                    $displayValEnd = $rawValEnd !== null
+                        ? MeterService::calculateDisplayValue($rawValEnd, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
+                        : null;
+
+                    if ($rawValStart !== null) {
+                        $displayValStart = MeterService::calculateDisplayValue($rawValStart, $userInitial !== null ? (float) $userInitial : null, $baseApiVal);
+                    } elseif ($userInitial !== null) {
+                        $displayValStart = (float) $userInitial;
+                        $dateStartStr = date('01.m.Y 00:00');
+                    } elseif ($displayValEnd !== null) {
+                        $displayValStart = $displayValEnd;
+                        $dateStartStr = $dateEndStr;
+                    } else {
+                        $displayValStart = null;
+                    }
+
+                    if ($meterNum !== null && $meterNum !== '') {
+                        $meterLabel = "💧 Счетчик № {$meterNum}";
+                        $prefix = "{$chNum}. ";
+                    } elseif ($totalChannels > 1) {
+                        $meterLabel = "Канал {$chNum}";
+                        $prefix = "{$chNum}. ";
+                    } else {
+                        $meterLabel = "Счетчик № {$deviceSerial}";
+                        $prefix = "";
+                    }
+
+                    $valStartStr = $displayValStart !== null ? number_format($displayValStart, 2, '.', '') . " m³" : '—';
+                    $valEndStr = $displayValEnd !== null ? number_format($displayValEnd, 2, '.', '') . " m³" : '—';
+                }
 
                 $lines[] = "<b>{$prefix}{$meterLabel}:</b>";
                 $lines[] = "  • Нач. месяца ({$dateStartStr}): <b>{$valStartStr}</b>";
@@ -348,7 +363,7 @@ class ReportService
 
                 if ($displayValEnd !== null && $displayValStart !== null) {
                     $monthConsumption = $displayValEnd - $displayValStart;
-                    $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . number_format($monthConsumption, 2, '.', '');
+                    $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . number_format($monthConsumption, $isFluo ? 3 : 2, '.', '');
                     $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
                 }
 
@@ -484,29 +499,44 @@ class ReportService
                     }
                 }
 
-                $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 1.0;
-                $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
+                $isFluo = MeterService::isFluoDevice($payload, $device);
 
-                $litersPerPulse = $unitMultiplier * 10.0 * $valueMultiplier;
-                $m3PerPulse = $litersPerPulse / 1000.0;
-                $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : null;
+                if ($isFluo) {
+                    $formattedVal = $lastVal !== null ? number_format($lastVal, 3, '.', '') . ' m³' : '—';
+                    $liters = $lastVal !== null ? (int) round($lastVal * 1000) : null;
+                    $litersStr = $liters !== null ? " ({$liters} л)" : '';
+                    $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
 
-                $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                $meterNum = $chConfig['meter_number'] ?? null;
-                $meterLabel = $meterNum ? " (№ <code>{$meterNum}</code>)" : "";
+                    $lines[] = "<b>Счетчик Fluo № {$deviceSerial}</b> [✅ Активен]:";
+                    $lines[] = "• Тип: <b>Умный электронный счётчик (Smart Meter)</b>";
+                    $lines[] = "• Дискретность: <b>1 л</b> (0.001 м³)";
+                    $lines[] = "• Измеренный объём: <b>{$formattedVal}</b>{$litersStr}";
+                    $lines[] = "• Дата опроса: <b>{$dateStr}</b>\n";
+                } else {
+                    $unitMultiplier = isset($meterBilling['unit_multiplier']) && is_numeric($meterBilling['unit_multiplier']) ? (float) $meterBilling['unit_multiplier'] : 1.0;
+                    $valueMultiplier = isset($meterBilling['value_multiplier']) && is_numeric($meterBilling['value_multiplier']) ? (float) $meterBilling['value_multiplier'] : 1.0;
 
-                $formattedVal = $lastVal !== null ? number_format($lastVal, 2, '.', '') . ' m³' : '—';
-                $pulsesStr = $pulses !== null ? "{$pulses} имп." : '—';
-                $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
-                $multiplierLiters = round($litersPerPulse, 3);
+                    $litersPerPulse = $unitMultiplier * 10.0 * $valueMultiplier;
+                    $m3PerPulse = $litersPerPulse / 1000.0;
+                    $pulses = ($m3PerPulse > 0 && $lastVal !== null) ? (int) round($lastVal / $m3PerPulse) : null;
 
-                $statusActive = in_array($chNum, $activeChannels, true) ? "✅ Активен" : "⏸ Отключен в боте";
+                    $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
+                    $meterNum = $chConfig['meter_number'] ?? null;
+                    $meterLabel = $meterNum ? " (№ <code>{$meterNum}</code>)" : "";
 
-                $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
-                $lines[] = "• Вес импульса: <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
-                $lines[] = "• Число импульсов: <b>{$pulsesStr}</b>";
-                $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
-                $lines[] = "• Дата опроса: <b>{$dateStr}</b>\n";
+                    $formattedVal = $lastVal !== null ? number_format($lastVal, 2, '.', '') . ' m³' : '—';
+                    $pulsesStr = $pulses !== null ? "{$pulses} имп." : '—';
+                    $dateStr = MeterService::formatDate($lastValDate, 'd.m.Y H:i', $timezone);
+                    $multiplierLiters = round($litersPerPulse, 3);
+
+                    $statusActive = in_array($chNum, $activeChannels, true) ? "✅ Активен" : "⏸ Отключен в боте";
+
+                    $lines[] = "<b>Вход {$chNum}{$meterLabel}</b> [{$statusActive}]:";
+                    $lines[] = "• Вес импульса: <b>{$multiplierLiters} л/имп</b> ({$m3PerPulse} м³/имп)";
+                    $lines[] = "• Число импульсов: <b>{$pulsesStr}</b>";
+                    $lines[] = "• Объём в базе: <b>{$formattedVal}</b>";
+                    $lines[] = "• Дата опроса: <b>{$dateStr}</b>\n";
+                }
             }
         } else {
             $lines[] = "ℹ️ Информация по каналам не найдена.\n";
