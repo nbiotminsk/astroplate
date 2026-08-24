@@ -38,67 +38,97 @@ if ($pdo) {
         $ver = $pdo->query("SELECT VERSION()")->fetchColumn();
         $dbMsg = "DB OK (MariaDB {$ver})";
 
-        // Если ответ API успешен — синхронизируем свежие показания в БД
+        // Получаем список всех зарегистрированных в БД приборов
+        $stmt = $pdo->query("SELECT serial_number, device_id, name FROM devices WHERE device_id != ''");
+        $dbDevices = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+
+        // Индексируем устройства, полученные пакетно через getAllDevices
+        $batchDevices = [];
         if ($isOk && !empty($res['payload']) && is_array($res['payload'])) {
-            $devices = $res['payload'];
-            $devicesCount = count($devices);
-            $newReadingsCount = 0;
-            $updatedSnapshots = 0;
-
-            foreach ($devices as $dev) {
-                $deviceId = (string) ($dev['id'] ?? '');
-                if ($deviceId === '') {
-                    continue;
+            foreach ($res['payload'] as $d) {
+                $dId = (string) ($d['id'] ?? '');
+                if ($dId !== '') {
+                    $batchDevices[$dId] = $d;
                 }
+            }
+        }
 
-                // 1. Сохраняем свежий снимок устройства для быстрого офлайн-доступа
-                $readingRepo->saveDeviceInfoSnapshot($deviceId, $dev);
-                $updatedSnapshots++;
+        $devicesCount = 0;
+        $newReadingsCount = 0;
+        $updatedSnapshots = 0;
 
-                // 2. Извлекаем текущие показания каналов
-                $readings = MeterService::extractCurrentReadingsFromDeviceInfo($dev);
-                foreach ($readings as $chNum => $reading) {
-                    $lastVal = $reading->lastValue;
-                    $lastValDate = $reading->lastValueDate;
+        // Обрабатываем каждый прибор из БД
+        foreach ($dbDevices as $dbDev) {
+            $deviceId = (string) ($dbDev['device_id'] ?? '');
+            $serial = (string) ($dbDev['serial_number'] ?? '');
+            if ($deviceId === '') {
+                continue;
+            }
 
-                    if ($lastVal === null || $lastValDate === null) {
-                        continue;
-                    }
-
-                    $formattedDate = date('Y-m-d H:i:s', MeterService::parseUtcTimestamp((string) $lastValDate));
-
-                    // Проверяем, есть ли уже запись с такой датой
-                    $checkStmt = $pdo->prepare("
-                        SELECT id FROM meter_readings 
-                        WHERE device_id = :dev_id AND channel_number = :ch_num AND reading_date = :r_date 
-                        LIMIT 1
-                    ");
-                    $checkStmt->execute([
-                        ':dev_id' => $deviceId,
-                        ':ch_num' => (int) $chNum,
-                        ':r_date' => $formattedDate,
-                    ]);
-
-                    if (!$checkStmt->fetchColumn()) {
-                        // Новое показание -> сохраняем в историю
-                        $insertStmt = $pdo->prepare("
-                            INSERT INTO meter_readings (device_id, channel_number, reading_date, value, value_raw, value_type)
-                            VALUES (:dev_id, :ch_num, :r_date, :val, :val_raw, 'DEVICE_DATA')
-                        ");
-                        $insertStmt->execute([
-                            ':dev_id' => $deviceId,
-                            ':ch_num' => (int) $chNum,
-                            ':r_date' => $formattedDate,
-                            ':val' => (float) $lastVal,
-                            ':val_raw' => (float) $lastVal,
-                        ]);
-                        $newReadingsCount++;
-                    }
+            $devPayload = null;
+            if (isset($batchDevices[$deviceId])) {
+                $devPayload = $batchDevices[$deviceId];
+            } else {
+                // Если прибора не было в пакетном ответе — опрашиваем точечно через getDeviceInfo
+                $singleResp = UnicBoard::getDeviceInfo($config, $deviceId);
+                if ($singleResp['ok'] && !empty($singleResp['payload'])) {
+                    $devPayload = $singleResp['payload'];
                 }
             }
 
-            $syncMsg = "SYNC: Опрошено приборов: {$devicesCount}, новых показаний записано в БД: {$newReadingsCount}";
+            if (!$devPayload) {
+                continue;
+            }
+
+            $devicesCount++;
+
+            // 1. Сохраняем свежий снимок устройства для быстрого офлайн-доступа
+            $readingRepo->saveDeviceInfoSnapshot($deviceId, $devPayload);
+            $updatedSnapshots++;
+
+            // 2. Извлекаем текущие показания каналов
+            $readings = MeterService::extractCurrentReadingsFromDeviceInfo($devPayload);
+            foreach ($readings as $chNum => $reading) {
+                $lastVal = $reading->lastValue;
+                $lastValDate = $reading->lastValueDate;
+
+                if ($lastVal === null || $lastValDate === null) {
+                    continue;
+                }
+
+                $formattedDate = date('Y-m-d H:i:s', MeterService::parseUtcTimestamp((string) $lastValDate));
+
+                // Проверяем, есть ли уже запись с такой датой
+                $checkStmt = $pdo->prepare("
+                    SELECT id FROM meter_readings 
+                    WHERE device_id = :dev_id AND channel_number = :ch_num AND reading_date = :r_date 
+                    LIMIT 1
+                ");
+                $checkStmt->execute([
+                    ':dev_id' => $deviceId,
+                    ':ch_num' => (int) $chNum,
+                    ':r_date' => $formattedDate,
+                ]);
+
+                if (!$checkStmt->fetchColumn()) {
+                    // Новое показание -> сохраняем в историю
+                    $insertStmt = $pdo->prepare("
+                        INSERT INTO meter_readings (device_id, channel_number, reading_date, value, value_raw, value_type)
+                        VALUES (:dev_id, :ch_num, :r_date, :val, :val_raw, 'DEVICE_DATA')
+                    ");
+                    $insertStmt->execute([
+                        ':dev_id' => $deviceId,
+                        ':ch_num' => (int) $chNum,
+                        ':r_date' => $formattedDate,
+                        ':val' => (float) $lastVal,
+                        ':val_raw' => (float) $lastVal,
+                    ]);
+                    $newReadingsCount++;
+                }
+            }
         }
+
+        $syncMsg = "SYNC: Опрошено приборов: {$devicesCount}, новых показаний записано в БД: {$newReadingsCount}";
     } catch (\Throwable $e) {
         $dbMsg = "DB Error: " . $e->getMessage();
     }
