@@ -15,19 +15,16 @@
         }
     },
     "8554760": {
-        "name": "Домашний тест",
+        "name": "Юпитер",
         "device_id": "ae0bf621-39e3-47e5-9126-52ec6e90d242",
-        "initial_values": {
-            "1": 0,
-            "2": 0
-        },
-        "address": "Домашний тест",
+        "initial_values": [],
+        "address": "Юпитер 8554760",
         "channels": {
             "1": {
-                "base_api_value": 0
+                "meter_number": ""
             },
             "2": {
-                "base_api_value": 4.3
+                "meter_number": ""
             }
         }
     },
