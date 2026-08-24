@@ -91,6 +91,20 @@ class EdgeCasesTest
         TestRunner::assertEquals('Счетчик Fluo у Пользователя A', $nameA, 'Пользователь A имеет свое имя для прибора');
         TestRunner::assertEquals('Счетчик Fluo у Пользователя B', $nameB, 'Пользователь B имеет свое имя для прибора');
 
+        // 7. Проверка пересчета показаний в месячном архиве при наличии user_initial
+        $deviceWithInit = new DeviceDTO(
+            deviceId: 'fake_init_id',
+            serialNumber: '8554760',
+            name: 'Тест Начальных Показаний',
+            initialValues: ['1' => 0.30, '2' => 0.50],
+            channels: [
+                '1' => ['user_initial' => 0.30, 'base_api_value' => 4.30],
+                '2' => ['user_initial' => 0.50, 'base_api_value' => 10.00],
+            ]
+        );
+        $monthWithInitReport = $reportService->buildMonthReport($config, $deviceWithInit);
+        TestRunner::assert(str_contains($monthWithInitReport, 'Архив за текущий месяц'), 'Месячный отчет формируется корректно для прибора с начальными показаниями');
+
         // Чистим тестовые данные
         $userRepo->removeMeter($userA, $sharedSerial);
         $userRepo->removeMeter($userB, $sharedSerial);

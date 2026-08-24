@@ -328,6 +328,7 @@ class EditDeviceCommand implements CommandInterface
                 $valFormatted = number_format($val, 2, '.', '');
 
                 $customDevices[$key]['channels'][$ch]['user_initial'] = $val;
+                $customDevices[$key]['channels'][$ch]['base_api_value'] = null;
                 $customDevices[$key]['initial_values'][$ch] = $val;
                 $summaryLines[] = "• Вход {$ch}: <b>{$valFormatted} m³</b>";
             } else {
@@ -337,9 +338,11 @@ class EditDeviceCommand implements CommandInterface
                 $val2F = number_format($val2, 2, '.', '');
 
                 $customDevices[$key]['channels']['1']['user_initial'] = $val1;
+                $customDevices[$key]['channels']['1']['base_api_value'] = null;
                 $customDevices[$key]['initial_values']['1'] = $val1;
 
                 $customDevices[$key]['channels']['2']['user_initial'] = $val2;
+                $customDevices[$key]['channels']['2']['base_api_value'] = null;
                 $customDevices[$key]['initial_values']['2'] = $val2;
 
                 $summaryLines[] = "• Вход 1: <b>{$val1F} m³</b>";

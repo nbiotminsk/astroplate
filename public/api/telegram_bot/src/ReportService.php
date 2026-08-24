@@ -255,9 +255,14 @@ class ReportService
         }
         ksort($channelsMonthData);
 
+        $activeChannels = $device->activeChannels;
         if (!empty($channelsMonthData)) {
             $totalChannels = count($channelsMonthData);
             foreach ($channelsMonthData as $chNum => $records) {
+                if ($activeChannels !== null && !empty($activeChannels) && !in_array((int) $chNum, $activeChannels, true)) {
+                    continue;
+                }
+
                 usort($records, static function (HistoricalValueDTO $a, HistoricalValueDTO $b) {
                     return MeterService::parseUtcTimestamp($b->date) - MeterService::parseUtcTimestamp($a->date);
                 });
@@ -266,31 +271,55 @@ class ReportService
                 $earliestInMonth = end($records) ?: null;
 
                 // Начало месяца
-                $valStart = $earliestInMonth ? $earliestInMonth->value : null;
+                $rawValStart = $earliestInMonth ? (float) $earliestInMonth->value : null;
                 $dateStart = $earliestInMonth ? $earliestInMonth->date : null;
                 $dateStartStr = $dateStart ? MeterService::formatDate($dateStart, 'd.m.Y H:i', $timezone) : '—';
 
                 // Конец периода: приоритет текущему показанию из /info, если оно новее
                 $currentCh = $currentReadings[$chNum] ?? null;
                 if ($currentCh && $currentCh->hasReading()) {
-                    $valEnd = $currentCh->lastValue;
+                    $rawValEnd = (float) $currentCh->lastValue;
                     $dateEnd = $currentCh->lastValueDate;
                 } elseif ($latestHistory) {
-                    $valEnd = $latestHistory->value;
+                    $rawValEnd = (float) $latestHistory->value;
                     $dateEnd = $latestHistory->date;
                 } else {
-                    $valEnd = null;
+                    $rawValEnd = null;
                     $dateEnd = null;
                 }
                 $dateEndStr = $dateEnd ? MeterService::formatDate($dateEnd, 'd.m.Y H:i', $timezone) : '—';
 
-                // Если начало месяца не зафиксировано в /values, используем начальное значение прибора
-                if ($valStart === null && isset($device->initialValues[(string) $chNum])) {
-                    $valStart = (float) $device->initialValues[(string) $chNum];
+                // Конфигурация канала (номер счетчика, начальные показания, база API)
+                $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
+                $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
+                    ? (float) $chConfig['user_initial']
+                    : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
+                    ? (float) $chConfig['base_api_value']
+                    : null;
+                $meterNum = $chConfig['meter_number'] ?? null;
+
+                if ($rawValEnd !== null && $userInitial !== null && ($baseApiVal === null || ($baseApiVal == 0.0 && $rawValEnd > 0))) {
+                    $baseApiVal = (float) $rawValEnd;
+                    if (!empty($device->serialNumber)) {
+                        Storage::updateDeviceChannelBaseApiValue($device->serialNumber, (string) $chNum, $baseApiVal);
+                    }
+                }
+
+                $displayValEnd = $rawValEnd !== null
+                    ? MeterService::calculateDisplayValue($rawValEnd, $userInitial !== null ? (float) $userInitial : null, $baseApiVal)
+                    : null;
+
+                if ($rawValStart !== null) {
+                    $displayValStart = MeterService::calculateDisplayValue($rawValStart, $userInitial !== null ? (float) $userInitial : null, $baseApiVal);
+                } elseif ($userInitial !== null) {
+                    $displayValStart = (float) $userInitial;
                     $dateStartStr = date('01.m.Y 00:00');
-                } elseif ($valStart === null && $valEnd !== null) {
-                    $valStart = $valEnd;
+                } elseif ($displayValEnd !== null) {
+                    $displayValStart = $displayValEnd;
                     $dateStartStr = $dateEndStr;
+                } else {
+                    $displayValStart = null;
                 }
 
                 $isFluo = MeterService::isFluoDevice($infoPayload, $device);
@@ -299,6 +328,9 @@ class ReportService
                 if ($isFluo) {
                     $meterLabel = "Счетчик Fluo № {$deviceSerial}";
                     $prefix = "";
+                } elseif ($meterNum !== null && $meterNum !== '') {
+                    $meterLabel = "💧 Счетчик № {$meterNum}";
+                    $prefix = "{$chNum}. ";
                 } elseif ($totalChannels > 1) {
                     $meterLabel = "Канал {$chNum}";
                     $prefix = "{$chNum}. ";
@@ -307,25 +339,25 @@ class ReportService
                     $prefix = "";
                 }
 
-                $valStartStr = $valStart !== null ? round($valStart, 4) . " m³" : '—';
-                $valEndStr = $valEnd !== null ? round($valEnd, 4) . " m³" : '—';
+                $valStartStr = $displayValStart !== null ? number_format($displayValStart, 2, '.', '') . " m³" : '—';
+                $valEndStr = $displayValEnd !== null ? number_format($displayValEnd, 2, '.', '') . " m³" : '—';
 
                 $lines[] = "<b>{$prefix}{$meterLabel}:</b>";
                 $lines[] = "  • Нач. месяца ({$dateStartStr}): <b>{$valStartStr}</b>";
                 $lines[] = "  • Кон. периода ({$dateEndStr}): <b>{$valEndStr}</b>";
 
-                if ($valEnd !== null && $valStart !== null) {
-                    $monthConsumption = $valEnd - $valStart;
-                    $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . round($monthConsumption, 4);
+                if ($displayValEnd !== null && $displayValStart !== null) {
+                    $monthConsumption = $displayValEnd - $displayValStart;
+                    $formattedConsumption = ($monthConsumption >= 0 ? '+' : '') . number_format($monthConsumption, 2, '.', '');
                     $lines[] = "  • 📊 <b>Расход за месяц: {$formattedConsumption} m³</b>";
                 }
 
                 // Кэш расхода
                 $svc = $this->meterService ?? new MeterService();
-                $lastCons = $svc->getMeterConsumptionInfo($config, $deviceId, (int) $chNum, $valEnd, $dateEnd, $records);
+                $lastCons = $svc->getMeterConsumptionInfo($config, $deviceId, (int) $chNum, $rawValEnd, $dateEnd, $records);
 
                 if ($lastCons && !empty($lastCons['last_change_date'])) {
-                    $diffVal = isset($lastCons['last_change_diff']) ? round((float) $lastCons['last_change_diff'], 4) : 0.0;
+                    $diffVal = isset($lastCons['last_change_diff']) ? number_format((float) $lastCons['last_change_diff'], 2, '.', '') : '0.00';
                     $lines[] = "\n  ℹ️ Последний расход зафиксирован: " . MeterService::formatDate($lastCons['last_change_date'], 'd.m.Y', $timezone) . " (на {$diffVal} m³)";
                 } else {
                     $lines[] = "\n  ℹ️ Последний расход не обнаружен.";

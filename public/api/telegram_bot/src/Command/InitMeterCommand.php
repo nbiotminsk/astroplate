@@ -51,11 +51,23 @@ class InitMeterCommand implements CommandInterface
                     $customDevices[(int) $serial]['initial_values'] = [];
                 }
                 $customDevices[(int) $serial]['initial_values'][(string) $chNum] = $val;
+                if (!isset($customDevices[(int) $serial]['channels'])) {
+                    $customDevices[(int) $serial]['channels'] = [];
+                }
+                if (!isset($customDevices[(int) $serial]['channels'][(string) $chNum])) {
+                    $customDevices[(int) $serial]['channels'][(string) $chNum] = [];
+                }
+                $customDevices[(int) $serial]['channels'][(string) $chNum]['user_initial'] = $val;
+                $customDevices[(int) $serial]['channels'][(string) $chNum]['base_api_value'] = null;
+
                 $this->deviceRepo->registerDevice(
                     $serial,
                     $customDevices[(int) $serial]['device_id'] ?? '',
                     $customDevices[(int) $serial]['name'] ?? "Устройство {$serial}",
-                    $customDevices[(int) $serial]['initial_values']
+                    $customDevices[(int) $serial]['initial_values'],
+                    $customDevices[(int) $serial]['address'] ?? null,
+                    $customDevices[(int) $serial]['active_channels'] ?? null,
+                    $customDevices[(int) $serial]['channels']
                 );
 
                 $devId = $customDevices[(int) $serial]['device_id'] ?? '';
