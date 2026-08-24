@@ -322,7 +322,7 @@ class AddDeviceCommand implements CommandInterface
             $isFluo = !empty($state['is_fluo']);
 
             if ($isFluo) {
-                $userInit = is_numeric($cleanText) ? (float) $cleanText : 0.0;
+                $userInit = null;
                 $meterNum = (string) ($state['serial'] ?? '');
 
                 $state['channels_config']['1'] = [
@@ -336,7 +336,7 @@ class AddDeviceCommand implements CommandInterface
 
             $parts = preg_split('/[\s]+/', $cleanText);
             $meterNum = $parts[0] ?? '';
-            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
+            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : null;
 
             if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
                 $userInit = (float) $parts[0];
@@ -370,7 +370,7 @@ class AddDeviceCommand implements CommandInterface
             $cleanText = trim(str_replace(',', '.', $text));
             $parts = preg_split('/[\s]+/', $cleanText);
             $meterNum = $parts[0] ?? '';
-            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : 0.0;
+            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : null;
 
             if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
                 $userInit = (float) $parts[0];
@@ -398,7 +398,9 @@ class AddDeviceCommand implements CommandInterface
 
         $initialValues = [];
         foreach ($channelsConfig as $ch => $cfg) {
-            $initialValues[(string) $ch] = $cfg['user_initial'] ?? 0.0;
+            if (isset($cfg['user_initial']) && $cfg['user_initial'] !== null) {
+                $initialValues[(string) $ch] = (float) $cfg['user_initial'];
+            }
         }
 
         $this->deviceRepo->registerDevice(
@@ -420,15 +422,18 @@ class AddDeviceCommand implements CommandInterface
 
         $summaryLines = [];
         if ($isFluo) {
-            $initVal = isset($initialValues['1']) ? number_format((float) $initialValues['1'], 2, '.', '') : '0.00';
-            $summaryLines[] = "• Начальные показания: <b>{$initVal} m³</b> (№ <code>{$serial}</code>)";
+            $summaryLines[] = "• Тип: <b>Умный счётчик Fluo</b> (№ <code>{$serial}</code>)";
         } else {
             foreach ($activeChannels as $ch) {
                 $chStr = (string) $ch;
                 $meterNum = $channelsConfig[$chStr]['meter_number'] ?? '';
-                $initVal = isset($initialValues[$chStr]) ? number_format((float) $initialValues[$chStr], 2, '.', '') : '0.00';
                 $meterPart = $meterNum !== '' ? " (Счётчик № {$meterNum})" : '';
-                $summaryLines[] = "• Вход {$ch}{$meterPart}: <b>{$initVal} m³</b>";
+                if (isset($initialValues[$chStr])) {
+                    $initVal = number_format((float) $initialValues[$chStr], 2, '.', '');
+                    $summaryLines[] = "• Вход {$ch}{$meterPart}: начальные <b>{$initVal} m³</b>";
+                } else {
+                    $summaryLines[] = "• Вход {$ch}{$meterPart}: <b>по показаниям модема</b>";
+                }
             }
         }
         $summary = implode("\n", $summaryLines);
