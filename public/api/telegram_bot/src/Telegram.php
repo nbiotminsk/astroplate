@@ -194,14 +194,16 @@ TXT;
                 ['text' => '🔄 Опросить / Обновить', 'callback_data' => 'back_dev_' . $serialOrId],
                 ['text' => '📅 Архив за месяц',     'callback_data' => 'month_' . $serialOrId],
             ],
-            [
-                ['text' => '⚙️ Диагностика',          'callback_data' => 'diag_' . $serialOrId],
-            ],
         ];
 
         if ($isAdded) {
             $buttons[] = [
-                ['text' => '✏️ Изменить', 'callback_data' => 'edit_' . $serialOrId],
+                ['text' => '⚙️ Диагностика', 'callback_data' => 'diag_' . $serialOrId],
+                ['text' => '✏️ Изменить',    'callback_data' => 'edit_' . $serialOrId],
+            ];
+        } else {
+            $buttons[] = [
+                ['text' => '⚙️ Диагностика', 'callback_data' => 'diag_' . $serialOrId],
             ];
         }
 
