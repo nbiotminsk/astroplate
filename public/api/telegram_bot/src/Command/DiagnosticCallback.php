@@ -48,7 +48,7 @@ class DiagnosticCallback implements CommandInterface
             $sub = 'menu';
         }
 
-        $device = $this->meterService->deviceLookup($config, $serial);
+        $device = $this->meterService->deviceLookup($config, $serial, $chatId);
         if (!$device) {
             Telegram::sendMessage($chatId, "Прибор не найден.", $token);
             return;

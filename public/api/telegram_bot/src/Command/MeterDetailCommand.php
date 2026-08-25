@@ -35,7 +35,7 @@ class MeterDetailCommand implements CommandInterface
             $text = $matches[1];
         }
 
-        $device = $this->meterService->deviceLookup($config, $text);
+        $device = $this->meterService->deviceLookup($config, $text, $chatId);
         if (!$device) {
             $this->telegram->sendMessage($chatId, "Устройство не найдено.\n\n" . Telegram::TO_CMD, $token, $mainKey);
             return;
