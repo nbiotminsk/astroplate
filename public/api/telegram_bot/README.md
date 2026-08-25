@@ -1,215 +1,401 @@
-# UnicBoard API & Telegram Bot Integration
+# 📖 Архитектура и справочник PHP-файлов Telegram-бота UnicBoard
 
-Интеграция Telegram-бота с API платформы **UnicBoard (DataUnic)** для дистанционного мониторинга приборов учёта воды и тепла (модемы и счётчики **Юпитер / MM219**, **Fluo** и др.).
-
-Проект основан на официальной спецификации [OpenAPI 3.0 (api.json)](file:///Users/nikolaj/Projects/astroplate/public/api/telegram_bot/api.json) и реализует отказоустойчивый клиент с многоуровневыми повторными попытками, структурированным JSON-логированием и разделением ответственности между слоями транспорта, парсинга данных и бизнес-логики.
+Комплексная система мониторинга приборов учёта воды и тепла компании «Телеофис» (teleofis24.by). Бот интегрирован с платформой **UnicBoard (DataUnic)**, поддерживает импульсные модемы (Юпитер / MM219, Вега, Arvas, RTU) и ультразвуковые счётчики **Fluo**, работает с СУБД **MariaDB 11.4** через PDO и имеет 100% покрытие модульными тестами.
 
 ---
 
-## 🏗 Архитектура проекта
+## 📊 Общая сводка по кодовой базе PHP
 
-Кодовая база спроектирована по модульному принципу:
+* **Всего PHP-файлов:** `54`
+* **Всего строк кода:** `7 574`
+* **Всего классов:** `110` (включая DTO, сервисы, репозитории, команды и тестовые сценарии)
+* **Всего интерфейсов:** `4`
+* **Всего методов и функций:** `234`
+* **Используемые PHP-расширения и библиотеки:** `ext-pdo`, `ext-pdo_mysql`, `ext-curl`, `ext-json`, `ext-mbstring`, `ext-pcre`, `ext-spl`.
+* **Тестовый набор:** `195 / 195` тестов успешно пройдены (`php tests/run_tests.php`).
 
-```
+---
+
+## 🗺 Структура каталогов
+
+```text
 public/api/telegram_bot/
-├── api.json                  # Спецификация OpenAPI 3.0 для UnicBoard API
-├── bot.php                   # Точка входа для запуска бота в режиме Long Polling
-├── config.php                # Загрузка и валидация конфигурации (.env)
-├── test_jupiter_api.py       # Автономный Python-скрипт для быстрой проверки API
-├── src/
-│   ├── UnicBoard.php         # Отказоустойчивый клиент UnicBoard API (HTTP, ретраи, fallback, логирование)
-│   ├── Telegram.php          # Клиент Telegram Bot API (HTTP cURL, отправка сообщений, вебхуки/polling)
-│   ├── MeterService.php      # Извлечение и валидация показаний, расчёт коэффициентов, анализ расхода
-│   ├── ReportService.php     # Формирование отчётов (текущие показания, месячный архив, fallback на /values)
-│   ├── BotHandler.php        # Маршрутизация команд и обработка Callback-кнопок
-│   ├── Container.php         # Простой Dependency Injection контейнер
-│   ├── Storage.php           # JSON-хранилище данных пользователей и приборов
-│   ├── Command/              # Обработчики команд бота (/start, /help, /add, /list, /report, /archive, /delete)
-│   ├── DTO/                  # Строго типизированные DTO (DeviceDTO, ChannelReadingDTO, HistoricalValueDTO и др.)
-│   └── Repository/           # Репозиторий приборов (UserMeterRepositoryInterface, FileUserMeterRepository)
-└── tests/                    # Комплексный набор модульных и интеграционных тестов
-    ├── run_tests.php         # Главный тест-раннер
-    ├── UnicBoardApiTest.php  # Тесты сценариев API (ретраи, fallback, валидация полей, нормализация метаданных)
-    ├── DTOTest.php           # Тесты DTO и преобразования данных
-    ├── EdgeCasesTest.php     # Тесты граничных случаев
-    ├── CommandTest.php       # Тесты команд бота
-    ├── ContainerTest.php     # Тесты DI-контейнера
-    └── RepositoryTest.php    # Тесты хранилища
+├── bot.php                         # Точка входа Telegram Webhook
+├── ping.php                        # Healthcheck, ping и фоновая автосинхронизация
+├── config.php                      # Конфигурационный массив окружения
+├── env.php                         # Безопасный загрузчик .env
+├── scripts/                        # Служебные CLI-скрипты и миграции
+│   ├── debug_info.php              # Диагностика и дамп UnicBoard API
+│   └── migrate_json_to_db.php      # Миграция JSON-хранилища в MariaDB
+├── src/                            # Исходный код ядра бота (PSR-4: TelegramBot\)
+│   ├── BotHandler.php              # Главный контроллер обработки Webhook
+│   ├── Container.php               # Контейнер внедрения зависимостей (DI)
+│   ├── Database.php                # Менеджер подключения к MariaDB и автомиграции
+│   ├── KeyboardBuilder.php         # Фабрика кнопок и меню Telegram
+│   ├── MeterService.php            # Расчёт показаний, дельт и фильтрация приборов
+│   ├── ReportService.php           # Генератор отчётов, графиков и карточек приборов
+│   ├── Storage.php                 # Файловый кэш, состояния сессий и логирование
+│   ├── Telegram.php                # HTTP-клиент Telegram Bot API (cURL)
+│   ├── UnicBoard.php               # Отказоустойчивый клиент UnicBoard REST API
+│   ├── DTO/                        # Data Transfer Objects (строгая типизация)
+│   ├── Command/                    # Команды и callback-обработчики (GoF Command)
+│   ├── Repository/                 # Слой работы с БД и файловым хранилищем
+│   └── Exception/                  # Пользовательские исключения
+└── tests/                          # Модульные и интеграционные тесты
+    ├── run_tests.php               # Главный раннер тестов
+    ├── TestRunner.php              # Тестовый микро-фреймворк
+    └── *Test.php                   # Тестовые наборы
 ```
 
 ---
 
-## 📡 Эндпоинты UnicBoard API (`/api/v1`)
-
-Базовый URL: `https://api.public.data-aggregator.unicboard.by`
-
-Все закрытые запросы требуют заголовок авторизации:
-```http
-Authorization: Bearer <UNICBOARD_API_TOKEN>
-Accept: application/json
-```
-
-### 1. Детальная информация по конкретному устройству
-- **Метод**: `GET /api/v1/devices/{device_id}/info`
-- **Path-параметры**: `device_id` (UUID)
-- **Назначение**: Первичный источник текущих показаний (`device_meter.last_value`), даты (`last_value_date`), коэффициентов (`unit_multiplier`, `value_multiplier`) и статуса каналов.
-
-### 2. Информация обо всех устройствах пользователя (Fallback)
-- **Методы**: 
-  - `POST /api/v1/devices/info` с телом `{"device_ids": ["<uuid>"]}` *(точечный fallback)*
-  - `GET /api/v1/devices/info?limit=100` *(пакетный fallback со списком)*
-- **Назначение**: Используется клиентом `UnicBoard::getDeviceInfo()` как многоуровневый fallback при недоступности прямого эндпоинта `{id}/info`.
-
-### 3. Архив и журнал показаний
-- **Метод**: `POST /api/v1/devices/values`
-- **Тело запроса**: `{"devices_id": ["<uuid>"]}` *(обратите внимание: имя поля в теле запроса строго `devices_id` согласно OpenAPI)*
-- **Query-параметры**:
-  - `period_from` *(ISO 8601, напр. `2026-08-01T00:00:00`)* — начало периода.
-  - `period_to` — конец периода.
-  - `journal_data_type` — тип среза (`CURRENT`, `END_OF_DAY`, `END_OF_MONTH`, `END_OF_YEAR`).
-  - `limit`, `offset`, `sort`, `page`.
-- **Типы записей (`value_type`)**:
-  - `DEVICE_DATA` — физические показания, полученные непосредственно с прибора.
-  - `INTERPOLATED_LINEAR` — расчётные интерполированные значения (не используются для расчёта фактического расхода).
-
-### 4. Уровень заряда батареи
-- **Метод**: `GET /api/v1/devices/{device_id}/battery-level`
-- **Поля ответа**: `value` (напряжение в вольтах, напр. `3.62`), `date`.
-
-### 5. Температура прибора
-- **Метод**: `GET /api/v1/devices/{device_id}/temperatures`
-- **Поля ответа**: `value` (температура в °C, напр. `24.5`), `date`.
-
-### 6. Журнал событий и аварий
-- **Метод**: `GET /api/v1/devices/{device_id}/events`
-- **События**: `MAGNET_WAS_DETECTED` (магнит), `CASE_WAS_OPENED` (вскрытие), `BATTERY_IS_LOW` (разряд), `FLOW_REVERSE` (обратный ход), `SYS_NO_DATA` (таймаут связи).
+## 📂 Подробное описание всех 54 PHP-файлов
 
 ---
 
-## 🔄 Стратегия отказоустойчивости и ретраев
+### 1. Точки входа и конфигурация (Root & Entry Points)
 
-В [`UnicBoard::getDeviceInfo()`](file:///Users/nikolaj/Projects/astroplate/public/api/telegram_bot/src/UnicBoard.php) реализована адаптивная стратегия чередования (до 4 попыток с логированием скорости ответа):
+#### `bot.php`
+* **Назначение:** Главная точка входа для входящих Webhook-запросов от серверов Telegram.
+* **Используемые модули / библиотеки:** `ext-json`, `TelegramBot\Container`, `TelegramBot\BotHandler`, `TelegramBot\Storage`.
+* **Функционал:**
+  * Получает тело HTTP POST запроса (`php://input`).
+  * Инициализирует DI-контейнер `Container`.
+  * Передаёт `update` в `BotHandler->handle()`.
+  * Логирует необработанные исключения и отдаёт Telegram `HTTP 200 OK`.
 
-1. **Попытка 1**: `GET /api/v1/devices/{id}/info` (прямой опрос конкретного прибора).
-2. **Попытка 2**: `POST /api/v1/devices/info` с телом `{"device_ids": [id]}` (точечный опрос по контракту API).
-3. **Попытка 3**: Повторный `GET /api/v1/devices/{id}/info`.
-4. **Попытка 4**: Повторный `POST /api/v1/devices/info` с телом `{"device_ids": [id]}`.
+#### `ping.php`
+* **Назначение:** Эндпоинт мониторинга (healthcheck), проверка доступности БД/API и запуск автосинхронизации показаний по cron.
+* **Используемые модули / библиотеки:** `ext-curl`, `ext-pdo`, `TelegramBot\UnicBoard`, `TelegramBot\Database`, `TelegramBot\ReadingRepository`.
+* **Функционал:**
+  * Проверяет доступность UnicBoard API (`UnicBoard::ping()`) с замером времени ответа в мс.
+  * Проверяет подключение к MariaDB (`Database::getConnection()`).
+  * Опрашивает зарегистрированные приборы и записывает свежие снимки в `device_info_snapshots` и `device_readings_log`.
 
-### Разделение ответственности:
-- **`UnicBoard` (API-клиент)**: Отвечает за транспорт и структурную валидацию (`hasCompleteDeviceInfoPayload`). Значение `last_value: null` считается корректным ответом API (например, для новых непривязанных приборов) и не вызывает бесконечных ретраев.
-- **`ReportService` (Бизнес-логика)**: Если в `/info` отсутствуют онлайн-показания (`last_value === null`), автоматически запрашивает исторический архив через `POST /devices/values` и формирует блок *«Последние сохранённые показания (нет текущих онлайн-данных)»*.
+#### `config.php`
+* **Назначение:** Основной конфигурационный файл. Загружает параметры окружения из `.env` и определяет настройки по умолчанию.
+* **Используемые модули / библиотеки:** `env.php`.
+* **Возвращает:** Массив конфигурации: `telegram_token`, `unicboard_api_base`, `unicboard_api_token`, `database` (host, port, user, pass, dbname), `timezone`, `devices`.
 
----
-
-## 📊 Маппинг полей и коэффициенты расчёта
-
-| Поле API | Назначение | Применение в коде |
-|---|---|---|
-| `device.manufacturer_serial_number` | Заводской номер модема | Информационное поле |
-| `device_channel.serial_number` | Номер импульсного канала (1, 2...) | Идентификатор канала прибора |
-| `device_meter.last_value` | Текущее показание счётчика | Базовое значение расхода |
-| `device_meter.last_value_date` | Дата и время последнего замера | Дата актуальности показаний |
-| `device_meter.unit_multiplier` | Коэффициент цены импульса (м³/имп) | Умножение сырых импульсов при необходимости |
-| `device_meter.value_multiplier` | Масштабный множитель значения | Масштабирование итогового расхода |
-| `values.value_type` | Тип значения (`DEVICE_DATA` / `INTERPOLATED_LINEAR`) | Фильтрация физических показаний для расчёта расхода |
-
----
-
-## 🚀 Установка и настройка
-
-### 1. Требования
-- **PHP 8.2+** с расширениями `curl`, `json`, `mbstring`.
-- **Composer** (опционально, для линтинга/проверок).
-- **Python 3.9+** с библиотекой `requests` (для запуска `test_jupiter_api.py`).
-
-### 2. Конфигурация окружения
-Создайте файл `.env` в директории `public/api/telegram_bot/`:
-
-```env
-# Токен бота Telegram от @BotFather
-TELEGRAM_BOT_TOKEN="123456789:ABCdefGHIjklMNOpqrSTUvwxYZ"
-
-# Базовый URL и API токен UnicBoard
-UNICBOARD_API_BASE="https://api.public.data-aggregator.unicboard.by"
-UNICBOARD_API_TOKEN="your_unicboard_bearer_token_here"
-
-# Часовой пояс
-TIMEZONE="Europe/Minsk"
-
-# Логирование (включение JSON-логов API запросов)
-UNICBOARD_API_LOG_ENABLED="true"
-```
+#### `env.php`
+* **Назначение:** Парсер файлов `.env` без сторонних тяжёлых зависимостей.
+* **Функции:**
+  * `env(string $key, mixed $default = null): mixed` — извлекает значение из `$_ENV`, `$_SERVER` или системного окружения `getenv()`.
+  * Загружает и парсит `.env` и `.env.local` при старте скрипта.
 
 ---
 
-## 🤖 Запуск Telegram-бота
+### 2. Служебные скрипты и миграции (`scripts/`)
 
-Запуск бота в режиме консольного Long Polling демона:
+#### `scripts/migrate_json_to_db.php`
+* **Назначение:** CLI-скрипт миграции существующих данных из JSON-файлов (`storage/*.json`) в реляционные таблицы MariaDB.
+* **Классы и методы:**
+  * Использует `TelegramBot\Database`, `TelegramBot\Storage`, `PDO`.
+* **Функционал:**
+  * Переносит приборы из `registered_devices.json` в таблицу `devices`.
+  * Переносит привязки пользователей из `user_meters.json` в таблицу `user_devices`.
+  * Переносит кэш показаний из `meter_cache.json` в таблицу `meter_cache`.
+  * Очищает битые/пустые серийные номера и исключает дублирование.
 
+#### `scripts/debug_info.php`
+* **Назначение:** CLI-утилита для разработчика. Делает прямой тестовый запрос к UnicBoard API по серийному номеру или UUID и выводит структурированный дамп ответа.
+* **Классы и методы:**
+  * Использует `TelegramBot\UnicBoard`, `TelegramBot\MeterService`.
+
+---
+
+### 3. Ядро приложения и инфраструктура (`src/`)
+
+#### `src/BotHandler.php`
+* **Класс:** `TelegramBot\BotHandler`
+* **Назначение:** Преобразует сырой JSON-пейлоад от Telegram в строго типизированный `TelegramUpdateDTO` и передаёт его в диспетчер команд.
+* **Методы:**
+  * `__construct(CommandDispatcher $dispatcher, ?Telegram $telegram = null)`
+  * `handle(array $updateData, array $config): void` — точка входа диспетчеризации.
+
+#### `src/Container.php`
+* **Класс:** `TelegramBot\Container`
+* **Назначение:** Легковесный Dependency Injection (DI) контейнер с ленивой инициализацией сервисов.
+* **Методы:**
+  * `__construct(array $config)`
+  * `set(string $id, callable $factory): void` — регистрация фабрики сервиса.
+  * `get(string $id): mixed` — получение или создание синглтон-экземпляра.
+  * `registerServices(): void` — биндинг репозиториев (SQL), сервисов (`MeterService`, `ReportService`, `KeyboardBuilder`), клиентов (`Telegram`) и цепочки команд.
+
+#### `src/Database.php`
+* **Класс:** `TelegramBot\Database`
+* **Назначение:** Менеджер подключения к базе данных MariaDB 11.4 через PDO и автомиграции структуры таблиц.
+* **Методы:**
+  * `getConnection(array $config = []): ?PDO` — синглтон-подключение к БД.
+  * `autoMigrate(PDO $pdo): void` — автоматическое создание и проверка индексов таблиц `devices`, `user_devices`, `meter_cache`, `device_readings_log`, `device_info_snapshots`.
+  * `resetForTests(): void` — сброс состояния для unit-тестов.
+
+#### `src/KeyboardBuilder.php`
+* **Класс:** `TelegramBot\KeyboardBuilder`
+* **Назначение:** Фабрика генерации интерфейса пользователя (Reply и Inline клавиатур Telegram).
+* **Методы:**
+  * `buildMainReplyKeyboard(string $chatId, string $prefix = '📍 '): array` — нижняя клавиатура со списком объектов пользователя.
+  * `buildCancelReplyKeyboard(): array` — кнопка отмены `❌ Отмена`.
+  * `buildDeviceKeyboard(string $serialOrId, bool $isAdded = false): array` — 3-рядное меню карточки прибора (Опрос, Архив, Диагностика 50%, Изменить 50%, Удалить).
+  * `buildDiagnosticKeyboard(string $serialOrId): array` — главное меню диагностики.
+  * `buildDiagSubKeyboard(string $serialOrId): array` — подменю возврата к диагностике.
+  * `buildEditDeviceKeyboard(string $serialOrId, bool $isFluo = false): array` — меню редактирования параметров.
+  * `buildEditChannelChoiceKeyboard(string $serialOrId): array` — выбор активных входов при редактировании.
+  * `buildChannelChoiceInlineKeyboard(): array` — выбор входов в мастере добавления.
+  * `buildSkipInitInlineKeyboard(int|string $channel): array` — кнопка `⏭️ Пропустить ввод показаний`.
+
+#### `src/Telegram.php`
+* **Класс:** `TelegramBot\Telegram`
+* **Назначение:** Сетевой транспортный клиент Telegram Bot API на базе cURL с сокрытием токенов в логах.
+* **Методы:**
+  * `sendMessage(string $chatId, string $text, string $token, ?array $replyMarkup = null): void`
+  * `answerCallbackQuery(string $callbackQueryId, string $token, string $text = ''): void`
+  * `tgApi(string $method, array $params, string $token): array` — вызов произвольного метода API Telegram.
+  * `httpGet(string $url, ...): array` / `httpPostJson(string $url, ...): array` — выполнение HTTP-запросов.
+  * `redactUrlForLog(string $url): string` — безопасное маскирование bot-токена в логах.
+  * Делегирует построение клавиатур в `KeyboardBuilder` для сохранения обратной совместимости.
+
+#### `src/UnicBoard.php`
+* **Класс:** `TelegramBot\UnicBoard`
+* **Назначение:** Отказоустойчивый клиент к REST API платформы UnicBoard с экспоненциальными повторами и чередованием эндпоинтов.
+* **Методы:**
+  * `getDeviceInfo(array $config, string $deviceId, int $maxRetries = 4): array` — получение текущих данных прибора по UUID.
+  * `getAllDevices(array $config, int $limit = 100): array` — список всех доступных модемов.
+  * `getDeviceValues(array $config, string $deviceId, int $limit = 50, ...): array` — архив показаний `/devices/values`.
+  * `getBatteryLevel(array $config, string $deviceId): array` — заряд батареи в вольтах.
+  * `getTemperatures(array $config, string $deviceId): array` — температура прибора в °C.
+  * `getDeviceEvents(array $config, string $deviceId): array` — журнал аварий и событий.
+  * `ping(array $config): array` — проверка соединения с UnicBoard.
+
+#### `src/MeterService.php`
+* **Класс:** `TelegramBot\MeterService`
+* **Назначение:** Бизнес-логика расчёта показаний, парсинга сырых данных модема, нормализации коэффициентов и поиска приборов.
+* **Методы:**
+  * `deviceLookup(array $config, string $input, ?string $chatId = null): ?DeviceDTO` — интеллектуальный поиск прибора по номеру/адресу с приоритизацией имени пользователя.
+  * `extractCurrentReadingsFromDeviceInfo(?array $payload): array` — извлечение показаний каналов из `/info`.
+  * `extractHistoricalRecordsFromValues(array $payload): array` — извлечение физических записей из архива.
+  * `isFluoDevice(?array $infoPayload, ?DeviceDTO $device = null): bool` — проверка, является ли прибор ультразвуковым счётчиком Fluo.
+  * `calculateAdjustedReading(float $currentApiValue, ?float $userInitial, ?float $baseApiValue): float` — формула корректировки циферблата: `UserInitial + (Current - Base)`.
+  * `parseUtcTimestamp(string $dateStr): int` — корректный парсинг дат UnicBoard в таймзону Минска.
+
+#### `src/ReportService.php`
+* **Класс:** `TelegramBot\ReportService`
+* **Назначение:** Формирование форматированных HTML-отчётов для Telegram (карточка прибора, месячный архив, диагностические срезы).
+* **Методы:**
+  * `buildReport(array $config, DeviceDTO $device): string` — мгновенная сводная карточка прибора.
+  * `buildMonthReport(array $config, DeviceDTO $device): string` — отчёт расхода за текущий календарный месяц.
+  * `buildDiagnosticReport(array $config, DeviceDTO $device): string` — сводная диагностика.
+  * `buildDiagChannelsReport(array $config, DeviceDTO $device): string` — импульсы и вес импульса по каналам.
+  * `buildDiagBatteryReport(array $config, DeviceDTO $device): string` — статус питания и батареи.
+  * `buildDiagTemperatureReport(array $config, DeviceDTO $device): string` — температура модема.
+  * `buildDiagClockReport(array $config, DeviceDTO $device): string` — часы модема и серверное время.
+
+#### `src/Storage.php`
+* **Класс:** `TelegramBot\Storage`
+* **Назначение:** Управление временными состояниями пользователей (FSM в мастере добавления/редактирования), файловым кэшем и логами.
+* **Методы:**
+  * `getUserState(string $chatId): ?array` / `setUserState(...)` / `clearUserState(...)`
+  * `log(string $message): void` — запись в `storage/bot.log`.
+
+#### `src/Exception/ApiUnavailableException.php`
+* **Класс:** `TelegramBot\Exception\ApiUnavailableException` (extends `\RuntimeException`)
+* **Назначение:** Выбрасывается при полном отказе внешнего API UnicBoard для показа дружелюбного экрана с кнопкой «🔄 Попробовать снова».
+
+---
+
+### 4. Объекты передачи данных (`src/DTO/`)
+
+#### `src/DTO/TelegramUpdateDTO.php`
+* **Класс:** `TelegramBot\DTO\TelegramUpdateDTO` (readonly)
+* **Свойства:** `updateId`, `chatId`, `text`, `isCallbackQuery`, `callbackData`, `callbackQueryId`, `messageId`.
+* **Методы:** `fromArray(array $update): self`.
+
+#### `src/DTO/DeviceDTO.php`
+* **Класс:** `TelegramBot\DTO\DeviceDTO` (readonly)
+* **Свойства:** `deviceId` (UUID), `serialNumber`, `name`, `initialValues`, `address`, `activeChannels`, `channels`.
+* **Методы:** `fromArray(array $data, string $id): self`, `toArray(): array`.
+
+#### `src/DTO/ChannelReadingDTO.php`
+* **Класс:** `TelegramBot\DTO\ChannelReadingDTO` (readonly)
+* **Свойства:** `channelNumber`, `lastValue`, `lastValueDate`, `unitMultiplier`, `valueMultiplier`, `meterSerialNumber`, `batteryLevel`, `temperature`.
+* **Методы:** `hasReading(): bool`.
+
+#### `src/DTO/HistoricalValueDTO.php`
+* **Класс:** `TelegramBot\DTO\HistoricalValueDTO` (readonly)
+* **Свойства:** `channelNumber`, `value`, `date`, `valueType` (`DEVICE_DATA` / `INTERPOLATED_LINEAR`).
+* **Методы:** `isPhysical(): bool`.
+
+#### `src/DTO/MeterReadingDTO.php`
+* **Класс:** `TelegramBot\DTO\MeterReadingDTO` (readonly)
+* **Свойства:** `channelNumber`, `currentReading`, `consumptionMonth`, `unit`, `lastUpdateDate`.
+
+---
+
+### 5. Команды и обработчики (`src/Command/`)
+
+#### `src/Command/CommandInterface.php`
+* **Интерфейс:** `TelegramBot\Command\CommandInterface`
+* **Методы:**
+  * `supports(TelegramUpdateDTO $update): bool`
+  * `handle(TelegramUpdateDTO $update, array $config): void`
+
+#### `src/Command/CommandDispatcher.php`
+* **Класс:** `TelegramBot\Command\CommandDispatcher`
+* **Назначение:** Реализует паттерн Chain of Responsibility — перебирает зарегистрированные команды и передаёт управление первой подходящей.
+* **Методы:** `dispatch(TelegramUpdateDTO $update, array $config): void`.
+
+#### `src/Command/StartCommand.php`
+* **Класс:** `TelegramBot\Command\StartCommand`
+* **Триггер:** `/start`, `/help`
+* **Действие:** Отправляет главное приветствие `Telegram::TO_CMD` и отрисовывает нижнюю клавиатуру.
+
+#### `src/Command/MyMetersCommand.php`
+* **Класс:** `TelegramBot\Command\MyMetersCommand`
+* **Триггер:** `/my`, `📋 Мои счетчики`
+* **Действие:** Выводит список всех добавленных приборов пользователя с текущими показаниями.
+
+#### `src/Command/MeterDetailCommand.php`
+* **Класс:** `TelegramBot\Command\MeterDetailCommand`
+* **Триггер:** Клик по кнопке объекта (напр. `📍 Nero`) или ввод номера прибора.
+* **Действие:** Вызывает `ReportService->buildReport()` и отправляет карточку прибора с кнопками управления.
+
+#### `src/Command/AddDeviceCommand.php`
+* **Класс:** `TelegramBot\Command\AddDeviceCommand`
+* **Триггер:** `/add`, `➕ Добавить счетчик`, а также шаги FSM `WAITING_*`.
+* **Действие:** Пошаговый мастер:
+  1. Поиск модема в UnicBoard по номеру.
+  2. Ввод адреса (для Fluo сразу завершается).
+  3. Выбор каналов (1, 2 или оба).
+  4. Раздельный ввод номера счётчика и показаний циферблата с возможностью пропуска (`⏭️ Пропустить`).
+
+#### `src/Command/DelDeviceCommand.php`
+* **Класс:** `TelegramBot\Command\DelDeviceCommand`
+* **Триггер:** `/del <номер>`
+* **Действие:** Удаляет прибор из списка пользователя и обновляет клавиатуру.
+
+#### `src/Command/EditDeviceCommand.php`
+* **Класс:** `TelegramBot\Command\EditDeviceCommand`
+* **Триггер:** Callback `edit_*`, `set_ch_*`, `back_dev_*` и шаги FSM `EDIT_*`.
+* **Действие:** Интерактивное изменение адреса, номеров счётчиков, начальных показаний и активных входов.
+
+#### `src/Command/InitMeterCommand.php`
+* **Класс:** `TelegramBot\Command\InitMeterCommand`
+* **Триггер:** `/init <serial> <ch> <value>`
+* **Действие:** Экспресс-установка начальных показаний циферблата в обход мастера.
+
+#### `src/Command/PingServerCommand.php`
+* **Класс:** `TelegramBot\Command\PingServerCommand`
+* **Триггер:** `/ping`, `⚡ Тест сервера`
+* **Действие:** Мгновенный тест связи с UnicBoard API и базой данных MariaDB с замером времени ответа.
+
+#### `src/Command/AddMeterCallback.php`
+* **Класс:** `TelegramBot\Command\AddMeterCallback`
+* **Триггер:** Callback `add_<serial>`
+* **Действие:** Добавление чужого/просматриваемого прибора в свой список.
+
+#### `src/Command/DelMeterCallback.php`
+* **Класс:** `TelegramBot\Command\DelMeterCallback`
+* **Триггер:** Callback `del_<serial>`
+* **Действие:** Удаление прибора через inline-кнопку карточки.
+
+#### `src/Command/MonthArchiveCallback.php`
+* **Класс:** `TelegramBot\Command\MonthArchiveCallback`
+* **Триггер:** Callback `month_<serial>`
+* **Действие:** Формирование и отправка отчёта расхода воды за календарный месяц.
+
+#### `src/Command/DiagnosticCallback.php`
+* **Класс:** `TelegramBot\Command\DiagnosticCallback`
+* **Триггер:** Callback `diag_<serial>`, `diag_ch_*`, `diag_bat_*`, `diag_temp_*`, `diag_clock_*`
+* **Действие:** Открытие экранов технической диагностики прибора.
+
+---
+
+### 6. Слой репозиториев (`src/Repository/`)
+
+#### `src/Repository/DeviceRepositoryInterface.php`
+* **Интерфейс:** Контракт реестра зарегистрированных в системе устройств (`registerDevice`, `findBySerialOrName`, `loadAll`, `removeDevice`).
+
+#### `src/Repository/SqlDeviceRepository.php`
+* **Класс:** Реализация `DeviceRepositoryInterface` для СУБД MariaDB (таблица `devices`). Сохраняет JSON-конфигурации каналов и UUID.
+
+#### `src/Repository/JsonDeviceRepository.php`
+* **Класс:** Файловая реализация `DeviceRepositoryInterface` (`storage/registered_devices.json`) для работы без БД.
+
+#### `src/Repository/UserMeterRepositoryInterface.php`
+* **Интерфейс:** Контракт персональных привязок приборов к Telegram Chat ID (`getMetersByChatId`, `addMeter`, `removeMeter`, `renameMeter`).
+
+#### `src/Repository/SqlUserMeterRepository.php`
+* **Класс:** Реализация `UserMeterRepositoryInterface` для MariaDB (таблица `user_devices`). Поддерживает персональные пользовательские названия объектов.
+
+#### `src/Repository/JsonUserMeterRepository.php`
+* **Класс:** Файловая реализация `UserMeterRepositoryInterface` (`storage/user_meters.json`).
+
+#### `src/Repository/MeterCacheRepositoryInterface.php`
+* **Интерфейс:** Контракт быстрого кэша последних известных показаний (`get`, `set`, `getAll`).
+
+#### `src/Repository/SqlMeterCacheRepository.php`
+* **Класс:** Реализация `MeterCacheRepositoryInterface` для MariaDB (таблица `meter_cache`).
+
+#### `src/Repository/JsonMeterCacheRepository.php`
+* **Класс:** Файловая реализация кэша в JSON (`storage/meter_cache.json`).
+
+#### `src/Repository/ReadingRepository.php`
+* **Класс:** Репозиторий исторических данных. Сохраняет горячие снимки `/info` (`device_info_snapshots`) и логи показаний (`device_readings_log`) для быстрой отдачи без повторных запросов в API.
+
+---
+
+### 7. Тестовый фреймворк и тестовые наборы (`tests/`)
+
+#### `tests/run_tests.php`
+* **Назначение:** Главный исполняемый файл для запуска полного прогона тестов (`php tests/run_tests.php`). Подключает все тест-сьюты и выводит итоговую статистику.
+
+#### `tests/TestRunner.php`
+* **Класс:** `TelegramBot\Tests\TestRunner`
+* **Назначение:** Легковесный тестовый раннер с цветным терминальным выводом.
+* **Методы:** `describe($section)`, `assert($condition, $message)`, `assertEquals($expected, $actual, $message)`.
+
+#### `tests/CommandTest.php`
+* **Класс:** `TelegramBot\Tests\CommandTest`
+* **Назначение:** Тестирование всех команд бота (`/start`, `/my`, `/add`, `/del`, `/init`, `/ping`), пошагового мастера с пропуском показаний, кнопок и редактирования.
+
+#### `tests/ContainerTest.php`
+* **Класс:** `TelegramBot\Tests\ContainerTest`
+* **Назначение:** Тестирование DI-контейнера `Container`, фабрик и синглтон-разрешения сервисов.
+
+#### `tests/DTOTest.php`
+* **Класс:** `TelegramBot\Tests\DTOTest`
+* **Назначение:** Тестирование сериализации/десериализации и иммутабельности DTO (`DeviceDTO`, `ChannelReadingDTO`, `HistoricalValueDTO` и др.).
+
+#### `tests/EdgeCasesTest.php`
+* **Класс:** `TelegramBot\Tests\EdgeCasesTest`
+* **Назначение:** Тестирование граничных условий, изоляции данных разных пользователей, обработки неполных JSON и специальных символов.
+
+#### `tests/RepositoryTest.php`
+* **Класс:** `TelegramBot\Tests\RepositoryTest`
+* **Назначение:** Тестирование репозиториев MariaDB (SQL) и файловых JSON-репозиториев.
+
+#### `tests/UnicBoardApiTest.php`
+* **Класс:** `TelegramBot\Tests\UnicBoardApiTest`
+* **Назначение:** Тестирование сценариев UnicBoard API (Tests A — Z): ретраи, экспоненциальные паузы, валидация по контракту OpenAPI, обработка ошибок 401/404/500/таймаутов.
+
+#### `tests/test_device_report.php`
+* **Назначение:** Интеграционный тест формирования отчётов по реальным моделям приборов (MM219, Fluo).
+
+---
+
+## 🛠 Запуск и обслуживание
+
+### Проверка синтаксиса всех файлов:
 ```bash
-cd public/api/telegram_bot
-php bot.php
+for f in $(find public/api/telegram_bot -name "*.php"); do php -l "$f" || exit 1; done
 ```
 
-### Команды бота:
-- `/start` — Приветствие и начало работы.
-- `/help` — Справка по всем доступным командам.
-- `/add <Номер> <UUID>` — Привязка прибора (напр. `/add 8524390 420de7d0-5e14-453d-8ad3-5a1dc3729e34`).
-- `/list` — Список подключённых приборов с быстрыми кнопками.
-- `/report` — Мгновенный сводный отчёт по всем приборам с текущими показаниями.
-- `/archive` — Детальный архив расхода за текущий месяц.
-- `/delete <Номер>` — Отвязка прибора.
-
----
-
-## 🧪 Тестирование
-
-Запуск полного набора тестов (149 тестов):
-
+### Запуск полного набора тестов:
 ```bash
 php public/api/telegram_bot/tests/run_tests.php
 ```
 
-Запуск автономного тестового Python-скрипта:
-
+### Проверка работоспособности на сервере:
 ```bash
-python3 public/api/telegram_bot/test_jupiter_api.py
-```
-
----
-
-## 📝 Логирование и диагностика
-
-Все события бота, ошибки и структурированные JSON-логи API-запросов автоматически записываются в файл **`storage/bot.log`** (путь можно переопределить через переменную `BOT_LOG_FILE` в `.env`), а также в стандартный поток `stderr`:
-
-```json
-{
-  "tag": "UNICBOARD_API",
-  "time": "2026-08-16T20:58:00+03:00",
-  "endpoint": "GET /api/v1/devices/{id}/info",
-  "device_id": "420de7d0-5e14-453d-8ad3-5a1dc3729e34",
-  "attempt": 1,
-  "request_variant": "get_device_id_info",
-  "http_status": 200,
-  "ok": true,
-  "payload_count": 2,
-  "duration_ms": 142.3,
-  "errors": [],
-  "extra": {
-    "total_count": 1,
-    "channels": [
-      {
-        "channel_number": 1,
-        "has_meter": true,
-        "last_value": 12.345,
-        "last_value_date": "2026-08-16T18:00:00"
-      }
-    ]
-  }
-}
-```
-
-Просмотр логов в реальном времени:
-```bash
-tail -f storage/bot.log
+curl -i https://teleofis24.by/api/telegram_bot/ping.php
 ```
