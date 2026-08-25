@@ -248,13 +248,9 @@ TXT;
             $buttons[] = [
                 ['text' => '🏷️ Номера счётчиков', 'callback_data' => 'edit_meters_' . $serialOrId],
             ];
-        }
-
-        $buttons[] = [
-            ['text' => '🔢 Начальные показания', 'callback_data' => 'edit_init_' . $serialOrId],
-        ];
-
-        if (!$isFluo) {
+            $buttons[] = [
+                ['text' => '🔢 Начальные показания', 'callback_data' => 'edit_init_' . $serialOrId],
+            ];
             $buttons[] = [
                 ['text' => '🔌 Количество каналов', 'callback_data' => 'edit_ch_' . $serialOrId],
             ];
