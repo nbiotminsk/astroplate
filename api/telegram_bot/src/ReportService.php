@@ -116,9 +116,13 @@ class ReportService
                 } else {
                     // Конфигурация канала (номер счетчика, начальные показания, база API)
                     $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                    $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
-                        ? (float) $chConfig['user_initial']
-                        : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                    if ($chConfig !== null && array_key_exists('user_initial', $chConfig)) {
+                        $userInitial = $chConfig['user_initial'] !== null ? (float) $chConfig['user_initial'] : null;
+                    } else {
+                        $userInitial = isset($device->initialValues[(string) $chNum]) && $device->initialValues[(string) $chNum] !== null
+                            ? (float) $device->initialValues[(string) $chNum]
+                            : null;
+                    }
                     $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
                         ? (float) $chConfig['base_api_value']
                         : null;
@@ -364,9 +368,13 @@ class ReportService
                 } else {
                     // Конфигурация канала (номер счетчика, начальные показания, база API)
                     $chConfig = $device->channels[$chNum] ?? $device->channels[(string) $chNum] ?? null;
-                    $userInitial = isset($chConfig['user_initial']) && $chConfig['user_initial'] !== null
-                        ? (float) $chConfig['user_initial']
-                        : (isset($device->initialValues[(string) $chNum]) ? (float) $device->initialValues[(string) $chNum] : null);
+                    if ($chConfig !== null && array_key_exists('user_initial', $chConfig)) {
+                        $userInitial = $chConfig['user_initial'] !== null ? (float) $chConfig['user_initial'] : null;
+                    } else {
+                        $userInitial = isset($device->initialValues[(string) $chNum]) && $device->initialValues[(string) $chNum] !== null
+                            ? (float) $device->initialValues[(string) $chNum]
+                            : null;
+                    }
                     $baseApiVal = isset($chConfig['base_api_value']) && $chConfig['base_api_value'] !== null
                         ? (float) $chConfig['base_api_value']
                         : null;

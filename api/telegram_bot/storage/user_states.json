@@ -1,1 +1,11 @@
-[]
+{
+    "test_user_sim_1": {
+        "step": "WAITING_CHANNELS_SELECT",
+        "channels_config": [],
+        "serial": "8554760",
+        "uuid": "ae0bf621-39e3-47e5-9126-52ec6e90d242",
+        "ch_count": 2,
+        "is_fluo": false,
+        "address": "Моя квартира"
+    }
+}

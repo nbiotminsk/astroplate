@@ -248,7 +248,7 @@ class EditDeviceCommand implements CommandInterface
                 return;
             }
 
-            // 1. Сохраняем в registered_devices.json
+            // 1. Сохраняем в registered_devices.json и MariaDB
             $customDevices = Storage::loadRegisteredDevices();
             $key = isset($customDevices[(int) $serial]) ? (int) $serial : (isset($customDevices[$serial]) ? $serial : (int) $serial);
             if (!isset($customDevices[$key])) {
@@ -258,8 +258,18 @@ class EditDeviceCommand implements CommandInterface
             $customDevices[$key]['name'] = $text;
             Storage::saveRegisteredDevices($customDevices);
 
-            // 2. Сохраняем/обновляем привязку у пользователя в user_meters.json
-            Storage::addUserMeter($chatId, (string) $serial, $text, '', $text);
+            $this->deviceRepo->registerDevice(
+                (string) $serial,
+                (string) ($customDevices[$key]['device_id'] ?? ''),
+                $text,
+                (array) ($customDevices[$key]['initial_values'] ?? []),
+                $text,
+                isset($customDevices[$key]['active_channels']) ? (array) $customDevices[$key]['active_channels'] : null,
+                isset($customDevices[$key]['channels']) ? (array) $customDevices[$key]['channels'] : null
+            );
+
+            // 2. Сохраняем/обновляем привязку у пользователя в БД и JSON
+            $this->userMeterRepo->addMeter($chatId, (string) $serial, $text, (string) ($customDevices[$key]['device_id'] ?? ''), $text);
 
             // 3. Очищаем состояние ввода и обновляем клавиатуры
             Storage::clearUserState($chatId);
@@ -305,6 +315,16 @@ class EditDeviceCommand implements CommandInterface
             }
 
             Storage::saveRegisteredDevices($customDevices);
+            $this->deviceRepo->registerDevice(
+                (string) $serial,
+                (string) ($customDevices[$key]['device_id'] ?? ''),
+                (string) ($customDevices[$key]['name'] ?? "Прибор № {$serial}"),
+                (array) ($customDevices[$key]['initial_values'] ?? []),
+                $customDevices[$key]['address'] ?? null,
+                isset($customDevices[$key]['active_channels']) ? (array) $customDevices[$key]['active_channels'] : null,
+                isset($customDevices[$key]['channels']) ? (array) $customDevices[$key]['channels'] : null
+            );
+
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 
@@ -322,7 +342,7 @@ class EditDeviceCommand implements CommandInterface
 
         // Редактирование начальных показаний
         if ($step === 'EDIT_INITIAL') {
-            $cleanText = str_replace(',', '.', $text);
+            $cleanText = trim(str_replace(',', '.', $text));
             $parts = preg_split('/[\s]+/', $cleanText);
             $activeChannels = $state['active_channels'] ?? [1, 2];
 
@@ -335,32 +355,71 @@ class EditDeviceCommand implements CommandInterface
             $summaryLines = [];
             if (count($activeChannels) === 1) {
                 $ch = (string) $activeChannels[0];
-                $val = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
-                $valFormatted = number_format($val, 2, '.', '');
-
-                $customDevices[$key]['channels'][$ch]['user_initial'] = $val;
-                $customDevices[$key]['channels'][$ch]['base_api_value'] = null;
-                $customDevices[$key]['initial_values'][$ch] = $val;
-                $summaryLines[] = "• Вход {$ch}: <b>{$valFormatted} m³</b>";
+                if ($cleanText === '-' || mb_strtolower($cleanText, 'UTF-8') === 'сброс' || mb_strtolower($cleanText, 'UTF-8') === 'нет') {
+                    $customDevices[$key]['channels'][$ch]['user_initial'] = null;
+                    $customDevices[$key]['channels'][$ch]['base_api_value'] = null;
+                    unset($customDevices[$key]['initial_values'][$ch]);
+                    $summaryLines[] = "• Вход {$ch}: <b>по показаниям модема</b>";
+                } else {
+                    $val = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
+                    $valFormatted = number_format($val, 2, '.', '');
+                    $customDevices[$key]['channels'][$ch]['user_initial'] = $val;
+                    $customDevices[$key]['channels'][$ch]['base_api_value'] = null;
+                    $customDevices[$key]['initial_values'][$ch] = $val;
+                    $summaryLines[] = "• Вход {$ch}: <b>{$valFormatted} m³</b>";
+                }
             } else {
-                $val1 = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0;
-                $val2 = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : (isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : 0.0);
-                $val1F = number_format($val1, 2, '.', '');
-                $val2F = number_format($val2, 2, '.', '');
+                if ($cleanText === '-' || mb_strtolower($cleanText, 'UTF-8') === 'сброс' || mb_strtolower($cleanText, 'UTF-8') === 'нет') {
+                    $customDevices[$key]['channels']['1']['user_initial'] = null;
+                    $customDevices[$key]['channels']['1']['base_api_value'] = null;
+                    $customDevices[$key]['channels']['2']['user_initial'] = null;
+                    $customDevices[$key]['channels']['2']['base_api_value'] = null;
+                    $customDevices[$key]['initial_values'] = [];
+                    $summaryLines[] = "• Вход 1: <b>по показаниям модема</b>";
+                    $summaryLines[] = "• Вход 2: <b>по показаниям модема</b>";
+                } else {
+                    $val1 = isset($parts[0]) && is_numeric($parts[0]) ? (float) $parts[0] : null;
+                    $val2 = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : $val1;
 
-                $customDevices[$key]['channels']['1']['user_initial'] = $val1;
-                $customDevices[$key]['channels']['1']['base_api_value'] = null;
-                $customDevices[$key]['initial_values']['1'] = $val1;
+                    if ($val1 !== null) {
+                        $val1F = number_format($val1, 2, '.', '');
+                        $customDevices[$key]['channels']['1']['user_initial'] = $val1;
+                        $customDevices[$key]['channels']['1']['base_api_value'] = null;
+                        $customDevices[$key]['initial_values']['1'] = $val1;
+                        $summaryLines[] = "• Вход 1: <b>{$val1F} m³</b>";
+                    } else {
+                        $customDevices[$key]['channels']['1']['user_initial'] = null;
+                        $customDevices[$key]['channels']['1']['base_api_value'] = null;
+                        unset($customDevices[$key]['initial_values']['1']);
+                        $summaryLines[] = "• Вход 1: <b>по показаниям модема</b>";
+                    }
 
-                $customDevices[$key]['channels']['2']['user_initial'] = $val2;
-                $customDevices[$key]['channels']['2']['base_api_value'] = null;
-                $customDevices[$key]['initial_values']['2'] = $val2;
-
-                $summaryLines[] = "• Вход 1: <b>{$val1F} m³</b>";
-                $summaryLines[] = "• Вход 2: <b>{$val2F} m³</b>";
+                    if ($val2 !== null) {
+                        $val2F = number_format($val2, 2, '.', '');
+                        $customDevices[$key]['channels']['2']['user_initial'] = $val2;
+                        $customDevices[$key]['channels']['2']['base_api_value'] = null;
+                        $customDevices[$key]['initial_values']['2'] = $val2;
+                        $summaryLines[] = "• Вход 2: <b>{$val2F} m³</b>";
+                    } else {
+                        $customDevices[$key]['channels']['2']['user_initial'] = null;
+                        $customDevices[$key]['channels']['2']['base_api_value'] = null;
+                        unset($customDevices[$key]['initial_values']['2']);
+                        $summaryLines[] = "• Вход 2: <b>по показаниям модема</b>";
+                    }
+                }
             }
 
             Storage::saveRegisteredDevices($customDevices);
+            $this->deviceRepo->registerDevice(
+                (string) $serial,
+                (string) ($customDevices[$key]['device_id'] ?? ''),
+                (string) ($customDevices[$key]['name'] ?? "Прибор № {$serial}"),
+                (array) ($customDevices[$key]['initial_values'] ?? []),
+                $customDevices[$key]['address'] ?? null,
+                isset($customDevices[$key]['active_channels']) ? (array) $customDevices[$key]['active_channels'] : null,
+                isset($customDevices[$key]['channels']) ? (array) $customDevices[$key]['channels'] : null
+            );
+
             Storage::clearUserState($chatId);
             $newMainKey = $this->telegram->buildMainReplyKeyboard($chatId);
 

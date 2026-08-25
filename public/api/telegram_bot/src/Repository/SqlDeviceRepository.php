@@ -90,7 +90,7 @@ class SqlDeviceRepository implements DeviceRepositoryInterface
         }
 
         try {
-            $stmt = $pdo->prepare("SELECT * FROM devices WHERE serial_number = :input OR name = :input LIMIT 1");
+            $stmt = $pdo->prepare("SELECT * FROM devices WHERE serial_number = :input OR name = :input OR address = :input LIMIT 1");
             $stmt->execute([':input' => $clean]);
             $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
