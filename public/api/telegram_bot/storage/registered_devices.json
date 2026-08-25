@@ -66,5 +66,22 @@
                 "base_api_value": null
             }
         }
+    },
+    "9998886": {
+        "name": "Счетчик 9998886",
+        "device_id": "uuid-9998886",
+        "serial_number": "9998886",
+        "initial_values": [],
+        "address": "Счетчик 9998886",
+        "active_channels": [
+            1
+        ],
+        "channels": {
+            "1": {
+                "meter_number": "12345678",
+                "user_initial": null,
+                "base_api_value": null
+            }
+        }
     }
 }

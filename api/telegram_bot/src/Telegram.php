@@ -276,4 +276,15 @@ TXT;
             ],
         ];
     }
+
+    public static function buildSkipInitInlineKeyboard(int|string $channel): array
+    {
+        return [
+            'inline_keyboard' => [
+                [
+                    ['text' => '⏭️ Пропустить ввод показаний', 'callback_data' => 'wiz_skip_init_' . $channel]
+                ]
+            ]
+        ];
+    }
 }
