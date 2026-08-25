@@ -62,7 +62,7 @@ class EditDeviceCommand implements CommandInterface
             // Кнопка [🔙 Назад к прибору]
             if (str_starts_with($data, 'back_dev_')) {
                 $serial = str_replace('back_dev_', '', $data);
-                $device = $this->meterService->deviceLookup($config, $serial);
+                $device = $this->meterService->deviceLookup($config, $serial, $chatId);
                 Telegram::answerCallbackQuery($cbId, $token);
                 if ($device) {
                     $report = $this->reportService->buildReport($config, $device);
