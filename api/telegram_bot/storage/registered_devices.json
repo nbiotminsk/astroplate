@@ -1,10 +1,10 @@
 {
     "8527038": {
-        "name": "ул. Тестовая 15",
+        "name": "Fluo",
         "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f",
         "initial_values": [],
         "serial_number": "8527038",
-        "address": "ул. Тестовая 15",
+        "address": "Счетчик Fluo 8527038",
         "active_channels": [
             1
         ],
@@ -49,5 +49,22 @@
         "active_channels": [
             1
         ]
+    },
+    "9998887": {
+        "name": "ул. Тестовая 15",
+        "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f",
+        "serial_number": "9998887",
+        "initial_values": [],
+        "address": "ул. Тестовая 15",
+        "active_channels": [
+            1
+        ],
+        "channels": {
+            "1": {
+                "meter_number": "9998887",
+                "user_initial": null,
+                "base_api_value": null
+            }
+        }
     }
 }

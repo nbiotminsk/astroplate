@@ -124,8 +124,8 @@ TXT;
         $buttons = [];
         foreach ($meters as $serial => $data) {
             $addr = is_array($data) ? ($data['address'] ?? $data['name'] ?? "Счетчик {$serial}") : (string) $data;
-            $prefix = (str_starts_with($addr, '📍') || str_starts_with($addr, '💧')) ? '' : '📍 ';
-            $buttons[] = ['text' => "{$prefix}{$addr}"];
+            $label = str_contains($addr, (string) $serial) ? "{$prefix}{$addr}" : "{$prefix}{$addr} ({$serial})";
+            $buttons[] = ['text' => $label];
             if (count($buttons) === 2) {
                 $keyboard[] = $buttons;
                 $buttons = [];

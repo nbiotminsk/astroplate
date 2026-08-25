@@ -120,7 +120,7 @@ class CommandTest
         // Fluo device wizard state test: address step finishes immediately without asking for readings
         \TelegramBot\Storage::setUserState('777', [
             'step' => 'WAITING_ADDRESS',
-            'serial' => '8527038',
+            'serial' => '9998887',
             'uuid' => '2e50bc92-6c87-4b64-b22e-e96e7997476f',
             'ch_count' => 1,
             'is_fluo' => true,
@@ -130,7 +130,8 @@ class CommandTest
         $addCmd->handle($fluoAddrUpdate, $config);
         TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Fluo wizard finishes immediately upon address entry');
         $savedFluo = $userMeterRepo->getMetersByChatId('777');
-        TestRunner::assert(isset($savedFluo['8527038']), 'Fluo meter is registered for user after address entry');
+        TestRunner::assert(isset($savedFluo['9998887']), 'Fluo meter is registered for user after address entry');
+        $userMeterRepo->removeMeter('777', '9998887');
 
         // EditDeviceCommand tests
         $editCmd = new \TelegramBot\Command\EditDeviceCommand($telegram, $meterService, $reportService, $deviceRepo, $userMeterRepo);
