@@ -453,10 +453,18 @@ class AddDeviceCommand implements CommandInterface
         } catch (\Throwable) {
             Telegram::sendMessage(
                 $chatId,
-                "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 {$serialLabel} <b>{$serial}</b>\n\n{$summary}\n\n<i>Выберите адрес в меню внизу для просмотра показаний.</i>",
+                "🎉 <b>{$devTypeLabel} успешно добавлен в систему!</b>\n\n📍 <b>{$address}</b>\n🆔 {$serialLabel} <b>{$serial}</b>\n\n{$summary}",
                 $token,
                 $devKey
             );
         }
+
+        // Обновляем нижнюю клавиатуру, заменяя кнопку «❌ Отмена» на актуальный список приборов
+        Telegram::sendMessage(
+            $chatId,
+            "<i>Главное меню обновлено. Выберите адрес внизу:</i>",
+            $token,
+            $mainKey
+        );
     }
 }
