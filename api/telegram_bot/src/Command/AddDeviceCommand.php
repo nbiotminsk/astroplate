@@ -282,15 +282,13 @@ class AddDeviceCommand implements CommandInterface
 
             if ($isFluo) {
                 $state['active_channels'] = [1];
-                $state['step'] = 'WAITING_METER_CH1';
-                Storage::setUserState($chatId, $state);
-
-                Telegram::sendMessage(
-                    $chatId,
-                    "📍 <b>Адрес:</b> {$address}\n\n🔢 Введите текущие показания с циферблата счётчика Fluo (в м³):\n\n<i>Пример: <code>0.12</code> или просто <code>0</code></i>",
-                    $token,
-                    $cancelKey
-                );
+                $state['channels_config']['1'] = [
+                    'meter_number' => (string) ($state['serial'] ?? ''),
+                    'user_initial' => null,
+                    'base_api_value' => null,
+                ];
+                $this->finishWizard($chatId, $state, $config);
+                return;
             } elseif ($chCount > 1) {
                 $state['step'] = 'WAITING_CHANNELS_SELECT';
                 Storage::setUserState($chatId, $state);

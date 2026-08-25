@@ -117,7 +117,7 @@ class CommandTest
         \TelegramBot\Storage::clearUserState('777');
         TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Storage::clearUserState resets user state');
 
-        // Fluo device wizard state test
+        // Fluo device wizard state test: address step finishes immediately without asking for readings
         \TelegramBot\Storage::setUserState('777', [
             'step' => 'WAITING_ADDRESS',
             'serial' => '8527038',
@@ -126,10 +126,11 @@ class CommandTest
             'is_fluo' => true,
             'active_channels' => [1],
         ]);
-        $fluoState = \TelegramBot\Storage::getUserState('777');
-        TestRunner::assert(!empty($fluoState['is_fluo']), 'Fluo device has is_fluo flag');
-        TestRunner::assertEquals(1, count($fluoState['active_channels'] ?? []), 'Fluo device has exactly 1 active channel');
-        \TelegramBot\Storage::clearUserState('777');
+        $fluoAddrUpdate = new TelegramUpdateDTO(10, '777', 'ул. Тестовая 15');
+        $addCmd->handle($fluoAddrUpdate, $config);
+        TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Fluo wizard finishes immediately upon address entry');
+        $savedFluo = $userMeterRepo->getMetersByChatId('777');
+        TestRunner::assert(isset($savedFluo['8527038']), 'Fluo meter is registered for user after address entry');
 
         // EditDeviceCommand tests
         $editCmd = new \TelegramBot\Command\EditDeviceCommand($telegram, $meterService, $reportService, $deviceRepo, $userMeterRepo);

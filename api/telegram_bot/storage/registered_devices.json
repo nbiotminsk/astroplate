@@ -1,9 +1,19 @@
 {
     "8527038": {
-        "name": "Fluo",
+        "name": "ул. Тестовая 15",
         "device_id": "2e50bc92-6c87-4b64-b22e-e96e7997476f",
-        "initial_values": {
-            "1": 0
+        "initial_values": [],
+        "serial_number": "8527038",
+        "address": "ул. Тестовая 15",
+        "active_channels": [
+            1
+        ],
+        "channels": {
+            "1": {
+                "meter_number": "8527038",
+                "user_initial": null,
+                "base_api_value": null
+            }
         }
     },
     "8524390": {
