@@ -90,20 +90,20 @@ class AddDeviceCommand implements CommandInterface
             }
 
             if (in_array(1, $state['active_channels'], true)) {
-                $state['step'] = 'WAITING_METER_CH1';
+                $state['step'] = 'WAITING_METER_NUM_CH1';
                 Storage::setUserState($chatId, $state);
                 Telegram::sendMessage(
                     $chatId,
-                    "Введите номер счётчика на <b>1-м входе</b> и текущие показания с циферблата (через пробел):\n\n<i>Пример: <code>12345678 142.5</code> или просто <code>12345678</code></i>",
+                    "🔢 Введите номер счётчика воды для <b>1-го входа</b> (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>12345678</code></i>",
                     $token,
                     $cancelKey
                 );
             } else {
-                $state['step'] = 'WAITING_METER_CH2';
+                $state['step'] = 'WAITING_METER_NUM_CH2';
                 Storage::setUserState($chatId, $state);
                 Telegram::sendMessage(
                     $chatId,
-                    "Введите номер счётчика на <b>2-м входе</b> и текущие показания с циферблата (через пробел):\n\n<i>Пример: <code>87654321 4.3</code> или просто <code>87654321</code></i>",
+                    "🔢 Введите номер счётчика воды для <b>2-го входа</b> (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>87654321</code></i>",
                     $token,
                     $cancelKey
                 );
@@ -111,29 +111,36 @@ class AddDeviceCommand implements CommandInterface
             return;
         }
 
-        // 3. Обработка пропущенного входа (wiz_skip)
-        if ($update->isCallbackQuery && $update->callbackData === 'wiz_skip') {
+        // 3. Обработка пропущенных показаний или входов
+        if ($update->isCallbackQuery && (str_starts_with($update->callbackData, 'wiz_skip_init_') || $update->callbackData === 'wiz_skip')) {
             $state = Storage::getUserState($chatId);
             if ($state === null) {
                 Telegram::answerCallbackQuery($update->callbackQueryId, $token);
                 return;
             }
-            Telegram::answerCallbackQuery($update->callbackQueryId, $token);
+            Telegram::answerCallbackQuery($update->callbackQueryId, $token, 'Показания пропущены');
 
-            if ($state['step'] === 'WAITING_METER_CH1') {
+            $isCh1 = str_contains($update->callbackData, '_1') || ($state['step'] ?? '') === 'WAITING_METER_INIT_CH1' || ($state['step'] ?? '') === 'WAITING_METER_CH1' || ($state['step'] ?? '') === 'WAITING_METER_NUM_CH1';
+
+            if ($isCh1) {
+                $state['channels_config']['1']['user_initial'] = null;
+                $state['channels_config']['1']['base_api_value'] = null;
+
                 if (in_array(2, $state['active_channels'] ?? [], true)) {
-                    $state['step'] = 'WAITING_METER_CH2';
+                    $state['step'] = 'WAITING_METER_NUM_CH2';
                     Storage::setUserState($chatId, $state);
                     Telegram::sendMessage(
                         $chatId,
-                        "Введите номер счётчика на <b>2-м входе</b> и текущие показания с циферблата (через пробел):\n\n<i>Пример: <code>87654321 4.3</code></i>",
+                        "🔢 Введите номер счётчика воды для <b>2-го входа</b> (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>87654321</code></i>",
                         $token,
                         $cancelKey
                     );
                 } else {
                     $this->finishWizard($chatId, $state, $config);
                 }
-            } elseif ($state['step'] === 'WAITING_METER_CH2') {
+            } else {
+                $state['channels_config']['2']['user_initial'] = null;
+                $state['channels_config']['2']['base_api_value'] = null;
                 $this->finishWizard($chatId, $state, $config);
             }
             return;
@@ -301,12 +308,12 @@ class AddDeviceCommand implements CommandInterface
                 );
             } else {
                 $state['active_channels'] = [1];
-                $state['step'] = 'WAITING_METER_CH1';
+                $state['step'] = 'WAITING_METER_NUM_CH1';
                 Storage::setUserState($chatId, $state);
 
                 Telegram::sendMessage(
                     $chatId,
-                    "Введите номер счётчика воды и текущие показания с циферблата (через пробел):\n\n<i>Пример: <code>12345678 142.5</code> или просто <code>12345678</code></i>",
+                    "🔢 Введите номер счётчика воды (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>12345678</code></i>",
                     $token,
                     $cancelKey
                 );
@@ -314,18 +321,15 @@ class AddDeviceCommand implements CommandInterface
             return;
         }
 
-        // 8. Шаг 3: Ввод номера счётчика для 1-го входа
-        if ($currentStep === 'WAITING_METER_CH1') {
+        // 8a. Шаг 3a: Ввод номера счётчика для 1-го входа
+        if ($currentStep === 'WAITING_METER_NUM_CH1' || $currentStep === 'WAITING_METER_CH1') {
             $cleanText = trim(str_replace(',', '.', $text));
             $isFluo = !empty($state['is_fluo']);
 
             if ($isFluo) {
-                $userInit = null;
-                $meterNum = (string) ($state['serial'] ?? '');
-
                 $state['channels_config']['1'] = [
-                    'meter_number' => $meterNum,
-                    'user_initial' => $userInit,
+                    'meter_number' => (string) ($state['serial'] ?? ''),
+                    'user_initial' => null,
                     'base_api_value' => null,
                 ];
                 $this->finishWizard($chatId, $state, $config);
@@ -333,27 +337,71 @@ class AddDeviceCommand implements CommandInterface
             }
 
             $parts = preg_split('/[\s]+/', $cleanText);
-            $meterNum = $parts[0] ?? '';
-            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : null;
 
-            if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
-                $userInit = (float) $parts[0];
-                $meterNum = '';
+            // Если пользователь ввел оба значения сразу: "12345678 142.5"
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
+                $meterNum = $parts[0];
+                $userInit = (float) $parts[1];
+
+                $state['channels_config']['1'] = [
+                    'meter_number' => $meterNum === '-' ? '' : $meterNum,
+                    'user_initial' => $userInit,
+                    'base_api_value' => null,
+                ];
+
+                if (in_array(2, $state['active_channels'] ?? [], true)) {
+                    $state['step'] = 'WAITING_METER_NUM_CH2';
+                    Storage::setUserState($chatId, $state);
+
+                    Telegram::sendMessage(
+                        $chatId,
+                        "🔢 Введите номер счётчика воды для <b>2-го входа</b> (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>87654321</code></i>",
+                        $token,
+                        $cancelKey
+                    );
+                } else {
+                    $this->finishWizard($chatId, $state, $config);
+                }
+                return;
             }
+
+            $isSkip = in_array(mb_strtolower($cleanText, 'UTF-8'), ['-', 'нет', 'пропустить', 'скип', 'pass', 'skip', '']);
+            $meterNum = $isSkip ? '' : $cleanText;
 
             $state['channels_config']['1'] = [
                 'meter_number' => $meterNum,
-                'user_initial' => $userInit,
+                'user_initial' => null,
                 'base_api_value' => null,
             ];
+            $state['step'] = 'WAITING_METER_INIT_CH1';
+            Storage::setUserState($chatId, $state);
+
+            $chLabel = count($state['active_channels'] ?? []) > 1 ? " для <b>1-го входа</b>" : "";
+            Telegram::sendMessage(
+                $chatId,
+                "📊 Введите текущие показания с циферблата счётчика{$chLabel} (в м³):\n\n<i>Пример: <code>142.5</code> или нажмите кнопку ниже:</i>",
+                $token,
+                Telegram::buildSkipInitInlineKeyboard(1)
+            );
+            return;
+        }
+
+        // 8b. Шаг 3b: Ввод начальных показаний для 1-го входа
+        if ($currentStep === 'WAITING_METER_INIT_CH1') {
+            $cleanText = trim(str_replace(',', '.', $text));
+            $isSkip = in_array(mb_strtolower($cleanText, 'UTF-8'), ['-', 'нет', 'пропустить', 'скип', 'pass', 'skip', '']);
+            $userInit = ($isSkip || !is_numeric($cleanText)) ? null : (float) $cleanText;
+
+            $state['channels_config']['1']['user_initial'] = $userInit;
+            $state['channels_config']['1']['base_api_value'] = null;
 
             if (in_array(2, $state['active_channels'] ?? [], true)) {
-                $state['step'] = 'WAITING_METER_CH2';
+                $state['step'] = 'WAITING_METER_NUM_CH2';
                 Storage::setUserState($chatId, $state);
 
                 Telegram::sendMessage(
                     $chatId,
-                    "Введите номер счётчика на <b>2-м входе</b> и текущие показания с циферблата (через пробел):\n\n<i>Пример: <code>87654321 4.3</code> или просто <code>87654321</code></i>",
+                    "🔢 Введите номер счётчика воды для <b>2-го входа</b> (или отправьте <code>-</code> / <code>пропустить</code>):\n\n<i>Пример: <code>87654321</code></i>",
                     $token,
                     $cancelKey
                 );
@@ -363,23 +411,54 @@ class AddDeviceCommand implements CommandInterface
             return;
         }
 
-        // 9. Шаг 4: Ввод номера счётчика для 2-го входа
-        if ($currentStep === 'WAITING_METER_CH2') {
+        // 9a. Шаг 4a: Ввод номера счётчика для 2-го входа
+        if ($currentStep === 'WAITING_METER_NUM_CH2' || $currentStep === 'WAITING_METER_CH2') {
             $cleanText = trim(str_replace(',', '.', $text));
             $parts = preg_split('/[\s]+/', $cleanText);
-            $meterNum = $parts[0] ?? '';
-            $userInit = isset($parts[1]) && is_numeric($parts[1]) ? (float) $parts[1] : null;
 
-            if (count($parts) === 1 && is_numeric($parts[0]) && str_contains($parts[0], '.')) {
-                $userInit = (float) $parts[0];
-                $meterNum = '';
+            // Если пользователь ввел оба значения сразу: "87654321 4.3"
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
+                $meterNum = $parts[0];
+                $userInit = (float) $parts[1];
+
+                $state['channels_config']['2'] = [
+                    'meter_number' => $meterNum === '-' ? '' : $meterNum,
+                    'user_initial' => $userInit,
+                    'base_api_value' => null,
+                ];
+
+                $this->finishWizard($chatId, $state, $config);
+                return;
             }
+
+            $isSkip = in_array(mb_strtolower($cleanText, 'UTF-8'), ['-', 'нет', 'пропустить', 'скип', 'pass', 'skip', '']);
+            $meterNum = $isSkip ? '' : $cleanText;
 
             $state['channels_config']['2'] = [
                 'meter_number' => $meterNum,
-                'user_initial' => $userInit,
+                'user_initial' => null,
                 'base_api_value' => null,
             ];
+            $state['step'] = 'WAITING_METER_INIT_CH2';
+            Storage::setUserState($chatId, $state);
+
+            Telegram::sendMessage(
+                $chatId,
+                "📊 Введите текущие показания с циферблата для <b>2-го входа</b> (в м³):\n\n<i>Пример: <code>4.3</code> или нажмите кнопку ниже:</i>",
+                $token,
+                Telegram::buildSkipInitInlineKeyboard(2)
+            );
+            return;
+        }
+
+        // 9b. Шаг 4b: Ввод начальных показаний для 2-го входа
+        if ($currentStep === 'WAITING_METER_INIT_CH2') {
+            $cleanText = trim(str_replace(',', '.', $text));
+            $isSkip = in_array(mb_strtolower($cleanText, 'UTF-8'), ['-', 'нет', 'пропустить', 'скип', 'pass', 'skip', '']);
+            $userInit = ($isSkip || !is_numeric($cleanText)) ? null : (float) $cleanText;
+
+            $state['channels_config']['2']['user_initial'] = $userInit;
+            $state['channels_config']['2']['base_api_value'] = null;
 
             $this->finishWizard($chatId, $state, $config);
         }

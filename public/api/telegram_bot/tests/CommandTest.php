@@ -133,6 +133,28 @@ class CommandTest
         TestRunner::assert(isset($savedFluo['9998887']), 'Fluo meter is registered for user after address entry');
         $userMeterRepo->removeMeter('777', '9998887');
 
+        // Pulse modem 2-step flow test: meter number -> prompt for readings -> skip readings
+        \TelegramBot\Storage::setUserState('777', [
+            'step' => 'WAITING_METER_NUM_CH1',
+            'serial' => '9998886',
+            'uuid' => 'uuid-9998886',
+            'ch_count' => 1,
+            'is_fluo' => false,
+            'active_channels' => [1],
+            'channels_config' => [],
+        ]);
+        $meterNumUpdate = new TelegramUpdateDTO(11, '777', '12345678');
+        $addCmd->handle($meterNumUpdate, $config);
+        $stateAfterNum = \TelegramBot\Storage::getUserState('777');
+        TestRunner::assertEquals('WAITING_METER_INIT_CH1', $stateAfterNum['step'] ?? '', 'Entering meter number transitions to WAITING_METER_INIT_CH1');
+        TestRunner::assertEquals('12345678', $stateAfterNum['channels_config']['1']['meter_number'] ?? '', 'Meter number saved in channels_config');
+
+        // Skip initial readings via callback
+        $skipInitUpdate = new TelegramUpdateDTO(12, '777', '', true, 'wiz_skip_init_1', 'cb_skip_1');
+        $addCmd->handle($skipInitUpdate, $config);
+        TestRunner::assert(\TelegramBot\Storage::getUserState('777') === null, 'Skipping readings finishes single-channel wizard');
+        $userMeterRepo->removeMeter('777', '9998886');
+
         // EditDeviceCommand tests
         $editCmd = new \TelegramBot\Command\EditDeviceCommand($telegram, $meterService, $reportService, $deviceRepo, $userMeterRepo);
         
