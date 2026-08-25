@@ -174,11 +174,26 @@ class Storage
     public static function getUserMeters(string $chatId): array
     {
         $all = self::loadUserMeters();
-        return $all[$chatId] ?? [];
+        $raw = $all[$chatId] ?? [];
+        if (!is_array($raw)) {
+            return [];
+        }
+        $clean = [];
+        foreach ($raw as $s => $item) {
+            $sStr = trim((string) $s);
+            if ($sStr !== '' && $sStr !== '0') {
+                $clean[$sStr] = $item;
+            }
+        }
+        return $clean;
     }
 
     public static function addUserMeter(string $chatId, string $serial, string $name, string $deviceId = '', ?string $address = null): void
     {
+        $serial = trim($serial);
+        if ($serial === '' || $serial === '0') {
+            return;
+        }
         $all = self::loadUserMeters();
         if (!isset($all[$chatId])) {
             $all[$chatId] = [];

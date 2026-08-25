@@ -106,4 +106,9 @@ if (file_exists($statesFile)) {
 }
 echo "📝 Состояния пользователей перенесены: {$statesCount}\n";
 
+// 5. Очистка пустых / невалидных записей
+$delUserDev = $pdo->exec("DELETE FROM user_devices WHERE serial_number IS NULL OR TRIM(serial_number) = '' OR serial_number = '0'");
+$delDev = $pdo->exec("DELETE FROM devices WHERE serial_number IS NULL OR TRIM(serial_number) = '' OR serial_number = '0'");
+echo "🧹 Очищено пустых/невалидных записей: " . ($delUserDev + $delDev) . "\n";
+
 echo "🎉 Миграция успешно завершена!\n";

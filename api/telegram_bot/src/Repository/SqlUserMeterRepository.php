@@ -38,7 +38,7 @@ class SqlUserMeterRepository implements UserMeterRepositoryInterface
                        d.name AS dev_name, d.address AS dev_address, d.device_id
                 FROM user_devices ud
                 LEFT JOIN devices d ON ud.serial_number = d.serial_number
-                WHERE ud.chat_id = :chat_id
+                WHERE ud.chat_id = :chat_id AND ud.serial_number IS NOT NULL AND TRIM(ud.serial_number) != ''
                 ORDER BY ud.id ASC
             ");
             $stmt->execute([':chat_id' => $chatId]);
@@ -46,7 +46,10 @@ class SqlUserMeterRepository implements UserMeterRepositoryInterface
 
             $result = [];
             foreach ($rows as $row) {
-                $serial = (string) $row['serial_number'];
+                $serial = trim((string) ($row['serial_number'] ?? ''));
+                if ($serial === '' || $serial === '0') {
+                    continue;
+                }
                 $result[$serial] = [
                     'name' => !empty($row['custom_name']) ? (string) $row['custom_name'] : ((string) ($row['dev_name'] ?? $serial)),
                     'address' => !empty($row['custom_address']) ? (string) $row['custom_address'] : (!empty($row['dev_address']) ? (string) $row['dev_address'] : null),
@@ -63,6 +66,10 @@ class SqlUserMeterRepository implements UserMeterRepositoryInterface
 
     public function addMeter(string $chatId, string $serial, string $name, string $deviceId = '', ?string $address = null): void
     {
+        $serial = trim($serial);
+        if ($serial === '' || $serial === '0') {
+            return;
+        }
         // Резервное сохранение в JSON
         $this->fallbackJsonRepo->addMeter($chatId, $serial, $name, $deviceId, $address);
 
