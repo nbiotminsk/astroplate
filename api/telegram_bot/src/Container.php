@@ -52,7 +52,8 @@ class Container
         $this->set(MeterService::class, fn() => new MeterService(
             $this->get(DeviceRepositoryInterface::class),
             $this->get(MeterCacheRepositoryInterface::class),
-            $this->get(ReadingRepository::class)
+            $this->get(ReadingRepository::class),
+            $this->get(UserMeterRepositoryInterface::class)
         ));
 
         $this->set(ReportService::class, fn() => new ReportService(

@@ -11,6 +11,7 @@ use TelegramBot\DTO\MeterReadingDTO;
 use TelegramBot\Repository\DeviceRepositoryInterface;
 use TelegramBot\Repository\MeterCacheRepositoryInterface;
 use TelegramBot\Repository\ReadingRepository;
+use TelegramBot\Repository\UserMeterRepositoryInterface;
 
 class MeterService
 {
@@ -20,7 +21,8 @@ class MeterService
     public function __construct(
         private ?DeviceRepositoryInterface $deviceRepo = null,
         private ?MeterCacheRepositoryInterface $cacheRepo = null,
-        private ?ReadingRepository $readingRepo = null
+        private ?ReadingRepository $readingRepo = null,
+        private ?UserMeterRepositoryInterface $userMeterRepo = null
     ) {}
 
     /**
@@ -452,7 +454,7 @@ class MeterService
         return $userInitial + $delta;
     }
 
-    public function deviceLookup(array $config, string $input): ?DeviceDTO
+    public function deviceLookup(array $config, string $input, ?string $chatId = null): ?DeviceDTO
     {
         $input = trim($input);
         if ($input === '') {
@@ -464,11 +466,49 @@ class MeterService
             $cleanInput = $matches[1];
         }
 
+        // 0. Проверяем привязки конкретного пользователя, если передан $chatId
+        if ($chatId !== null && $this->userMeterRepo !== null) {
+            $userMeters = $this->userMeterRepo->getMetersByChatId($chatId);
+            foreach ($userMeters as $serial => $uDev) {
+                $uName = $uDev['name'] ?? '';
+                $uAddr = $uDev['address'] ?? '';
+                if (
+                    (string) $serial === $cleanInput ||
+                    (string) $serial === $input ||
+                    ($uName !== '' && (mb_strtolower($uName, 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') || mb_strtolower($uName, 'UTF-8') === mb_strtolower($input, 'UTF-8'))) ||
+                    ($uAddr !== '' && (mb_strtolower($uAddr, 'UTF-8') === mb_strtolower($cleanInput, 'UTF-8') || mb_strtolower($uAddr, 'UTF-8') === mb_strtolower($input, 'UTF-8')))
+                ) {
+                    $rawDev = $this->deviceRepo ? $this->deviceRepo->findBySerialOrName((string) $serial) : null;
+                    $customTitle = !empty($uAddr) ? $uAddr : (!empty($uName) ? $uName : ($rawDev ? ($rawDev->address ?: $rawDev->name) : "Счетчик {$serial}"));
+                    if ($rawDev) {
+                        return new DeviceDTO(
+                            $rawDev->deviceId,
+                            $rawDev->serialNumber,
+                            $customTitle,
+                            $rawDev->initialValues,
+                            $customTitle,
+                            $rawDev->activeChannels,
+                            $rawDev->channels
+                        );
+                    }
+                    if (!empty($uDev['device_id'])) {
+                        return new DeviceDTO(
+                            $uDev['device_id'],
+                            (string) $serial,
+                            $customTitle,
+                            [],
+                            $customTitle
+                        );
+                    }
+                }
+            }
+        }
+
         // 1. Проверяем локальный конфиг config.php
         $devices = $config['devices'] ?? [];
         if (isset($devices[(int) $cleanInput])) {
             $dev = $devices[(int) $cleanInput];
-            return DeviceDTO::fromArray($dev, (string) $cleanInput);
+            return $this->applyUserCustomName(DeviceDTO::fromArray($dev, (string) $cleanInput), $chatId);
         }
 
         foreach ($devices as $id => $info) {
@@ -478,10 +518,10 @@ class MeterService
                 mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
                 mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
             ) {
-                return DeviceDTO::fromArray($info, (string) $id);
+                return $this->applyUserCustomName(DeviceDTO::fromArray($info, (string) $id), $chatId);
             }
             if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
-                return DeviceDTO::fromArray($info, (string) $id);
+                return $this->applyUserCustomName(DeviceDTO::fromArray($info, (string) $id), $chatId);
             }
         }
 
@@ -489,18 +529,20 @@ class MeterService
         if ($this->deviceRepo !== null) {
             $foundByRepo = $this->deviceRepo->findBySerialOrName($cleanInput) ?? $this->deviceRepo->findBySerialOrName($input);
             if ($foundByRepo !== null) {
-                return $foundByRepo;
+                return $this->applyUserCustomName($foundByRepo, $chatId);
             }
         }
 
         $customDevices = $this->deviceRepo ? $this->deviceRepo->loadAll() : Storage::loadRegisteredDevices();
         if (isset($customDevices[$cleanInput])) {
             $dev = $customDevices[$cleanInput];
-            return ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
+            $dto = ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
+            return $this->applyUserCustomName($dto, $chatId);
         }
         if (isset($customDevices[(int) $cleanInput])) {
             $dev = $customDevices[(int) $cleanInput];
-            return ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
+            $dto = ($dev instanceof DeviceDTO) ? $dev : DeviceDTO::fromArray($dev, (string) $cleanInput);
+            return $this->applyUserCustomName($dto, $chatId);
         }
 
         foreach ($customDevices as $id => $info) {
@@ -515,7 +557,7 @@ class MeterService
                     $info->deviceId === $cleanInput ||
                     $info->deviceId === $input
                 ) {
-                    return $info;
+                    return $this->applyUserCustomName($info, $chatId);
                 }
                 continue;
             }
@@ -527,10 +569,10 @@ class MeterService
                     mb_strtolower($info['name'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8') ||
                     mb_strtolower($info['address'] ?? '', 'UTF-8') === mb_strtolower($input, 'UTF-8')
                 ) {
-                    return DeviceDTO::fromArray($info, (string) $id);
+                    return $this->applyUserCustomName(DeviceDTO::fromArray($info, (string) $id), $chatId);
                 }
                 if (($info['device_id'] ?? null) === $cleanInput || ($info['device_id'] ?? null) === $input) {
-                    return DeviceDTO::fromArray($info, (string) $id);
+                    return $this->applyUserCustomName(DeviceDTO::fromArray($info, (string) $id), $chatId);
                 }
             }
         }
@@ -546,16 +588,44 @@ class MeterService
 
                     if ($mfgSerial === $cleanInput || $mac === $cleanInput || $devId === $cleanInput) {
                         $devName = $item['device_modification']['name'] ?? $item['device_modification']['device_modification_type']['name_ru'] ?? "Устройство {$mfgSerial}";
-                        return new DeviceDTO(
+                        $dto = new DeviceDTO(
                             deviceId: $devId,
                             serialNumber: $mfgSerial !== '' ? $mfgSerial : $cleanInput,
                             name: $devName
                         );
+                        return $this->applyUserCustomName($dto, $chatId);
                     }
                 }
             }
         }
 
         return null;
+    }
+
+    private function applyUserCustomName(DeviceDTO $device, ?string $chatId): DeviceDTO
+    {
+        if ($chatId === null || $this->userMeterRepo === null) {
+            return $device;
+        }
+
+        $userMeters = $this->userMeterRepo->getMetersByChatId($chatId);
+        $s = $device->serialNumber ?: $device->deviceId;
+
+        if (isset($userMeters[$s])) {
+            $customTitle = !empty($userMeters[$s]['address']) ? $userMeters[$s]['address'] : (!empty($userMeters[$s]['name']) ? $userMeters[$s]['name'] : null);
+            if ($customTitle !== null && trim($customTitle) !== '') {
+                return new DeviceDTO(
+                    $device->deviceId,
+                    $device->serialNumber,
+                    $customTitle,
+                    $device->initialValues,
+                    $customTitle,
+                    $device->activeChannels,
+                    $device->channels
+                );
+            }
+        }
+
+        return $device;
     }
 }

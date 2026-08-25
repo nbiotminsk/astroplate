@@ -75,7 +75,7 @@ class EditDeviceCommand implements CommandInterface
             // Кнопка [✏️ Изменить] -> Открытие главного меню настроек
             if (preg_match('/^edit_(\d+)$/', $data, $m)) {
                 $serial = $m[1];
-                $device = $this->meterService->deviceLookup($config, $serial);
+                $device = $this->meterService->deviceLookup($config, $serial, $chatId);
                 Telegram::answerCallbackQuery($cbId, $token);
                 if (!$device) {
                     Telegram::sendMessage($chatId, "Прибор не найден.", $token, $mainKey);
@@ -111,7 +111,7 @@ class EditDeviceCommand implements CommandInterface
             // Опция 2: [🏷️ Номера счётчиков]
             if (str_starts_with($data, 'edit_meters_')) {
                 $serial = str_replace('edit_meters_', '', $data);
-                $device = $this->meterService->deviceLookup($config, $serial);
+                $device = $this->meterService->deviceLookup($config, $serial, $chatId);
                 Telegram::answerCallbackQuery($cbId, $token);
                 if (!$device) {
                     Telegram::sendMessage($chatId, "Прибор не найден.", $token, $mainKey);
@@ -147,7 +147,7 @@ class EditDeviceCommand implements CommandInterface
             // Опция 3: [🔢 Начальные показания]
             if (str_starts_with($data, 'edit_init_')) {
                 $serial = str_replace('edit_init_', '', $data);
-                $device = $this->meterService->deviceLookup($config, $serial);
+                $device = $this->meterService->deviceLookup($config, $serial, $chatId);
                 Telegram::answerCallbackQuery($cbId, $token);
                 if (!$device) {
                     Telegram::sendMessage($chatId, "Прибор не найден.", $token, $mainKey);

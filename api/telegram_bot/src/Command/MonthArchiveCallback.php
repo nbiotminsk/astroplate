@@ -30,7 +30,7 @@ class MonthArchiveCallback implements CommandInterface
         $serial = str_replace('month_', '', $update->callbackData);
 
         $this->telegram->answerCallbackQuery($cbId, $token);
-        $device = $this->meterService->deviceLookup($config, $serial);
+        $device = $this->meterService->deviceLookup($config, $serial, $chatId);
         if ($device) {
             $monthReport = $this->reportService->buildMonthReport($config, $device);
             $key = Telegram::buildDiagnosticKeyboard($serial);
