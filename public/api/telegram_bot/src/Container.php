@@ -45,8 +45,13 @@ class Container
         $this->set(MeterCacheRepositoryInterface::class, fn() => new SqlMeterCacheRepository($this->config));
         $this->set(ReadingRepository::class, fn() => new ReadingRepository($this->config));
 
-        $this->set(Telegram::class, fn() => new Telegram(
+        $this->set(KeyboardBuilder::class, fn() => new KeyboardBuilder(
             $this->get(UserMeterRepositoryInterface::class)
+        ));
+
+        $this->set(Telegram::class, fn() => new Telegram(
+            $this->get(UserMeterRepositoryInterface::class),
+            $this->get(KeyboardBuilder::class)
         ));
 
         $this->set(MeterService::class, fn() => new MeterService(
