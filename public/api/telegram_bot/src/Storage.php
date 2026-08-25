@@ -125,13 +125,12 @@ class Storage
         ?array $channels = null
     ): void {
         $devices = self::loadRegisteredDevices();
-        $devData = $devices[(int) $serial] ?? [];
+        $key = (int) $serial;
+        $devData = $devices[$key] ?? [];
         $devData['name'] = $name;
         $devData['device_id'] = $uuid;
         $devData['serial_number'] = $serial;
-        if (!empty($initialValues)) {
-            $devData['initial_values'] = $initialValues;
-        }
+        $devData['initial_values'] = $initialValues;
         if ($address !== null && $address !== '') {
             $devData['address'] = $address;
         }
@@ -141,7 +140,7 @@ class Storage
         if ($channels !== null) {
             $devData['channels'] = $channels;
         }
-        $devices[(int) $serial] = $devData;
+        $devices[$key] = $devData;
         self::saveRegisteredDevices($devices);
     }
 
